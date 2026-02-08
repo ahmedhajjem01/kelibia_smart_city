@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "djoser",
     "corsheaders",
     "rest_framework_simplejwt",
 ]
@@ -139,4 +140,41 @@ from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
+# Email Configuration (Console for Development)
+# To use Real Gmail:
+# 1. Go to Google Account > Security > 2-Step Verification > App Passwords.
+# 2. Generate a new password.
+# 3. Uncomment the lines below and fill in your details.
+# 4. Comment out the 'EMAIL_BACKEND = ...console...' line.
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = "your-email@gmail.com"
+# EMAIL_HOST_PASSWORD = "your-app-password"
+
+EMAIL_HOST = "localhost"
+EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = "webmaster@kelibiasmartcity.tn"
+DOMAIN = "localhost:5500"
+SITE_NAME = "Kelibia Smart City"
+
+# Djoser Configuration
+DJOSER = {
+    "LOGIN_FIELD": "username",
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    "SET_USERNAME_RETYPE": True,
+    "SET_PASSWORD_RETYPE": True,
+    "PASSWORD_RESET_CONFIRM_URL": "reset-password-confirm.html?uid={uid}&token={token}",
+    "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
+    "ACTIVATION_URL": "activate.html?uid={uid}&token={token}",
+    "SEND_ACTIVATION_EMAIL": True,
+    "SERIALIZERS": {},
 }
