@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Tunisia Smart City</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body class="bg-light d-flex align-items-center py-5">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-success text-white text-center py-4">
+                        <h3 class="font-weight-light my-2">Créer un compte Citoyen</h3>
+                        <p class="small mb-0">Rejoignez Tunisia Smart City</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="registerForm">
+                            <h5 class="mb-3 text-muted border-bottom pb-2">Identité</h5>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6 form-floating">
+                                    <input type="text" class="form-control" id="first_name" placeholder="Prénom"
+                                        required>
+                                    <label for="first_name">Prénom</label>
+                                </div>
+                                <div class="col-md-6 form-floating">
+                                    <input type="text" class="form-control" id="last_name" placeholder="Nom" required>
+                                    <label for="last_name">Nom</label>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="cin" placeholder="CIN (8 chiffres)"
+                                    pattern="\d{8}" maxlength="8" required>
+                                <label for="cin">Numéro de CIN (8 chiffres)</label>
+                            </div>
+
+                            <h5 class="mb-3 text-muted border-bottom pb-2 mt-4">Contact & Localisation</h5>
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control" id="phone" placeholder="Téléphone (8 chiffres)"
+                                    pattern="\d{8}" maxlength="8" required>
+                                <label for="phone">Numéro de Téléphone</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="email" placeholder="Email (Optionnel)">
+                                <label for="email">Email (Optionnel)</label>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6 form-floating">
+                                    <select class="form-select" id="governorate" required>
+                                        <option value="" selected disabled>Choisir...</option>
+                                        <option value="Ariana">Ariana</option>
+                                        <option value="Beja">Béja</option>
+                                        <option value="Ben Arous">Ben Arous</option>
+                                        <option value="Bizerte">Bizerte</option>
+                                        <option value="Gabes">Gabès</option>
+                                        <option value="Gafsa">Gafsa</option>
+                                        <option value="Jendouba">Jendouba</option>
+                                        <option value="Kairouan">Kairouan</option>
+                                        <option value="Kasserine">Kasserine</option>
+                                        <option value="Kebili">Kébili</option>
+                                        <option value="Kef">Le Kef</option>
+                                        <option value="Mahdia">Mahdia</option>
+                                        <option value="Manouba">La Manouba</option>
+                                        <option value="Medenine">Médenine</option>
+                                        <option value="Monastir">Monastir</option>
+                                        <option value="Nabeul">Nabeul</option>
+                                        <option value="Sfax">Sfax</option>
+                                        <option value="Sidi Bouzid">Sidi Bouzid</option>
+                                        <option value="Siliana">Siliana</option>
+                                        <option value="Sousse">Sousse</option>
+                                        <option value="Tataouine">Tataouine</option>
+                                        <option value="Tozeur">Tozeur</option>
+                                        <option value="Tunis">Tunis</option>
+                                        <option value="Zaghouan">Zaghouan</option>
+                                    </select>
+                                    <label for="governorate">Gouvernorat</label>
+                                </div>
+                                <div class="col-md-6 form-floating">
+                                    <select class="form-select" id="city" required disabled>
+                                        <option value="" selected disabled>Choisir...</option>
+                                    </select>
+                                    <label for="city">Ville</label>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" id="address" placeholder="Adresse complète"
+                                    style="height: 80px" required></textarea>
+                                <label for="address">Adresse complète (Rue, Immeuble...)</label>
+                            </div>
+
+                            <h5 class="mb-3 text-muted border-bottom pb-2 mt-4">Sécurité & Validation</h5>
+                            <div class="mb-3">
+                                <label class="form-label d-block">Méthode de validation :</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="validation_method" id="val_email"
+                                        value="email" checked>
+                                    <label class="form-check-label" for="val_email">Email</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="validation_method" id="val_sms"
+                                        value="sms">
+                                    <label class="form-check-label" for="val_sms">SMS</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6 form-floating">
+                                    <input type="password" class="form-control" id="password" placeholder="Mot de passe"
+                                        required>
+                                    <label for="password">Mot de passe</label>
+                                </div>
+                                <div class="col-md-6 form-floating">
+                                    <input type="password" class="form-control" id="re_password" placeholder="Confirmer"
+                                        required>
+                                    <label for="re_password">Confirmer</label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn btn-success btn-lg" type="submit" id="registerBtn">
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"
+                                        aria-hidden="true"></span>
+                                    S'inscrire
+                                </button>
+                            </div>
+                            <div id="message" class="alert mt-3 d-none" role="alert"></div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center py-3">
+                        <div class="small"><a href="login.html">Vous avez déjà un compte ? Connectez-vous</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const cityData = {
+            'Nabeul': ['Nabeul', 'Hammamet', 'Kélibia', 'Dar Chaâbane El Fehri', 'Béni Khiar', 'El Mida', 'Hammam Ghezèze', 'Korba', 'Menzel Bouzelfa', 'Menzel Temime', 'Soliman', 'Takilsa', 'Grombalia', 'Béni Khalled', 'Bou Argoub', 'El Haouaria'],
+            'Tunis': ['Tunis', 'La Marsa', 'Le Kram', 'La Goulette', 'Carthage', 'Sidi Bou Saïd', 'Gammarth', 'Sidi Hassine', 'El Ouardia'],
+            'Sousse': ['Sousse', 'Hammam Sousse', 'Akouda', 'Kalâa Kebira', 'Kalâa Seghira', 'Msaken', 'Enfidha', 'Bouficha', 'Hergla'],
+            'Ariana': ['Ariana', 'Soukra', 'Raoued', 'Kalaat el-Andalous', 'Sidi Thabet', 'Mnihla', 'Ettadhamen'],
+            'Ben Arous': ['Ben Arous', 'Ezzahra', 'Hammam Lif', 'Hammam Chott', 'Bou Mhel el-Bassatine', 'Mornag', 'Radès', 'Mégrin', 'Fouchana'],
+            'Bizerte': ['Bizerte', 'Menzel Bourguiba', 'Mateur', 'Ghezala', 'Sejnane', 'Joumine', 'Utique', 'Ghar El Melh', 'Ras Jebel'],
+            'Sfax': ['Sfax', 'Sakiet Ezzit', 'Sakiet Eddaier', 'Chihia', 'Gremda', 'El Ain', 'Thyna', 'Agareb', 'Jebiniana'],
+            'Monastir': ['Monastir', 'Khniss', 'Ouerdanin', 'Sahline', 'Zéramdine', 'Béni Hassen', 'Jemmal', 'Bekalta', 'Sayada', 'Téboulba', 'Ksibet el-Médiouni'],
+            'Ariana': ['Ariana Centre', 'Ettadhamen', 'Mnihla', 'Raoued', 'Sidi Thabet', 'Soukra'],
+            'Beja': ['Béja Centre', 'Amdoun', 'Goubellat', 'Medjez el-Bab', 'Nefza', 'Téboursouk', 'Testour', 'Thibar'],
+            'Gabes': ['Gabès Centre', 'El Hamma', 'Ghannouch', 'Mareth', 'Matmata', 'Menzel El Habib', 'Métouia'],
+            'Gafsa': ['Gafsa Centre', 'El Guettar', 'El Ksar', 'Mdhilla', 'Métlaoui', 'Moularès', 'Redeyef', 'Sened'],
+            'Jendouba': ['Jendouba Centre', 'Aïn Draham', 'Balta-Bou Aouane', 'Bou Salem', 'Fernana', 'Ghardimaou', 'Oued Meliz', 'Tabarka'],
+            'Kairouan': ['Kairouan Centre', 'Bou Hajla', 'Chebika', 'Echrarda', 'Haffouz', 'Hajeb El Ayoun', 'Nasrallah', 'Oueslatia', 'Sbikha'],
+            'Kasserine': ['Kasserine Centre', 'Fériana', 'Foussana', 'Haidra', 'Jedelienne', 'Majel Bel Abbès', 'Sbeïtla', 'Sbiba', 'Thala'],
+            'Kebili': ['Kébili Centre', 'Douz Centre', 'Faouar', 'Souk Lahad'],
+            'Kef': ['Le Kef Centre', 'Dahmani', 'Jerissa', 'Kalâat Khasba', 'Kalaat Senan', 'Nebeur', 'Sakiet Sidi Youssef', 'Tajerouine'],
+            'Mahdia': ['Mahdia Centre', 'Bou Merdes', 'Chebba', 'Chorbane', 'El Jem', 'Hebira', 'Ksour Essef', 'Melloulèche', 'Ouled Chamekh', 'Sidi Alouane'],
+            'Manouba': ['La Manouba Centre', 'Borj El Amri', 'Djedeida', 'Douar Hicher', 'El Battan', 'Mornaguia', 'Oued Ellil', 'Tebourba'],
+            'Medenine': ['Médenine Centre', 'Ben Guerdane', 'Djerba Ajim', 'Djerba Houmt Souk', 'Djerba Midoun', 'Zarzis'],
+            'Sidi Bouzid': ['Sidi Bouzid Centre', 'Bir El Hafey', 'Cebbala Ouled Asker', 'Jilma', 'Mazzouna', 'Menzel Bouzaiane', 'Regueb', 'Sidi Ali Ben Aoun'],
+            'Siliana': ['Siliana Centre', 'Bou Arada', 'Bargou', 'Gaâfour', 'Kesra', 'Makthar', 'Rouhia'],
+            'Tataouine': ['Tataouine Centre', 'Bir Lahmar', 'Dehiba', 'Ghomrassen', 'Remada', 'Smâr'],
+            'Tozeur': ['Tozeur Centre', 'Degache', 'Hezoua', 'Nefta', 'Tamaghza'],
+            'Zaghouan': ['Zaghouan Centre', 'Bir Mcherga', 'El Fahs', 'Nadhour', 'Saouaf', 'Zriba'],
+        };
+
+        const govSelect = document.getElementById('governorate');
+        const citySelect = document.getElementById('city');
+
+        govSelect.addEventListener('change', function () {
+            const selectedGov = this.value;
+            const cities = cityData[selectedGov] || [];
+
+            citySelect.innerHTML = '<option value="" selected disabled>Choisir...</option>';
+            cities.forEach(city => {
+                const opt = document.createElement('option');
+                opt.value = city;
+                opt.textContent = city;
+                citySelect.appendChild(opt);
+            });
+            citySelect.disabled = false;
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const first_name = document.getElementById('first_name').value;
+            const cin = document.getElementById('cin').value;
+
+            // Gather data
+            const data = {
+                first_name: first_name,
+                last_name: document.getElementById('last_name').value,
+                cin: cin,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value || undefined,
+                governorate: document.getElementById('governorate').value,
+                city: document.getElementById('city').value,
+                address: document.getElementById('address').value,
+                validation_method: document.querySelector('input[name="validation_method"]:checked').value,
+                // Auto-generate username: Prenom + CIN
+                username: first_name.toLowerCase().trim() + cin,
+                password: document.getElementById('password').value,
+                re_password: document.getElementById('re_password').value
+            };
+
+            const btn = document.getElementById('registerBtn');
+            const msg = document.getElementById('message');
+            const spinner = btn.querySelector('.spinner-border');
+
+            // Validations
+            if (data.password !== data.re_password) {
+                showError("Les mots de passe ne correspondent pas.");
+                return;
+            }
+            if (!data.email && data.validation_method === 'email') {
+                showError("L'email est requis pour la validation par Email.");
+                return;
+            }
+
+            // Reset UI
+            msg.classList.add('d-none');
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/accounts/register/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const resData = await response.json();
+
+                if (response.ok) {
+                    msg.classList.remove('alert-danger', 'd-none');
+                    msg.classList.add('alert-success');
+
+                    let successText = 'Compte créé avec succès !';
+                    if (data.validation_method === 'email') {
+                        successText += ' <br>Veuillez vérifier votre <strong>Email</strong> pour l\'activer.';
+                        msg.innerHTML = successText;
+                    } else {
+                        // Redirect to SMS verification page
+                        msg.innerHTML = "Redirection vers la vérification SMS...";
+                        setTimeout(() => {
+                            window.location.href = `verify-sms.html?username=${data.username}`;
+                        }, 1500);
+                    }
+                    document.getElementById('registerForm').reset();
+                    citySelect.disabled = true;
+                } else {
+                    let errorMsg = "Erreur lors de l'inscription :<br>";
+                    errorMsg += resData.error || "Une erreur est survenue lors de la création du compte.";
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+
+            function showError(text) {
+                msg.innerHTML = text;
+                msg.classList.remove('alert-success', 'd-none');
+                msg.classList.add('alert-danger');
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        });
+    </script>
+</body>
+
+</html>

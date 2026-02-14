@@ -31,7 +31,7 @@
         // Check Auth
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
 
         document.getElementById('tokenDisplay').textContent = token;
@@ -39,7 +39,7 @@
         function logout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
     </script>
 </body>

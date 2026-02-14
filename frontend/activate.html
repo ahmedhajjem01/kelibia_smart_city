@@ -34,7 +34,7 @@
                         <div id="message" class="alert mt-3 d-none"></div>
                     </div>
                     <div class="card-footer text-center py-3">
-                        <div class="small"><a href="index.html">Retour à la connexion</a></div>
+                        <div class="small"><a href="login.html">Retour à la connexion</a></div>
                     </div>
                 </div>
             </div>
@@ -74,7 +74,7 @@
 
                 if (response.ok || response.status === 204) {
                     msg.className = 'alert alert-success d-block mt-3';
-                    msg.innerHTML = 'Compte activé ! <a href="index.html">Connectez-vous</a>';
+                    msg.innerHTML = 'Compte activé ! <a href="login.html">Connectez-vous</a>';
                 } else {
                     const data = await response.json();
                     throw new Error(JSON.stringify(data));
