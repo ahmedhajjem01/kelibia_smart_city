@@ -1,0 +1,13 @@
+{% load i18n %}
+
+{% block text_body %}
+{% blocktrans %}Hello {{ user.username }}, {% endblocktrans %}
+
+{% trans "Thank you for registering. Please click the link below to verify your account:" %}
+
+{{ protocol }}://{{ domain }}/{{ url }}
+
+{% trans "Thanks for using our service!" %}
+
+{% trans "The Tunisia Smart City Team" %}
+{% endblock %}

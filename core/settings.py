@@ -65,7 +65,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -104,6 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 10,
+        }
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -155,19 +158,16 @@ SIMPLE_JWT = {
 # 3. Uncomment the lines below and fill in your details.
 # 4. Comment out the 'EMAIL_BACKEND = ...console...' line.
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.gmail.com"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = "your-email@gmail.com"
-# EMAIL_HOST_PASSWORD = "your-app-password"
+# Gmail SMTP Configuration
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "harounahajjem@gmail.com"  # FIXME: Replace with your Gmail
+EMAIL_HOST_PASSWORD = "lxjsjbfypcwfujlw" # FIXME: Replace with your 16-character App Password
 
-# Email Settings
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_HOST = "localhost"
-EMAIL_PORT = 1025
-DEFAULT_FROM_EMAIL = "webmaster@kelibiasmartcity.tn"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DOMAIN = "localhost:5500"
 SITE_NAME = "Tunisia Smart City"
 
@@ -183,14 +183,10 @@ DJOSER = {
     "PASSWORD_RESET_CONFIRM_URL": "reset-password-confirm.html?uid={uid}&token={token}",
     "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
     "ACTIVATION_URL": "activate.html?uid={uid}&token={token}",
-    "SEND_ACTIVATION_EMAIL": False, # Temporarily False for debugging
+    "SEND_ACTIVATION_EMAIL": True,
     "SERIALIZERS": {
         "user_create": "accounts.serializers.UserCreateSerializer",
         "user": "djoser.serializers.UserSerializer",
         "current_user": "djoser.serializers.UserSerializer",
     },
 }
-# Twilio Settings
-# SMS Gateway Settings (Infobip)
-INFOBIP_API_KEY = "0ce4d479dec99c06f33a7608810325ab-58189c6b-6b0d-465d-b075-bf6872610c01"
-INFOBIP_BASE_URL = "pdp1m3.api.infobip.com"

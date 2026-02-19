@@ -1,0 +1,14 @@
+{% load i18n %}
+
+{% block html_body %}
+<p>{% blocktrans %}Hello {{ user.username }}, {% endblocktrans %}</p>
+<p>{% trans "Thank you for registering. Please click the button below to verify your account:" %}</p>
+<p>
+    <a href="{{ protocol }}://{{ domain }}/{{ url }}"
+        style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+        {% trans "Verify My Account" %}
+    </a>
+</p>
+<p>{% trans "Thanks for using our service!" %}</p>
+<p>{% trans "The Tunisia Smart City Team" %}</p>
+{% endblock %}

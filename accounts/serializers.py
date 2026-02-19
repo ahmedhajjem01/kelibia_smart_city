@@ -15,5 +15,4 @@ class UserCreateSerializer(DjoserUserCreateSerializer):
             "address",
             "governorate",
             "city",
-            "validation_method",
         )

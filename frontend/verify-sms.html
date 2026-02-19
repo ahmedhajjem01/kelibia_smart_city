@@ -111,8 +111,16 @@
 
                 if (response.ok) {
                     msg.className = 'alert alert-success mt-3';
-                    msg.textContent = "Compte vérifié ! Redirection vers la page de connexion...";
-                    setTimeout(() => window.location.href = 'login.html', 2000);
+                    msg.innerHTML = "Compte vérifié ! <br> Redirection vers votre tableau de bord...";
+
+                    // Auto-login: Store tokens
+                    if (data.access && data.refresh) {
+                        localStorage.setItem('accessToken', data.access);
+                        localStorage.setItem('refreshToken', data.refresh);
+                        localStorage.setItem('username', data.username);
+                    }
+
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 } else {
                     throw new Error(data.error || "Code invalide.");
                 }

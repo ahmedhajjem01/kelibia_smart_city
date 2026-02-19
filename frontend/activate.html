@@ -15,26 +15,17 @@
             <div class="col-md-6 col-lg-5">
                 <div class="card shadow-lg border-0 rounded-lg">
                     <div class="card-header bg-primary text-white text-center py-4">
-                        <h3 class="font-weight-light my-2">Activation</h3>
+                        <h3 class="font-weight-light my-2">Activation de votre compte</h3>
                     </div>
-                    <div class="card-body p-4 text-center">
-                        <p>Veuillez confirmer l'activation de votre compte.</p>
-
-                        <!-- Manual Input Fallback for local testing -->
-                        <div class="mb-3 text-start">
-                            <label class="form-label small text-muted">UID (copié du lien)</label>
-                            <input type="text" id="uid" class="form-control form-control-sm">
-                        </div>
-                        <div class="mb-3 text-start">
-                            <label class="form-label small text-muted">Token (copié du lien)</label>
-                            <input type="text" id="token" class="form-control form-control-sm">
+                    <div class="card-body p-5 text-center">
+                        <div id="loader">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                            <p>Vérification de vos informations en cours...</p>
                         </div>
 
-                        <button id="activateBtn" class="btn btn-primary w-100">Activer le compte</button>
-                        <div id="message" class="alert mt-3 d-none"></div>
-                    </div>
-                    <div class="card-footer text-center py-3">
-                        <div class="small"><a href="login.html">Retour à la connexion</a></div>
+                        <div id="message" class="alert d-none"></div>
                     </div>
                 </div>
             </div>
@@ -42,49 +33,54 @@
     </div>
 
     <script>
-        // Try to get params from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlUid = urlParams.get('uid');
-        const urlToken = urlParams.get('token');
-
-        if (urlUid) document.getElementById('uid').value = urlUid;
-        if (urlToken) document.getElementById('token').value = urlToken;
-
-        document.getElementById('activateBtn').addEventListener('click', async () => {
-            const uid = document.getElementById('uid').value;
-            const token = document.getElementById('token').value;
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('uid');
+            const token = urlParams.get('token');
             const msg = document.getElementById('message');
-            const btn = document.getElementById('activateBtn');
+            const loader = document.getElementById('loader');
 
             if (!uid || !token) {
-                msg.textContent = "UID et Token requis.";
-                msg.classList.add('alert-warning', 'd-block');
+                loader.classList.add('d-none');
+                msg.textContent = "UID ou Token manquant dans le lien d'activation.";
+                msg.className = 'alert alert-warning d-block';
                 return;
             }
 
-            btn.disabled = true;
-            btn.textContent = "Activation en cours...";
-
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/users/activation/', {
+                // Call our CUSTOM activation endpoint that returns tokens
+                const response = await fetch('http://127.0.0.1:8000/api/accounts/activation/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ uid, token })
                 });
 
-                if (response.ok || response.status === 204) {
-                    msg.className = 'alert alert-success d-block mt-3';
-                    msg.innerHTML = 'Compte activé ! <a href="login.html">Connectez-vous</a>';
+                const data = await response.json();
+
+                if (response.ok) {
+                    loader.classList.add('d-none');
+                    msg.className = 'alert alert-success d-block';
+                    msg.innerHTML = 'Compte activé avec succès ! <br> Redirection vers votre tableau de bord...';
+
+                    // Auto-login: Store tokens
+                    if (data.access && data.refresh) {
+                        localStorage.setItem('accessToken', data.access);
+                        localStorage.setItem('refreshToken', data.refresh);
+                        localStorage.setItem('username', data.username);
+                    }
+
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
                 } else {
-                    const data = await response.json();
-                    throw new Error(JSON.stringify(data));
+                    throw new Error(data.detail || JSON.stringify(data));
                 }
             } catch (e) {
-                msg.className = 'alert alert-danger d-block mt-3';
-                msg.textContent = "Erreur: " + e.message;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Activer le compte";
+                loader.classList.add('d-none');
+                msg.className = 'alert alert-danger d-block';
+                msg.textContent = "L'activation a échoué. Le lien est peut-être expiré ou déjà utilisé.";
+                console.error(e);
             }
         });
     </script>
