@@ -1,7 +1,7 @@
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const errorDiv = document.getElementById('error-message');
     const loginBtn = document.getElementById('loginBtn');
@@ -14,7 +14,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     spinner.classList.remove('d-none');
 
     const credentials = {
-        username: usernameInput.value,
+        email: emailInput.value,
         password: passwordInput.value
     };
 

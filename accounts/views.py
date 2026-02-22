@@ -1,17 +1,15 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import get_user_model
-from django.db import IntegrityError
-from djoser.serializers import ActivationSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 import logging
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import default_token_generator
+from django.db import IntegrityError
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from djoser.serializers import ActivationSerializer
 
 User = get_user_model()
-logger = logging.getLogger(__name__)
-
-from django.contrib.auth.password_validation import validate_password
-from rest_framework.exceptions import ValidationError as DRFValidationError
 
 class RegisterView(APIView):
     def post(self, request):
@@ -68,7 +66,6 @@ class RegisterView(APIView):
         except Exception as e:
             return Response({"error": "Une erreur interne est survenue."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from django.contrib.auth.tokens import default_token_generator
 
 class CustomActivationView(APIView):
     """

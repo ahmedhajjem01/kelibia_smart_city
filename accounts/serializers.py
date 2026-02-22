@@ -1,5 +1,4 @@
 from djoser.serializers import UserCreateSerializer as DjoserUserCreateSerializer
-print("DEBUG: accounts/serializers.py LOADED")
 from django.contrib.auth import get_user_model
 import logging
 
