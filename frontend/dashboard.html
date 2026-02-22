@@ -6,13 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Kelibia Smart City</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .arabic-font {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">Kelibia Smart City</a>
-            <button class="btn btn-outline-light btn-sm" onclick="logout()">Déconnexion</button>
+            <a class="navbar-brand" href="#" data-i18n="home">Kelibia Smart City</a>
+            <div class="d-flex align-items-center">
+                <select class="form-select form-select-sm me-3" id="langSelect" onchange="setLanguage(this.value)"
+                    style="width: auto;">
+                    <option value="fr">Français</option>
+                    <option value="ar">العربية</option>
+                </select>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()" data-i18n="logout">Déconnexion</button>
+            </div>
         </div>
     </nav>
 
@@ -20,22 +33,23 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="alert alert-success">
-                    <h4>Bienvenue !</h4>
-                    <p>Vous êtes connecté avec succès au portail Kelibia Smart City.</p>
+                    <h4 data-i18n="welcome">Bienvenue !</h4>
+                    <p data-i18n="welcome_msg">Vous êtes connecté avec succès au portail Kelibia Smart City.</p>
                 </div>
 
                 <!-- Services Card -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">Services Administratifs</h5>
-                        <p class="card-text text-muted">Consultez la liste des documents requis pour vos démarches
+                        <h5 class="card-title" data-i18n="admin_services">Services Administratifs</h5>
+                        <p class="card-text text-muted" data-i18n="services_desc">Consultez la liste des documents
+                            requis pour vos démarches
                             municipales (État civil, Urbanisme, etc.).</p>
-                        <a href="services.html" class="btn btn-primary">Voir les services</a>
+                        <a href="services.html" class="btn btn-primary" data-i18n="view_services">Voir les services</a>
                     </div>
                 </div>
 
                 <div class="card p-4 shadow-sm">
-                    <h5>Votre Token d'Accès :</h5>
+                    <h5 data-i18n="your_token">Votre Token d'Accès :</h5>
                     <code id="tokenDisplay" class="d-block text-break"></code>
                 </div>
             </div>
@@ -43,12 +57,12 @@
             <div class="col-md-4">
                 <div class="card shadow-sm">
                     <div class="card-header bg-white">
-                        <h6 class="mb-0">Profil</h6>
+                        <h6 class="mb-0" data-i18n="profile">Profil</h6>
                     </div>
                     <div class="card-body text-center">
                         <img src="https://ui-avatars.com/api/?name=User&background=0D6EFD&color=fff"
                             class="rounded-circle mb-3" width="80">
-                        <h6 id="userName">Chargement...</h6>
+                        <h6 id="userName" data-i18n="loading">Chargement...</h6>
                         <p class="text-muted small" id="userEmail">...</p>
                     </div>
                 </div>
@@ -56,6 +70,7 @@
         </div>
     </div>
 
+    <script src="js/lang.js"></script>
     <script>
         // Check Auth
         const token = localStorage.getItem('accessToken');
@@ -85,6 +100,10 @@
             localStorage.removeItem('refreshToken');
             window.location.href = 'login.html';
         }
+
+        // Initialize Language
+        initLanguage();
+        document.getElementById('langSelect').value = getLanguage();
 
         fetchUserInfo();
     </script>
