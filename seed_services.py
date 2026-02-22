@@ -18,16 +18,16 @@ def seed_services():
         category=etat_civil,
         name_fr="Contrat de Mariage",
         name_ar="عقد زواج",
-        description_fr="Documents nécessaires pour la conclusion d'un acte de mariage.",
-        description_ar="الأوراق المطلوبة لإبرام عقد الزواج.",
+        description_fr="C'est le document officiel pour vous marier légalement. Il regroupe toutes les infos sur vous et votre futur conjoint.",
+        description_ar="هذه هي الوثيقة الرسمية للزواج قانونياً. تضم كل المعلومات عنك وعن شريك حياتك القادم.",
         processing_time="Immédiat"
     )
 
     marriage_reqs = [
-        ("Extrait de naissance de chacun des deux conjoints", "مضمون ولادة لكل من الزوجين"),
-        ("Certificat médical prénuptial", "شهادة طبية سابقة للزواج"),
-        ("Copie de la CIN des deux conjoints", "نسخة من بطاقة التعريف الوطنية للزوجين"),
-        ("Copie de la CIN des deux témoins", "نسخة من بطاقة التعريف الوطنية للشاهدين")
+        ("Grand extrait de naissance (moins de 3 mois)", "مضمون ولادة جديد (أقل من 3 أشهر)"),
+        ("Certificat médical (examen pour mariage)", "شهادة طبية (فحص الزواج)"),
+        ("Copie simple de votre carte d'identité (CIN)", "نسخة عادية من بطاقة التعريف"),
+        ("Copie de la carte d'identité des deux témoins", "نسخة من بطاقة التعريف للشاهدين")
     ]
     for fr, ar in marriage_reqs:
         Requirement.objects.get_or_create(service=marriage, name_fr=fr, name_ar=ar)
@@ -36,32 +36,32 @@ def seed_services():
         category=etat_civil,
         name_fr="Extrait de Naissance",
         name_ar="مضمون ولادة",
-        description_fr="Obtention d'un extrait de naissance.",
-        description_ar="الحصول على مضمون ولادة.",
+        description_fr="Une preuve officielle de votre naissance. Utile pour presque toutes les démarches administratives.",
+        description_ar="وثيقة رسمية تثبت ولادتك. ستحتاجها في أغلب الأوراق الرسمية.",
         processing_time="10 minutes"
     )
-    Requirement.objects.get_or_create(service=birth, name_fr="CIN du demandeur", name_ar="بطاقة التعريف الوطنية لمقدم الطلب")
+    Requirement.objects.get_or_create(service=birth, name_fr="Votre carte d'identité (CIN)", name_ar="بطاقة التعريف الوطنية الخاصة بك")
 
     # 2. Urbanisme & Travaux (التعمير والأشغال)
     urbanisme, _ = Category.objects.get_or_create(
-        name_fr="Urbanisme & Travaux",
-        name_ar="التعمير والأشغال",
-        icon="fa-building"
+        name_fr="Maison & Construction",
+        name_ar="المنزل والبناء",
+        icon="fa-house-chimney"
     )
 
     permis_batir, _ = Service.objects.get_or_create(
         category=urbanisme,
-        name_fr="Permis de Bâtir",
+        name_fr="Autorisation de construire",
         name_ar="رخصة بناء",
-        description_fr="Demande d'autorisation pour construire un bâtiment.",
-        description_ar="طلب رخصة لبناء عقار.",
+        description_fr="Vous devez demander ceci avant de poser la première brique de votre nouvelle maison ou d'ajouter un étage.",
+        description_ar="يجب أن تطلب هذه الرخصة قبل البدء في بناء منزلك الجديد أو إضافة طابق إضافي.",
         processing_time="15 à 45 jours"
     )
     urbanisme_reqs = [
-        ("Demande sur papier timbre", "مطلب على ورق تمبر"),
-        ("Certificat de propriété", "شهادة ملكية"),
-        ("Projet d'architecture", "مشروع معماري"),
-        ("Quittance de paiement des taxes", "وصل خلاص الأداءات البلدية")
+        ("Un simple papier avec un timbre fiscal", "مطلب بسيط عليه تمبر جبائي"),
+        ("Preuve que vous êtes le propriétaire du terrain", "شهادة تثبت أنك صاحب الأرض"),
+        ("Les plans dessinés par l'architecte", "الأمثلة التي رسمها المهندس المعماري"),
+        ("Un reçu qui prouve que vous avez payé vos taxes locales", "وصل يثبت أنك دفعت الأداءات البلدية")
     ]
     for fr, ar in urbanisme_reqs:
         Requirement.objects.get_or_create(service=permis_batir, name_fr=fr, name_ar=ar)
@@ -69,115 +69,115 @@ def seed_services():
     # New Demands from Images
     terrasement, _ = Service.objects.get_or_create(
         category=urbanisme,
-        name_fr="Tarbied / Tabeed de Route",
-        name_ar="تعبيد طريق",
-        description_fr="Demande de pavage ou de goudronnage d'une route.",
-        description_ar="حول طلب تعبيد طريق.",
-        processing_time="Selon planning"
+        name_fr="Demande de Goudronnage de la Rue",
+        name_ar="طلب تعبيد طريق",
+        description_fr="Pour demander à la mairie de goudronner ou de réparer la route devant chez vous.",
+        description_ar="لطلب تعبيد أو إصلاح الطريق الموجود أمام منزلك من البلدية.",
+        processing_time="Dépends du planning de la mairie"
     )
-    Requirement.objects.get_or_create(service=terrasement, name_fr="Demande écrite", name_ar="مطلب كتابي")
+    Requirement.objects.get_or_create(service=terrasement, name_fr="Une simple lettre explicative", name_ar="مورقة توضيحية بسيطة")
 
     renovation_permis, _ = Service.objects.get_or_create(
         category=urbanisme,
-        name_fr="Permis de Restauration / Rénovation",
+        name_fr="Réparations de la Maison (Rénovation)",
         name_ar="رخصة ترميم بناية",
-        description_fr="Autorisation pour effectuer des travaux de restauration sur un bâtiment existant.",
-        description_ar="حول طلب رخصة ترميم بناية.",
+        description_fr="Indispensable pour faire des gros travaux de réparation ou ravalement de façade sans changer la structure.",
+        description_ar="ضروري للقيام بإصلاحات كبرى أو دهن الواجهة دون تغيير هيكل البناء.",
         processing_time="15 jours"
     )
 
     occupation_public, _ = Service.objects.get_or_create(
         category=urbanisme,
-        name_fr="Occupation Temporaire du Domaine Public",
-        name_ar="إشغال الطريق العام (أشغال بناء/ترميم)",
-        description_fr="Autorisation d'occuper la voie publique pour des travaux.",
-        description_ar="طلب رخصة في إشغال الطريق العام بمناسبة إقامة أشغال بناء أو ترميم محل.",
+        name_fr="Utiliser le trottoir pour vos travaux",
+        name_ar="إشغال الطريق العام",
+        description_fr="Si vous avez besoin de poser du sable ou des briques sur le trottoir pendant que vous construisez.",
+        description_ar="إذا كنت بحاجة لوضع الرمل أو الياجور على الرصيف أثناء قيامك بأشغال البناء.",
         processing_time="7 jours"
     )
 
-    # 3. Fiscalité & Finance (الخدمات الجبائية)
+    # 3. Fiscalité & Finance (المالية والضرائب)
     fiscalite, _ = Category.objects.get_or_create(
-        name_fr="Fiscalité & Finance",
-        name_ar="الخدمات الجبائية",
-        icon="fa-file-invoice-dollar"
+        name_fr="Argent & Impôts",
+        name_ar="الأموال والأداءات",
+        icon="fa-wallet"
     )
 
     services_جبائية, _ = Service.objects.get_or_create(
         category=fiscalite,
-        name_fr="Services Fiscaux",
-        name_ar="طلب خدمات جبائية",
-        description_fr="Enregistrement foncier, changement de propriété, arrêt d'activité.",
-        description_ar="ترسيم عقار، ترسيم مناب، تغيير ملكية عقار، تغيير صبغة عقار، إعلام بإيقاف نشاط.",
-        processing_time="Variable"
+        name_fr="Choses liées au terrain et impôts",
+        name_ar="خدمات جبائية",
+        description_fr="Pour enregistrer un terrain, changer le nom du propriétaire ou arrêter un commerce.",
+        description_ar="لتسجيل أرض، تغيير اسم المالك أو إغلاق محل تجاري.",
+        processing_time="Dépend de votre dossier"
     )
 
     tnd_immobilier, _ = Service.objects.get_or_create(
         category=fiscalite,
-        name_fr="Attestation de Recouvrement des Taxes",
-        name_ar="شهادة في ترسيم عقار بجدول التحصيل",
-        description_fr="Attestation pour les propriétés bâties ou non bâties.",
-        description_ar="طلب شهادة في ترسيم عقار بجدول تحصيل المعاليم الموظفة على العقارات (المبنية / غير المبنية).",
+        name_fr="Preuve de paiement des impôts sur la maison",
+        name_ar="شهادة خلاص الأداءات",
+        description_fr="Une attestation qui confirme que vous n'avez plus de dettes fiscales envers la mairie pour votre maison.",
+        description_ar="شهادة تؤكد أنك قمت بخلاص كل الأداءات البلدية المطلوبة لمنزلك.",
         processing_time="2 jours"
     )
 
-    # 4. Autorisations Commerciales & Divers (رخص تجارية متنوعة)
+    # 4. Autorisations Commerciales (المشاريع والمحلات)
     commerce, _ = Category.objects.get_or_create(
-        name_fr="Commerce & Autorisations",
-        name_ar="التجارة والرخص",
-        icon="fa-store"
+        name_fr="Boutiques & Commerces",
+        name_ar="المحلات والمشاريع",
+        icon="fa-shop"
     )
 
     cahier_charges, _ = Service.objects.get_or_create(
         category=commerce,
-        name_fr="Cahier des Charges (Locaux/Cafés/Jeux)",
-        name_ar="كراس الشروط (محلات/مقاهي/ألعاب)",
-        description_fr="Respect des conditions de salubrité et d'exploitation.",
-        description_ar="كراس الشروط الخاص بضبط الشروط العامة لصلوحية المحلات أو استغلال المقاهي.",
-        processing_time="Immédiat"
+        name_fr="Règles pour ouvrir un Café ou une Boutique",
+        name_ar="كراس الشروط",
+        description_fr="C'est le guide des règles que vous devez signer pour avoir le droit d'ouvrir votre commerce.",
+        description_ar="هو دليل القواعد الذي يجب أن تمضيه لتتمكن من فتح مشروعك الخاص.",
+        processing_time="Tout de suite"
     )
 
     enseigne_pub, _ = Service.objects.get_or_create(
         category=commerce,
-        name_fr="Permis d'Enseigne Publicitaire",
+        name_fr="Installer une enseigne ou un panneau",
         name_ar="رخصة علامة إشهارية",
-        description_fr="Autorisation pour l'installation d'une plaque ou enseigne publicitaire.",
-        description_ar="حول طلب رخصة في تركيز علامة إشهارية.",
+        description_fr="Avant de mettre un grand panneau publicitaire sur votre boutique, vous devez prévenir la mairie.",
+        description_ar="قبل وضع لافتة كبيرة أو إشهار فوق محلك، يجب عليك إعلام البلدية والحصول على موافقة.",
         processing_time="10 jours"
     )
 
-    # 5. Réseaux & Services Publics (الربط بالشبكات)
+    # 5. Réseaux & Services Publics (الربط بالخدمات)
     reseaux, _ = Category.objects.get_or_create(
-        name_fr="Réseaux & Connexions",
-        name_ar="الربط بالشبكات",
-        icon="fa-plug"
+        name_fr="Eau, Lumière et Égouts",
+        name_ar="الماء والكهرباء والتطهير",
+        icon="fa-bolt"
     )
 
     connexion_reseau, _ = Service.objects.get_or_create(
         category=reseaux,
-        name_fr="Raccordement aux Réseaux",
-        name_ar="ترخيص الربط بالشبكات البلدية",
-        description_fr="Autorisation pour le raccordement Eau, Électricité, Assainissement.",
-        description_ar="حول طلب ترخيص الربط بالشبكات البلدية (ماء، كهرباء، تطهير).",
+        name_fr="Brancher ma maison à l'eau ou l'électricité",
+        name_ar="الربط بالشبكات",
+        description_fr="Vous avez besoin de ce papier de la mairie pour que la SONEDE ou la STEG viennent brancher votre maison.",
+        description_ar="تحتاج لهذه الورقة من البلدية ليتمكن عمال الصوناد أو الستاغ من ربط منزلك بالماء أو الكهرباء.",
         processing_time="15 jours"
     )
 
-    # 6. Réclamations (الشكاوى)
+    # 6. Réclamations (الشكاوى والمشاكل)
     reclamations, _ = Category.objects.get_or_create(
-        name_fr="Réclamations",
-        name_ar="الشكاوى والبلاغات",
-        icon="fa-exclamation-triangle"
+        name_fr="Problèmes & Signalements",
+        name_ar="المشاكل والشكاوى",
+        icon="fa-bullhorn"
     )
 
     bruit, _ = Service.objects.get_or_create(
         category=reclamations,
-        name_fr="Plainte pour Nuisance Sonore",
-        name_ar="شكوى حول الضجيج",
-        description_fr="Signalement de bruit excessif ou nuisance nocturne.",
-        description_ar="حول شكوى حول الضجيج.",
-        processing_time="Traitement police municipale"
+        name_fr="Se plaindre du bruit (Voisins ou Travaux)",
+        name_ar="شكوى من الضجيج",
+        description_fr="Pour signaler que quelqu'un fait trop de bruit le soir ou sans autorisation.",
+        description_ar="للإبلاغ عن وجود ضجيج مزعج في الليل أو أعمال بناء بدون رخصة تزعج المارة.",
+        processing_time="Transmis à la police municipale"
     )
 
-    print("Database expanded successfully with real Kelibia Municipality demands!")
+    print("Base de données mise à jour avec des descriptions simples et claires !")
 
 if __name__ == "__main__":
     seed_services()
