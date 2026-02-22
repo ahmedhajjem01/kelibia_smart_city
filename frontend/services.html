@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services Administratifs - Kelibia Smart City</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .service-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-header {
+            border-left: 5px solid #0d6efd;
+            padding-left: 15px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html"><i class="fas fa-city me-2"></i>Kelibia Smart City</a>
+            <div class="d-flex">
+                <a href="dashboard.html" class="btn btn-outline-light btn-sm me-2">Tableau de bord</a>
+                <button class="btn btn-light btn-sm" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="fw-bold">Services Administratifs</h2>
+                <p class="text-muted">Retrouvez ici tous les documents nécessaires pour vos démarches municipales à
+                    Kelibia.</p>
+            </div>
+        </div>
+
+        <div id="servicesContainer">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Chargement des services...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for service details -->
+    <div class="modal fade" id="serviceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">Détails du service</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="modalDescription" class="mb-4 text-muted"></div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-file-alt me-2 text-primary"></i>Documents requis :
+                            </h6>
+                            <ul id="modalRequirements" class="list-group list-group-flush mb-4"></ul>
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-5">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-2"><i class="fas fa-clock me-2 text-info"></i>Délai estimé
+                                    </h6>
+                                    <p id="modalTime" class="mb-0"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary disabled"><i
+                            class="fas fa-paper-plane me-2"></i>Demander en ligne (Bientôt)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const token = localStorage.getItem('accessToken');
+        if (!token) window.location.href = 'login.html';
+
+        async function loadServices() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/services/categories/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const categories = await response.json();
+                renderServices(categories);
+            } catch (error) {
+                document.getElementById('servicesContainer').innerHTML = `
+                    <div class="alert alert-danger">Erreur lors de la récupération des services. Veuillez réessayer plus tard.</div>
+                `;
+            }
+        }
+
+        function renderServices(categories) {
+            const container = document.getElementById('servicesContainer');
+            if (categories.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">Aucun service disponible pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            categories.forEach(cat => {
+                let html = `
+                    <div class="category-section mb-5">
+                        <div class="category-header">
+                            <h3 class="fw-bold"><i class="fas ${cat.icon || 'fa-folder-open'} me-2"></i>${cat.name_fr} / ${cat.name_ar}</h3>
+                        </div>
+                        <div class="row g-4">
+                `;
+
+                cat.services.forEach(service => {
+                    html += `
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card border-0 shadow-sm" onclick="showServiceDetail(${JSON.stringify(service).replace(/"/g, '&quot;')})">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">${service.name_fr}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted arabic text-end">${service.name_ar}</h6>
+                                    <p class="card-text small text-muted text-truncate" style="max-height: 3rem;">${service.description_fr}</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="badge bg-light text-primary border">${service.requirements.length} documents</span>
+                                        <i class="fas fa-chevron-right text-primary opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+                container.innerHTML += html;
+            });
+        }
+
+        function showServiceDetail(service) {
+            const modal = new bootstrap.Modal(document.getElementById('serviceModal'));
+            document.getElementById('modalTitle').textContent = `${service.name_fr} / ${service.name_ar}`;
+            document.getElementById('modalDescription').textContent = service.description_fr;
+            document.getElementById('modalTime').textContent = service.processing_time || "Non spécifié";
+
+            const reqList = document.getElementById('modalRequirements');
+            reqList.innerHTML = '';
+            service.requirements.forEach(req => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item bg-transparent d-flex justify-content-between align-items-center p-3';
+                li.innerHTML = `
+                    <span>${req.name_fr}</span>
+                    <span class="text-muted small arabic">${req.name_ar}</span>
+                `;
+                reqList.appendChild(li);
+            });
+
+            modal.show();
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = 'login.html';
+        }
+
+        loadServices();
+    </script>
+</body>
+
+</html>

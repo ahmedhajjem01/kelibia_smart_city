@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from djoser.serializers import ActivationSerializer
+from .serializers import CustomUserSerializer
 
 User = get_user_model()
 
@@ -91,3 +92,11 @@ class CustomActivationView(APIView):
             "refresh": str(refresh),
             "username": user.username
         }, status=status.HTTP_200_OK)
+
+class UserProfileView(APIView):
+    """
+    Returns the current user's profile information.
+    """
+    def get(self, request):
+        serializer = CustomUserSerializer(request.user)
+        return Response(serializer.data)

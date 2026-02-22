@@ -15,3 +15,9 @@ class UserCreateSerializer(DjoserUserCreateSerializer):
             "governorate",
             "city",
         )
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    from rest_framework import serializers
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'cin', 'phone', 'address', 'governorate', 'city', 'user_type', 'is_verified')

@@ -17,13 +17,42 @@
     </nav>
 
     <div class="container mt-5">
-        <div class="alert alert-success">
-            <h4>Bienvenue !</h4>
-            <p>Vous êtes connecté avec succès.</p>
-        </div>
-        <div class="card p-4">
-            <h5>Votre Token d'Accès :</h5>
-            <code id="tokenDisplay" class="d-block text-break"></code>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="alert alert-success">
+                    <h4>Bienvenue !</h4>
+                    <p>Vous êtes connecté avec succès au portail Kelibia Smart City.</p>
+                </div>
+
+                <!-- Services Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Services Administratifs</h5>
+                        <p class="card-text text-muted">Consultez la liste des documents requis pour vos démarches
+                            municipales (État civil, Urbanisme, etc.).</p>
+                        <a href="services.html" class="btn btn-primary">Voir les services</a>
+                    </div>
+                </div>
+
+                <div class="card p-4 shadow-sm">
+                    <h5>Votre Token d'Accès :</h5>
+                    <code id="tokenDisplay" class="d-block text-break"></code>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Profil</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="https://ui-avatars.com/api/?name=User&background=0D6EFD&color=fff"
+                            class="rounded-circle mb-3" width="80">
+                        <h6 id="userName">Chargement...</h6>
+                        <p class="text-muted small" id="userEmail">...</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -36,11 +65,28 @@
 
         document.getElementById('tokenDisplay').textContent = token;
 
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/accounts/me/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('userName').textContent = `${user.first_name} ${user.last_name}`;
+                    document.getElementById('userEmail').textContent = user.email;
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        }
+
         function logout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             window.location.href = 'login.html';
         }
+
+        fetchUserInfo();
     </script>
 </body>
 
