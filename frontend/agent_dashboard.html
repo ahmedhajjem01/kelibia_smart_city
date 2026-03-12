@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord Agent - Kelibia Smart City</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .arabic-font {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .agent-card {
+            border-left: 5px solid #198754;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="#" data-i18n="agent_dashboard">Tableau de bord Agent</a>
+            <div class="d-flex align-items-center">
+                <div class="btn-group me-3" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('fr')"
+                        title="Français">
+                        <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR">
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('ar')"
+                        title="العربية">
+                        <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN">
+                    </button>
+                </div>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()" data-i18n="logout">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="alert alert-success">
+                    <h4 data-i18n="agent_welcome">Bienvenue Agent !</h4>
+                    <p data-i18n="welcome_msg">Vous êtes connecté avec succès au portail Kelibia Smart City.</p>
+                </div>
+
+                <!-- Reclamations Card -->
+                <div class="card shadow-sm mb-4 agent-card">
+                    <div class="card-body">
+                        <h5 class="card-title text-success"><i class="fas fa-bullhorn me-2"></i><span
+                                data-i18n="reclamations_mgnt">Gestion des Réclamations</span></h5>
+                        <p class="card-text text-muted">Gérez les signalements des citoyens (bruit, voirie, etc.).</p>
+
+                        <div id="reclamationsList" class="mt-3">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0" data-i18n="profile">Profil Agent</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="https://ui-avatars.com/api/?name=Agent&background=198754&color=fff"
+                            class="rounded-circle mb-3" width="80">
+                        <h6 id="userName" data-i18n="loading">Chargement...</h6>
+                        <p class="text-muted small" id="userEmail">...</p>
+                        <span class="badge bg-success">Municipal Agent</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/lang.js"></script>
+    <script>
+        // Check Auth
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('tokenDisplay').textContent = token;
+
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/accounts/me/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('userName').textContent = `${user.first_name} ${user.last_name}`;
+                    document.getElementById('userEmail').textContent = user.email;
+
+                    // Security: If not agent or admin, redirect to citizen dashboard
+                    if (user.user_type !== 'agent' && !user.is_staff && !user.is_superuser) {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        fetchReclamations();
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        }
+
+        async function fetchReclamations() {
+            const listDiv = document.getElementById('reclamationsList');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/reclamations/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.length === 0) {
+                        listDiv.innerHTML = '<p class="text-muted text-center py-3">Aucune réclamation pour le moment.</p>';
+                        return;
+                    }
+
+                    let html = '<div class="list-group">';
+                    data.forEach(rec => {
+                        const statusBadge = getStatusBadge(rec.status);
+                        html += `
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">${rec.title}</h6>
+                                    <small class="text-muted">${new Date(rec.created_at).toLocaleDateString()}</small>
+                                </div>
+                                <p class="mb-1 small text-truncate">${rec.description}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Par: ${rec.citizen_name}</small>
+                                    ${statusBadge}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    listDiv.innerHTML = html;
+                }
+            } catch (error) {
+                listDiv.innerHTML = '<p class="text-danger">Erreur de chargement.</p>';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge bg-warning text-dark">En attente</span>',
+                'in_progress': '<span class="badge bg-info">En cours</span>',
+                'resolved': '<span class="badge bg-success">Résolue</span>',
+                'rejected': '<span class="badge bg-secondary">Rejetée</span>'
+            };
+            return badges[status] || '<span class="badge bg-light text-dark">Inconnu</span>';
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize Language
+        initLanguage();
+        fetchUserInfo();
+    </script>
+</body>
+
+</html>

@@ -43,13 +43,24 @@ python manage.py migrate
 python recreate_superuser.py
 ```
 
+### 7. Comptes de Test
+Utilisez ces comptes pour tester les différentes fonctionnalités :
+
+| Role | Email | Mot de Passe |
+| :--- | :--- | :--- |
+| **Admin** | `admin@kelibiasmartcity.tn` | `admin` |
+| **Agent** | `agent1@kelibiasmartcity.tn` | `agent123` |
+| **Citoyen** | `testuser@example.com` | `password123` |
+
 ## 🏁 Lancer le Projet
 Double-cliquez sur le fichier :
 👉 **`start_dev.bat`**
 
 Cela lancera automatiquement :
 -   Le **Backend** : http://127.0.0.1:8000
--   Le **Frontend** : http://localhost:5500/login.html
+-   Le **Frontend** : http://127.0.0.1:5500/login.html
 
----
-**Note sur l'OTP SMS**: Pour recevoir les SMS sur votre téléphone, assurez-vous de configurer votre propre `INFOBIP_API_KEY` dans `settings.py` ou de vérifier votre numéro sur le portail Infobip.
+> [!IMPORTANT]
+> **Important** : Utilisez toujours **`http://127.0.0.1:5500/login.html`** (et non `localhost`) pour que la session partagée (SSO) entre le portail et l'admin Django fonctionne correctement.
+
+

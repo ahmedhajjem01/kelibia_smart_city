@@ -19,11 +19,16 @@
         <div class="container">
             <a class="navbar-brand" href="#" data-i18n="home">Kelibia Smart City</a>
             <div class="d-flex align-items-center">
-                <select class="form-select form-select-sm me-3" id="langSelect" onchange="setLanguage(this.value)"
-                    style="width: auto;">
-                    <option value="fr">Français</option>
-                    <option value="ar">العربية</option>
-                </select>
+                <div class="btn-group me-3" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('fr')"
+                        title="Français">
+                        <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR">
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('ar')"
+                        title="العربية">
+                        <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN">
+                    </button>
+                </div>
                 <button class="btn btn-outline-light btn-sm" onclick="logout()" data-i18n="logout">Déconnexion</button>
             </div>
         </div>
@@ -40,17 +45,35 @@
                 <!-- Services Card -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
-                        <h5 class="card-title" data-i18n="admin_services">Services Administratifs</h5>
+                        <h5 class="card-title text-primary"><i class="fas fa-file-invoice me-2"></i><span
+                                data-i18n="admin_services">Services Administratifs</span></h5>
                         <p class="card-text text-muted" data-i18n="services_desc">Consultez la liste des documents
-                            requis pour vos démarches
-                            municipales (État civil, Urbanisme, etc.).</p>
+                            requis pour vos démarches municipales.</p>
                         <a href="services.html" class="btn btn-primary" data-i18n="view_services">Voir les services</a>
                     </div>
                 </div>
 
-                <div class="card p-4 shadow-sm">
-                    <h5 data-i18n="your_token">Votre Token d'Accès :</h5>
-                    <code id="tokenDisplay" class="d-block text-break"></code>
+                <!-- Reclamations Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger"><i class="fas fa-bullhorn me-2"></i><span
+                                data-i18n="my_reclamations">Mes Réclamations</span></h5>
+                        <p class="card-text text-muted" data-i18n="reclamations_desc">Signalez un problème (éclairage,
+                            déchets, voirie) et suivez sa résolution.</p>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reclamationModal"
+                            data-i18n="new_reclamation">Nouvelle Réclamation</button>
+                    </div>
+                </div>
+
+                <!-- News Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning"><i class="fas fa-newspaper me-2"></i><span
+                                data-i18n="news_title">Actualités de Kélibia</span></h5>
+                        <p class="card-text text-muted" data-i18n="news_desc">Restez informé des derniers événements et
+                            annonces de votre commune.</p>
+                        <a href="#" class="btn btn-warning" data-i18n="view_services">Lire les articles</a>
+                    </div>
                 </div>
             </div>
 
@@ -70,6 +93,44 @@
         </div>
     </div>
 
+    <!-- Reclamation Modal -->
+    <div class="modal fade" id="reclamationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="new_reclamation">Nouvelle Réclamation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reclamationForm">
+                        <div class="mb-3">
+                            <label class="form-label" data-i18n="details_title">Titre</label>
+                            <input type="text" class="form-control" id="recTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Catégorie</label>
+                            <select class="form-select" id="recCategory">
+                                <option value="lighting">Éclairage Public</option>
+                                <option value="trash">Déchets / Hygiène</option>
+                                <option value="roads">Voirie / Routes</option>
+                                <option value="noise">Nuisances Sonores</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="recDescription" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="submitBtn"
+                            data-i18n="submit">Envoyer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="js/lang.js"></script>
     <script>
         // Check Auth
@@ -77,8 +138,6 @@
         if (!token) {
             window.location.href = 'login.html';
         }
-
-        document.getElementById('tokenDisplay').textContent = token;
 
         async function fetchUserInfo() {
             try {
@@ -95,6 +154,46 @@
             }
         }
 
+        // Handle Reclamation Submission
+        document.getElementById('reclamationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = getTranslation('processing');
+
+            const data = {
+                title: document.getElementById('recTitle').value,
+                category: document.getElementById('recCategory').value,
+                description: document.getElementById('recDescription').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/reclamations/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert(getTranslation('success_msg'));
+                    document.getElementById('reclamationForm').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('reclamationModal')).hide();
+                } else {
+                    alert(getTranslation('error_msg'));
+                }
+            } catch (error) {
+                alert(getTranslation('error_msg'));
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
         function logout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
@@ -103,8 +202,6 @@
 
         // Initialize Language
         initLanguage();
-        document.getElementById('langSelect').value = getLanguage();
-
         fetchUserInfo();
     </script>
 </body>

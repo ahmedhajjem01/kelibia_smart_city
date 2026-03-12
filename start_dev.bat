@@ -15,7 +15,7 @@ echo.
 echo ==================================================
 echo   Servers running!
 echo   Backend API: http://127.0.0.1:8000
-echo   Frontend UI: http://localhost:5500/login.html
+echo   Frontend UI: http://127.0.0.1:5500/login.html
 echo ==================================================
 echo.
 pause

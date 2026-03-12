@@ -24,6 +24,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify(credentials)
         });
 
@@ -34,8 +35,17 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             localStorage.setItem('accessToken', data.access);
             localStorage.setItem('refreshToken', data.refresh);
 
-            // Redirect to dashboard (create this file next)
-            window.location.href = 'dashboard.html';
+            // Role-based Redirection
+            if (data.is_staff || data.is_superuser) {
+                // Admin users go to the Django Admin interface
+                window.location.href = 'http://127.0.0.1:8000/admin/';
+            } else if (data.user_type === 'agent') {
+                // Municipal agents go to their specialized dashboard
+                window.location.href = 'agent_dashboard.html';
+            } else {
+                // Regular citizens go to the main dashboard
+                window.location.href = 'dashboard.html';
+            }
         } else {
             // Error
             throw new Error(data.detail || 'Identifiants incorrects');

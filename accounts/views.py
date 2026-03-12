@@ -1,5 +1,5 @@
-import logging
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login, logout
+from django.shortcuts import redirect
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
@@ -7,8 +7,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 from djoser.serializers import ActivationSerializer
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer, MyTokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -100,3 +101,22 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            email = request.data.get('email')
+            user = User.objects.filter(email=email).first()
+            if user and (user.is_staff or user.is_superuser):
+                login(request, user)
+        return response
+
+def admin_logout(request):
+    """
+    Custom logout view for the admin to redirect to the frontend.
+    """
+    logout(request)
+    return redirect('http://127.0.0.1:5500/login.html')

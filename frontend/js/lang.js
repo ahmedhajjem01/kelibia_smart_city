@@ -19,7 +19,22 @@ const translations = {
         request_online: "Demander en ligne (Bientôt)",
         loading_services: "Chargement des services...",
         details_title: "Détails du service",
-        home: "Accueil"
+        home: "Accueil",
+        download_form: "Télécharger le formulaire",
+        download_form_ar: "Télécharger (Version Arabe)",
+        agent_dashboard: "Tableau de bord Agent",
+        reclamations_mgnt: "Gestion des Réclamations",
+        view_reclamations: "Voir les réclamations",
+        agent_welcome: "Bienvenue Agent !",
+        my_reclamations: "Mes Réclamations",
+        new_reclamation: "Nouvelle Réclamation",
+        reclamations_desc: "Signalez un problème (éclairage, déchets, voirie) et suivez sa résolution.",
+        news_title: "Actualités de Kélibia",
+        news_desc: "Restez informé des derniers événements et annonces de votre commune.",
+        submit: "Envoyer",
+        processing: "Traitement en cours...",
+        success_msg: "Opération réussie !",
+        error_msg: "Une erreur est survenue."
     },
     ar: {
         dashboard: "لوحة القيادة",
@@ -41,7 +56,21 @@ const translations = {
         request_online: "الطلب عبر الإنترنت (قريباً)",
         loading_services: "جاري تحميل الخدمات...",
         details_title: "تفاصيل الخدمة",
-        home: "الرئيسية"
+        home: "الرئيسية",
+        download_form: "تحميل المطبوعة",
+        agent_dashboard: "لوحة قيادة العون",
+        reclamations_mgnt: "إدارة الشكاوى",
+        view_reclamations: "عرض الشكاوى",
+        agent_welcome: "مرحباً أيها العون!",
+        my_reclamations: "شكاويّ",
+        new_reclamation: "شكوى جديدة",
+        reclamations_desc: "أبلغ عن مشكل (إضاءة، نفايات، طرقات) وتابع عملية الإصلاح.",
+        news_title: "أخبار قليبية",
+        news_desc: "ابق على اطلاع بآخر الأحداث والبلاغات الصادرة عن بلديتك.",
+        submit: "إرسال",
+        processing: "جاري المعالجة...",
+        success_msg: "تمت العملية بنجاح!",
+        error_msg: "حدث خطأ ما."
     }
 };
 

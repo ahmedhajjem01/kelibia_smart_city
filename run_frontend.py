@@ -17,10 +17,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 # Create the server
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
-    print(f"Serving Frontend at http://localhost:{PORT}")
+    print(f"Serving Frontend at http://127.0.0.1:{PORT}")
     try:
         print(f"Serving directory: {os.path.abspath(DIRECTORY)}")
     except Exception:
         pass
-    print(f"Open http://localhost:{PORT}/login.html to start")
+    print(f"Open http://127.0.0.1:{PORT}/login.html to start")
     httpd.serve_forever()

@@ -18,6 +18,8 @@ class Service(models.Model):
     description_fr = models.TextField(blank=True, verbose_name="Description (FR)")
     description_ar = models.TextField(blank=True, verbose_name="Description (AR)")
     processing_time = models.CharField(max_length=100, blank=True, verbose_name="Délai de traitement")
+    form_pdf_ar = models.FileField(upload_to='service_forms/ar/', blank=True, null=True, verbose_name="Formulaire PDF (AR)")
+    form_pdf_fr = models.FileField(upload_to='service_forms/fr/', blank=True, null=True, verbose_name="Formulaire PDF (FR)")
 
     def __str__(self):
         return self.name_fr

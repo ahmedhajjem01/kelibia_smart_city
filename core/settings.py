@@ -25,7 +25,15 @@ SECRET_KEY = "django-insecure-i^5$pv^)4zg(hk)+t)_xzl)^2b#()#1f#rgs#3rx6tu&*p_r0=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]  # For development
+
+# Session and Cookie configuration for SSO
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_SECURE = False     # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False   # Must be False for some frontend JS to read it if needed
+CSRF_USE_SESSIONS = False      # Default
 
 
 # Application definition
@@ -43,6 +51,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "accounts",
     "services",
+    "reclamations",
+    "news",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -132,15 +142,30 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-# CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
+# Media files (Uploaded PDF forms, images, etc.)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# CORS & CSRF Configuration
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+]
+# CORS_ALLOW_ALL_ORIGINS = True  # Disabled for security/credentials compatibility
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
 }
+
+CORS_ALLOW_CREDENTIALS = True
 
 from datetime import timedelta
 
@@ -166,7 +191,7 @@ EMAIL_HOST_USER = "harounahajjem@gmail.com"  # FIXME: Replace with your Gmail
 EMAIL_HOST_PASSWORD = "lxjsjbfypcwfujlw" # FIXME: Replace with your 16-character App Password
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-DOMAIN = "localhost:5500"
+DOMAIN = "127.0.0.1:5500"
 SITE_NAME = "Tunisia Smart City"
 
 # Djoser Configuration

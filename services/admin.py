@@ -6,7 +6,7 @@ class RequirementInline(admin.TabularInline):
     extra = 1
 
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['name_fr', 'category', 'processing_time']
+    list_display = ['name_fr', 'category', 'processing_time', 'form_pdf_ar', 'form_pdf_fr']
     list_filter = ['category']
     inlines = [RequirementInline]
 
