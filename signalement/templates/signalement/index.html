@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Signalement – Kélibia Smart City</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #map { height: 450px; margin-top: 15px; }
+    input, textarea, button, select {
+        width: 100%; margin-top: 8px; padding: 8px;
+        box-sizing: border-box;
+    }
+    button { cursor: pointer; background-color: #2E75B6; color: white; border: none; border-radius: 4px; }
+    button:hover { background-color: #1F4E79; }
+    .badge-duplicate { color: orange; font-weight: bold; }
+    .badge-urgent { color: red; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<h2>📢 Signaler un problème</h2>
+
+<form id="complaintForm">
+    <input type="text" id="title" placeholder="Titre du problème" required>
+
+    <!-- Sélecteur de catégorie (choix du citoyen) -->
+    <select id="category" required>
+        <option value="">-- Choisir une catégorie --</option>
+        <option value="voirie">🚧 Voirie</option>
+        <option value="eclairage">💡 Éclairage public</option>
+        <option value="dechets">🗑️ Déchets et propreté</option>
+        <option value="eau">💧 Eau et assainissement</option>
+        <option value="espaces_verts">🌳 Espaces verts</option>
+        <option value="batiments">🏛️ Bâtiments publics</option>
+        <option value="autre">📌 Autre</option>
+    </select>
+
+    <textarea id="description" placeholder="Décrivez le problème en détail..." required></textarea>
+    <input type="file" id="photo" accept="image/*">
+    <button type="submit">📤 Envoyer le signalement</button>
+</form>
+
+<h2>🗺️ Carte des signalements</h2>
+<div id="map"></div>
+
+<script>
+/* ================= MAP INITIALIZATION ================= */
+const map = L.map('map').setView([36.847, 11.093], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+let selectedLatLng = null;
+let tempMarker = null;
+
+/* ================= MAP CLICK ================= */
+map.on('click', function (e) {
+    selectedLatLng = e.latlng;
+    if (tempMarker) { map.removeLayer(tempMarker); }
+    tempMarker = L.marker(e.latlng)
+        .addTo(map)
+        .bindPopup("📍 Position du signalement")
+        .openPopup();
+});
+
+/* ================= BACKEND URLS ================= */
+const API_LIST_URL = "http://127.0.0.1:8000/api/signalement/list/";
+const API_ADD_URL  = "http://127.0.0.1:8000/api/signalement/add/";
+
+/* ================= COULEURS PAR CATÉGORIE ================= */
+function getColor(category) {
+    const colors = {
+        'Voirie': 'red',
+        'Éclairage public': 'orange',
+        'Déchets et propreté': 'green',
+        'Eau et assainissement': 'blue',
+        'Espaces verts': 'darkgreen',
+        'Bâtiments publics': 'purple',
+        'Autre': 'gray'
+    };
+    return colors[category] || 'gray';
+}
+
+/* ================= LOAD EXISTING COMPLAINTS ================= */
+fetch(API_LIST_URL)
+.then(res => res.json())
+.then(data => {
+    data.forEach(c => {
+        const color = getColor(c.category);
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`
+        });
+        L.marker([c.latitude, c.longitude], { icon })
+            .addTo(map)
+            .bindPopup(`
+                <b>${c.title}</b><br>
+                📂 ${c.category}<br>
+                🔄 ${c.status}<br>
+                ⚡ Priorité : ${c.priority}
+                ${c.is_duplicate ? '<br><span style="color:orange">⚠️ Doublon détecté</span>' : ''}
+            `);
+    });
+})
+.catch(err => console.error("Erreur chargement signalements:", err));
+
+/* ================= FORM SUBMIT ================= */
+document.getElementById("complaintForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    if (!selectedLatLng) {
+        alert("📍 Veuillez cliquer sur la carte pour choisir une position.");
+        return;
+    }
+
+    const category = document.getElementById("category").value;
+    if (!category) {
+        alert("📂 Veuillez choisir une catégorie.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", document.getElementById("title").value);
+    formData.append("description", document.getElementById("description").value);
+    formData.append("category", category);
+    formData.append("latitude", selectedLatLng.lat);
+    formData.append("longitude", selectedLatLng.lng);
+
+    const photoFile = document.getElementById("photo").files[0];
+    if (photoFile) { formData.append("photo", photoFile); }
+
+    fetch(API_ADD_URL, { method: "POST", body: formData })
+    .then(res => {
+        if (!res.ok) { return res.text().then(text => { throw new Error(text); }); }
+        return res.json();
+    })
+    .then(data => {
+        let message = `✅ Signalement envoyé !\n📂 Catégorie : ${data.category}\n⚡ Priorité : ${data.priority}`;
+        if (data.is_duplicate) {
+            message += `\n⚠️ Attention : un signalement similaire existe déjà dans cette zone !`;
+        }
+        alert(message);
+
+        const color = getColor(data.category);
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`
+        });
+
+        L.marker([data.latitude, data.longitude], { icon })
+            .addTo(map)
+            .bindPopup(`
+                <b>${data.title}</b><br>
+                📂 ${data.category}<br>
+                🔄 ${data.status}<br>
+                ⚡ Priorité : ${data.priority}
+                ${data.is_duplicate ? '<br><span style="color:orange">⚠️ Doublon détecté</span>' : ''}
+            `)
+            .openPopup();
+
+        if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+        document.getElementById("complaintForm").reset();
+        selectedLatLng = null;
+        map.setView([36.847, 11.093], 13);
+    })
+    .catch(err => {
+        console.error("Erreur backend:", err);
+        alert("❌ Erreur lors de l'envoi. Vérifiez la console.");
+    });
+});
+</script>
+
+</body>
+</html>
