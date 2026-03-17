@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/news/', include('news.urls')),
     path('api/signalement/', include('signalement.urls')),
     path('signalement/', include('signalement.urls')),
+    path('dashboard/', include('signalement.urls')),
 ]
 
 if settings.DEBUG:

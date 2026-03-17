@@ -2,179 +2,464 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Signalement – Kélibia Smart City</title>
-
+<title>Kélibia Smart City — Portail citoyen</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #map { height: 450px; margin-top: 15px; }
-    input, textarea, button, select {
-        width: 100%; margin-top: 8px; padding: 8px;
-        box-sizing: border-box;
-    }
-    button { cursor: pointer; background-color: #2E75B6; color: white; border: none; border-radius: 4px; }
-    button:hover { background-color: #1F4E79; }
-    .badge-duplicate { color: orange; font-weight: bold; }
-    .badge-urgent { color: red; font-weight: bold; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f4f4f0; }
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  .topnav { background: #1a1a1a; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 44px; }
+  .topnav-brand { display: flex; align-items: center; gap: 8px; color: white; font-size: 13px; font-weight: 500; }
+  .topnav-logo { width: 28px; height: 28px; background: #185FA5; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .topnav-right { display: flex; align-items: center; gap: 8px; }
+  .topnav-btn { background: transparent; border: 0.5px solid rgba(255,255,255,0.3); color: white; font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+  .topnav-btn.active { background: #185FA5; border-color: #185FA5; }
+  .topnav-search { background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2); color: white; font-size: 12px; padding: 4px 10px; border-radius: 4px; width: 160px; }
+
+  .hero { position: relative; height: 180px; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #0C447C 0%, #185FA5 40%, #1D9E75 100%); }
+  .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+  .hero-content { position: relative; z-index: 1; padding: 1.5rem 1.5rem 1.5rem 220px; display: flex; align-items: flex-end; height: 100%; }
+  .hero-text h1 { color: white; font-size: 20px; font-weight: 500; line-height: 1.3; }
+  .hero-text p { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 4px; }
+  .hero-badge { margin-left: auto; background: rgba(255,255,255,0.15); border: 0.5px solid rgba(255,255,255,0.3); color: white; font-size: 11px; padding: 6px 14px; border-radius: 4px; text-align: center; }
+  .hero-badge-num { font-size: 20px; font-weight: 500; display: block; }
+
+  .layout { display: flex; flex: 1; }
+
+  .sidebar { width: 200px; background: #2c2c2a; flex-shrink: 0; }
+  .sidebar-logo { padding: 1.25rem 1rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .sidebar-city { color: white; font-size: 13px; font-weight: 500; }
+  .sidebar-sub { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 2px; }
+  .sidebar-section { padding: 0.75rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
+  .sidebar-section-title { color: rgba(255,255,255,0.35); font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 1rem 0.5rem; }
+  .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 7px 1rem; color: rgba(255,255,255,0.65); font-size: 12px; cursor: pointer; border-left: 2px solid transparent; text-decoration: none; }
+  .sidebar-item:hover { background: rgba(255,255,255,0.06); color: white; }
+  .sidebar-item.active { background: rgba(24,95,165,0.25); color: white; border-left-color: #378ADD; }
+  .sidebar-badge { margin-left: auto; background: #185FA5; color: white; font-size: 9px; padding: 1px 6px; border-radius: 8px; }
+  .sidebar-badge.orange { background: #BA7517; }
+  .sidebar-badge.green { background: #3B6D11; }
+
+  .main { flex: 1; padding: 1.5rem; min-width: 0; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .stat { background: white; border-radius: 6px; border: 0.5px solid #e0ddd6; padding: 0.875rem 1rem; }
+  .stat-num { font-size: 22px; font-weight: 500; color: #1a1a1a; }
+  .stat-lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  .stat-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+
+  .content-grid { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 1.25rem; }
+  .panel { background: white; border-radius: 6px; border: 0.5px solid #e0ddd6; overflow: hidden; margin-bottom: 1.25rem; }
+  .panel-head { padding: 0.875rem 1rem; border-bottom: 0.5px solid #e0ddd6; display: flex; align-items: center; gap: 8px; }
+  .panel-accent { width: 3px; height: 14px; border-radius: 2px; background: #185FA5; }
+  .panel-title { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+  .panel-body { padding: 1rem; }
+
+  .form-lbl { font-size: 11px; color: #666; margin-bottom: 5px; display: block; }
+  .req { color: #E24B4A; }
+  .form-grp { margin-bottom: 0.875rem; }
+  input[type="text"], textarea, select { width: 100%; font-size: 13px; padding: 7px 10px; border: 0.5px solid #d0cdc6; border-radius: 6px; background: white; color: #1a1a1a; }
+  textarea { height: 70px; resize: none; }
+  input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: #378ADD; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .cat { background: #f4f4f0; border: 0.5px solid #e0ddd6; border-radius: 6px; padding: 8px 6px; cursor: pointer; text-align: center; transition: all 0.12s; }
+  .cat:hover { border-color: #378ADD; }
+  .cat.on { background: #E6F1FB; border-color: #378ADD; }
+  .cat-ic { font-size: 16px; display: block; margin-bottom: 3px; }
+  .cat-nm { font-size: 10px; color: #666; }
+  .cat.on .cat-nm { color: #185FA5; }
+
+  .map-ph { background: #f4f4f0; border: 0.5px dashed #c0bdb6; border-radius: 6px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; margin-bottom: 0.875rem; }
+  .map-ph.selected { background: #E6F1FB; border-color: #378ADD; }
+  .map-ph-txt { font-size: 11px; color: #999; }
+
+  .photo-ph { background: #f4f4f0; border: 0.5px dashed #c0bdb6; border-radius: 6px; padding: 12px; text-align: center; cursor: pointer; margin-bottom: 0.875rem; }
+  .photo-ph-txt { font-size: 11px; color: #999; margin-top: 4px; }
+
+  .submit-btn { width: 100%; background: #185FA5; color: white; border: none; border-radius: 6px; padding: 9px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .submit-btn:hover { background: #0C447C; }
+
+  #map { height: 300px; border-radius: 6px; margin-bottom: 0.875rem; }
+
+  .legend-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0.875rem; }
+  .leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666; }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .rec-list { display: flex; flex-direction: column; gap: 6px; }
+  .rec { display: flex; align-items: flex-start; gap: 8px; padding: 8px; background: #fafaf8; border-radius: 6px; border: 0.5px solid #e8e5de; }
+  .rec-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+  .rec-title { font-size: 12px; font-weight: 500; color: #1a1a1a; }
+  .rec-meta { font-size: 10px; color: #999; margin-top: 2px; }
+  .rec-status { margin-left: auto; font-size: 9px; padding: 2px 7px; border-radius: 8px; flex-shrink: 0; white-space: nowrap; }
+  .s-wait { background: #FAEEDA; color: #854F0B; }
+  .s-prog { background: #E6F1FB; color: #185FA5; }
+  .s-done { background: #EAF3DE; color: #3B6D11; }
+
+  .notice { padding: 8px 0; border-bottom: 0.5px solid #e8e5de; }
+  .notice:last-child { border-bottom: none; }
+  .notice-title { font-size: 12px; color: #185FA5; font-weight: 500; }
+  .notice-meta { font-size: 10px; color: #999; margin-top: 2px; }
 </style>
 </head>
-
 <body>
+<div class="app">
 
-<h2>📢 Signaler un problème</h2>
+  <!-- TOP NAV -->
+  <div class="topnav">
+    <div class="topnav-brand">
+      <div class="topnav-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+      Municipalité de Kélibia
+    </div>
+    <div class="topnav-right">
+      <button class="topnav-btn active">FR</button>
+      <button class="topnav-btn">AR</button>
+      <input class="topnav-search" placeholder="Rechercher...">
+    </div>
+  </div>
 
-<form id="complaintForm">
-    <input type="text" id="title" placeholder="Titre du problème" required>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Bienvenue sur le portail citoyen<br>de Kélibia Smart City</h1>
+        <p>Signalez un problème, suivez vos demandes, accédez aux services municipaux</p>
+      </div>
+      <div class="hero-badge">
+        <span class="hero-badge-num" id="totalCount">0</span>
+        signalements ce mois
+      </div>
+    </div>
+  </div>
 
-    <!-- Sélecteur de catégorie (choix du citoyen) -->
-    <select id="category" required>
-        <option value="">-- Choisir une catégorie --</option>
-        <option value="voirie">🚧 Voirie</option>
-        <option value="eclairage">💡 Éclairage public</option>
-        <option value="dechets">🗑️ Déchets et propreté</option>
-        <option value="eau">💧 Eau et assainissement</option>
-        <option value="espaces_verts">🌳 Espaces verts</option>
-        <option value="batiments">🏛️ Bâtiments publics</option>
-        <option value="autre">📌 Autre</option>
-    </select>
+  <div class="layout">
 
-    <textarea id="description" placeholder="Décrivez le problème en détail..." required></textarea>
-    <input type="file" id="photo" accept="image/*">
-    <button type="submit">📤 Envoyer le signalement</button>
-</form>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-city">Kélibia Smart City</div>
+        <div class="sidebar-sub">Portail citoyen numérique</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Signalement</div>
+        <a href="/signalement/" class="sidebar-item active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          Carte & signalements
+          <span class="sidebar-badge" id="enCoursCount">0</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Mes réclamations
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Services municipaux</div>
+        <a href="#" class="sidebar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Services
+        </a>
+        <a href="#" class="sidebar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          Actualités
+          <span class="sidebar-badge green">3</span>
+        </a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Compte</div>
+        <a href="/frontend/login.html" class="sidebar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Connexion
+        </a>
+        <a href="/frontend/signup.html" class="sidebar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Inscription
+        </a>
+      </div>
+    </div>
 
-<h2>🗺️ Carte des signalements</h2>
-<div id="map"></div>
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-lbl"><span class="stat-dot" style="background:#378ADD"></span>Total signalements</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="statEnCours">0</div>
+          <div class="stat-lbl"><span class="stat-dot" style="background:#EF9F27"></span>En cours</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="statResolus">0</div>
+          <div class="stat-lbl"><span class="stat-dot" style="background:#639922"></span>Résolus</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="statDoublons">0</div>
+          <div class="stat-lbl"><span class="stat-dot" style="background:#E24B4A"></span>Doublons détectés</div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div>
+          <!-- FORM -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-accent"></div>
+              <span class="panel-title">Nouveau signalement</span>
+            </div>
+            <div class="panel-body">
+              <form id="complaintForm">
+                <div class="form-grp">
+                  <label class="form-lbl">Catégorie <span class="req">*</span></label>
+                  <div class="cat-grid">
+                    <div class="cat on" data-value="voirie" onclick="pickCat(this)"><span class="cat-ic">🚧</span><span class="cat-nm">Voirie</span></div>
+                    <div class="cat" data-value="eclairage" onclick="pickCat(this)"><span class="cat-ic">💡</span><span class="cat-nm">Éclairage</span></div>
+                    <div class="cat" data-value="dechets" onclick="pickCat(this)"><span class="cat-ic">🗑</span><span class="cat-nm">Déchets</span></div>
+                    <div class="cat" data-value="eau" onclick="pickCat(this)"><span class="cat-ic">💧</span><span class="cat-nm">Eau</span></div>
+                    <div class="cat" data-value="espaces_verts" onclick="pickCat(this)"><span class="cat-ic">🌳</span><span class="cat-nm">Espaces verts</span></div>
+                    <div class="cat" data-value="batiments" onclick="pickCat(this)"><span class="cat-ic">🏛</span><span class="cat-nm">Bâtiments</span></div>
+                  </div>
+                </div>
+                <div class="form-grp">
+                  <label class="form-lbl">Titre <span class="req">*</span></label>
+                  <input type="text" id="title" placeholder="Ex: Nid-de-poule rue principale" required>
+                </div>
+                <div class="form-grp">
+                  <label class="form-lbl">Description <span class="req">*</span></label>
+                  <textarea id="description" placeholder="Décrivez le problème en détail..." required></textarea>
+                </div>
+                <div class="form-grp">
+                  <label class="form-lbl">Position sur la carte <span class="req">*</span></label>
+                  <div class="map-ph" id="mapPlaceholder">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                    <span class="map-ph-txt" id="mapPlaceholderTxt">Cliquez sur la carte pour positionner</span>
+                  </div>
+                </div>
+                <div class="form-grp">
+                  <label class="form-lbl">Photo (optionnelle)</label>
+                  <div class="photo-ph" onclick="document.getElementById('photo').click()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                    <div class="photo-ph-txt" id="photoTxt">Ajouter une photo (optionnel)</div>
+                  </div>
+                  <input type="file" id="photo" accept="image/*" style="display:none" onchange="updatePhotoLabel(this)">
+                </div>
+                <button type="submit" class="submit-btn">Envoyer le signalement</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- MAP -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-accent"></div>
+              <span class="panel-title">Carte des signalements — Kélibia</span>
+            </div>
+            <div class="panel-body">
+              <div class="legend-row">
+                <div class="leg"><div class="leg-dot" style="background:#378ADD"></div>Voirie</div>
+                <div class="leg"><div class="leg-dot" style="background:#EF9F27"></div>Éclairage</div>
+                <div class="leg"><div class="leg-dot" style="background:#639922"></div>Déchets</div>
+                <div class="leg"><div class="leg-dot" style="background:#1D9E75"></div>Eau</div>
+                <div class="leg"><div class="leg-dot" style="background:#D85A30"></div>Espaces verts</div>
+                <div class="leg"><div class="leg-dot" style="background:#7F77DD"></div>Bâtiments</div>
+              </div>
+              <div id="map"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+          <!-- RECENT -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-accent" style="background:#EF9F27"></div>
+              <span class="panel-title">Signalements récents</span>
+            </div>
+            <div class="panel-body">
+              <div class="rec-list" id="recentList">
+                <div style="font-size:12px;color:#999;text-align:center;padding:1rem">Chargement...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NEWS -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-accent" style="background:#639922"></div>
+              <span class="panel-title">Actualités municipales</span>
+            </div>
+            <div class="panel-body">
+              <div class="notice"><div class="notice-title">Réunion du conseil municipal</div><div class="notice-meta">12 Mars 2026 · Gouvernance</div></div>
+              <div class="notice"><div class="notice-title">Travaux avenue principale</div><div class="notice-meta">10 Mars 2026 · Voirie</div></div>
+              <div class="notice"><div class="notice-title">Collecte déchets encombrants</div><div class="notice-meta">8 Mars 2026 · Services</div></div>
+            </div>
+          </div>
+
+          <!-- QUICK ACCESS -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-accent" style="background:#7F77DD"></div>
+              <span class="panel-title">Accès rapide</span>
+            </div>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
+              <button style="width:100%;background:#f4f4f0;border:0.5px solid #e0ddd6;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;text-align:left;color:#1a1a1a">Demande de permis de bâtir</button>
+              <button style="width:100%;background:#f4f4f0;border:0.5px solid #e0ddd6;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;text-align:left;color:#1a1a1a">Légalisation de documents</button>
+              <button style="width:100%;background:#f4f4f0;border:0.5px solid #e0ddd6;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;text-align:left;color:#1a1a1a">Calculateur de taxes</button>
+              <button style="width:100%;background:#185FA5;border:none;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;text-align:left;color:white;font-weight:500">Se connecter / S'inscrire</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ================= MAP INITIALIZATION ================= */
-const map = L.map('map').setView([36.847, 11.093], 13);
+const API_LIST = "http://127.0.0.1:8000/api/signalement/list/";
+const API_ADD  = "http://127.0.0.1:8000/api/signalement/add/";
 
+const COLORS = {
+  'Voirie': '#378ADD', 'Éclairage public': '#EF9F27',
+  'Déchets et propreté': '#639922', 'Eau et assainissement': '#1D9E75',
+  'Espaces verts': '#D85A30', 'Bâtiments publics': '#7F77DD', 'Autre': '#888'
+};
+
+const map = L.map('map').setView([36.847, 11.093], 14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+  attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
 let selectedLatLng = null;
 let tempMarker = null;
+let selectedCategory = 'voirie';
 
-/* ================= MAP CLICK ================= */
-map.on('click', function (e) {
-    selectedLatLng = e.latlng;
-    if (tempMarker) { map.removeLayer(tempMarker); }
-    tempMarker = L.marker(e.latlng)
-        .addTo(map)
-        .bindPopup("📍 Position du signalement")
-        .openPopup();
+map.on('click', function(e) {
+  selectedLatLng = e.latlng;
+  if (tempMarker) map.removeLayer(tempMarker);
+  tempMarker = L.marker(e.latlng).addTo(map).bindPopup("📍 Position sélectionnée").openPopup();
+  document.getElementById('mapPlaceholder').classList.add('selected');
+  document.getElementById('mapPlaceholderTxt').textContent = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
 });
 
-/* ================= BACKEND URLS ================= */
-const API_LIST_URL = "http://127.0.0.1:8000/api/signalement/list/";
-const API_ADD_URL  = "http://127.0.0.1:8000/api/signalement/add/";
-
-/* ================= COULEURS PAR CATÉGORIE ================= */
-function getColor(category) {
-    const colors = {
-        'Voirie': 'red',
-        'Éclairage public': 'orange',
-        'Déchets et propreté': 'green',
-        'Eau et assainissement': 'blue',
-        'Espaces verts': 'darkgreen',
-        'Bâtiments publics': 'purple',
-        'Autre': 'gray'
-    };
-    return colors[category] || 'gray';
+function pickCat(el) {
+  document.querySelectorAll('.cat').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  selectedCategory = el.dataset.value;
 }
 
-/* ================= LOAD EXISTING COMPLAINTS ================= */
-fetch(API_LIST_URL)
-.then(res => res.json())
-.then(data => {
+function updatePhotoLabel(input) {
+  if (input.files[0]) {
+    document.getElementById('photoTxt').textContent = input.files[0].name;
+  }
+}
+
+function getStatusClass(status) {
+  if (status.includes('cours')) return 's-prog';
+  if (status.includes('solu') || status.includes('Résolu')) return 's-done';
+  return 's-wait';
+}
+
+function loadComplaints() {
+  fetch(API_LIST)
+  .then(r => r.json())
+  .then(data => {
+    let total = data.length;
+    let enCours = data.filter(c => c.status.includes('cours')).length;
+    let resolus = data.filter(c => c.status.includes('solu')).length;
+    let doublons = data.filter(c => c.is_duplicate).length;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statEnCours').textContent = enCours;
+    document.getElementById('statResolus').textContent = resolus;
+    document.getElementById('statDoublons').textContent = doublons;
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('enCoursCount').textContent = enCours;
+
+    const recList = document.getElementById('recentList');
+    recList.innerHTML = '';
+
+    data.slice(0, 6).forEach(c => {
+      const color = COLORS[c.category] || '#888';
+      const statusClass = getStatusClass(c.status);
+      recList.innerHTML += `
+        <div class="rec">
+          <div class="rec-dot" style="background:${color}"></div>
+          <div style="flex:1;min-width:0">
+            <div class="rec-title">${c.title}</div>
+            <div class="rec-meta">${c.category}</div>
+          </div>
+          <div class="rec-status ${statusClass}">${c.status}</div>
+        </div>`;
+    });
+
     data.forEach(c => {
-        const color = getColor(c.category);
-        const icon = L.divIcon({
-            className: '',
-            html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`
-        });
-        L.marker([c.latitude, c.longitude], { icon })
-            .addTo(map)
-            .bindPopup(`
-                <b>${c.title}</b><br>
-                📂 ${c.category}<br>
-                🔄 ${c.status}<br>
-                ⚡ Priorité : ${c.priority}
-                ${c.is_duplicate ? '<br><span style="color:orange">⚠️ Doublon détecté</span>' : ''}
-            `);
+      const color = COLORS[c.category] || '#888';
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`
+      });
+      L.marker([c.latitude, c.longitude], { icon })
+        .addTo(map)
+        .bindPopup(`<b>${c.title}</b><br>📂 ${c.category}<br>🔄 ${c.status}<br>⚡ ${c.priority}${c.is_duplicate ? '<br><span style="color:orange">⚠️ Doublon</span>' : ''}`);
     });
-})
-.catch(err => console.error("Erreur chargement signalements:", err));
+  })
+  .catch(err => console.error('Erreur:', err));
+}
 
-/* ================= FORM SUBMIT ================= */
-document.getElementById("complaintForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+document.getElementById('complaintForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!selectedLatLng) { alert('📍 Cliquez sur la carte pour choisir une position.'); return; }
 
-    if (!selectedLatLng) {
-        alert("📍 Veuillez cliquer sur la carte pour choisir une position.");
-        return;
-    }
+  const formData = new FormData();
+  formData.append('title', document.getElementById('title').value);
+  formData.append('description', document.getElementById('description').value);
+  formData.append('category', selectedCategory);
+  formData.append('latitude', selectedLatLng.lat);
+  formData.append('longitude', selectedLatLng.lng);
+  const photo = document.getElementById('photo').files[0];
+  if (photo) formData.append('photo', photo);
 
-    const category = document.getElementById("category").value;
-    if (!category) {
-        alert("📂 Veuillez choisir une catégorie.");
-        return;
-    }
+  fetch(API_ADD, { method: 'POST', body: formData })
+  .then(r => { if (!r.ok) return r.text().then(t => { throw new Error(t); }); return r.json(); })
+  .then(data => {
+    let msg = `✅ Signalement envoyé !\n📂 ${data.category}\n⚡ Priorité : ${data.priority}`;
+    if (data.is_duplicate) msg += '\n⚠️ Un signalement similaire existe déjà dans cette zone !';
+    alert(msg);
 
-    const formData = new FormData();
-    formData.append("title", document.getElementById("title").value);
-    formData.append("description", document.getElementById("description").value);
-    formData.append("category", category);
-    formData.append("latitude", selectedLatLng.lat);
-    formData.append("longitude", selectedLatLng.lng);
-
-    const photoFile = document.getElementById("photo").files[0];
-    if (photoFile) { formData.append("photo", photoFile); }
-
-    fetch(API_ADD_URL, { method: "POST", body: formData })
-    .then(res => {
-        if (!res.ok) { return res.text().then(text => { throw new Error(text); }); }
-        return res.json();
-    })
-    .then(data => {
-        let message = `✅ Signalement envoyé !\n📂 Catégorie : ${data.category}\n⚡ Priorité : ${data.priority}`;
-        if (data.is_duplicate) {
-            message += `\n⚠️ Attention : un signalement similaire existe déjà dans cette zone !`;
-        }
-        alert(message);
-
-        const color = getColor(data.category);
-        const icon = L.divIcon({
-            className: '',
-            html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>`
-        });
-
-        L.marker([data.latitude, data.longitude], { icon })
-            .addTo(map)
-            .bindPopup(`
-                <b>${data.title}</b><br>
-                📂 ${data.category}<br>
-                🔄 ${data.status}<br>
-                ⚡ Priorité : ${data.priority}
-                ${data.is_duplicate ? '<br><span style="color:orange">⚠️ Doublon détecté</span>' : ''}
-            `)
-            .openPopup();
-
-        if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-        document.getElementById("complaintForm").reset();
-        selectedLatLng = null;
-        map.setView([36.847, 11.093], 13);
-    })
-    .catch(err => {
-        console.error("Erreur backend:", err);
-        alert("❌ Erreur lors de l'envoi. Vérifiez la console.");
+    const color = COLORS[data.category] || '#888';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`
     });
+    L.marker([data.latitude, data.longitude], { icon })
+      .addTo(map)
+      .bindPopup(`<b>${data.title}</b><br>📂 ${data.category}<br>🔄 ${data.status}<br>⚡ ${data.priority}`)
+      .openPopup();
+
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+    document.getElementById('complaintForm').reset();
+    document.querySelectorAll('.cat').forEach(c => c.classList.remove('on'));
+    document.querySelector('.cat[data-value="voirie"]').classList.add('on');
+    selectedCategory = 'voirie';
+    selectedLatLng = null;
+    document.getElementById('mapPlaceholder').classList.remove('selected');
+    document.getElementById('mapPlaceholderTxt').textContent = 'Cliquez sur la carte pour positionner';
+    document.getElementById('photoTxt').textContent = 'Ajouter une photo (optionnel)';
+    map.setView([36.847, 11.093], 14);
+    loadComplaints();
+  })
+  .catch(err => { console.error(err); alert('❌ Erreur lors de l\'envoi.'); });
 });
-</script>
 
+loadComplaints();
+</script>
 </body>
 </html>

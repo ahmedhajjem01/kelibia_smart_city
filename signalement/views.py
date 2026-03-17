@@ -2,13 +2,31 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
-import json
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .models import Complaint
+from .classifier import classify
+
+User = get_user_model()
+
+def get_user_from_token(request):
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        token_str = auth_header.split(' ')[1]
+        try:
+            token = AccessToken(token_str)
+            user_id = token['user_id']
+            return User.objects.get(id=user_id)
+        except Exception:
+            return None
+    return None
 
 def index(request):
     return render(request, "signalement/index.html")
+
+def dashboard(request):
+    return render(request, "signalement/dashboard.html")
 
 @csrf_exempt
 def add_complaint(request):
@@ -21,15 +39,14 @@ def add_complaint(request):
             longitude = float(request.POST.get("longitude"))
             photo = request.FILES.get("photo")
 
-            # Créer le point géospatial
             location = Point(longitude, latitude, srid=4326)
 
-            # Détecter les doublons (même catégorie dans un rayon de 100m)
-            nearby = Complaint.objects.filter(
-                category=category,
-                location__distance_lte=(location, D(m=100))
-            )
-            is_duplicate = nearby.exists()
+            classification = classify(description, location=location, category=category)
+            priority = classification["priority"]
+            is_duplicate = classification["is_duplicate"]
+
+            # Récupérer le citoyen connecté si token présent
+            citizen = get_user_from_token(request)
 
             complaint = Complaint.objects.create(
                 title=title,
@@ -37,7 +54,9 @@ def add_complaint(request):
                 category=category,
                 location=location,
                 photo=photo,
+                priority=priority,
                 is_duplicate=is_duplicate,
+                citizen=citizen,
             )
 
             return JsonResponse({
@@ -53,9 +72,21 @@ def add_complaint(request):
             })
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Méthode non autorisée"}, status=405)
 
 def get_complaints(request):
-    complaints = Complaint.objects.all().order_by("-created_at")
+    token_user = get_user_from_token(request)
+    
+    if token_user and token_user.user_type == 'agent':
+        # Agent voit tout
+        complaints = Complaint.objects.all().order_by("-created_at")
+    elif token_user:
+        # Citoyen voit uniquement ses réclamations
+        complaints = Complaint.objects.filter(citizen=token_user).order_by("-created_at")
+    else:
+        # Non connecté — liste vide
+        complaints = Complaint.objects.none()
+
     data = []
     for c in complaints:
         data.append({
