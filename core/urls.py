@@ -3,9 +3,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from accounts.views import MyTokenObtainPairView, admin_logout
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
+from core.views import login_page
 
 urlpatterns = [
     path('admin/logout/', admin_logout, name='admin_logout'),
@@ -20,6 +19,10 @@ urlpatterns = [
     path('api/news/', include('news.urls')),
     path('extrait-naissance/', include('extrait_naissance.urls')),
     path('extrait-mariage/', include('extrait_mariage.urls')),
+    path('api/signalement/', include('signalement.urls')),
+    path('signalement/', include('signalement.urls')),
+    path('dashboard/', include('signalement.urls')),
+    path('', login_page, name='login'),
 ]
 
 if settings.DEBUG:

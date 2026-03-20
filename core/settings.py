@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,7 +46,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     "rest_framework",
+    "rest_framework_gis",
     "djoser",
     "corsheaders",
     "rest_framework_simplejwt",
@@ -55,6 +58,7 @@ INSTALLED_APPS = [
     "news",
     "extrait_naissance",
     "extrait_mariage",
+    "signalement",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -95,10 +99,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": "kelibia_db",
         "USER": "postgres",
-        "PASSWORD": "admin",
+        "PASSWORD": "root",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -215,4 +219,11 @@ DJOSER = {
         "current_user": "djoser.serializers.UserSerializer",
     },
 }
+# SMS Gateway Settings (Infobip)
+INFOBIP_API_KEY = "0ce4d479dec99c06f33a7608810325ab-58189c6b-6b0d-465d-b075-bf6872610c01"
+INFOBIP_BASE_URL = "pdp1m3.api.infobip.com"
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+GDAL_LIBRARY_PATH = r'C:\Users\MSI\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll'
+GEOS_LIBRARY_PATH = r'C:\Users\MSI\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll'
