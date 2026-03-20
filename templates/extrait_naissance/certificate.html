@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مضمون ولادة - {{ extrait.titulaire.prenom_ar }} {{ extrait.titulaire.nom_ar }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #e6e9ee;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            width: 210mm;
+            height: 295mm; overflow: hidden;
+            background: #ffffff;
+            padding: 15px;
+            box-sizing: border-box;
+            border: 5px solid #6ab0de;
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1.5px solid #6ab0de;
+            pointer-events: none;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .header-left {
+            width: 30%;
+            text-align: right;
+            position: relative;
+        }
+        .header-left .top-text {
+            font-weight: bold;
+            color: #6ab0de;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .info-box {
+            border: 2px solid #6ab0de;
+            border-radius: 12px;
+            padding: 6px;
+            font-size: 0.85em;
+            color: #6ab0de;
+            background-color: #fbfcff;
+        }
+        .info-box div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            border-bottom: 1px dotted #a8d0ed;
+            padding-bottom: 3px;
+        }
+        .info-box div:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .info-box span.label-text {
+            width: 80px;
+        }
+        .info-box span.value { 
+            color: #2c3e50; 
+            font-weight: bold; 
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-center {
+            width: 40%;
+            text-align: center;
+            color: #6ab0de;
+        }
+        .header-center .logo {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 5px;
+        }
+        .header-center h1 {
+            font-size: 28px;
+            margin: 0;
+            line-height: 1.3;
+            letter-spacing: 0.5px;
+        }
+        .header-center h1 span {
+            border-bottom: 2px solid #6ab0de;
+            padding-bottom: 2px;
+        }
+        .header-center h2 {
+            font-size: 26px;
+            margin: 15px 0 0 0;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            width: 30%;
+            text-align: right;
+            color: #6ab0de;
+            font-size: 1.05em;
+        }
+        .header-right .republic {
+            text-align: center;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #6ab0de;
+            display: inline-block;
+            padding-bottom: 3px;
+            width: 100%;
+        }
+        .header-right div {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .header-right div strong {
+            color: #2c3e50;
+            margin-right: 10px;
+            font-weight: normal;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+            border: 2px solid #6ab0de;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+
+        .row {
+            flex: 1;
+            display: flex;
+            border-bottom: 2px solid #6ab0de;
+        }
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            width: 25%;
+            color: #6ab0de;
+            padding: 6px 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            border-left: 2px solid #6ab0de;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .value {
+            width: 75%;
+            padding: 6px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 1.25em;
+            color: #1a252f;
+            font-weight: 700;
+        }
+
+        .value .sub-text {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            font-weight: normal;
+            margin-top: 6px;
+        }
+
+        .footer-boxes {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .footer-box {
+            border: 2px solid #6ab0de;
+            border-radius: 10px;
+            padding: 6px 15px;
+            color: #6ab0de;
+        }
+        .observations {
+            width: 60%;
+            min-height: 70px;
+        }
+        .observations .title { 
+            font-weight: bold; 
+            font-size: 1.2em;
+            margin-bottom: 8px; 
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .observations .obs-content {
+            color: #2c3e50;
+            font-size: 1.1em;
+            text-align: right;
+        }
+        
+        .price-box {
+            width: 38%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+        .price-row span.val { 
+            color: #2c3e50; 
+            font-weight: bold; 
+            font-size: 1.2em;
+        }
+        
+        .qr-code-container {
+            position: absolute;
+            bottom: 100px;
+            left: 30px;
+            text-align: center;
+        }
+        .qr-code-container img {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #6ab0de;
+            padding: 5px;
+            background: white;
+        }
+        .qr-code-container .qr-text {
+            font-size: 0.7em;
+            color: #6ab0de;
+            margin-top: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+        @media print {
+            @page { size: A4; margin: 0; }
+            body { padding: 0; margin: 0; }
+            .page { transform: scale(0.98); transform-origin: top left; }
+            body { background-color: white; padding: 0; }
+            .page { 
+                box-shadow: none; 
+                margin: 0; 
+                border: 5px solid #6ab0de; 
+                border-radius: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-btn { display: none !important; }
+        }
+        .print-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            font-family: 'Amiri', serif;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .print-btn:hover {
+            background-color: #1a252f;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+    طباعة المضمون
+</button>
+
+<div class="page">
+    <div class="header">
+        <div class="header-left">
+            <div class="top-text">رقم الحالة المدنية</div>
+            <div class="info-box">
+                <div style="justify-content: space-between;">
+                    <span class="label-text" style="color: #6ab0de; white-space: nowrap; width: auto;">{{ extrait.arrondissement_gauche }} / .....</span>
+                    <span class="value" style="text-align: left; padding: 0;">{{ extrait.titulaire.n_etat_civil|default:"-" }}</span>
+                </div>
+                <div><span class="label-text">ســـنة</span> <span class="value">{{ extrait.annee_acte }}</span></div>
+                <div><span class="label-text">عدد الرسم</span> <span class="value">{{ extrait.numero_registre }}</span></div>
+                <div style="border: none; margin-bottom: 0; padding-bottom: 0;">
+                    <span class="label-text" style="width:50px;">تصريح</span> <span class="value" style="text-align: right;">{% if extrait.declaration %}✔{% else %}&nbsp;{% endif %}</span>
+                    <span class="label-text" style="width:40px;">حكم</span> <span class="value" style="text-align: right;">{% if extrait.jugement %}✔{% else %}&nbsp;{% endif %}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <img src="/media/logo_tunisie.png" class="logo" alt="الجمهورية التونسية" style="width: 70px; height: 75px; object-fit: contain; margin-bottom: 5px;">
+            <h1>مضمون<br><span>من دفاتر الحالة المدنية</span></h1>
+            <h2>الـولادات</h2>
+        </div>
+
+        <div class="header-right">
+            <div class="republic">الجمهورية التونسية</div>
+            <div>ولاية : <strong>{{ extrait.gouvernorat_ar }}</strong></div>
+            <div>معتمدية : <strong>{{ extrait.delegation_ar }}</strong></div>
+            <div>بلدية : <strong>{{ extrait.commune_ar }}</strong></div>
+            <div>الدائرة البلدية : <strong>{{ extrait.arrondissement_municipal_ar|default:"-" }}</strong></div>
+            <div>عمادة : <strong>{{ extrait.imada_ar }}</strong></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="row">
+            <div class="label">الإسم<br>اللقب</div>
+            <div class="value">
+                <div>{{ extrait.titulaire.prenom_ar }}</div>
+                <div>{{ extrait.titulaire.nom_ar }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">تاريخ الولادة<br><span style="font-size: 0.75em; font-weight: normal; margin-top: 5px;">اليوم - الشهر والسنة<br>(بلسان القلم)</span></div>
+            <div class="value">
+                <div>{{ extrait.titulaire.date_naissance|date:"Y-m-d" }}</div>
+                <div class="sub-text">{{ extrait.titulaire.date_naissance_lettres_ar }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">مكان الولادة</div>
+            <div class="value">{{ extrait.titulaire.lieu_naissance_ar }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">جنس المولود<br><span style="font-size: 0.8em; font-weight: normal;">(ذكر أو أنثى)</span></div>
+            <div class="value">{% if extrait.titulaire.sexe == 'M' %}ذكر{% else %}أنثى{% endif %}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">إسم الأب ولقبه<br>وحرفته وجنسيته</div>
+            <div class="value" style="font-weight: normal;">
+                {{ extrait.titulaire.pere.prenom_ar }} {{ extrait.titulaire.pere.nom_ar }}، {{ extrait.titulaire.pere.profession_ar|default:"-" }}، {{ extrait.titulaire.pere.nationalite_ar|default:"-" }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">إسم الأم ولقبها<br>وحرفتها وجنسيتها</div>
+            <div class="value" style="font-weight: normal;">
+                {{ extrait.titulaire.mere.prenom_ar }} {{ extrait.titulaire.mere.nom_ar }}، {{ extrait.titulaire.mere.profession_ar|default:"-" }}، {{ extrait.titulaire.mere.nationalite_ar|default:"-" }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">تاريخ الإعـلام<br><span style="font-size: 0.75em; font-weight: normal; margin-top: 5px;">السنة-الشهر واليوم والساعة</span></div>
+            <div class="value">{{ extrait.date_declaration|date:"Y - m - d • H:i" }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">إسم من قام بالإعلام ولقبه<br>وحرفته أو المحكمة</div>
+            <div class="value" style="font-weight: normal;">{{ extrait.declarant_ar }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">إسم ضابط الحالة المدنية<br>وصفته</div>
+            <div class="value" style="font-weight: normal;">{{ extrait.officer_etat_civil_ar }}</div>
+        </div>
+    </div>
+
+    <div class="footer-boxes">
+        <div class="footer-box observations">
+            <div class="title">المـلاحظـــــــــــــــات</div>
+            <div class="obs-content">{{ extrait.observations_ar|default:"لا شيء" }}</div>
+        </div>
+        
+        <div class="footer-box price-box">
+            <div class="price-row">
+                <span>العدد الرتبي :</span>
+                <span class="val">{{ extrait.numero_ordre|default:"-" }}</span>
+            </div>
+            <div class="price-row" >
+                <span>الثمن :</span>
+                <span class="val">{{ extrait.prix }} ד.ت</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="qr-code-container">
+        <img src="data:image/png;base64,{{ extrait.get_qr_code }}" alt="QR Code Verification">
+        <div class="qr-text">VÉRIFICATION NUMÉRIQUE<br>{{ extrait.uuid|truncatechars:15 }}</div>
+    </div>
+</div>
+
+</body>
+</html>

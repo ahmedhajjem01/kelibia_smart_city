@@ -115,7 +115,7 @@
                         <i class="fas fa-download me-2"></i><span data-i18n="download_form">Télécharger le
                             formulaire</span>
                     </a>
-                    <button type="button" class="btn btn-primary disabled"><i class="fas fa-paper-plane me-2"></i><span
+                    <button type="button" id="modalRequestBtn" class="btn btn-primary disabled"><i class="fas fa-paper-plane me-2"></i><span
                             data-i18n="request_online">Demander en ligne (Bientôt)</span></button>
                 </div>
             </div>
@@ -249,6 +249,40 @@
                 downloadBtn.classList.remove('d-none');
             } else {
                 downloadBtn.classList.add('d-none');
+            }
+
+            const requestBtn = document.getElementById('modalRequestBtn');
+            const requestSpan = requestBtn.querySelector('span');
+            const requestIcon = requestBtn.querySelector('i');
+
+            if (service.name_fr === "Extrait de Naissance" || service.name_ar === "مضمون ولادة") {
+                requestBtn.classList.remove('disabled');
+                requestBtn.classList.remove('btn-primary');
+                requestBtn.classList.add('btn-success');
+                requestIcon.className = 'fas fa-bolt me-2';
+                requestSpan.setAttribute('data-i18n', 'extract_now');
+                requestSpan.textContent = lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡';
+                requestBtn.onclick = () => {
+                    window.location.href = 'mes-extraits.html';
+                };
+            } else if (service.name_fr === "Extrait de Mariage" || service.name_ar === "مضمون من رسم زواج") {
+                requestBtn.classList.remove('disabled');
+                requestBtn.classList.remove('btn-primary');
+                requestBtn.classList.add('btn-success');
+                requestIcon.className = 'fas fa-bolt me-2';
+                requestSpan.setAttribute('data-i18n', 'extract_now');
+                requestSpan.textContent = lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡';
+                requestBtn.onclick = () => {
+                    window.location.href = 'mes-mariages.html';
+                };
+            } else {
+                requestBtn.classList.add('disabled');
+                requestBtn.classList.remove('btn-success');
+                requestBtn.classList.add('btn-primary');
+                requestIcon.className = 'fas fa-paper-plane me-2';
+                requestSpan.setAttribute('data-i18n', 'request_online');
+                requestSpan.textContent = lang === 'ar' ? 'طلب عن بعد (قريبا)' : 'Demander en ligne (Bientôt)';
+                requestBtn.onclick = null;
             }
 
             serviceModal.show();

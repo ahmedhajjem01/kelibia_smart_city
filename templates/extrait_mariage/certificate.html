@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مضمون زواج - {{ extrait.epoux.prenom_ar }} & {{ extrait.epouse.prenom_ar }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #e6e9ee;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            width: 210mm;
+            height: 295mm; 
+            overflow: hidden;
+            background: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 5px solid #d4af37; /* Gold-like border for marriage */
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1.5px solid #d4af37;
+            pointer-events: none;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .header-left {
+            width: 30%;
+            text-align: right;
+        }
+        .info-box {
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 8px;
+            font-size: 0.9em;
+            color: #2c3e50;
+            background-color: #fffaf0;
+        }
+        .info-box div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            border-bottom: 1px dotted #e6cc80;
+            padding-bottom: 3px;
+        }
+        .info-box div:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .info-box span.label-text {
+            color: #8a6d3b;
+            font-weight: bold;
+        }
+        .info-box span.value { 
+            font-weight: bold; 
+        }
+
+        .header-center {
+            width: 40%;
+            text-align: center;
+        }
+        .header-center .logo {
+            width: 60px;
+            margin-bottom: 5px;
+        }
+        .header-center h1 {
+            font-size: 24px;
+            margin: 0;
+            color: #8a6d3b;
+            border-bottom: 2px solid #d4af37;
+            display: inline-block;
+            padding-bottom: 2px;
+        }
+        .header-center h2 {
+            font-size: 22px;
+            margin: 10px 0 0 0;
+            color: #2c3e50;
+        }
+
+        .header-right {
+            width: 30%;
+            text-align: right;
+            font-size: 1em;
+            color: #2c3e50;
+        }
+        .republic {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #d4af37;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .section-title {
+            background-color: #fffaf0;
+            color: #8a6d3b;
+            padding: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        .spouse-container {
+            display: flex;
+            flex: 1;
+        }
+        .spouse-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #d4af37;
+        }
+        .spouse-column:last-child {
+            border-left: none;
+        }
+        .spouse-row {
+            padding: 8px 15px;
+            border-bottom: 1px solid #eee;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .spouse-row:last-child {
+            border-bottom: none;
+        }
+        .spouse-label {
+            color: #8a6d3b;
+            font-size: 0.9em;
+            margin-bottom: 2px;
+        }
+        .spouse-value {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .marriage-details {
+            border-top: 2px solid #d4af37;
+            padding: 15px;
+            background-color: #fffaf0;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .detail-label {
+            width: 150px;
+            color: #8a6d3b;
+            font-weight: bold;
+        }
+        .detail-value {
+            flex: 1;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .observations {
+            width: 65%;
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 10px;
+            min-height: 80px;
+        }
+        .signature-box {
+            width: 30%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .qr-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6em;
+            margin-top: 5px;
+        }
+
+        @media print {
+            @page { size: A4; margin: 0; }
+            body { padding: 0; margin: 0; background-color: white; }
+            .page { box-shadow: none; border-radius: 0; transform: scale(0.98); transform-origin: top left; }
+            .print-btn { display: none; }
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #8a6d3b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+            font-family: 'Amiri', serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">طباعة المضمون</button>
+
+<div class="page">
+    <div class="header">
+        <div class="header-right">
+            <div class="republic">الجمهورية التونسية</div>
+            <div>وزارة الداخلية</div>
+            <div>بلدية : <strong>{{ extrait.commune_ar }}</strong></div>
+            <div>ولاية : <strong>{{ extrait.gouvernorat_ar }}</strong></div>
+        </div>
+
+        <div class="header-center">
+            <img src="/media/tunisia log.png" class="logo" alt="الجمهورية التونسية">
+            <h1>مضمون من رسم زواج</h1>
+            <h2>عدد {{ extrait.numero_registre }} لسنة {{ extrait.annee_acte }}</h2>
+        </div>
+
+        <div class="header-left">
+            <div class="info-box">
+                <div><span class="label-text">رقم الرسم:</span> <span class="value">{{ extrait.numero_registre }}</span></div>
+                <div><span class="label-text">السنة:</span> <span class="value">{{ extrait.annee_acte }}</span></div>
+                <div><span class="label-text">العدد الرتبي:</span> <span class="value">{{ extrait.numero_ordre|default:"-" }}</span></div>
+                <div><span class="label-text">الثمن:</span> <span class="value">{{ extrait.prix }} د.ت</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="section-title">بيانات الزوجين</div>
+        <div class="spouse-container">
+            <!-- Husband Section -->
+            <div class="spouse-column">
+                <div style="background: #fdf2d0; text-align: center; font-weight: bold; padding: 5px; border-bottom: 1px solid #d4af37;">الزوج</div>
+                <div class="spouse-row">
+                    <span class="spouse-label">الإسم واللقب</span>
+                    <span class="spouse-value">{{ extrait.epoux.prenom_ar }} {{ extrait.epoux.nom_ar }}</span>
+                </div>
+                <div class="spouse-row">
+                    <span class="spouse-label">تاريخ الولادة</span>
+                    <span class="spouse-value">{{ extrait.epoux.date_naissance|date:"Y-m-d" }}</span>
+                </div>
+                <div class="spouse-row">
+                    <span class="spouse-label">مكان الولادة</span>
+                    <span class="spouse-value">{{ extrait.epoux.lieu_naissance_ar }}</span>
+                </div>
+                <div class="spouse-row">
+                    <span class="spouse-label">إسم الأب والأم</span>
+                    <span class="spouse-value">{{ extrait.epoux.pere.prenom_ar }} و {{ extrait.epoux.mere.prenom_ar }}</span>
+                </div>
+            </div>
+            
+            <!-- Wife Section -->
+            <div class="spouse-column">
+                <div style="background: #fdf2d0; text-align: center; font-weight: bold; padding: 5px; border-bottom: 1px solid #d4af37;">الزوجة</div>
+                <div class="spouse-row">
+                    <span class="spouse-label">الإسم واللقب</span>
+                    <span class="spouse-value">{{ extrait.epouse.prenom_ar }} {{ extrait.epouse.nom_ar }}</span>
+                </div>
+                <div class="spouse-row">
+                    <span class="spouse-label">تاريخ الولادة</span>
+                    <span class="spouse-value">{{ extrait.epouse.date_naissance|date:"Y-m-d" }}</span>
+                </div>
+                <div class="spouse-row">
+                    <span class="spouse-label">مكان الولادة</span>
+                    <span class="spouse-value">{{ extrait.epouse.lieu_naissance_ar }}</span>
+                </div>
+                <div class="spouse-row">
+                    <span class="spouse-label">إسم الأب والأم</span>
+                    <span class="spouse-value">{{ extrait.epouse.pere.prenom_ar }} و {{ extrait.epouse.mere.prenom_ar }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="marriage-details">
+            <div class="section-title" style="margin: -15px -15px 15px -15px;">تفاصيل عقد الزواج</div>
+            <div class="detail-row">
+                <span class="detail-label">تاريخ الزواج:</span>
+                <span class="detail-value">{{ extrait.date_mariage|date:"Y-m-d" }} ({{ extrait.date_mariage_lettres_ar }})</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">مكان الزواج:</span>
+                <span class="detail-value">{{ extrait.lieu_mariage_ar }}</span>
+            </div>
+            <div class="detail-row" style="margin-bottom: 0;">
+                <span class="detail-label">نظام الأملاك:</span>
+                <span class="detail-value" style="color: #c0392b;">{{ extrait.regime_ar }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="observations">
+            <div style="font-weight: bold; border-bottom: 1px solid #d4af37; margin-bottom: 5px;">ملاحظات:</div>
+            <div style="font-size: 0.9em;">{{ extrait.observations_ar|default:"لا توجد ملاحظات" }}</div>
+        </div>
+        <div class="signature-box">
+            <div style="font-weight: bold;">توقيع ضابط الحالة المدنية</div>
+            <div style="font-size: 0.85em; margin-top: 5px;">{{ extrait.officer_etat_civil_ar }}</div>
+            <div class="qr-placeholder">
+                QR CODE VERIFICATION
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

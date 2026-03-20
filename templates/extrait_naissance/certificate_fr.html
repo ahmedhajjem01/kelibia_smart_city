@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Extrait de Naissance - {{ extrait.titulaire.prenom_fr }} {{ extrait.titulaire.nom_fr }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e6e9ee;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            width: 210mm;
+            height: 295mm; overflow: hidden;
+            background: #ffffff;
+            padding: 15px;
+            box-sizing: border-box;
+            border: 5px solid #6ab0de;
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1.5px solid #6ab0de;
+            pointer-events: none;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .header-left {
+            width: 30%;
+            text-align: left;
+        }
+        .header-left .top-text {
+            font-weight: bold;
+            color: #6ab0de;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+        .info-box {
+            border: 2px solid #6ab0de;
+            border-radius: 12px;
+            padding: 6px;
+            font-size: 0.85em;
+            color: #6ab0de;
+            background-color: #fbfcff;
+        }
+        .info-box div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            border-bottom: 1px dotted #a8d0ed;
+            padding-bottom: 3px;
+        }
+        .info-box div:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .info-box span.label-text {
+            width: 110px;
+        }
+        .info-box span.value { 
+            color: #2c3e50; 
+            font-weight: bold; 
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-center {
+            width: 40%;
+            text-align: center;
+            color: #6ab0de;
+        }
+        .header-center .logo {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 5px;
+        }
+        .header-center h1 {
+            font-size: 24px;
+            margin: 0;
+            line-height: 1.3;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .header-center h1 span {
+            border-bottom: 2px solid #6ab0de;
+            padding-bottom: 2px;
+        }
+        .header-center h2 {
+            font-size: 22px;
+            margin: 15px 0 0 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header-right {
+            width: 30%;
+            text-align: left;
+            color: #6ab0de;
+            font-size: 1.05em;
+        }
+        .header-right .republic {
+            text-align: center;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #6ab0de;
+            display: inline-block;
+            padding-bottom: 3px;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .header-right div {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .header-right div strong {
+            color: #2c3e50;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+            border: 2px solid #6ab0de;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+
+        .row {
+            flex: 1;
+            display: flex;
+            border-bottom: 2px solid #6ab0de;
+        }
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            width: 35%;
+            color: #6ab0de;
+            padding: 6px 15px;
+            font-weight: bold;
+            font-size: 1.05em;
+            border-right: 2px solid #6ab0de;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+            line-height: 1.4;
+        }
+        .value {
+            width: 65%;
+            padding: 6px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 1.25em;
+            color: #1a252f;
+            font-weight: 700;
+        }
+
+        .value .sub-text {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            font-weight: normal;
+            margin-top: 6px;
+        }
+
+        .footer-boxes {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .footer-box {
+            border: 2px solid #6ab0de;
+            border-radius: 10px;
+            padding: 6px 15px;
+            color: #6ab0de;
+        }
+        .observations {
+            width: 60%;
+            min-height: 70px;
+        }
+        .observations .title { 
+            font-weight: bold; 
+            font-size: 1.2em;
+            margin-bottom: 8px; 
+            text-align: center;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .observations .obs-content {
+            color: #2c3e50;
+            font-size: 1.1em;
+            text-align: left;
+        }
+        
+        .price-box {
+            width: 38%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+        .price-row span.val { 
+            color: #2c3e50; 
+            font-weight: bold; 
+            font-size: 1.2em;
+        }
+        
+        .qr-code-container {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            text-align: center;
+        }
+        .qr-code-container img {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #6ab0de;
+            padding: 5px;
+            background: white;
+        }
+        .qr-code-container .qr-text {
+            font-size: 0.7em;
+            color: #6ab0de;
+            margin-top: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+        @media print {
+            @page { size: A4; margin: 0; }
+            body { padding: 0; margin: 0; }
+            .page { transform: scale(0.98); transform-origin: top left; }
+            body { background-color: white; padding: 0; }
+            .page { 
+                box-shadow: none; 
+                margin: 0; 
+                border: 5px solid #6ab0de; 
+                border-radius: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-btn { display: none !important; }
+        }
+        .print-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            font-family: 'Roboto', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .print-btn:hover {
+            background-color: #1a252f;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+    Imprimer l'extrait
+</button>
+
+<div class="page">
+    <div class="header">
+        <div class="header-left">
+            <div class="top-text">N° État Civil</div>
+            <div class="info-box">
+                <div style="justify-content: space-between;">
+                    <span class="label-text" style="color: #6ab0de; white-space: nowrap; width: auto;">..... / {{ extrait.arrondissement_gauche }}</span>
+                    <span class="value" style="text-align: right; padding: 0;">{{ extrait.titulaire.n_etat_civil|default:"-" }}</span>
+                </div>
+                <div><span class="label-text">Année</span> <span class="value">{{ extrait.annee_acte }}</span></div>
+                <div><span class="label-text">N° de l'acte</span> <span class="value">{{ extrait.numero_registre }}</span></div>
+                <div style="border: none; margin-bottom: 0; padding-bottom: 0;">
+                    <span class="label-text" style="width:80px;">Décl.</span> <span class="value" style="text-align: left;">{% if extrait.declaration %}✔{% else %}&nbsp;{% endif %}</span>
+                    <span class="label-text" style="width:70px;">Jugem.</span> <span class="value" style="text-align: left;">{% if extrait.jugement %}✔{% else %}&nbsp;{% endif %}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <img src="/media/logo_tunisie.png" class="logo" alt="République Tunisienne" style="width: 70px; height: 75px; object-fit: contain; margin-bottom: 5px;">
+            <h1>Extrait<br><span>des Registres de l'État Civil</span></h1>
+            <h2>Naissances</h2>
+        </div>
+
+        <div class="header-right">
+            <div class="republic">République Tunisienne</div>
+            <div>Gouvernorat : <strong>{{ extrait.gouvernorat_fr }}</strong></div>
+            <div>Délégation : <strong>{{ extrait.delegation_fr }}</strong></div>
+            <div>Commune : <strong>{{ extrait.commune_fr }}</strong></div>
+            <div>Arrond. Municipal : <strong>{{ extrait.arrondissement_municipal_fr|default:"-" }}</strong></div>
+            <div>Imada / Secteur : <strong>{{ extrait.imada_fr }}</strong></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="row">
+            <div class="label">Prénom<br>Nom</div>
+            <div class="value">
+                <div>{{ extrait.titulaire.prenom_fr }}</div>
+                <div>{{ extrait.titulaire.nom_fr }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">Date de Naissance<br><span style="font-size: 0.8em; font-weight: normal; margin-top: 5px;">Jour - Mois - Année<br>(en toutes lettres)</span></div>
+            <div class="value">
+                <div>{{ extrait.titulaire.date_naissance|date:"d-m-Y" }}</div>
+                <div class="sub-text">{{ extrait.titulaire.date_naissance_lettres_fr }}</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">Lieu de Naissance</div>
+            <div class="value">{{ extrait.titulaire.lieu_naissance_fr }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Sexe<br><span style="font-size: 0.8em; font-weight: normal;">(Masculin ou Féminin)</span></div>
+            <div class="value">{% if extrait.titulaire.sexe == 'M' %}Masculin{% else %}Féminin{% endif %}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Prénom, nom du père,<br>sa profession et nationalité</div>
+            <div class="value" style="font-weight: normal;">
+                {{ extrait.titulaire.pere.prenom_fr }} {{ extrait.titulaire.pere.nom_fr }}, {{ extrait.titulaire.pere.profession_fr|default:"-" }}, {{ extrait.titulaire.pere.nationalite_fr|default:"-" }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">Prénom, nom de la mère,<br>sa profession et nationalité</div>
+            <div class="value" style="font-weight: normal;">
+                {{ extrait.titulaire.mere.prenom_fr }} {{ extrait.titulaire.mere.nom_fr }}, {{ extrait.titulaire.mere.profession_fr|default:"-" }}, {{ extrait.titulaire.mere.nationalite_fr|default:"-" }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="label">Date de Déclaration<br><span style="font-size: 0.8em; font-weight: normal; margin-top: 5px;">Année, Mois, Jour et Heure</span></div>
+            <div class="value">{{ extrait.date_declaration|date:"d - m - Y • H:i" }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Déclarant (Nom, prénom,<br>profession ou Tribunal)</div>
+            <div class="value" style="font-weight: normal;">{{ extrait.declarant_fr }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Officier de l'État Civil<br>et sa qualité</div>
+            <div class="value" style="font-weight: normal;">{{ extrait.officer_etat_civil_fr }}</div>
+        </div>
+    </div>
+
+    <div class="footer-boxes">
+        <div class="footer-box observations">
+            <div class="title">Mentions marginales</div>
+            <div class="obs-content">{{ extrait.observations_fr|default:"Néant" }}</div>
+        </div>
+        
+        <div class="footer-box price-box">
+            <div class="price-row">
+                <span>Numéro d'ordre :</span>
+                <span class="val">{{ extrait.numero_ordre|default:"-" }}</span>
+            </div>
+            <div class="price-row" >
+                <span>Taxe payée :</span>
+                <span class="val">{{ extrait.prix }} DT</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="qr-code-container">
+        <img src="data:image/png;base64,{{ extrait.get_qr_code }}" alt="QR Code Verification">
+        <div class="qr-text">VÉRIFICATION NUMÉRIQUE<br>{{ extrait.uuid|truncatechars:15 }}</div>
+    </div>
+</div>
+
+</body>
+</html>

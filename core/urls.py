@@ -18,6 +18,8 @@ urlpatterns = [
     path('api/services/', include('services.urls')),
     path('api/reclamations/', include('reclamations.urls')),
     path('api/news/', include('news.urls')),
+    path('extrait-naissance/', include('extrait_naissance.urls')),
+    path('extrait-mariage/', include('extrait_mariage.urls')),
 ]
 
 if settings.DEBUG:

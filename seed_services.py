@@ -201,6 +201,22 @@ def seed_services():
     for fr, ar in transfer_reqs:
         Requirement.objects.get_or_create(service=transfer_corps, name_fr=fr, name_ar=ar)
 
+    legalisation, _ = Service.objects.get_or_create(
+        category=etat_civil,
+        name_fr="Légalisation de Signature",
+        name_ar="التعريف بالإمضاء",
+        description_fr="La légalisation de signature est la procédure par laquelle l’administration confirme l’authenticité d’une signature apposée sur un document.",
+        description_ar="التعريف بالإمضاء هو الإجراء الذي تؤكد من خلاله الإدارة صحة التوقيع الموجود على الوثيقة.",
+        processing_time="Immédiat (حينياً)",
+        form_pdf_ar="service_forms/ar/التعريف_بالإمضاء.pdf"
+    )
+    legalisation_reqs = [
+        ("Le document à légaliser", "الوثيقة المراد التعريف بها"),
+        ("Pièce d'identité officielle (CIN ou passeport)", "الوثيقة الرسمية لإثبات الهوية (بطاقة التعريف، جواز سفر)")
+    ]
+    for fr, ar in legalisation_reqs:
+        Requirement.objects.get_or_create(service=legalisation, name_fr=fr, name_ar=ar)
+
     # 2. Social & Vie Citoyenne (الشؤون الاجتماعية والحياة المدنية)
     social, _ = Category.objects.get_or_create(
         name_fr="Social & Événements",

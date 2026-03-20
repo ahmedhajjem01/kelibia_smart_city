@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     "services",
     "reclamations",
     "news",
+    "extrait_naissance",
+    "extrait_mariage",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -213,3 +215,4 @@ DJOSER = {
         "current_user": "djoser.serializers.UserSerializer",
     },
 }
+
