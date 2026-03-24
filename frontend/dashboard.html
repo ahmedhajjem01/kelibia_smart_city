@@ -151,7 +151,7 @@
 
         async function fetchUserInfo() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/accounts/me/', {
+                const response = await fetch('/api/accounts/me/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -180,7 +180,7 @@
             };
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/reclamations/', {
+                const response = await fetch('/api/reclamations/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -82,7 +82,7 @@
         async function fetchExtraits() {
             try {
                 // Fetch Birth Extraits
-                const birthResponse = await fetch('http://127.0.0.1:8000/extrait-naissance/api/mes-extraits/', {
+                const birthResponse = await fetch('/extrait-naissance/api/mes-extraits/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 

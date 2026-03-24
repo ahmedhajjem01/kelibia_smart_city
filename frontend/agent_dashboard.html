@@ -95,7 +95,7 @@
 
         async function fetchUserInfo() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/accounts/me/', {
+                const response = await fetch('/api/accounts/me/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -118,7 +118,7 @@
         async function fetchReclamations() {
             const listDiv = document.getElementById('reclamationsList');
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/reclamations/', {
+                const response = await fetch('/api/reclamations/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {

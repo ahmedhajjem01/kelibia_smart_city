@@ -98,7 +98,7 @@
 
         async function fetchDeclarations() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/extrait-naissance/api/declaration/', {
+                const response = await fetch('/extrait-naissance/api/declaration/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -151,7 +151,7 @@
             myModal.show();
 
             try {
-                const response = await fetch(`http://127.0.0.1:8000/extrait-naissance/api/declaration/${id}/`, {
+                const response = await fetch(`/extrait-naissance/api/declaration/${id}/`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -195,7 +195,7 @@
             if (!confirm(`Voulez-vous vraiment ${newStatus === 'validated' ? 'valider' : 'rejeter'} cette déclaration ?`)) return;
             
             try {
-                const response = await fetch(`http://127.0.0.1:8000/extrait-naissance/api/declaration/${currentDecId}/`, {
+                const response = await fetch(`/extrait-naissance/api/declaration/${currentDecId}/`, {
                     method: 'PATCH',
                     headers: { 
                         'Authorization': `Bearer ${token}`,

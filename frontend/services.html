@@ -132,7 +132,7 @@
 
         async function loadServices() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/services/categories/', {
+                const response = await fetch('/api/services/categories/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 allCategories = await response.json();

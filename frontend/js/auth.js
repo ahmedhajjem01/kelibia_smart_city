@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/token/', {
+            const response = await fetch('/api/token/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Role-based Redirection
                 if (data.is_staff || data.is_superuser) {
                     // Admin users go to the Django Admin interface
-                    window.location.href = 'http://127.0.0.1:8000/admin/';
+                    window.location.href = '/admin/';
                 } else if (data.user_type === 'agent') {
                     // Municipal agents go to their specialized dashboard
                     window.location.href = 'agent_dashboard.html';

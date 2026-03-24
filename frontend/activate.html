@@ -49,7 +49,7 @@
 
             try {
                 // Call our CUSTOM activation endpoint that returns tokens
-                const response = await fetch('http://127.0.0.1:8000/api/accounts/activation/', {
+                const response = await fetch('/api/accounts/activation/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ uid, token })

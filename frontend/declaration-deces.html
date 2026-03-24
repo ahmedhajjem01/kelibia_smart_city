@@ -92,7 +92,7 @@
 
         async function fetchEligibleRelatives() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/extrait-deces/api/declaration/', {
+                const response = await fetch('/extrait-deces/api/declaration/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -132,7 +132,7 @@
             };
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/extrait-deces/api/declaration/', {
+                const response = await fetch('/extrait-deces/api/declaration/', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

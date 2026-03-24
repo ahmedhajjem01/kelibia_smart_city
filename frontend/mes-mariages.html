@@ -76,7 +76,7 @@
 
         async function fetchMariages() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/extrait-mariage/api/mes-mariages/', {
+                const response = await fetch('/extrait-mariage/api/mes-mariages/', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
