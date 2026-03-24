@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déclaration de Naissance - Kelibia Smart City</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .arabic-font { font-family: 'Cairo', sans-serif; }
+        .step-card { border-radius: 15px; border: none; }
+        .form-label { font-weight: 600; color: #495057; }
+        .section-title { border-left: 4px solid #0d6efd; padding-left: 10px; margin-bottom: 20px; }
+        [dir="rtl"] .section-title { border-left: none; border-right: 4px solid #0d6efd; padding-left: 0; padding-right: 10px; }
+        .verify-box { background: #e7f1ff; border-radius: 10px; padding: 20px; margin-bottom: 30px; border: 1px dashed #0d6efd; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html" data-i18n="home"><i class="fas fa-city me-2"></i>Kelibia Smart City</a>
+            <div class="d-flex align-items-center">
+                <div class="btn-group me-3" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('fr')">FR</button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('ar')">AR</button>
+                </div>
+                <a href="services.html" class="btn btn-outline-light btn-sm me-2" data-i18n="admin_services">Services</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-9">
+                <div class="card step-card shadow">
+                    <div class="card-header bg-white p-4 border-0">
+                        <h2 class="fw-bold text-primary mb-1" data-i18n="birth_decl_title">Service de Déclaration de Naissance</h2>
+                        <p class="text-muted" data-i18n="birth_decl_desc">Utilisez ce formulaire pour signaler la naissance d'un nouveau-né.</p>
+                    </div>
+                    <div class="card-body p-4">
+                        
+
+                        <form id="birthDeclarationForm">
+                            
+                            <h5 class="section-title fw-bold text-dark" data-i18n="newborn_info">Informations du nouveau-né</h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="prenom_fr" class="form-label" data-i18n="first_name_fr">Prénom (Français)</label>
+                                    <input type="text" class="form-control" id="prenom_fr" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="prenom_ar" class="form-label" data-i18n="first_name_ar">الاسم (بالعربية)</label>
+                                    <input type="text" class="form-control" id="prenom_ar" dir="rtl" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nom_fr" class="form-label" data-i18n="last_name_fr">Nom (Français)</label>
+                                    <input type="text" class="form-control" id="nom_fr" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nom_ar" class="form-label" data-i18n="last_name_ar">اللقب (بالعربية)</label>
+                                    <input type="text" class="form-control" id="nom_ar" dir="rtl" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="date_naissance" class="form-label" data-i18n="date_of_birth">Date et heure de naissance</label>
+                                    <input type="datetime-local" class="form-control" id="date_naissance" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="sexe" class="form-label" data-i18n="gender">Sexe</label>
+                                    <select class="form-select" id="sexe" required>
+                                        <option value="M" data-i18n="male">Masculin</option>
+                                        <option value="F" data-i18n="female">Féminin</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="lieu_naissance_fr" class="form-label" data-i18n="place_of_birth_fr">Lieu de naissance (Français)</label>
+                                    <input type="text" class="form-control" id="lieu_naissance_fr" placeholder="Hôpital de Kelibia" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="lieu_naissance_ar" class="form-label" data-i18n="place_of_birth_ar">مكان الولادة (بالعربية)</label>
+                                    <input type="text" class="form-control" id="lieu_naissance_ar" dir="rtl" placeholder="مستشفى قليبية" required>
+                                </div>
+                            </div>
+
+                            <h5 class="section-title fw-bold text-dark" data-i18n="profile">Informations des parents</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="cin_pere" class="form-label" data-i18n="father_cin">CIN Père</label>
+                                    <input type="text" class="form-control" id="cin_pere" maxlength="8">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cin_mere" class="form-label" data-i18n="mother_cin">CIN Mère</label>
+                                    <input type="text" class="form-control" id="cin_mere" maxlength="8">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="attachment" class="form-label mb-0" data-i18n="attachment_scan">Scanner de la شهادة الولادة</label>
+                                    <a href="img/real_birth_notification.png" target="_blank" class="btn btn-sm btn-link text-decoration-none" data-i18n="view_example">
+                                        <i class="fas fa-image me-1"></i>Voir un exemple
+                                    </a>
+                                </div>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="attachment" accept="image/*,application/pdf">
+                                    <button class="btn btn-outline-primary" type="button" id="scanBtn" onclick="simulateScan()">
+                                        <i class="fas fa-check-double me-2"></i><span data-i18n="scan_quality_check">Vérifier la qualité</span>
+                                    </button>
+                                </div>
+                                <div id="scanProgress" class="progress mt-2 d-none" style="height: 10px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                                </div>
+                                <div id="scanStatus" class="form-text">Téléchargez une photo ou un scan du document papier remis par l'hôpital.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="commentaire" class="form-label" data-i18n="comments">Observations</label>
+                                <textarea class="form-control" id="commentaire" rows="2"></textarea>
+                            </div>
+
+                            <div class="d-grid pt-3">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="fas fa-baby me-2"></i><span data-i18n="submit">Envoyer la déclaration</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="successMsg" class="alert alert-success mt-4 d-none">
+                            <i class="fas fa-check-circle me-2"></i><span data-i18n="birth_declaration_success">La déclaration a été soumise avec succès.</span>
+                            <div class="mt-3">
+                                <a href="dashboard.html" class="btn btn-success btn-sm" data-i18n="dashboard">Retour au tableau de bord</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/lang.js"></script>
+    <script>
+        const token = localStorage.getItem('accessToken');
+        if (!token) window.location.href = 'login.html';
+
+
+        document.getElementById('birthDeclarationForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + getTranslation('processing');
+
+            const formData = new FormData();
+            formData.append('prenom_fr', document.getElementById('prenom_fr').value);
+            formData.append('prenom_ar', document.getElementById('prenom_ar').value);
+            formData.append('nom_fr', document.getElementById('nom_fr').value);
+            formData.append('nom_ar', document.getElementById('nom_ar').value);
+            formData.append('date_naissance', document.getElementById('date_naissance').value);
+            formData.append('lieu_naissance_fr', document.getElementById('lieu_naissance_fr').value);
+            formData.append('lieu_naissance_ar', document.getElementById('lieu_naissance_ar').value);
+            formData.append('sexe', document.getElementById('sexe').value);
+            formData.append('cin_pere', document.getElementById('cin_pere').value);
+            formData.append('cin_mere', document.getElementById('cin_mere').value);
+            formData.append('commentaire', document.getElementById('commentaire').value);
+            
+            const fileInput = document.getElementById('attachment');
+            if (fileInput.files[0]) {
+                formData.append('attachment', fileInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/extrait-naissance/api/declaration/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('birthDeclarationForm').classList.add('d-none');
+                    document.getElementById('successMsg').classList.remove('d-none');
+                } else {
+                    const err = await response.json();
+                    alert(getTranslation('error_msg') + ': ' + JSON.stringify(err));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-baby me-2"></i>' + getTranslation('submit');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                submitBtn.disabled = false;
+            }
+        };
+
+        initLanguage();
+
+        async function simulateScan() {
+            const fileInput = document.getElementById('attachment');
+            if (!fileInput.files[0]) {
+                alert(getTranslation('error_msg'));
+                return;
+            }
+
+            const scanBtn = document.getElementById('scanBtn');
+            const progress = document.getElementById('scanProgress');
+            const status = document.getElementById('scanStatus');
+            
+            scanBtn.disabled = true;
+            progress.classList.remove('d-none');
+            status.innerHTML = `<span class="text-primary fw-bold">${getTranslation('scan_processing')}</span>`;
+
+            // Simulate quality check (mocked blur detection)
+            setTimeout(() => {
+                progress.classList.add('d-none');
+                scanBtn.disabled = false;
+                
+                // For demo: check if it looks like the correct document type
+                const fileName = fileInput.files[0].name.toLowerCase();
+                if (fileName.includes('blurry') || fileName.includes('flou')) {
+                    status.innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> ${getTranslation('scan_error_blurry')}</span>`;
+                } else if (fileName.includes('notification') || fileName.includes('birth') || fileName.includes('naissance') || fileName.includes('real')) {
+                    status.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> ${getTranslation('scan_success')}</span>`;
+                } else {
+                    status.innerHTML = `<span class="text-warning fw-bold"><i class="fas fa-question-circle me-1"></i> ${getTranslation('scan_error_invalid')}</span>`;
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

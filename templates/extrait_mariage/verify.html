@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification d'Authenticité - Mariage - Kelibia Smart City</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .verification-card { max-width: 600px; margin: 50px auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .success-banner { background: #d4af37; color: white; padding: 20px; text-align: center; }
+        .success-banner i { font-size: 3rem; margin-bottom: 10px; }
+        .info-section { padding: 30px; }
+        .info-label { color: #6c757d; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; }
+        .info-value { color: #212529; font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .logo-section { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .logo-section img { height: 60px; }
+        .spouse-title { color: #d4af37; font-weight: bold; border-bottom: 2px solid #d4af37; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="verification-card">
+        <div class="logo-section">
+            <img src="/media/tunisia log.png" alt="Republic of Tunisia">
+            <h4 class="mt-2 text-primary">Kelibia Smart City</h4>
+            <small class="text-muted">Portail de Vérification Officiel</small>
+        </div>
+
+        <div class="success-banner">
+            <i class="fas fa-check-circle"></i>
+            <h2>Acte de Mariage Authentique</h2>
+            <p>Ce document est certifié conforme par le registre de l'État Civil de la Commune de Kelibia.</p>
+        </div>
+
+        <div class="info-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="spouse-title">L'ÉPOUX / الزوج</div>
+                    <div class="info-label">Nom et Prénom</div>
+                    <div class="info-value">{{ extrait.epoux.prenom_fr }} {{ extrait.epoux.nom_fr }}</div>
+                    <div class="info-value text-end" dir="rtl">{{ extrait.epoux.prenom_ar }} {{ extrait.epoux.nom_ar }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="spouse-title">L'ÉPOUSE / الزوجة</div>
+                    <div class="info-label">Nom et Prénom</div>
+                    <div class="info-value">{{ extrait.epouse.prenom_fr }} {{ extrait.epouse.nom_fr }}</div>
+                    <div class="info-value text-end" dir="rtl">{{ extrait.epouse.prenom_ar }} {{ extrait.epouse.nom_ar }}</div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="info-label">Date du Mariage</div>
+                    <div class="info-value">{{ extrait.date_mariage|date:"d/m/Y" }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-label">Acte N° / Année</div>
+                    <div class="info-value">{{ extrait.numero_registre }} / {{ extrait.annee_acte }}</div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="info-label">Régime Matrimonial</div>
+                    <div class="info-value">{{ extrait.regime_fr }} ({{ extrait.regime_ar }})</div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <small class="text-muted">ID Vérification: {{ extrait.uuid }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

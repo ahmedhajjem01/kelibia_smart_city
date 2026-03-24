@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Extrait d'Acte de Décès - {{ extrait.defunt.prenom_fr }} {{ extrait.defunt.nom_fr }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        .page {
+            display: flex;
+            flex-direction: column;
+            width: 210mm;
+            height: 295mm;
+            background: #ffffff;
+            padding: 30px;
+            box-sizing: border-box;
+            border: 3px solid #2c3e50;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+        .header-column { width: 33%; }
+        .header-center { text-align: center; }
+        .logo { width: 60px; margin-bottom: 5px; }
+        .main-title { font-size: 24px; color: #2c3e50; margin: 0; font-weight: bold; text-transform: uppercase; }
+        
+        .content-box {
+            flex: 1;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f5f6fa;
+            padding-bottom: 8px;
+        }
+        .label { width: 200px; color: #7f8c8d; font-weight: bold; text-transform: uppercase; font-size: 0.8em; }
+        .value { flex: 1; font-weight: bold; color: #2f3640; font-size: 1.1em; }
+
+        .footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .signature-section { text-align: center; width: 300px; }
+        .qr-code img { width: 110px; height: 110px; border: 1px solid #f1f2f6; }
+
+        @media print {
+            body { padding: 0; background: white; }
+            .page { box-shadow: none; border: 2px solid #000; }
+            .print-btn { display: none; }
+        }
+        .print-btn {
+            position: fixed; top: 20px; right: 20px;
+            padding: 10px 20px; background: #2c3e50; color: white;
+            border: none; border-radius: 5px; cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">Imprimer l'extrait</button>
+
+<div class="page">
+    <div class="header">
+        <div class="header-column">
+            <div>Rép. Tunisienne</div>
+            <div>Ministère de l'Intérieur</div>
+            <div>Commune: <strong>{{ extrait.commune_fr }}</strong></div>
+        </div>
+        <div class="header-center header-column">
+            <img src="/media/tunisia log.png" class="logo" alt="Republic of Tunisia">
+            <h1 class="main-title">Extrait de Décès</h1>
+            <div>Acte N° {{ extrait.numero_registre }} / {{ extrait.annee_acte }}</div>
+        </div>
+        <div class="header-column" style="text-align: right;">
+            <div>Prix: {{ extrait.prix }} DT</div>
+        </div>
+    </div>
+
+    <div class="content-box">
+        <div class="info-row">
+            <div class="label">Nom et Prénom:</div>
+            <div class="value">{{ extrait.defunt.prenom_fr }} {{ extrait.defunt.nom_fr }}</div>
+        </div>
+        <div class="info-row">
+            <div class="label">Né(e) le:</div>
+            <div class="value">{{ extrait.defunt.date_naissance|date:"d/m/Y" }} à {{ extrait.defunt.lieu_naissance_fr }}</div>
+        </div>
+        <div class="info-row">
+            <div class="label">Fils de:</div>
+            <div class="value">{{ extrait.defunt.pere.prenom_fr }}</div>
+        </div>
+        <div class="info-row">
+            <div class="label">Et de:</div>
+            <div class="value">{{ extrait.defunt.mere.prenom_fr }}</div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <div class="info-row">
+            <div class="label">Décédé(e) le:</div>
+            <div class="value">{{ extrait.date_deces|date:"d/m/Y" }} à {{ extrait.date_deces|date:"H:i" }}</div>
+        </div>
+        <div class="info-row">
+            <div class="label">Lieu du décès:</div>
+            <div class="value">{{ extrait.lieu_deces_fr }}</div>
+        </div>
+        <div class="info-row">
+            <div class="label">Déclarant:</div>
+            <div class="value">{{ extrait.declarant_fr }}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="qr-code">
+            <img src="data:image/png;base64,{{ extrait.get_qr_code }}" alt="QR Code">
+            <div style="font-size: 9px; color: #a4b0be; text-align: center; margin-top: 5px;">VERIFICATION DIGITALE</div>
+        </div>
+        <div class="signature-section">
+            <div style="font-weight: bold; margin-bottom: 40px; text-transform: uppercase; font-size: 0.9em;">L'Officier de l'État Civil</div>
+            <div>{{ extrait.officer_etat_civil_fr }}</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

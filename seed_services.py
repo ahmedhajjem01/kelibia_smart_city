@@ -452,31 +452,6 @@ def seed_services():
     for fr, ar in reseaux_reqs:
         Requirement.objects.get_or_create(service=connexion_reseau, name_fr=fr, name_ar=ar)
 
-    # 6. Réclamations (الشكاوى والمشاكل)
-    reclamations, _ = Category.objects.get_or_create(
-        name_fr="Problèmes & Signalements",
-        name_ar="المشاكل والشكاوى",
-        icon="fa-bullhorn"
-    )
-
-    bruit, _ = Service.objects.get_or_create(
-        category=reclamations,
-        name_fr="Plainte pour Nuisances Sonores",
-        name_ar="شكوى حول الضجيج",
-        description_fr="Pour signaler des nuisances sonores provenant d'un local, d'un chantier ou d'un commerce.",
-        description_ar="للإبلاغ عن الضجيج المزعج الصادر عن محل، حضيرة بناء، أو فضاء تجاري.",
-        processing_time="Suivi par la police municipale"
-    )
-    bruit_reqs = [
-        ("Identité du plaignant (Nom, prénom, adresse)", "هوية صاحب الشكوى (الاسم واللقب والعنوان الكامله)"),
-        ("Copie de la CIN (Numéro et date d'émission)", "نسخة من بطاقة التعريف الوطنية (الرقم وتاريخ الإصدار)"),
-        ("Adresse exacte de l'origine du bruit", "العنوان الدقيق لمصدر الضجيج"),
-        ("Responsable présumé (Propriétaire ou occupant)", "المسؤول المفترض (صاحب المحل أو شاغله)"),
-        ("Nature de l'activité (ex: café, atelier, chantier)", "طبيعة النشاط (مثلا: مقهى، ورشة، حضيرة بناء)")
-    ]
-    for fr, ar in bruit_reqs:
-        Requirement.objects.get_or_create(service=bruit, name_fr=fr, name_ar=ar)
-
     print("Base de données mise à jour avec les nouveaux services !")
     print("NOTE: Vous pouvez maintenant ajouter les chemins des fichiers PDF (AR/FR) via l'admin Django.")
 

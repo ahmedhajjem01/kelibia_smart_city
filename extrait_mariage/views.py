@@ -10,6 +10,11 @@ def wedding_certificate_view(request, pk, lang='ar'):
     template_name = 'extrait_mariage/certificate.html' if lang == 'ar' else 'extrait_mariage/certificate_fr.html'
     return render(request, template_name, {'extrait': extrait})
 
+def verify_mariage_certificate_view(request, cert_uuid, lang='ar'):
+    extrait = get_object_or_404(ExtraitMariage, uuid=cert_uuid)
+    template_name = 'extrait_mariage/verify.html' if lang == 'ar' else 'extrait_mariage/verify_fr.html'
+    return render(request, template_name, {'extrait': extrait, 'is_verified': True})
+
 class MesMariagesAPIView(APIView):
     """
     API endpoint that returns the wedding certificates corresponding to the logged-in user.

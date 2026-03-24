@@ -9,15 +9,22 @@ django.setup()
 from extrait_naissance.models import Citoyen, ExtraitNaissance
 
 def generate_dummy_extraits():
+    from extrait_mariage.models import ExtraitMariage
+    from extrait_deces.models import ExtraitDeces
+    from django.utils import timezone
+    
     # Remove existing ones
+    ExtraitMariage.objects.all().delete()
     ExtraitNaissance.objects.all().delete()
+    ExtraitDeces.objects.all().delete()
     Citoyen.objects.all().delete()
     
     first_names_m = [("Mohamed", "محمد"), ("Ahmed", "أحمد"), ("Youssef", "يوسف"), ("Aziz", "عزيز"), ("Skander", "إسكندر"), ("Ilyes", "إلياس")]
     first_names_f = [("Fatma", "فاطمة"), ("Mariem", "مريم"), ("Nour", "نور"), ("Yasmine", "ياسمين"), ("Chaima", "شيماء"), ("Sirine", "سيرين")]
     last_names = [("Ben Ali", "بن علي"), ("Trabelsi", "الطرابلسي"), ("Gharbi", "الغربي"), ("Ayari", "العياري"), ("Riahi", "الرياحي")]
     
-    for i in range(10):
+    num_families = 10
+    for i in range(num_families):
         # 1. Parents
         pere_prenom_fr, pere_prenom_ar = random.choice(first_names_m)
         mere_prenom_fr, mere_prenom_ar = random.choice(first_names_f)
@@ -117,6 +124,43 @@ def generate_dummy_extraits():
             officer_etat_civil_ar="ضابط الحالة المدنية", officer_etat_civil_fr="Officier Municipal",
             prix=1.000
         )
+        
+        # 6. Acte de mariage pour le PERE et la MERE
+        ExtraitMariage.objects.create(
+            epoux=pere,
+            epouse=mere,
+            annee_acte=year - random.randint(1, 10),
+            numero_registre=str(random.randint(100, 999)),
+            date_mariage=date(year - random.randint(1, 10), random.randint(1, 12), random.randint(1, 28)),
+            date_mariage_lettres_ar="العاشر من ماي",
+            date_mariage_lettres_fr="Dix Mai",
+            lieu_mariage_ar=pere.lieu_naissance_ar,
+            lieu_mariage_fr=pere.lieu_naissance_fr,
+            regime_matrimonial='communaute' if random.choice([True, False]) else 'separation',
+            officer_etat_civil_ar="محسن البحري",
+            officer_etat_civil_fr="Mohsen Bahri",
+            numero_ordre=str(random.randint(1000, 9000)),
+            prix=2.000,
+            observations_ar="",
+            observations_fr=""
+        )
+
+        # 7. Acte de décès (Simulation pour les premières familles pour garantir le test)
+        if i < 5:
+            # On simule le décès d'un enfant pour garantir que les parents (test user) voient l'acte
+            ExtraitDeces.objects.create(
+                defunt=enfant,
+                annee_acte=2024,
+                numero_registre=str(100 + i),
+                date_deces=timezone.now() - timedelta(days=random.randint(10, 50)),
+                lieu_deces_ar="مستشفى قليبية",
+                lieu_deces_fr="Hôpital de Kelibia",
+                declarant_ar="قريب المتوفى",
+                declarant_fr="Parent du défunt",
+                officer_etat_civil_ar="محسن البحري",
+                officer_etat_civil_fr="Mohsen Bahri",
+                prix=0.500
+            )
         
     print("10 familles et extraits relationnels ont été créés avec succès !")
 

@@ -107,7 +107,48 @@ class ExtraitNaissance(models.Model):
         img.save(buffered, format="PNG")
         return base64.b64encode(buffered.getvalue()).decode()
 
+
+class DeclarationNaissance(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente / قيد الانتظار'),
+        ('validated', 'Validé / تم التحقق'),
+        ('rejected', 'Rejeté / مرفوض'),
+    ]
+
+    declarant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="declarations_naissance",
+        verbose_name="Déclarant"
+    )
+    
+    # Hospital Link
+    attachment = models.FileField(upload_to='declarations/naissance/', blank=True, null=True, verbose_name="Pièce jointe (Scan)")
+    
+    # Nouveau-né
+    prenom_ar = models.CharField(max_length=100, verbose_name="Prénom AR")
+    prenom_fr = models.CharField(max_length=100, verbose_name="Prénom FR")
+    nom_ar = models.CharField(max_length=100, verbose_name="Nom AR")
+    nom_fr = models.CharField(max_length=100, verbose_name="Nom FR")
+    
+    date_naissance = models.DateTimeField(verbose_name="Date et heure de naissance")
+    lieu_naissance_ar = models.CharField(max_length=200, verbose_name="Lieu de naissance AR")
+    lieu_naissance_fr = models.CharField(max_length=200, verbose_name="Lieu de naissance FR")
+    sexe = models.CharField(max_length=10, choices=[('M', 'M/ذكر'), ('F', 'F/أنثى')], verbose_name="Sexe")
+    
+    # Parents
+    cin_pere = models.CharField(max_length=8, verbose_name="CIN Père", blank=True, null=True)
+    cin_mere = models.CharField(max_length=8, verbose_name="CIN Mère", blank=True, null=True)
+    
+    commentaire = models.TextField(blank=True, verbose_name="Commentaire / ملاحظات")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Déclaration: {self.prenom_fr} {self.nom_fr} ({self.status})"
+
     class Meta:
-        verbose_name = "Extrait de Naissance"
-        verbose_name_plural = "Extraits de Naissance"
-        ordering = ['-annee_acte', '-created_at']
+        verbose_name = "Déclaration de Naissance"
+        verbose_name_plural = "Déclarations de Naissance"

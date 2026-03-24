@@ -46,9 +46,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.gis",
+    # "django.contrib.gis",
     "rest_framework",
-    "rest_framework_gis",
+    # "rest_framework_gis",
     "djoser",
     "corsheaders",
     "rest_framework_simplejwt",
@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     "news",
     "extrait_naissance",
     "extrait_mariage",
-    "signalement",
+    "extrait_deces",
+    # "signalement",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -99,12 +100,8 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "kelibia_db",
-        "USER": "postgres",
-        "PASSWORD": "root",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -225,5 +222,6 @@ INFOBIP_BASE_URL = "pdp1m3.api.infobip.com"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-GDAL_LIBRARY_PATH = r'C:\Users\MSI\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll'
-GEOS_LIBRARY_PATH = r'C:\Users\MSI\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll'
+# GDAL_LIBRARY_PATH = r'C:\Users\MSI\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll'
+# GEOS_LIBRARY_PATH = r'C:\Users\MSI\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll'
+

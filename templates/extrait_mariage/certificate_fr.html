@@ -338,8 +338,8 @@
         <div class="signature-box">
             <div style="font-weight: bold;">L'Officier de l'État Civil</div>
             <div style="font-size: 0.85em; margin-top: 5px;">{{ extrait.officer_etat_civil_fr }}</div>
-            <div class="qr-placeholder">
-                QR CODE VERIFICATION
+            <div class="qr-code">
+                <img src="data:image/png;base64,{{ extrait.get_qr_code }}" alt="QR Code" style="width: 100px; height: 100px;">
             </div>
         </div>
     </div>

@@ -3,7 +3,9 @@ from django.db import models
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Citoyen, ExtraitNaissance
+from rest_framework import status
+from .models import Citoyen, ExtraitNaissance, DeclarationNaissance
+from .serializers import DeclarationNaissanceSerializer
 
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitNaissance, pk=pk)
@@ -14,10 +16,6 @@ def certificate_view(request, pk, lang='ar'):
     return render(request, template, {'extrait': extrait})
 
 class MesExtraitsAPIView(APIView):
-    """
-    API endpoint that returns the birth certificates corresponding to the logged-in user
-    (via their CIN) and the birth certificates of their children.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -34,15 +32,10 @@ class MesExtraitsAPIView(APIView):
                 "enfants": []
             }, status=404)
             
-        # Mon extrait personnel
         mon_extrait = ExtraitNaissance.objects.filter(titulaire=citoyen).first()
-        
-        # Les extraits de mes enfants (où je suis le père ou la mère)
         enfants_extraits = ExtraitNaissance.objects.filter(
             models.Q(titulaire__pere=citoyen) | models.Q(titulaire__mere=citoyen)
         )
-
-        # L'extrait de mon conjoint (via les enfants en commun)
         conjoints_extraits = ExtraitNaissance.objects.filter(
             models.Q(titulaire__enfants_mere__pere=citoyen) |
             models.Q(titulaire__enfants_pere__mere=citoyen)
@@ -85,6 +78,47 @@ class MesExtraitsAPIView(APIView):
             })
             
         return Response(data)
+
+
+class DeclarationNaissanceAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.is_staff or getattr(request.user, 'role', '') == 'agent':
+            queryset = DeclarationNaissance.objects.all().order_by('-created_at')
+        else:
+            queryset = DeclarationNaissance.objects.filter(declarant=request.user).order_by('-created_at')
+        serializer = DeclarationNaissanceSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = DeclarationNaissanceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(declarant=request.user)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+class DeclarationNaissanceDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        declaration = get_object_or_404(DeclarationNaissance, pk=pk)
+        if not (request.user.is_staff or getattr(request.user, 'role', '') == 'agent' or declaration.declarant == request.user):
+            return Response({"error": "Non autorisé"}, status=403)
+        serializer = DeclarationNaissanceSerializer(declaration)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        if not (request.user.is_staff or getattr(request.user, 'role', '') == 'agent'):
+             return Response({"error": "Seuls les agents peuvent modifier le statut."}, status=403)
+        declaration = get_object_or_404(DeclarationNaissance, pk=pk)
+        new_status = request.data.get('status')
+        if new_status in ['validated', 'rejected']:
+            declaration.status = new_status
+            declaration.save()
+            return Response({"status": declaration.status})
+        return Response({"error": "Statut invalide"}, status=400)
+
 def verify_birth_certificate_view(request, cert_uuid):
     extrait = get_object_or_404(ExtraitNaissance, uuid=cert_uuid)
     return render(request, 'extrait_naissance/verify.html', {'extrait': extrait})

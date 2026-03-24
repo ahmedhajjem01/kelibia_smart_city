@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+import uuid
 from extrait_naissance.models import Citoyen
 
 class ExtraitMariage(models.Model):
@@ -16,6 +17,9 @@ class ExtraitMariage(models.Model):
         related_name="extraits_mariage",
         verbose_name="Utilisateur du portail"
     )
+    
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
     
     # Époux (Groom)
     epoux = models.ForeignKey(Citoyen, on_delete=models.CASCADE, related_name="mariages_epoux", verbose_name="Époux")
@@ -71,6 +75,29 @@ class ExtraitMariage(models.Model):
 
     def __str__(self):
         return f"Mariage: {self.epoux.nom_fr} & {self.epouse.nom_fr} ({self.annee_acte})"
+
+    @property
+    def get_qr_code(self):
+        import qrcode
+        import io
+        import base64
+        
+        # URL for verification
+        verify_url = f"http://127.0.0.1:8000/extrait-mariage/verify/{self.uuid}/"
+        
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(verify_url)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode()
 
     class Meta:
         verbose_name = "Extrait de Mariage"

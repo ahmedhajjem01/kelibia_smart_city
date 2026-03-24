@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/news/', include('news.urls')),
     path('extrait-naissance/', include('extrait_naissance.urls')),
     path('extrait-mariage/', include('extrait_mariage.urls')),
+    path('extrait-deces/', include('extrait_deces.urls')),
     path('api/signalement/', include('signalement.urls')),
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),

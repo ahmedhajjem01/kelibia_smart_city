@@ -255,7 +255,10 @@
             const requestSpan = requestBtn.querySelector('span');
             const requestIcon = requestBtn.querySelector('i');
 
-            if (service.name_fr === "Extrait de Naissance" || service.name_ar === "مضمون ولادة") {
+            const nameLower = service.name_fr.toLowerCase().trim();
+            const nameAr = service.name_ar.trim();
+
+            if (nameLower === "extrait de naissance" || nameAr === "مضمون ولادة") {
                 requestBtn.classList.remove('disabled');
                 requestBtn.classList.remove('btn-primary');
                 requestBtn.classList.add('btn-success');
@@ -265,7 +268,17 @@
                 requestBtn.onclick = () => {
                     window.location.href = 'mes-extraits.html';
                 };
-            } else if (service.name_fr === "Extrait de Mariage" || service.name_ar === "مضمون من رسم زواج") {
+            } else if (nameLower === "déclaration de naissance" || nameAr === "تصريح بولادة") {
+                requestBtn.classList.remove('disabled');
+                requestBtn.classList.remove('btn-primary');
+                requestBtn.classList.add('btn-success');
+                requestIcon.className = 'fas fa-baby me-2';
+                requestSpan.setAttribute('data-i18n', 'declare_birth');
+                requestSpan.textContent = getTranslation('declare_birth');
+                requestBtn.onclick = () => {
+                    window.location.href = 'declaration-naissance.html';
+                };
+            } else if (nameLower === "extrait de mariage" || nameAr === "مضمون من رسم زواج" || nameAr === "مضمون زواج") {
                 requestBtn.classList.remove('disabled');
                 requestBtn.classList.remove('btn-primary');
                 requestBtn.classList.add('btn-success');
@@ -274,6 +287,26 @@
                 requestSpan.textContent = lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡';
                 requestBtn.onclick = () => {
                     window.location.href = 'mes-mariages.html';
+                };
+            } else if (nameLower === "extrait de décès" || nameAr === "مضمون وفاة") {
+                requestBtn.classList.remove('disabled');
+                requestBtn.classList.remove('btn-primary');
+                requestBtn.classList.add('btn-success');
+                requestIcon.className = 'fas fa-bolt me-2';
+                requestSpan.setAttribute('data-i18n', 'extract_now');
+                requestSpan.textContent = lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡';
+                requestBtn.onclick = () => {
+                    window.location.href = 'mes-deces.html';
+                };
+            } else if (nameLower === "déclaration de décès" || nameAr === "تصريح بوفاة") {
+                requestBtn.classList.remove('disabled');
+                requestBtn.classList.remove('btn-primary');
+                requestBtn.classList.add('btn-success');
+                requestIcon.className = 'fas fa-paper-plane me-2';
+                requestSpan.setAttribute('data-i18n', 'declare_death');
+                requestSpan.textContent = getTranslation('declare_death');
+                requestBtn.onclick = () => {
+                    window.location.href = 'declaration-deces.html';
                 };
             } else {
                 requestBtn.classList.add('disabled');
