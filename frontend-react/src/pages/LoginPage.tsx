@@ -13,7 +13,7 @@ type TokenResponse = {
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { t, lang, setLang } = useI18n()
+  const { t, setLang } = useI18n()
 
   const [email, setEmail] = useState('')
 // ...
