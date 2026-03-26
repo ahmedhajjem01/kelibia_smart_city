@@ -4,17 +4,12 @@
     {
       "src": "core/wsgi.py",
       "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.12"
-      }
+      "config": { "runtime": "python3.12" }
     },
     {
       "src": "frontend-react/package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "config": { "distDir": "dist" }
     }
   ],
   "routes": [
@@ -36,9 +31,12 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/((?!api/.*|admin/.*|static/.*|media/.*|assets/.*|favicon.svg$).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/admin/(.*)", "destination": "/admin/$1" },
+    { "source": "/static/(.*)", "destination": "/static/$1" },
+    { "source": "/media/(.*)", "destination": "/media/$1" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/favicon.svg", "destination": "/favicon.svg" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
