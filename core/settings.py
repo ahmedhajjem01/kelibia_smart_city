@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "extrait_mariage",
     "extrait_deces",
     "signalement",
+    "attestation_residence",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

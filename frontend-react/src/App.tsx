@@ -14,6 +14,8 @@ import DeclarationDecesPage from './pages/DeclarationDecesPage'
 import MesExtraitsPage from './pages/MesExtraitsPage'
 import MesDecesPage from './pages/MesDecesPage'
 import MesMariagesPage from './pages/MesMariagesPage'
+import DemandeResidencePage from './pages/DemandeResidencePage'
+import MesResidencesPage from './pages/MesResidencesPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 export default function App() {
@@ -67,6 +69,14 @@ export default function App() {
           <Route
             path="/municipalite-naissances"
             element={<MunicipaliteNaissancesPage />}
+          />
+          <Route
+            path="/demande-residence"
+            element={<DemandeResidencePage />}
+          />
+          <Route
+            path="/mes-residences"
+            element={<MesResidencesPage />}
           />
 
           {/* Backward-compatible aliases with old .html URLs */}

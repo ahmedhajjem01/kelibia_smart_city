@@ -21,6 +21,7 @@ urlpatterns = [
     path('extrait-mariage/', include('extrait_mariage.urls')),
     path('extrait-deces/', include('extrait_deces.urls')),
     path('api/signalement/', include('signalement.urls')),
+    path('api/residence/', include('attestation_residence.urls')),
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),
     path('', login_page, name='login'),

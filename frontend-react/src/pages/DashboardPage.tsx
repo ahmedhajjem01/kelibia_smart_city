@@ -221,7 +221,7 @@ export default function DashboardPage() {
                       </Link>
                     </div>
                     <div className="col-md-3 col-6 text-center">
-                      <Link to="/services" className="text-decoration-none">
+                      <Link to="/mes-residences" className="text-decoration-none">
                         <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-warning h-100 d-flex flex-column align-items-center justify-content-center">
                           <i className="fas fa-home fa-2x text-warning mb-2"></i>
                           <span className="fw-bold small">{t('residence_cert')}</span>
