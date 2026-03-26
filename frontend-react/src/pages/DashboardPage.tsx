@@ -196,7 +196,7 @@ export default function DashboardPage() {
                 <div className="card-body bg-light">
                   <p className="text-muted small mb-4">{t('civil_docs_desc')}</p>
                   <div className="row g-3">
-                    <div className="col-4 text-center">
+                    <div className="col-md-3 col-6 text-center">
                       <Link to="/mes-extraits" className="text-decoration-none">
                         <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-success h-100 d-flex flex-column align-items-center justify-content-center">
                           <i className="fas fa-baby fa-2x text-success mb-2"></i>
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                         </div>
                       </Link>
                     </div>
-                    <div className="col-4 text-center">
+                    <div className="col-md-3 col-6 text-center">
                       <Link to="/mes-mariages" className="text-decoration-none">
                         <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-primary h-100 d-flex flex-column align-items-center justify-content-center">
                           <i className="fas fa-ring fa-2x text-primary mb-2"></i>
@@ -212,11 +212,19 @@ export default function DashboardPage() {
                         </div>
                       </Link>
                     </div>
-                    <div className="col-4 text-center">
+                    <div className="col-md-3 col-6 text-center">
                       <Link to="/mes-deces" className="text-decoration-none">
                         <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-dark h-100 d-flex flex-column align-items-center justify-content-center">
                           <i className="fas fa-dove fa-2x text-dark mb-2"></i>
                           <span className="fw-bold small">{t('deces_cert')}</span>
+                        </div>
+                      </Link>
+                    </div>
+                    <div className="col-md-3 col-6 text-center">
+                      <Link to="/services" className="text-decoration-none">
+                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-warning h-100 d-flex flex-column align-items-center justify-content-center">
+                          <i className="fas fa-home fa-2x text-warning mb-2"></i>
+                          <span className="fw-bold small">{t('residence_cert')}</span>
                         </div>
                       </Link>
                     </div>
