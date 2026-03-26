@@ -1,8 +1,10 @@
+from .serializers import ReclamationSerializer, ReclamationGeoSerializer
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Reclamation
 from .serializers import ReclamationSerializer
+from .classifier import classify
 
 class ReclamationViewSet(viewsets.ModelViewSet):
     serializer_class = ReclamationSerializer
@@ -22,7 +24,17 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
-        serializer.save(citizen=self.request.user)
+        # Auto-classification : priorité + service responsable
+        title       = self.request.data.get('title', '')
+        description = self.request.data.get('description', '')
+        category    = self.request.data.get('category', 'other')
+        result      = classify(title, description, category)
+        serializer.save(
+            citizen=self.request.user,
+            priority=result['priority'],
+            service_responsable=result['service_responsable'],
+            category=result['category'],
+        )
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def update_status(self, request, pk=None):
@@ -39,6 +51,15 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             if user.user_type == 'agent':
                 reclamation.agent = user
             reclamation.save()
-            return Response({"status": "Statut mis à jour."})
-        
+            return Response({"status": "Statut mis à jour."}) 
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def geojson(self, request):
+        user = request.user
+        if user.is_staff or user.is_superuser or user.user_type == 'agent':
+            qs = Reclamation.objects.exclude(location__isnull=True)
+        else:
+            qs = Reclamation.objects.filter(citizen=user).exclude(location__isnull=True)
+        from .serializers import ReclamationGeoSerializer
+        serializer = ReclamationGeoSerializer(qs, many=True)
+        return Response(serializer.data)   

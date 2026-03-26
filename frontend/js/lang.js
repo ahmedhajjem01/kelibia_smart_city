@@ -1,170 +1,184 @@
 const translations = {
     fr: {
-        dashboard: "Tableau de bord",
-        logout: "Déconnexion",
-        welcome: "Bienvenue !",
-        welcome_msg: "Vous êtes connecté avec succès au portail Kelibia Smart City.",
-        admin_services: "Services Administratifs",
-        services_desc: "Consultez la liste des documents requis pour vos démarches municipales (État civil, Urbanisme, etc.).",
-        services_desc_long: "Retrouvez ici tous les documents nécessaires pour vos démarches municipales à Kelibia.",
-        view_services: "Voir les services",
-        your_token: "Votre Token d'Accès :",
-        profile: "Profil",
-        loading: "Chargement...",
-        retrieval_error: "Erreur lors de la récupération des services. Veuillez réessayer plus tard.",
-        no_services: "Aucun service disponible pour le moment.",
-        documents_required: "Documents requis :",
-        estimated_time: "Délai estimé",
-        close: "Fermer",
-        request_online: "Demander en ligne (Bientôt)",
-        loading_services: "Chargement des services...",
-        details_title: "Détails du service",
-        home: "Accueil",
-        download_form: "Télécharger le formulaire",
-        download_form_ar: "Télécharger (Version Arabe)",
-        agent_dashboard: "Tableau de bord Agent",
-        reclamations_mgnt: "Gestion des Réclamations",
-        view_reclamations: "Voir les réclamations",
-        agent_welcome: "Bienvenue Agent !",
-        my_reclamations: "Mes Réclamations",
-        new_reclamation: "Nouvelle Réclamation",
-        reclamations_desc: "Signalez un problème (éclairage, déchets, voirie) et suivez sa résolution.",
-        news_title: "Actualités de Kélibia",
-        news_desc: "Restez informé des derniers événements et annonces de votre commune.",
-        submit: "Envoyer",
-        processing: "Traitement en cours...",
-        success_msg: "Opération réussie !",
-        error_msg: "Une erreur est survenue.",
-        my_deces: "Mes Actes de Décès",
-        deces_desc: "Consultez les actes de décès des membres de votre famille enregistrés.",
-        view_deces: "Voir les actes",
-        declare_death: "Déclarer un décès",
-        death_decl_title: "Service de Déclaration de Décès",
-        death_decl_desc: "Utilisez ce formulaire pour signaler le décès d'un parent ou d'un membre de votre famille.",
-        select_relative: "Sélectionnez le défunt",
-        date_of_death: "Date et heure du décès",
-        place_of_death_fr: "Lieu du décès (Français)",
-        place_of_death_ar: "Lieu du décès (Arabe)",
-        comments: "Commentaires / Observations",
-        declaration_success: "Votre déclaration a été soumise avec succès et est en cours de traitement.",
-        no_eligible_relatives: "Aucun membre de la famille éligible pour une déclaration n'a été trouvé.",
-        declare_birth: "Déclarer une naissance",
-        birth_decl_title: "Service de Déclaration de Naissance",
-        birth_decl_desc: "Utilisez ce formulaire pour signaler la naissance d'un nouveau-né.",
-        newborn_info: "Informations du nouveau-né",
-        first_name_fr: "Prénom (Français)",
-        first_name_ar: "الاسم (بالعربية)",
-        last_name_fr: "Nom (Français)",
-        last_name_ar: "اللقب (بالعربية)",
-        date_of_birth: "Date et heure de naissance",
-        place_of_birth_fr: "Lieu de naissance (Français)",
-        place_of_birth_ar: "مكان الولادة (بالعربية)",
-        gender: "Sexe",
-        male: "Masculin / ذكر",
-        female: "Féminin / أنثى",
-        father_cin: "CIN du Père (Optionnel si vous êtes la mère)",
-        mother_cin: "CIN de la Mère (Optionnel si vous êtes le père)",
-        birth_declaration_success: "La déclaration de naissance a été soumise avec succès.",
-        agent_birth_decl: "Gestion des Déclarations de Naissance",
-        agent_birth_desc: "Validez les déclarations soumises par les citoyens et vérifiez les pièces jointes.",
-        status_pending: "En attente",
-        status_validated: "Validée",
-        status_rejected: "Rejetée",
-        view_details: "Voir Détails",
-        attachment_scan: "Scan du document",
-        validate: "Valider",
-        reject: "Rejeter",
-        no_declarations: "Aucune déclaration trouvée.",
-        scan_quality_check: "Vérifier l'authenticité",
-        view_example: "Voir un exemple",
-        scan_processing: "Vérification de l'authenticité...",
-        scan_success: "Certificat authentifié : Document conforme aux normes hospitalières.",
-        scan_error_invalid: "Document non reconnu. Veuillez télécharger l'إعلام ولادة original.",
-        scan_error_blurry: "L'image semble floue. Veuillez reprendre une photo plus nette."
+        // ── General ──
+        dashboard:        "Tableau de bord",
+        logout:           "Déconnexion",
+        loading:          "Chargement...",
+        close:            "Fermer",
+        submit:           "Envoyer",
+        processing:       "Traitement en cours...",
+        success_msg:      "Opération réussie !",
+        error_msg:        "Une erreur est survenue.",
+        home:             "Accueil",
+
+        // ── Navbar / Branding ──
+        municipality:     "بلدية قليبية — Commune de Kélibia",
+        smart_city:       "Portail Citoyen — Kelibia Smart City",
+
+        // ── Hero / Welcome ──
+        welcome:          "Bienvenue,",
+        welcome_msg:      "Gérez vos signalements et accédez aux services municipaux.",
+        agent_welcome:    "Espace Agent —",
+
+        // ── Roles ──
+        citizen_role:     "Citoyen",
+        citizen_portal:   "Portail Citoyen",
+
+        // ── Navigation ──
+        navigation:       "NAVIGATION",
+        account:          "COMPTE",
+
+        // ── Sidebar items ──
+        admin_services:   "Services Administratifs",
+        my_reclamations:  "Mes Réclamations",
+        news_title:       "Actualités",
+        profile:          "Mon Profil",
+        reclamations_mgnt:"Gestion des Réclamations",
+        agent_dashboard:  "Tableau de bord Agent",
+
+        // ── Stat cards ──
+        stat_total:       "Total signalements",
+        stat_pending:     "En attente",
+        stat_inprogress:  "En cours",
+        stat_resolved:    "Résolus",
+
+        // ── Quick actions ──
+        quick_actions:    "Actions Rapides",
+        map_view:         "Carte SIG",
+        new_reclamation:  "Nouveau Signalement",
+
+        // ── Profile card ──
+        profile_type:     "Rôle",
+        profile_city:     "Ville",
+        profile_phone:    "Tél.",
+
+        // ── Table columns ──
+        col_title:        "Titre",
+        col_category:     "Catégorie",
+        col_status:       "Statut",
+        col_date:         "Date",
+        col_photo:        "Photo (optionnel)",
+
+        // ── Empty / error states ──
+        no_reclamations:  "Aucun signalement pour le moment.",
+
+        // ── Services page ──
+        services_desc:        "Consultez la liste des documents requis pour vos démarches municipales (État civil, Urbanisme, etc.).",
+        services_desc_long:   "Retrouvez ici tous les documents nécessaires pour vos démarches municipales à Kelibia.",
+        view_services:        "Voir les services",
+        retrieval_error:      "Erreur lors de la récupération des services. Veuillez réessayer plus tard.",
+        no_services:          "Aucun service disponible pour le moment.",
+        documents_required:   "Documents requis :",
+        estimated_time:       "Délai estimé",
+        request_online:       "Demander en ligne (Bientôt)",
+        loading_services:     "Chargement des services...",
+        details_title:        "Détails du service",
+        download_form:        "Télécharger le formulaire",
+        download_form_ar:     "Télécharger (Version Arabe)",
+
+        // ── News ──
+        news_desc:        "Restez informé des derniers événements et annonces de votre commune.",
+
+        // ── Reclamation form ──
+        reclamations_desc:"Signalez un problème (éclairage, déchets, voirie) et suivez sa résolution.",
+        your_token:       "Votre Token d'Accès :",
+
+        // ── Agent ──
+        view_reclamations:"Voir les réclamations",
     },
+
     ar: {
-        dashboard: "لوحة القيادة",
-        logout: "تسجيل الخروج",
-        welcome: "مرحباً بك!",
-        welcome_msg: "لقد سجلت دخولك بنجاح في بوابة قليبية مدينة ذكية.",
-        admin_services: "الخدمات الإدارية",
-        services_desc: "اطلع على قائمة الوثائق المطلوبة لمعاملاتك البلدية (الحالة المدنية، التعمير، إلخ).",
-        services_desc_long: "تجدون هنا جميع الوثائق اللازمة لمختلف الإجراءات البلدية في قليبية.",
-        view_services: "عرض الخدمات",
-        your_token: "رمز الدخول الخاص بك:",
-        profile: "الملف الشخصي",
-        loading: "جاري التحميل...",
-        retrieval_error: "خطأ أثناء جلب الخدمات. يرجى المحاولة مرة أخرى لاحقاً.",
-        no_services: "لا توجد خدمات متاحة حالياً.",
-        documents_required: "الوثائق المطلوبة:",
-        estimated_time: "الوقت المقدر",
-        close: "إغلاق",
-        request_online: "الطلب عبر الإنترنت (قريباً)",
-        loading_services: "جاري تحميل الخدمات...",
-        details_title: "تفاصيل الخدمة",
-        home: "الرئيسية",
-        download_form: "تحميل المطبوعة",
-        agent_dashboard: "لوحة قيادة العون",
-        reclamations_mgnt: "إدارة الشكاوى",
-        view_reclamations: "عرض الشكاوى",
-        agent_welcome: "مرحباً أيها العون!",
-        my_reclamations: "شكاويّ",
-        new_reclamation: "شكوى جديدة",
-        reclamations_desc: "أبلغ عن مشكل (إضاءة، نفايات، طرقات) وتابع عملية الإصلاح.",
-        news_title: "أخبار قليبية",
-        news_desc: "ابق على اطلاع بآخر الأحداث والبلاغات الصادرة عن بلديتك.",
-        submit: "إرسال",
-        processing: "جاري المعالجة...",
-        success_msg: "تمت العملية بنجاح!",
-        error_msg: "حدث خطأ ما.",
-        my_deces: "مضامين الوفاة",
-        deces_desc: "اطلع على مضامين الوفاة الخاصة بأفراد عائلتك المسجلين.",
-        view_deces: "عرض المضامين",
-        declare_death: "التصريح بوفاة",
-        death_decl_title: "خدمة التصريح بالوفاة",
-        death_decl_desc: "استخدم هذا النموذج للإبلاغ عن وفاة أحد الأقارب أو أفراد العائلة.",
-        select_relative: "اختر المتوفى",
-        date_of_death: "تاريخ وساعة الوفاة",
-        place_of_death_fr: "مكان الوفاة (بالفرنسية)",
-        place_of_death_ar: "مكان الوفاة (بالعربية)",
-        comments: "ملاحظات",
-        declaration_success: "تم تقديم تصريحك بنجاح وهو قيد المعالجة الآن.",
-        no_eligible_relatives: "لم يتم العثور على أفراد عائلة مؤهلين للتصريح.",
-        declare_birth: "التصريح بولادة",
-        birth_decl_title: "خدمة التصريح بالولادة",
-        birth_decl_desc: "استخدم هذا النموذج للإبلاغ عن ولادة مولود جديد.",
-        newborn_info: "معلومات المولود الجديد",
-        first_name_fr: "الاسم (بالفرنسية)",
-        first_name_ar: "الاسم (بالعربية)",
-        last_name_fr: "اللقب (بالفرنسية)",
-        last_name_ar: "اللقب (بالعربية)",
-        date_of_birth: "تاريخ وساعة الولادة",
-        place_of_birth_fr: "مكان الولادة (بالفرنسية)",
-        place_of_birth_ar: "مكان الولادة (بالعربية)",
-        gender: "الجنس",
-        male: "ذكر",
-        female: "أنثى",
-        father_cin: "رقم بطاقة تعريف الأب (اختياري إذا كنت الأم)",
-        mother_cin: "رقم بطاقة تعريف الأم (اختياري إذا كنت الأب)",
-        birth_declaration_success: "تم تقديم تصريح الولادة بنجاح.",
-        agent_birth_decl: "إدارة تصاريح الولادة",
-        agent_birth_desc: "صادق على التصاريح المقدمة من قبل المواطنين وتحقق من المرفقات.",
-        status_pending: "قيد الانتظار",
-        status_validated: "تمت المصادقة",
-        status_rejected: "مرفوض",
-        view_details: "عرض التفاصيل",
-        attachment_scan: "مسح الوثيقة",
-        validate: "مصادقة",
-        reject: "رفض",
-        no_declarations: "لم يتم العثور على أي تصريح.",
-        scan_quality_check: "التحقق من الأصالة",
-        view_example: "مشاهدة مثال",
-        scan_processing: "جاري التحقق من الأصالة...",
-        scan_success: "تم إثبات الأصالة: الوثيقة مطابقة للمعايير الاستشفائية.",
-        scan_error_invalid: "الوثيقة غير معترف بها. يرجى تحميل 'إعلام ولادة' الأصلي.",
-        scan_error_blurry: "الصورة تبدو غير واضحة. يرجى التقاط صورة أكثر ووضوحًا."
+        // ── General ──
+        dashboard:        "لوحة القيادة",
+        logout:           "تسجيل الخروج",
+        loading:          "جاري التحميل...",
+        close:            "إغلاق",
+        submit:           "إرسال",
+        processing:       "جاري المعالجة...",
+        success_msg:      "تمت العملية بنجاح!",
+        error_msg:        "حدث خطأ ما.",
+        home:             "الرئيسية",
+
+        // ── Navbar / Branding ──
+        municipality:     "بلدية قليبية — Commune de Kélibia",
+        smart_city:       "بوابة المواطن — قليبية مدينة ذكية",
+
+        // ── Hero / Welcome ──
+        welcome:          "مرحباً بك،",
+        welcome_msg:      "أدر بلاغاتك وتمتع بخدمات البلدية الإلكترونية.",
+        agent_welcome:    "فضاء العون —",
+
+        // ── Roles ──
+        citizen_role:     "مواطن",
+        citizen_portal:   "بوابة المواطن",
+
+        // ── Navigation ──
+        navigation:       "التنقل",
+        account:          "الحساب",
+
+        // ── Sidebar items ──
+        admin_services:   "الخدمات الإدارية",
+        my_reclamations:  "شكاويّ",
+        news_title:       "الأخبار",
+        profile:          "ملفي الشخصي",
+        reclamations_mgnt:"إدارة الشكاوى",
+        agent_dashboard:  "لوحة قيادة العون",
+
+        // ── Stat cards ──
+        stat_total:       "إجمالي البلاغات",
+        stat_pending:     "قيد الانتظار",
+        stat_inprogress:  "قيد المعالجة",
+        stat_resolved:    "تم الحل",
+
+        // ── Quick actions ──
+        quick_actions:    "إجراءات سريعة",
+        map_view:         "خريطة SIG",
+        new_reclamation:  "بلاغ جديد",
+
+        // ── Profile card ──
+        profile_type:     "الدور",
+        profile_city:     "المدينة",
+        profile_phone:    "الهاتف",
+
+        // ── Table columns ──
+        col_title:        "العنوان",
+        col_category:     "الفئة",
+        col_status:       "الحالة",
+        col_date:         "التاريخ",
+        col_photo:        "صورة (اختياري)",
+
+        // ── Empty / error states ──
+        no_reclamations:  "لا توجد بلاغات حالياً.",
+
+        // ── Services page ──
+        services_desc:        "اطلع على قائمة الوثائق المطلوبة لمعاملاتك البلدية (الحالة المدنية، التعمير، إلخ).",
+        services_desc_long:   "تجدون هنا جميع الوثائق اللازمة لمختلف الإجراءات البلدية في قليبية.",
+        view_services:        "عرض الخدمات",
+        retrieval_error:      "خطأ أثناء جلب الخدمات. يرجى المحاولة مرة أخرى لاحقاً.",
+        no_services:          "لا توجد خدمات متاحة حالياً.",
+        documents_required:   "الوثائق المطلوبة:",
+        estimated_time:       "الوقت المقدر",
+        request_online:       "الطلب عبر الإنترنت (قريباً)",
+        loading_services:     "جاري تحميل الخدمات...",
+        details_title:        "تفاصيل الخدمة",
+        download_form:        "تحميل المطبوعة",
+        download_form_ar:     "تحميل (النسخة العربية)",
+
+        // ── News ──
+        news_desc:        "ابق على اطلاع بآخر الأحداث والبلاغات الصادرة عن بلديتك.",
+
+        // ── Reclamation form ──
+        reclamations_desc:"أبلغ عن مشكل (إضاءة، نفايات، طرقات) وتابع عملية الإصلاح.",
+        your_token:       "رمز الدخول الخاص بك:",
+
+        // ── Agent ──
+        view_reclamations:"عرض الشكاوى",
     }
 };
+
+/* ─────────────────────────────────────────
+   CORE FUNCTIONS
+───────────────────────────────────────── */
 
 function initLanguage() {
     const savedLang = localStorage.getItem('preferredLanguage') || 'fr';
@@ -175,7 +189,7 @@ function setLanguage(lang) {
     localStorage.setItem('preferredLanguage', lang);
     document.documentElement.lang = lang;
 
-    // Set text direction
+    // Text direction
     if (lang === 'ar') {
         document.body.dir = 'rtl';
         document.body.classList.add('arabic-font');
@@ -184,10 +198,10 @@ function setLanguage(lang) {
         document.body.classList.remove('arabic-font');
     }
 
-    // Update static translations
+    // Update all data-i18n elements
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang][key]) {
+        if (translations[lang] && translations[lang][key]) {
             el.textContent = translations[lang][key];
         }
     });
@@ -195,10 +209,16 @@ function setLanguage(lang) {
     // Update placeholders
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
-        if (translations[lang][key]) {
+        if (translations[lang] && translations[lang][key]) {
             el.placeholder = translations[lang][key];
         }
     });
+
+    // Update language button active states (if they exist on the page)
+    const btnFr = document.getElementById('btn-fr');
+    const btnAr = document.getElementById('btn-ar');
+    if (btnFr) btnFr.classList.toggle('active', lang === 'fr');
+    if (btnAr) btnAr.classList.toggle('active', lang === 'ar');
 }
 
 function getLanguage() {
@@ -207,5 +227,5 @@ function getLanguage() {
 
 function getTranslation(key) {
     const lang = getLanguage();
-    return translations[lang][key] || key;
+    return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
 }

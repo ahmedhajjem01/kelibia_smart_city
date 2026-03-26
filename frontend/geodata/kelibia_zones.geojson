@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","properties":{"name":"Centre-Ville","type":"zone_urbaine","color":"#1565c0","description":"Zone centrale de Kélibia"},"geometry":{"type":"Polygon","coordinates":[[[11.095,36.840],[11.110,36.840],[11.110,36.855],[11.095,36.855],[11.095,36.840]]]}},
+    {"type":"Feature","properties":{"name":"Zone Port & Plage","type":"zone_touristique","color":"#00838f","description":"Zone portuaire et balnéaire"},"geometry":{"type":"Polygon","coordinates":[[[11.108,36.843],[11.120,36.843],[11.120,36.855],[11.108,36.855],[11.108,36.843]]]}},
+    {"type":"Feature","properties":{"name":"Zone Résidentielle Nord","type":"zone_residentielle","color":"#2e7d32","description":"Quartiers résidentiels nord"},"geometry":{"type":"Polygon","coordinates":[[[11.090,36.855],[11.108,36.855],[11.108,36.868],[11.090,36.868],[11.090,36.855]]]}},
+    {"type":"Feature","properties":{"name":"Zone Industrielle","type":"zone_industrielle","color":"#e65100","description":"Zone d'activités industrielles"},"geometry":{"type":"Polygon","coordinates":[[[11.080,36.840],[11.095,36.840],[11.095,36.850],[11.080,36.850],[11.080,36.840]]]}},
+    {"type":"Feature","properties":{"name":"Zone Agricole Ouest","type":"zone_agricole","color":"#558b2f","description":"Terres agricoles à l'ouest"},"geometry":{"type":"Polygon","coordinates":[[[11.070,36.835],[11.085,36.835],[11.085,36.855],[11.070,36.855],[11.070,36.835]]]}}
+  ]
+}
