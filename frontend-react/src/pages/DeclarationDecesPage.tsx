@@ -90,6 +90,13 @@ export default function DeclarationDecesPage() {
       const form = e.currentTarget as HTMLFormElement
       const fd = new FormData(form)
 
+      // Ensure both place of death fields are present even if only one was in the UI
+      if (lang === 'ar') {
+        if (!fd.has('lieu_deces_fr')) fd.append('lieu_deces_fr', '')
+      } else {
+        if (!fd.has('lieu_deces_ar')) fd.append('lieu_deces_ar', '')
+      }
+
       // If we have a captured file, inject it. 
       // Note: If the user also selected a file via the input, the captured one takes precedence or you can choose.
       if (capturedFile) {
