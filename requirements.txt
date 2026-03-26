@@ -35,3 +35,4 @@ urllib3==2.6.3
 yarl==1.22.0
 dj-database-url==2.3.0
 whitenoise==6.9.0
+qrcode==7.4.2

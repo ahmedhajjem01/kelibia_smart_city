@@ -187,6 +187,19 @@ export default function DashboardPage() {
 
             <div className="card shadow-sm mb-4">
               <div className="card-body">
+                <h5 className="card-title text-success">
+                  <i className="fas fa-baby me-2" />
+                  {t('my_extraits')}
+                </h5>
+                <p className="card-text text-muted">{t('extraits_desc')}</p>
+                <Link to="/mes-extraits" className="btn btn-success">
+                  {t('view_extraits')}
+                </Link>
+              </div>
+            </div>
+
+            <div className="card shadow-sm mb-4">
+              <div className="card-body">
                 <h5 className="card-title text-danger">
                   <i className="fas fa-bullhorn me-2" />
                   {t('my_reclamations')}
