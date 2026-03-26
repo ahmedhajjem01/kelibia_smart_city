@@ -94,6 +94,13 @@ class DeclarationDeces(models.Model):
     lieu_deces_ar = models.CharField(max_length=200, verbose_name="Lieu du décès AR")
     lieu_deces_fr = models.CharField(max_length=200, verbose_name="Lieu du décès FR")
     
+    police_report = models.FileField(
+        upload_to='declarations/deces/police/', 
+        blank=True, 
+        null=True, 
+        verbose_name="Rapport de police (si suspect)"
+    )
+    
     commentaire = models.TextField(blank=True, verbose_name="Commentaire / ملاحظات")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     

@@ -143,6 +143,8 @@ const translations: Record<Lang, Record<string, string>> = {
     mariage_cert: 'Mariage',
     deces_cert: 'Décès',
     view_extraits: 'Voir les documents',
+    police_report: 'Rapport de police',
+    police_report_desc: '(si décès dans des conditions suspectes) (Optionnel)',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -273,6 +275,8 @@ const translations: Record<Lang, Record<string, string>> = {
     mariage_cert: 'زواج',
     deces_cert: 'وفاة',
     view_extraits: 'عرض الوثائق',
+    police_report: 'تقرير الشرطة',
+    police_report_desc: '(في صورة وجود شبهة في سبب الوفاة) (اختياري)',
   },
 }
 

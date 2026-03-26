@@ -68,21 +68,12 @@ export default function DeclarationDecesPage() {
       const form = e.currentTarget as HTMLFormElement
       const fd = new FormData(form)
 
-      const payload = {
-        defunt: String(fd.get('defunt') || ''),
-        date_deces: String(fd.get('date_deces') || ''),
-        lieu_deces_fr: String(fd.get('lieu_deces_fr') || ''),
-        lieu_deces_ar: String(fd.get('lieu_deces_ar') || ''),
-        commentaire: String(fd.get('commentaire') || ''),
-      }
-
       const response = await fetch('/extrait-deces/api/declaration/', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${access}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: fd,
       })
 
       if (!response.ok) {
@@ -194,6 +185,13 @@ export default function DeclarationDecesPage() {
                         </label>
                         <input type="text" className="form-control" id="lieu_deces_ar" name="lieu_deces_ar" placeholder="مستشفى قليبية" required />
                       </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="police_report" className="form-label">
+                        {t('police_report')} <span className="text-muted small">{t('police_report_desc')}</span>
+                      </label>
+                      <input type="file" className="form-control" id="police_report" name="police_report" accept="application/pdf,image/*" />
                     </div>
 
                     <div className="mb-4">

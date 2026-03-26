@@ -14,7 +14,7 @@ class DeclarationDecesSerializer(serializers.ModelSerializer):
         model = DeclarationDeces
         fields = [
             'id', 'defunt', 'defunt_detail', 'date_deces', 
-            'lieu_deces_fr', 'lieu_deces_ar', 'commentaire', 
-            'status', 'created_at'
+            'lieu_deces_fr', 'lieu_deces_ar', 'police_report',
+            'commentaire', 'status', 'created_at'
         ]
         read_only_fields = ['status', 'created_at']
