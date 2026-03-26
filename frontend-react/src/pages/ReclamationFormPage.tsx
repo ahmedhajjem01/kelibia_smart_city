@@ -32,7 +32,7 @@ function LocationMarker({ position, setPosition }: { position: [number, number] 
 }
 
 export default function ReclamationFormPage() {
-  const { t } = useI18n()
+  const { t, setLang } = useI18n()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(false)
@@ -116,9 +116,29 @@ export default function ReclamationFormPage() {
                     <i className="fas fa-exclamation-triangle me-3"></i>
                     {t('new_reclamation_title')}
                 </h3>
-                <Link to="/dashboard" className="btn btn-outline-light btn-sm rounded-circle shadow-sm">
-                  <i className="fas fa-times"></i>
-                </Link>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="btn-group btn-group-sm">
+                    <button
+                      type="button"
+                      className="btn btn-outline-light"
+                      onClick={() => setLang('fr')}
+                      title="Français"
+                    >
+                      <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-light"
+                      onClick={() => setLang('ar')}
+                      title="العربية"
+                    >
+                      <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
+                    </button>
+                  </div>
+                  <Link to="/dashboard" className="btn btn-outline-light btn-sm rounded-circle shadow-sm">
+                    <i className="fas fa-times"></i>
+                  </Link>
+                </div>
               </div>
             </div>
             

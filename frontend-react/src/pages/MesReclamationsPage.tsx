@@ -16,7 +16,7 @@ interface Reclamation {
 }
 
 export default function MesReclamationsPage() {
-  const { t } = useI18n()
+  const { t, setLang } = useI18n()
   const navigate = useNavigate()
   const [reclamations, setReclamations] = useState<Reclamation[]>([])
   const [loading, setLoading] = useState(true)
@@ -74,12 +74,29 @@ export default function MesReclamationsPage() {
   return (
     <div className="container py-5">
       <div className="d-flex justify-content-between align-items-center mb-5">
-        <div>
+        <div className="d-flex align-items-center gap-3">
+            <div className="btn-group btn-group-sm">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => setLang('fr')}
+                title="Français"
+              >
+                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => setLang('ar')}
+                title="العربية"
+              >
+                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
+              </button>
+            </div>
             <h2 className="fw-bold mb-1">
                 <i className="fas fa-bullhorn text-danger me-3"></i>
                 {t('my_reclamations')}
             </h2>
-            <p className="text-muted mb-0">{t('reclamations_desc')}</p>
         </div>
         <Link to="/nouvelle-reclamation" className="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm hover-lift">
           <i className="fas fa-plus me-2"></i> {t('new_reclamation')}

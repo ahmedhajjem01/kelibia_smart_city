@@ -186,20 +186,22 @@ export default function MunicipaliteNaissancesPage() {
               <i className="fas fa-user-shield me-2" />
               Espace Agent
             </span>
-            <div className="btn-group" role="group">
+            <div className="btn-group me-3" role="group">
               <button
                 type="button"
                 className="btn btn-sm btn-outline-light"
                 onClick={() => setLang('fr')}
+                title="Français"
               >
-                FR
+                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
               </button>
               <button
                 type="button"
                 className="btn btn-sm btn-outline-light"
                 onClick={() => setLang('ar')}
+                title="العربية"
               >
-                AR
+                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
               </button>
             </div>
             <button className="btn btn-outline-light btn-sm ms-3" onClick={logout}>

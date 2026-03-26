@@ -13,7 +13,7 @@ type Demande = {
 }
 
 export default function MesResidencesPage() {
-  const { t, lang } = useI18n()
+  const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
   const [demandes, setDemandes] = useState<Demande[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,10 +55,30 @@ export default function MesResidencesPage() {
   return (
     <div className="container py-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-primary text-uppercase fw-bold m-0">
-          <i className="fas fa-home me-2"></i>
-          {t('mes_residences')}
-        </h2>
+        <div className="d-flex align-items-center gap-3">
+          <div className="btn-group btn-group-sm">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary"
+              onClick={() => setLang('fr')}
+              title="Français"
+            >
+              <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary"
+              onClick={() => setLang('ar')}
+              title="العربية"
+            >
+              <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
+            </button>
+          </div>
+          <h2 className="text-primary text-uppercase fw-bold m-0">
+            <i className="fas fa-home me-2"></i>
+            {t('mes_residences')}
+          </h2>
+        </div>
         <Link to="/demande-residence" className="btn btn-primary rounded-pill shadow-sm">
           <i className="fas fa-plus me-2"></i>
           {t('req_residence')}

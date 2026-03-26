@@ -34,7 +34,7 @@ interface Reclamation {
 }
 
 export default function AgentReclamationsPage() {
-  const { t } = useI18n()
+  const { t, setLang } = useI18n()
   const navigate = useNavigate()
   const [reclamations, setReclamations] = useState<Reclamation[]>([])
   const [loading, setLoading] = useState(true)
@@ -120,6 +120,24 @@ export default function AgentReclamationsPage() {
                     </h5>
                 </div>
                 <div className="d-flex align-items-center gap-3">
+                    <div className="btn-group btn-group-sm">
+                      <button
+                        type="button"
+                        className="btn btn-outline-light"
+                        onClick={() => setLang('fr')}
+                        title="Français"
+                      >
+                        <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-light"
+                        onClick={() => setLang('ar')}
+                        title="العربية"
+                      >
+                        <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
+                      </button>
+                    </div>
                     <span className="badge bg-danger rounded-pill px-3">
                         {reclamations.filter(r => r.status === 'pending').length} en attente
                     </span>

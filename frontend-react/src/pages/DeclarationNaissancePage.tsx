@@ -175,15 +175,17 @@ export default function DeclarationNaissancePage() {
                 type="button"
                 className="btn btn-sm btn-outline-light"
                 onClick={() => setLang('fr')}
+                title="Français"
               >
-                FR
+                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
               </button>
               <button
                 type="button"
                 className="btn btn-sm btn-outline-light"
                 onClick={() => setLang('ar')}
+                title="العربية"
               >
-                AR
+                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
               </button>
             </div>
             <Link to="/services" className="btn btn-outline-light btn-sm me-2">
