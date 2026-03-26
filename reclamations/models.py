@@ -1,4 +1,4 @@
-from django.contrib.gis.db import models
+from django.db import models
 from django.conf import settings
 
 class Reclamation(models.Model):
@@ -54,7 +54,8 @@ class Reclamation(models.Model):
     service_responsable = models.CharField(max_length=100, blank=True, verbose_name="Service Responsable")
     is_duplicate = models.BooleanField(default=False, verbose_name="Doublon détecté")
     image       = models.ImageField(upload_to='reclamations/', null=True, blank=True, verbose_name="Image / Preuve")
-    location    = models.PointField(null=True, blank=True, srid=4326, verbose_name="Localisation (GPS)")
+    latitude    = models.FloatField(null=True, blank=True, verbose_name="Latitude")
+    longitude   = models.FloatField(null=True, blank=True, verbose_name="Longitude")
     created_at  = models.DateTimeField(auto_now_add=True)
     updated_at  = models.DateTimeField(auto_now=True)
 

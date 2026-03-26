@@ -1,4 +1,3 @@
-from .serializers import ReclamationSerializer, ReclamationGeoSerializer
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -53,13 +52,3 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             reclamation.save()
             return Response({"status": "Statut mis à jour."}) 
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
-    def geojson(self, request):
-        user = request.user
-        if user.is_staff or user.is_superuser or user.user_type == 'agent':
-            qs = Reclamation.objects.exclude(location__isnull=True)
-        else:
-            qs = Reclamation.objects.filter(citizen=user).exclude(location__isnull=True)
-        from .serializers import ReclamationGeoSerializer
-        serializer = ReclamationGeoSerializer(qs, many=True)
-        return Response(serializer.data)   

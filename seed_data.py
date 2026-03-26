@@ -24,7 +24,6 @@ os.environ.setdefault('PGCLIENTENCODING', 'UTF8')
 django.setup()
 
 from django.contrib.auth import get_user_model
-from django.contrib.gis.geos import Point
 from reclamations.models import Reclamation
 
 User = get_user_model()
@@ -406,7 +405,8 @@ for i, r in enumerate(RECLAMATIONS_DATA):
         description=r['description'],
         category=r['category'],
         status=r['status'],
-        location=Point(lng, lat, srid=4326),
+        latitude=lat,
+        longitude=lng,
         created_at=created_at,
         updated_at=created_at if r['status'] == 'pending' else (created_at + timedelta(hours=random.randint(2, 48))),
     )
