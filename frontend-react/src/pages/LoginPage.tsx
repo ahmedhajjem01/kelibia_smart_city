@@ -42,17 +42,28 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      const data = (await res.json()) as Partial<TokenResponse> & {
-        detail?: string
+      const raw = await res.text()
+
+      let data: Partial<TokenResponse> & { detail?: string } | null = null
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as Partial<TokenResponse> & { detail?: string }
+        } catch {
+          // Backend might return HTML/text on failure; keep error generic.
+        }
       }
 
-      if (!res.ok || !data.access || !data.refresh) {
-        throw new Error(data.detail || 'Identifiants incorrects')
+      if (!res.ok) {
+        throw new Error(data?.detail || raw || 'Erreur de connexion.')
+      }
+
+      if (!data?.access || !data?.refresh) {
+        throw new Error(data?.detail || 'Réponse invalide du serveur.')
       }
 
       storeTokens({
-        access: data.access,
-        refresh: data.refresh,
+        access: data.access as string,
+        refresh: data.refresh as string,
       })
 
       if (rememberMe) {
