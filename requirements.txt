@@ -36,4 +36,4 @@ yarl==1.22.0
 dj-database-url==2.3.0
 whitenoise==6.9.0
 qrcode==7.4.2
-django-rest-framework-gis==1.1.0
+
