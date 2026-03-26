@@ -680,6 +680,9 @@ export default function SignupPage() {
                     }}
                     className="img-fluid rounded"
                   />
+                  <div className="mt-2 text-muted small">
+                    {t('camera_troubleshoot')}
+                  </div>
                </div>
                <div className="modal-footer border-0 justify-content-center">
                  <button type="button" className="btn btn-success btn-lg px-5" onClick={capture}>

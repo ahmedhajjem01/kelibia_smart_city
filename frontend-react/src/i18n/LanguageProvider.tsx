@@ -111,7 +111,7 @@ const translations: Record<Lang, Record<string, string>> = {
     capture_title: 'Capturer CIN',
     take_photo: 'Prendre la photo',
     cin_required_error: 'Veuillez fournir les deux faces de votre CIN (Photo ou Upload).',
-    portal_title: 'Portail Citoyen & Agent',
+    portal_title: 'Portail Citoyen',
     password_label: 'Mot de passe',
     remember_me: 'Se souvenir de moi',
     login_btn: 'Se connecter',
@@ -136,6 +136,7 @@ const translations: Record<Lang, Record<string, string>> = {
     join_smart_city: 'Rejoignez Tunisia Smart City',
     documents_cin: 'Documents (CIN)',
     choose: 'Choisir...',
+    camera_troubleshoot: 'Si l\'écran est noir, vérifiez les permissions de votre navigateur pour accéder à la caméra.',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -259,6 +260,7 @@ const translations: Record<Lang, Record<string, string>> = {
     join_smart_city: 'انضم إلى تونس مدينة ذكية',
     documents_cin: 'الوثائق (بطاقة التعريف)',
     choose: 'اختر...',
+    camera_troubleshoot: 'إذا كانت الشاشة سوداء، يرجى التثبت من أذونات المتصفح للوصول إلى الكاميرا.',
   },
 }
 
