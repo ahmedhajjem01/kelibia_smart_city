@@ -2,7 +2,7 @@ import http.server
 import socketserver
 import os
 
-PORT = 5500
+PORT = 5501
 DIRECTORY = "frontend"
 
 class Handler(http.server.SimpleHTTPRequestHandler):

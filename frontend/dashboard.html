@@ -4,206 +4,1046 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Kelibia Smart City</title>
+    <title>Portail Citoyen — Commune de Kélibia</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
-        .arabic-font {
-            font-family: 'Cairo', sans-serif;
+        :root {
+            --green-dark:  #0d2b4e;
+            --green-mid:   #1565c0;
+            --green-light: #1e88e5;
+            --red-tn:      #c62828;
+            --gold:        #f9a825;
+            --sidebar-bg:  #0d1b2e;
+            --sidebar-hover: #1a2f4a;
+            --body-bg:     #eef2f7;
+            --card-shadow: 0 2px 12px rgba(0,0,0,.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--body-bg);
+            min-height: 100vh;
+            margin: 0;
+        }
+        body.arabic-font { font-family: 'Cairo', 'Tajawal', sans-serif; }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            background: var(--green-dark);
+            color: #fff;
+            font-size: .8rem;
+            padding: 4px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topbar a { color: rgba(255,255,255,.75); text-decoration: none; margin: 0 6px; }
+        .topbar a:hover { color: #fff; }
+
+        /* ── MAIN NAVBAR ── */
+        .main-navbar {
+            background: #fff;
+            border-bottom: 3px solid var(--green-mid);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 68px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+        .navbar-brand-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+        .navbar-logo {
+            width: 52px; height: 52px;
+            background: var(--green-mid);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.4rem;
+        }
+        .navbar-title { line-height: 1.2; }
+        .navbar-title .main-title {
+            font-size: 1.05rem; font-weight: 700; color: var(--green-dark); display: block;
+        }
+        .navbar-title .sub-title { font-size: .75rem; color: #777; }
+        .navbar-actions { display: flex; align-items: center; gap: 10px; }
+        .lang-btn {
+            background: none; border: 1px solid #ddd; border-radius: 6px;
+            padding: 4px 10px; cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            font-size: .82rem; color: #444; transition: all .2s;
+        }
+        .lang-btn:hover { border-color: var(--green-mid); color: var(--green-mid); }
+        .lang-btn.active { background: var(--green-mid); color: #fff; border-color: var(--green-mid); }
+        .user-pill {
+            background: var(--green-mid); color: #fff;
+            border-radius: 50px; padding: 5px 14px 5px 5px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: .85rem; cursor: pointer;
+        }
+        .user-pill .avatar {
+            width: 28px; height: 28px; background: #fff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--green-mid); font-size: .75rem; font-weight: 700;
+        }
+        .logout-btn {
+            background: var(--red-tn); color: #fff; border: none; border-radius: 6px;
+            padding: 5px 12px; font-size: .82rem; cursor: pointer;
+            display: flex; align-items: center; gap: 5px; transition: background .2s;
+        }
+        .logout-btn:hover { background: #b71c1c; }
+
+        /* ── GREEN HERO STRIP ── */
+        .hero-strip {
+            background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-light) 100%);
+            color: #fff;
+            padding: 0;
+            overflow: hidden;
+        }
+        .hero-top {
+            padding: 22px 28px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .hero-strip .greeting { font-size: 1.15rem; font-weight: 600; }
+        .hero-strip .sub { font-size: .85rem; opacity: .85; margin-top: 4px; }
+        .hero-strip .badge-role {
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.4);
+            border-radius: 20px;
+            padding: 4px 14px; font-size: .78rem;
+        }
+
+        /* ── FORT IMAGE ── */
+        .fort-banner {
+            width: 100%;
+            height: 210px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #0d2b4e 0%, #1565c0 100%);
+        }
+        .fort-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 55%;
+            display: block;
+        }
+        .fort-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(13,43,78,.5) 0%,
+                rgba(13,43,78,.05) 40%,
+                rgba(13,43,78,.05) 60%,
+                rgba(13,43,78,.65) 100%
+            );
+            z-index: 1;
+        }
+        .fort-banner .fort-caption {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            z-index: 2;
+            color: rgba(255,255,255,.8);
+            font-size: .72rem;
+            font-style: italic;
+        }
+        .fort-banner .fort-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,.5);
+            font-size: .85rem;
+            z-index: 0;
+        }
+        .fort-banner .fort-placeholder i {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            opacity: .4;
+        }
+
+        .breadcrumb-bar {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 28px;
+            font-size: .8rem; color: #666;
+        }
+        .breadcrumb-bar a { color: var(--green-mid); text-decoration: none; }
+
+        /* ── LAYOUT ── */
+        .page-body { display: flex; min-height: calc(100vh - 200px); }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 240px; min-width: 240px;
+            background: var(--sidebar-bg);
+            color: #c8d6e5; padding: 20px 0; flex-shrink: 0;
+        }
+        .sidebar-section-title {
+            font-size: .68rem; text-transform: uppercase;
+            letter-spacing: 1px; color: rgba(255,255,255,.35);
+            padding: 14px 20px 4px;
+        }
+        .sidebar-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 20px; cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all .2s; font-size: .88rem;
+            text-decoration: none; color: #c8d6e5;
+        }
+        .sidebar-item:hover {
+            background: var(--sidebar-hover); color: #fff;
+            border-left-color: var(--green-light);
+        }
+        .sidebar-item.active {
+            background: var(--sidebar-hover); color: #fff;
+            border-left-color: var(--green-light);
+        }
+        .sidebar-item i { width: 18px; text-align: center; font-size: .9rem; }
+        .sidebar-divider { border-top: 1px solid rgba(255,255,255,.06); margin: 10px 0; }
+
+        /* ── MAIN CONTENT ── */
+        .main-content { flex: 1; padding: 24px 28px; overflow-x: hidden; }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: .95rem; font-weight: 700; color: var(--green-dark);
+            border-left: 4px solid var(--green-mid);
+            padding-left: 10px; margin-bottom: 16px;
+        }
+
+        /* ── QUICK ACTIONS ── */
+        .quick-action-btn {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 8px; padding: 18px 10px; border-radius: 10px;
+            border: 2px solid #e8f5e9; background: #f9fffe;
+            text-decoration: none; color: var(--green-dark);
+            font-size: .8rem; font-weight: 600;
+            transition: all .2s; cursor: pointer;
+        }
+        .quick-action-btn:hover {
+            background: var(--green-mid); color: #fff; border-color: var(--green-mid);
+        }
+        .quick-action-btn .qa-icon {
+            font-size: 1.4rem; color: var(--green-mid); transition: color .2s;
+        }
+        .quick-action-btn:hover .qa-icon { color: #fff; }
+
+        /* ── CONTENT CARDS ── */
+        .content-card {
+            background: #fff; border-radius: 10px;
+            box-shadow: var(--card-shadow); margin-bottom: 22px; overflow: hidden;
+        }
+        .content-card .card-header-custom {
+            background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+            color: #fff; padding: 12px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .9rem; font-weight: 600;
+        }
+        .content-card .card-header-custom .icon { opacity: .8; margin-right: 8px; }
+        .content-card .card-body-custom { padding: 18px; }
+
+        /* ── NEWS MINI CARD ── */
+        .news-mini {
+            display: flex; gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0; align-items: flex-start;
+        }
+        .news-mini:last-child { border-bottom: none; }
+        .news-mini .news-dot {
+            width: 8px; height: 8px; background: var(--green-mid);
+            border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+        }
+        .news-mini .news-text { font-size: .83rem; color: #444; }
+        .news-mini .news-date { font-size: .72rem; color: #aaa; }
+
+        /* ── PROFILE SIDEBAR CARD ── */
+        .profile-card {
+            background: #fff; border-radius: 10px;
+            box-shadow: var(--card-shadow); overflow: hidden; margin-bottom: 16px;
+        }
+        .profile-card .profile-header {
+            background: linear-gradient(135deg, var(--green-dark), var(--green-light));
+            padding: 24px; text-align: center; color: #fff;
+        }
+        .profile-avatar {
+            width: 64px; height: 64px;
+            background: rgba(255,255,255,.25);
+            border: 3px solid rgba(255,255,255,.6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; font-weight: 700;
+            margin: 0 auto 10px; color: #fff;
+        }
+        .profile-card .profile-name { font-size: .95rem; font-weight: 700; }
+        .profile-card .profile-email { font-size: .75rem; opacity: .8; margin-top: 2px; }
+        .profile-card .profile-body { padding: 14px 16px; }
+        .profile-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: .8rem;
+        }
+        .profile-row:last-child { border-bottom: none; }
+        .profile-row .lbl { color: #888; }
+        .profile-row .val { color: #333; font-weight: 600; }
+
+        /* ── MODAL ── */
+        .modal-content { border: none; border-radius: 14px; overflow: hidden; }
+        .modal-header-custom {
+            background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+            color: #fff; padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-header-custom .modal-title-custom { font-size: 1rem; font-weight: 700; }
+        .modal-header-custom .btn-close-custom {
+            background: rgba(255,255,255,.2); border: none; color: #fff;
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .9rem; transition: background .2s;
+        }
+        .modal-header-custom .btn-close-custom:hover { background: rgba(255,255,255,.4); }
+        .modal-body { padding: 22px; }
+        .form-label-custom { font-size: .82rem; font-weight: 600; color: #444; margin-bottom: 5px; }
+        .form-control-custom, .form-select-custom {
+            border: 1.5px solid #dde3ea; border-radius: 8px;
+            padding: 10px 14px; font-size: .9rem; transition: border-color .2s; width: 100%;
+        }
+        .form-control-custom:focus, .form-select-custom:focus {
+            outline: none; border-color: var(--green-mid);
+            box-shadow: 0 0 0 3px rgba(46,125,50,.12);
+        }
+        .submit-btn-custom {
+            background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+            color: #fff; border: none; border-radius: 8px; padding: 11px;
+            font-size: .9rem; font-weight: 600; width: 100%; cursor: pointer;
+            transition: opacity .2s; display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .submit-btn-custom:hover { opacity: .9; }
+        .submit-btn-custom:disabled { opacity: .6; cursor: not-allowed; }
+
+        #pickMap {
+            height: 220px; border-radius: 8px;
+            border: 2px solid #dde3ec; cursor: crosshair;
+        }
+        .loc-coords {
+            background: #f0faf2; border: 1px solid #a5d6a7; border-radius: 6px;
+            padding: 6px 10px; font-size: .78rem; color: var(--green-dark);
+            display: flex; align-items: center; gap: 6px; margin-top: 6px;
+        }
+        .loc-coords.empty { background: #f8f9fa; border-color: #dde3ec; color: #aaa; }
+        .loc-hint { font-size: .74rem; color: #888; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+        /* ── FOOTER ── */
+        .page-footer {
+            background: var(--sidebar-bg); color: rgba(255,255,255,.5);
+            text-align: center; font-size: .75rem; padding: 14px; margin-top: auto;
+        }
+        .page-footer span { color: var(--green-light); }
+
+        @media(max-width: 768px) {
+            .sidebar { display: none; }
+            .hero-top { padding: 16px; }
+            .main-content { padding: 16px; }
+            .fort-banner { height: 140px; }
         }
     </style>
 </head>
 
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#" data-i18n="home">Kelibia Smart City</a>
-            <div class="d-flex align-items-center">
-                <div class="btn-group me-3" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('fr')"
-                        title="Français">
-                        <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR">
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="setLanguage('ar')"
-                        title="العربية">
-                        <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN">
-                    </button>
-                </div>
-                <button class="btn btn-outline-light btn-sm" onclick="logout()" data-i18n="logout">Déconnexion</button>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div>
+            <i class="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul
+        </div>
+        <div>
+            <a href="#"><i class="fas fa-phone me-1"></i>+216 72 295 XXX</a>
+            <a href="#"><i class="fas fa-envelope me-1"></i>contact@kelibia.tn</a>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <nav class="main-navbar">
+        <a class="navbar-brand-area" href="#">
+            <div class="navbar-logo"><i class="fas fa-city"></i></div>
+            <div class="navbar-title">
+                <span class="main-title" data-i18n="municipality">بلدية قليبية — Commune de Kélibia</span>
+                <span class="sub-title" data-i18n="smart_city">Portail Citoyen — Kelibia Smart City</span>
             </div>
+        </a>
+        <div class="navbar-actions">
+            <button class="lang-btn" id="btn-fr" onclick="setLanguage('fr')">
+                <img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR"> FR
+            </button>
+            <button class="lang-btn" id="btn-ar" onclick="setLanguage('ar')">
+                <img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR"> عربي
+            </button>
+            <div class="user-pill" id="userPill">
+                <div class="avatar" id="userInitials">?</div>
+                <span id="userName" data-i18n="loading">Chargement...</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span data-i18n="logout">Déconnexion</span>
+            </button>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="alert alert-success">
-                    <h4 data-i18n="welcome">Bienvenue !</h4>
-                    <p data-i18n="welcome_msg">Vous êtes connecté avec succès au portail Kelibia Smart City.</p>
+    <!-- HERO STRIP -->
+    <div class="hero-strip">
+        <!-- Texte de bienvenue -->
+        <div class="hero-top">
+            <div>
+                <div class="greeting">
+                    <i class="fas fa-hand-wave me-2"></i>
+                    <span data-i18n="welcome">Bienvenue,</span>
+                    <strong id="heroName">Citoyen</strong> !
                 </div>
-
-                <!-- Services Card -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary"><i class="fas fa-file-invoice me-2"></i><span
-                                data-i18n="admin_services">Services Administratifs</span></h5>
-                        <p class="card-text text-muted" data-i18n="services_desc">Consultez la liste des documents
-                            requis pour vos démarches municipales.</p>
-                        <a href="services.html" class="btn btn-primary" data-i18n="view_services">Voir les services</a>
-                    </div>
-                </div>
-
-                <!-- Reclamations Card -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title text-danger"><i class="fas fa-bullhorn me-2"></i><span
-                                data-i18n="my_reclamations">Mes Réclamations</span></h5>
-                        <p class="card-text text-muted" data-i18n="reclamations_desc">Signalez un problème (éclairage,
-                            déchets, voirie) et suivez sa résolution.</p>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reclamationModal"
-                            data-i18n="new_reclamation">Nouvelle Réclamation</button>
-                    </div>
-                </div>
-
-                <!-- News Card -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title text-warning"><i class="fas fa-newspaper me-2"></i><span
-                                data-i18n="news_title">Actualités de Kélibia</span></h5>
-                        <p class="card-text text-muted" data-i18n="news_desc">Restez informé des derniers événements et
-                            annonces de votre commune.</p>
-                        <a href="#" class="btn btn-warning" data-i18n="view_services">Lire les articles</a>
-                    </div>
-                </div>
+                <div class="sub" data-i18n="welcome_msg">Gérez vos signalements et accédez aux services municipaux.</div>
             </div>
-
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0" data-i18n="profile">Profil</h6>
-                    </div>
-                    <div class="card-body text-center">
-                        <img src="https://ui-avatars.com/api/?name=User&background=0D6EFD&color=fff"
-                            class="rounded-circle mb-3" width="80">
-                        <h6 id="userName" data-i18n="loading">Chargement...</h6>
-                        <p class="text-muted small" id="userEmail">...</p>
-                    </div>
-                </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-role">
+                    <i class="fas fa-user-check me-1"></i>
+                    <span data-i18n="citizen_role">Citoyen</span>
+                </span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png"
+                     height="22" style="border-radius:3px;" alt="Tunisie">
             </div>
+        </div>
+
+        <!-- IMAGE DU FORT DE KÉLIBIA -->
+        <div class="fort-banner" id="fortBanner">
+            <div class="fort-placeholder">
+                <i class="fas fa-fort-awesome"></i>
+                <span>Fort de Kélibia</span>
+            </div>
+            <img id="fortImg"
+                 src="images/fort.webp"
+                 alt="Fort de Kélibia"
+                 style="position:relative;z-index:1;"
+                 onerror="tryNextFortSrc(this)">
+            <span class="fort-caption" style="z-index:3;">Fort de Kélibia — Patrimoine historique</span>
         </div>
     </div>
 
-    <!-- Reclamation Modal -->
-    <div class="modal fade" id="reclamationModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="new_reclamation">Nouvelle Réclamation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb-bar">
+        <a href="#"><i class="fas fa-home me-1"></i><span data-i18n="home">Accueil</span></a>
+        <span class="mx-2 text-muted">/</span>
+        <span data-i18n="citizen_portal">Portail Citoyen</span>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-section-title" data-i18n="navigation">NAVIGATION</div>
+
+            <a class="sidebar-item active" href="dashboard.html">
+                <i class="fas fa-tachometer-alt"></i>
+                <span data-i18n="dashboard">Tableau de bord</span>
+            </a>
+            <a class="sidebar-item" href="#mapCard" onclick="document.getElementById('mapCard').scrollIntoView({behavior:'smooth'});return false;">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>Carte SIG</span>
+            </a>
+            <a class="sidebar-item" href="mes_reclamations.html">
+                <i class="fas fa-bullhorn"></i>
+                <span data-i18n="my_reclamations">Mes Réclamations</span>
+            </a>
+            <a class="sidebar-item" href="services.html">
+                <i class="fas fa-file-alt"></i>
+                <span data-i18n="admin_services">Services Administratifs</span>
+            </a>
+            <a class="sidebar-item" href="#">
+                <i class="fas fa-newspaper"></i>
+                <span data-i18n="news_title">Actualités</span>
+            </a>
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section-title" data-i18n="account">COMPTE</div>
+
+            <a class="sidebar-item" href="#">
+                <i class="fas fa-user-circle"></i>
+                <span data-i18n="profile">Mon Profil</span>
+            </a>
+            <a class="sidebar-item" href="login.html" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span data-i18n="logout">Déconnexion</span>
+            </a>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+
+            <!-- QUICK ACTIONS -->
+            <div class="content-card mb-4">
+                <div class="card-header-custom">
+                    <span><i class="fas fa-bolt icon"></i><span data-i18n="quick_actions">Actions Rapides</span></span>
                 </div>
-                <div class="modal-body">
-                    <form id="reclamationForm">
-                        <div class="mb-3">
-                            <label class="form-label" data-i18n="details_title">Titre</label>
-                            <input type="text" class="form-control" id="recTitle" required>
+                <div class="card-body-custom">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <button class="quick-action-btn w-100"
+                                data-bs-toggle="modal" data-bs-target="#reclamationModal">
+                                <i class="fas fa-plus-circle qa-icon"></i>
+                                <span data-i18n="new_reclamation">Nouveau Signalement</span>
+                            </button>
                         </div>
+                        <div class="col-6 col-md-3">
+                            <a class="quick-action-btn w-100" href="mes_reclamations.html">
+                                <i class="fas fa-list-check qa-icon"></i>
+                                <span data-i18n="my_reclamations">Mes Réclamations</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a class="quick-action-btn w-100" href="services.html">
+                                <i class="fas fa-file-invoice qa-icon"></i>
+                                <span data-i18n="admin_services">Services Admin.</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a class="quick-action-btn w-100" href="#">
+                                <i class="fas fa-newspaper qa-icon"></i>
+                                <span data-i18n="news_title">Actualités</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARTE SIG 3 COUCHES -->
+            <div class="content-card mb-4" id="mapCard">
+                <div class="card-header-custom" style="background:linear-gradient(90deg,#0d2b4e,#1565c0);display:flex;align-items:center;justify-content:space-between;">
+                    <span><i class="fas fa-map-marked-alt me-2"></i>Carte de Kélibia — Signalements en temps réel</span>
+                    <span style="font-size:.72rem;opacity:.75;" id="citizenMapCount">Chargement...</span>
+                </div>
+                <div id="citizenMap" style="height:320px;width:100%;border-radius:0 0 10px 10px;"></div>
+            </div>
+
+            <!-- NEWS CARD -->
+            <div class="content-card">
+                <div class="card-header-custom" style="background:linear-gradient(90deg,#1a3a5c,#1565c0);">
+                    <span><i class="fas fa-newspaper icon"></i><span data-i18n="news_title">Actualités Municipales</span></span>
+                </div>
+                <div class="card-body-custom">
+                    <div class="news-mini">
+                        <div class="news-dot"></div>
+                        <div>
+                            <div class="news-text">Ramassage des ordures — Programme de mai 2025</div>
+                            <div class="news-date">12 mai 2025</div>
+                        </div>
+                    </div>
+                    <div class="news-mini">
+                        <div class="news-dot"></div>
+                        <div>
+                            <div class="news-text">Travaux d'entretien des routes côtières</div>
+                            <div class="news-date">8 mai 2025</div>
+                        </div>
+                    </div>
+                    <div class="news-mini">
+                        <div class="news-dot"></div>
+                        <div>
+                            <div class="news-text">Réunion publique — plan d'urbanisme</div>
+                            <div class="news-date">3 mai 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /main-content -->
+
+        <!-- RIGHT PROFILE COLUMN -->
+        <div style="width:240px;min-width:240px;padding:24px 16px 24px 0;flex-shrink:0;" id="rightCol">
+
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileInitials">?</div>
+                    <div class="profile-name" id="profileName">Chargement...</div>
+                    <div class="profile-email" id="profileEmail">...</div>
+                </div>
+                <div class="profile-body">
+                    <div class="profile-row">
+                        <span class="lbl" data-i18n="profile_type">Rôle</span>
+                        <span class="val" style="color:var(--green-mid);" data-i18n="citizen_role">Citoyen</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="lbl" data-i18n="profile_city">Ville</span>
+                        <span class="val" id="profileCity">Kélibia</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="lbl" data-i18n="profile_phone">Tél.</span>
+                        <span class="val" id="profilePhone">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lien rapide vers réclamations -->
+            <a href="mes_reclamations.html"
+               style="display:block;background:var(--green-mid);color:#fff;border-radius:8px;padding:12px 16px;
+                      text-decoration:none;font-size:.85rem;font-weight:600;text-align:center;
+                      box-shadow:0 3px 10px rgba(46,125,50,.3);transition:background .2s;margin-bottom:10px;">
+                <i class="fas fa-list-check me-2"></i>Voir mes réclamations
+            </a>
+
+            <button onclick="document.querySelector('[data-bs-target=\'#reclamationModal\']').click()"
+               style="display:block;width:100%;background:#fff;color:var(--green-dark);
+                      border:1.5px solid #c8e6c9;border-radius:8px;padding:10px 16px;
+                      font-size:.82rem;font-weight:600;text-align:center;cursor:pointer;transition:all .2s;">
+                <i class="fas fa-plus-circle me-2" style="color:var(--green-mid);"></i>Nouveau signalement
+            </button>
+
+        </div><!-- /right column -->
+
+    </div><!-- /page-body -->
+
+    <!-- FOOTER -->
+    <div class="page-footer">
+        © 2025 <span>Commune de Kélibia</span> — Portail Citoyen Kelibia Smart City &nbsp;|&nbsp; Tous droits réservés
+    </div>
+
+
+    <!-- ════════ RECLAMATION MODAL ════════ -->
+    <div class="modal fade" id="reclamationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header-custom">
+                    <div class="modal-title-custom">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        <span data-i18n="new_reclamation">Nouveau Signalement</span>
+                    </div>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div id="modalAlert" style="display:none;margin:12px 22px 0;border-radius:8px;padding:10px 14px;font-size:.84rem;"></div>
+
+                <div class="modal-body">
+                    <form id="reclamationForm" enctype="multipart/form-data">
+
                         <div class="mb-3">
-                            <label class="form-label">Catégorie</label>
-                            <select class="form-select" id="recCategory">
-                                <option value="lighting">Éclairage Public</option>
-                                <option value="trash">Déchets / Hygiène</option>
-                                <option value="roads">Voirie / Routes</option>
-                                <option value="noise">Nuisances Sonores</option>
-                                <option value="other">Autre</option>
+                            <label class="form-label-custom" data-i18n="col_title">Titre</label>
+                            <input type="text" class="form-control-custom" id="recTitle" required
+                                placeholder="Ex: Lampadaire cassé rue Ibn Khaldoun">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom" data-i18n="col_category">Catégorie</label>
+                            <select class="form-select-custom" id="recCategory">
+                                <option value="lighting">💡 Éclairage Public</option>
+                                <option value="trash">🗑️ Déchets / Hygiène</option>
+                                <option value="roads">🛣️ Voirie / Routes</option>
+                                <option value="noise">🔊 Nuisances Sonores</option>
+                                <option value="other">📌 Autre</option>
                             </select>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" id="recDescription" rows="3" required></textarea>
+                            <label class="form-label-custom">Description</label>
+                            <textarea class="form-control-custom" id="recDescription" rows="3" required
+                                placeholder="Décrivez le problème en détail..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100" id="submitBtn"
-                            data-i18n="submit">Envoyer</button>
+
+                        <div class="mb-3">
+                            <label class="form-label-custom">
+                                <i class="fas fa-camera me-1" style="color:var(--green-mid);"></i>
+                                <span data-i18n="col_photo">Photo (optionnel)</span>
+                            </label>
+                            <input type="file" class="form-control-custom" id="recImage"
+                                accept="image/*" style="padding:7px 12px;">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label-custom">
+                                <i class="fas fa-map-pin me-1" style="color:var(--green-mid);"></i>
+                                Localisation sur la carte
+                                <span style="font-weight:400;color:#aaa;font-size:.74rem;"> (cliquez pour pointer)</span>
+                            </label>
+                            <div id="pickMap"></div>
+                            <div id="locCoords" class="loc-coords empty">
+                                <i class="fas fa-location-dot"></i>
+                                <span id="locCoordsText">Aucune localisation sélectionnée</span>
+                            </div>
+                            <div class="loc-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Cliquez sur la carte pour géolocaliser le signalement.
+                                <button type="button" onclick="useMyLocation()" style="margin-left:6px;background:none;border:1px solid var(--green-mid);border-radius:5px;padding:1px 8px;font-size:.72rem;color:var(--green-mid);cursor:pointer;">
+                                    <i class="fas fa-crosshairs me-1"></i>Ma position
+                                </button>
+                            </div>
+                            <input type="hidden" id="recLatitude">
+                            <input type="hidden" id="recLongitude">
+                        </div>
+
+                        <button type="submit" class="submit-btn-custom" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span data-i18n="submit">Envoyer le signalement</span>
+                        </button>
+
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
+    <!-- ════════ /MODAL ════════ -->
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/lang.js"></script>
     <script>
-        // Check Auth
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            window.location.href = 'login.html';
-        }
-
-        async function fetchUserInfo() {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/api/accounts/me/', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const user = await response.json();
-                    document.getElementById('userName').textContent = `${user.first_name} ${user.last_name}`;
-                    document.getElementById('userEmail').textContent = user.email;
-                }
-            } catch (error) {
-                console.error('Error fetching user info:', error);
+        /* ── FORT IMAGE FALLBACK ── */
+        const fortSources = [
+            'images/fort.webp',          // fichier original (.webp)
+            'images/fort_kelibia.jpg',   // copie renommée
+            'https://www.tunisia.travel/media/thumbs/poi/large/fort-de-kelibia-2.jpg',
+            'https://media-cdn.tripadvisor.com/media/photo-s/0e/4a/8e/5c/kelibia-castle.jpg',
+        ];
+        let fortSrcIndex = 0;
+        function tryNextFortSrc(img) {
+            fortSrcIndex++;
+            if (fortSrcIndex < fortSources.length) {
+                img.src = fortSources[fortSrcIndex];
+            } else {
+                // Toutes les sources ont échoué — afficher placeholder
+                img.style.display = 'none';
             }
         }
 
-        // Handle Reclamation Submission
-        document.getElementById('reclamationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
+        /* ── AUTH GUARD ── */
+        const token = localStorage.getItem('accessToken');
+        if (!token) window.location.href = 'login.html';
+        const API = 'http://127.0.0.1:8000';
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = getTranslation('processing');
+        /* ── CARTE PRINCIPALE — 3 COUCHES SIG ── */
+        let citizenMap = null, citizenMarkersLayer = null;
 
-            const data = {
-                title: document.getElementById('recTitle').value,
-                category: document.getElementById('recCategory').value,
-                description: document.getElementById('recDescription').value
+        function initCitizenMap() {
+            citizenMap = L.map('citizenMap').setView([36.8467, 11.1047], 13);
+
+            // ── Couche 1 : OpenStreetMap ──────────────────────────────────
+            const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(citizenMap);
+
+            // ── Couche 2 : Satellite Esri ─────────────────────────────────
+            const satellite = L.tileLayer(
+                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                {
+                    attribution: '© Esri, DigitalGlobe, GeoEye, Earthstar Geographics',
+                    maxZoom: 19
+                }
+            );
+
+            // ── Couche 3 : Topographique (WMS / OpenTopoMap) ─────────────
+            const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
+                maxZoom: 17,
+                opacity: 0.9
+            });
+
+            citizenMarkersLayer = L.layerGroup().addTo(citizenMap);
+
+            // Sélecteur des 3 couches
+            L.control.layers(
+                {
+                    '🗺️ OpenStreetMap'      : osm,
+                    '🛰️ Satellite (Esri)'   : satellite,
+                    '🏔️ Topographique (WMS)': topoMap
+                },
+                { '📍 Signalements': citizenMarkersLayer },
+                { position: 'topright', collapsed: false }
+            ).addTo(citizenMap);
+
+            // Légende simplifiée
+            const legend = L.control({ position: 'bottomleft' });
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div');
+                div.style.cssText = 'background:#fff;padding:8px 12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:11px;min-width:150px;';
+                div.innerHTML = `
+                    <div style="font-weight:700;margin-bottom:5px;color:#0d2b4e;">📋 Légende</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><span style="width:10px;height:10px;border-radius:50%;background:#e65100;display:inline-block;"></span> En attente</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><span style="width:10px;height:10px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><span style="width:10px;height:10px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> Résolu</div>
+                    <div style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejeté</div>
+                `;
+                return div;
             };
+            legend.addTo(citizenMap);
 
+            // Charger les signalements sur la carte
+            loadCitizenMapMarkers();
+        }
+
+        async function loadCitizenMapMarkers() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/reclamations/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(data)
+                const res = await fetch(`${API}/api/reclamations/`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const recs = Array.isArray(data) ? data : (data.results || []);
+
+                citizenMarkersLayer.clearLayers();
+                const colorMap = {
+                    pending:     '#e65100',
+                    in_progress: '#1565c0',
+                    resolved:    '#1b5e20',
+                    rejected:    '#757575',
+                };
+                const catIcon = { lighting:'💡', trash:'🗑️', roads:'🛣️', noise:'🔊', other:'📌' };
+                const statusLabel = { pending:'En attente', in_progress:'En cours', resolved:'Résolue', rejected:'Rejetée' };
+                const BASE_LAT = 36.8467, BASE_LNG = 11.1047;
+
+                recs.forEach(r => {
+                    const hasCoords = r.latitude != null && r.longitude != null;
+                    const lat = hasCoords ? r.latitude  : (BASE_LAT + (Math.random() - 0.5) * 0.04);
+                    const lng = hasCoords ? r.longitude : (BASE_LNG + (Math.random() - 0.5) * 0.06);
+                    const color = colorMap[r.status] || '#888';
+                    const icon  = catIcon[r.category] || '📌';
+
+                    const marker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: '',
+                            html: `<div style="background:${color};color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);${!hasCoords?'opacity:0.6;':''};">${icon}</div>`,
+                            iconSize: [28, 28], iconAnchor: [14, 14],
+                        })
+                    }).addTo(citizenMarkersLayer);
+
+                    marker.bindPopup(`
+                        <div style="min-width:180px;font-size:12px;">
+                            <strong style="color:#0d2b4e;">${r.title}</strong><br>
+                            <span style="font-size:11px;color:#888;">${icon} ${r.category}</span><br>
+                            <span style="font-size:11px;">📅 ${new Date(r.created_at).toLocaleDateString('fr-TN',{day:'2-digit',month:'short',year:'numeric'})}</span><br>
+                            <div style="margin-top:4px;">
+                                <span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44;">
+                                    ${statusLabel[r.status] || r.status}
+                                </span>
+                                ${!hasCoords ? '<span style="font-size:10px;color:#aaa;margin-left:3px;">(approx.)</span>' : ''}
+                            </div>
+                        </div>
+                    `);
                 });
 
-                if (response.ok) {
-                    alert(getTranslation('success_msg'));
+                document.getElementById('citizenMapCount').textContent = `${recs.length} signalement(s) affiché(s)`;
+            } catch(e) {
+                document.getElementById('citizenMapCount').textContent = 'Carte non disponible';
+            }
+        }
+
+        /* ── CARTE MODAL ── */
+        let pickMap = null, pickMarker = null;
+
+        document.getElementById('reclamationModal').addEventListener('shown.bs.modal', function () {
+            if (!pickMap) {
+                pickMap = L.map('pickMap').setView([36.8467, 11.1047], 14);
+
+                // ── Couche 1 : OpenStreetMap ──
+                const pmOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap', maxZoom: 19
+                }).addTo(pickMap);
+
+                // ── Couche 2 : Satellite Esri ──
+                const pmSat = L.tileLayer(
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    { attribution: '© Esri', maxZoom: 19 }
+                );
+
+                // ── Couche 3 : Topographique (WMS) ──
+                const pmTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenTopoMap', maxZoom: 17
+                });
+
+                // Sélecteur 3 couches — collapsed:true pour ne pas encombrer le modal
+                L.control.layers(
+                    { '🗺️ OpenStreetMap': pmOsm, '🛰️ Satellite': pmSat, '🏔️ Topographique': pmTopo },
+                    {},
+                    { position: 'topright', collapsed: true }
+                ).addTo(pickMap);
+
+                pickMap.on('click', function(e) {
+                    placePickMarker(e.latlng.lat, e.latlng.lng);
+                });
+            }
+            setTimeout(() => pickMap.invalidateSize(), 100);
+        });
+
+        document.getElementById('reclamationModal').addEventListener('hidden.bs.modal', function () {
+            if (pickMarker) { pickMap.removeLayer(pickMarker); pickMarker = null; }
+            document.getElementById('recLatitude').value  = '';
+            document.getElementById('recLongitude').value = '';
+            const coordEl = document.getElementById('locCoords');
+            coordEl.classList.add('empty');
+            document.getElementById('locCoordsText').textContent = 'Aucune localisation sélectionnée';
+        });
+
+        function placePickMarker(lat, lng) {
+            if (pickMarker) pickMap.removeLayer(pickMarker);
+            const icon = L.divIcon({
+                className: '',
+                html: `<div style="background:var(--green-mid);color:#fff;border-radius:50% 50% 50% 0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);"><i class="fas fa-map-pin" style="transform:rotate(45deg);"></i></div>`,
+                iconSize: [32, 32], iconAnchor: [16, 32],
+            });
+            pickMarker = L.marker([lat, lng], { icon }).addTo(pickMap);
+            document.getElementById('recLatitude').value  = lat.toFixed(6);
+            document.getElementById('recLongitude').value = lng.toFixed(6);
+            const coordEl = document.getElementById('locCoords');
+            coordEl.classList.remove('empty');
+            document.getElementById('locCoordsText').textContent = `Lat: ${lat.toFixed(5)}  •  Lng: ${lng.toFixed(5)}`;
+        }
+
+        function useMyLocation() {
+            if (!navigator.geolocation) { alert('Géolocalisation non supportée.'); return; }
+            navigator.geolocation.getCurrentPosition(
+                pos => { pickMap.setView([pos.coords.latitude, pos.coords.longitude], 16); placePickMarker(pos.coords.latitude, pos.coords.longitude); },
+                () => alert('Impossible d\'obtenir votre position.')
+            );
+        }
+
+        /* ── HELPERS ── */
+        function initials(name) {
+            if (!name || name.trim() === '') return '?';
+            return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function showModalAlert(msg, type = 'danger') {
+            const el = document.getElementById('modalAlert');
+            el.style.display = 'block';
+            el.style.background = type === 'success' ? '#e8f5e9' : '#ffebee';
+            el.style.color      = type === 'success' ? '#1b5e20' : '#b71c1c';
+            el.style.border     = type === 'success' ? '1px solid #a5d6a7' : '1px solid #ef9a9a';
+            el.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${msg}`;
+        }
+
+        /* ── FETCH USER INFO ── */
+        async function fetchUserInfo() {
+            try {
+                const res = await fetch(`${API}/api/accounts/me/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error();
+                const user = await res.json();
+                const fullName = `${user.first_name} ${user.last_name}`.trim() || user.email;
+                const inits = initials(fullName);
+                document.getElementById('userName').textContent     = fullName;
+                document.getElementById('userInitials').textContent  = inits;
+                document.getElementById('heroName').textContent      = user.first_name || fullName;
+                document.getElementById('profileName').textContent   = fullName;
+                document.getElementById('profileEmail').textContent  = user.email;
+                document.getElementById('profileInitials').textContent = inits;
+                document.getElementById('profileCity').textContent   = user.city || 'Kélibia';
+                document.getElementById('profilePhone').textContent  = user.phone || '—';
+            } catch {
+                document.getElementById('userName').textContent = 'Utilisateur';
+            }
+        }
+
+        /* ── SUBMIT RECLAMATION ── */
+        document.getElementById('reclamationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours...`;
+            document.getElementById('modalAlert').style.display = 'none';
+
+            const lat = document.getElementById('recLatitude').value;
+            const lng = document.getElementById('recLongitude').value;
+            const imageFile = document.getElementById('recImage').files[0];
+            let body, headers;
+
+            if (imageFile) {
+                body = new FormData();
+                body.append('title',       document.getElementById('recTitle').value);
+                body.append('category',    document.getElementById('recCategory').value);
+                body.append('description', document.getElementById('recDescription').value);
+                body.append('image', imageFile);
+                if (lat && lng) { body.append('latitude', lat); body.append('longitude', lng); }
+                headers = { 'Authorization': `Bearer ${token}` };
+            } else {
+                const payload = {
+                    title:       document.getElementById('recTitle').value,
+                    category:    document.getElementById('recCategory').value,
+                    description: document.getElementById('recDescription').value,
+                };
+                if (lat && lng) { payload.latitude = parseFloat(lat); payload.longitude = parseFloat(lng); }
+                body = JSON.stringify(payload);
+                headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+            }
+
+            try {
+                const res = await fetch(`${API}/api/reclamations/`, { method: 'POST', headers, body });
+                if (res.ok) {
+                    showModalAlert('Signalement envoyé avec succès !', 'success');
                     document.getElementById('reclamationForm').reset();
-                    bootstrap.Modal.getInstance(document.getElementById('reclamationModal')).hide();
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('reclamationModal')).hide();
+                        document.getElementById('modalAlert').style.display = 'none';
+                    }, 1400);
                 } else {
-                    alert(getTranslation('error_msg'));
+                    const errData = await res.json().catch(() => ({}));
+                    showModalAlert(Object.values(errData).flat().join(' ') || 'Erreur lors de l\'envoi.');
                 }
-            } catch (error) {
-                alert(getTranslation('error_msg'));
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
+            } catch { showModalAlert('Erreur réseau. Vérifiez votre connexion.'); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-paper-plane"></i> <span data-i18n="submit">Envoyer le signalement</span>`;
             }
         });
 
+        /* ── LOGOUT ── */
         function logout() {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             window.location.href = 'login.html';
         }
 
-        // Initialize Language
-        initLanguage();
+        /* ── LANGUAGE ── */
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLanguage', lang);
+            document.documentElement.lang = lang;
+            if (lang === 'ar') {
+                document.body.dir = 'rtl';
+                document.body.classList.add('arabic-font');
+            } else {
+                document.body.dir = 'ltr';
+                document.body.classList.remove('arabic-font');
+            }
+            if (typeof translations !== 'undefined') {
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
+                });
+            }
+            document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+            document.getElementById('btn-ar').classList.toggle('active', lang === 'ar');
+        }
+
+        /* ── INIT ── */
+        if (typeof initLanguage === 'function') initLanguage();
         fetchUserInfo();
+        initCitizenMap();
     </script>
 </body>
-
 </html>

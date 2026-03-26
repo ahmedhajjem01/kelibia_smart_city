@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport – Modifications Kélibia Smart City</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 40px auto; padding: 0 24px; color: #1a1a2e; line-height: 1.7; }
+  h1 { color: #1a5c2a; border-bottom: 3px solid #2e7d32; padding-bottom: 10px; }
+  h2 { color: #2e7d32; margin-top: 40px; border-left: 4px solid #43a047; padding-left: 12px; }
+  h3 { color: #1565c0; margin-top: 24px; }
+  code { background: #f4f6f8; padding: 2px 7px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9em; color: #c62828; }
+  pre { background: #1e1e2e; color: #cdd6f4; padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 0.88em; line-height: 1.6; }
+  pre .comment { color: #6c7086; }
+  pre .key { color: #89dceb; }
+  pre .val { color: #a6e3a1; }
+  pre .str { color: #f9e2af; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th { background: #2e7d32; color: white; padding: 10px 14px; text-align: left; }
+  td { padding: 9px 14px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) { background: #f9fbe7; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.78em; font-weight: 600; }
+  .new { background: #c8e6c9; color: #1b5e20; }
+  .modified { background: #fff9c4; color: #f57f17; }
+  .fixed { background: #ffccbc; color: #bf360c; }
+  .info-box { background: #e3f2fd; border-left: 4px solid #1565c0; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+  .warn-box { background: #fff8e1; border-left: 4px solid #f9a825; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+  .section-divider { border: none; border-top: 2px dashed #c8e6c9; margin: 40px 0; }
+  @media print { body { margin: 20px; } pre { font-size: 0.8em; } }
+</style>
+</head>
+<body>
+
+<h1>📋 Rapport des Modifications — Kélibia Smart City</h1>
+<p><strong>Projet :</strong> <code>C:\Users\MSI\Desktop\kelibia_smart_city</code><br>
+<strong>Date :</strong> Mars 2026<br>
+<strong>Objectif :</strong> Mise en place complète du backend Django + GeoDjango, seed data réaliste, et interface frontend dark-theme.</p>
+
+<div class="info-box">
+  <strong>ℹ️ Note :</strong> Tous les fichiers modifiés se trouvent dans le dossier <code>kelibia_smart_city</code>. Le dossier <code>kelibia_partner</code> était le dossier de travail initial — les modifications ont été migrées vers le bon dossier.
+</div>
+
+<hr class="section-divider">
+
+<h2>1. <code>core/settings.py</code> <span class="badge modified">Modifié</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Le fichier de configuration principal de Django. Plusieurs paramètres ont été ajoutés ou modifiés pour faire fonctionner PostGIS, GeoDjango, CORS, et JWT.</p>
+
+<h3>Modifications apportées :</h3>
+
+<table>
+<tr><th>Paramètre</th><th>Valeur ajoutée</th><th>Raison</th></tr>
+<tr><td><code>ENGINE</code></td><td><code>django.contrib.gis.db.backends.postgis</code></td><td>Utiliser PostGIS (base géospatiale) au lieu de PostgreSQL standard</td></tr>
+<tr><td><code>client_encoding</code></td><td><code>UTF8</code></td><td>Éviter les erreurs d'encodage avec les caractères arabes/français</td></tr>
+<tr><td><code>GDAL_LIBRARY_PATH</code></td><td>Chemin vers <code>gdal.dll</code></td><td>GeoDjango ne trouve pas GDAL automatiquement sur Windows</td></tr>
+<tr><td><code>GEOS_LIBRARY_PATH</code></td><td>Chemin vers <code>geos_c.dll</code></td><td>Idem pour GEOS (bibliothèque géométrique)</td></tr>
+<tr><td><code>CORS_ALLOWED_ORIGINS</code></td><td>ports 5500 et 5501</td><td>Autoriser le frontend à appeler l'API Django (sécurité navigateur)</td></tr>
+<tr><td><code>CORS_ALLOW_ALL_ORIGINS</code></td><td><code>True</code></td><td>Développement local — évite les blocages CORS</td></tr>
+<tr><td><code>django.contrib.gis</code></td><td>dans INSTALLED_APPS</td><td>Activer le module GeoDjango pour les champs géographiques</td></tr>
+<tr><td><code>rest_framework_gis</code></td><td>dans INSTALLED_APPS</td><td>Sérialiser les champs géographiques (PointField → JSON GeoJSON)</td></tr>
+</table>
+
+<h3>Code clé :</h3>
+<pre>
+DATABASES = {
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",  <span class="comment"># PostGIS</span>
+        "NAME": "kelibia_db",
+        "USER": "postgres",
+        "PASSWORD": "root",
+        "HOST": "localhost",
+        "PORT": "5432",
+        "OPTIONS": { "client_encoding": "UTF8" },           <span class="comment"># Encodage UTF-8</span>
+    }
+}
+
+GDAL_LIBRARY_PATH = r'C:\...\osgeo\gdal.dll'               <span class="comment"># Chemin Windows GDAL</span>
+GEOS_LIBRARY_PATH = r'C:\...\osgeo\geos_c.dll'             <span class="comment"># Chemin Windows GEOS</span>
+
+CORS_ALLOW_ALL_ORIGINS = True                               <span class="comment"># Dev : autoriser tous les origines</span>
+</pre>
+
+<hr class="section-divider">
+
+<h2>2. <code>reclamations/models.py</code> <span class="badge modified">Modifié</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Ajout d'un champ GPS (<code>PointField</code>) au modèle <code>Reclamation</code> pour stocker la position géographique de chaque signalement.</p>
+
+<h3>Champ ajouté :</h3>
+<pre>
+from django.contrib.gis.db import models as gis_models
+
+class Reclamation(models.Model):
+    <span class="comment"># ... champs existants ...</span>
+    location = gis_models.PointField(
+        geography=True,
+        null=True,
+        blank=True,
+        srid=4326           <span class="comment"># Système WGS84 (GPS standard, utilisé par Google Maps)</span>
+    )
+</pre>
+
+<div class="info-box">
+  <strong>SRID 4326 :</strong> C'est le système de coordonnées GPS mondial (latitude/longitude). C'est le même que Google Maps, OpenStreetMap, Leaflet.js utilisent.
+</div>
+
+<hr class="section-divider">
+
+<h2>3. <code>reclamations/migrations/0002_add_location_pointfield.py</code> <span class="badge new">Nouveau</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Migration Django générée automatiquement pour appliquer le nouveau champ <code>location</code> à la base de données PostgreSQL/PostGIS.</p>
+
+<pre>
+from django.contrib.gis.db import models
+
+class Migration(migrations.Migration):
+    dependencies = [('reclamations', '0001_initial')]
+
+    operations = [
+        migrations.AddField(
+            model_name='reclamation',
+            name='location',
+            field=models.PointField(
+                geography=True, null=True, blank=True, srid=4326
+            ),
+        ),
+    ]
+</pre>
+
+<p>Appliquée avec : <code>python manage.py migrate</code></p>
+
+<hr class="section-divider">
+
+<h2>4. <code>reclamations/serializers.py</code> <span class="badge modified">Modifié</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Le serializer convertit les objets Python (modèles Django) en JSON pour l'API REST. On a ajouté le support du champ <code>location</code> en format GeoJSON.</p>
+
+<pre>
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
+
+class ReclamationSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Reclamation
+        geo_field = "location"       <span class="comment"># Champ géographique principal</span>
+        fields = [
+            'id', 'title', 'description', 'category',
+            'status', 'location', 'created_at', 'citizen'
+        ]
+</pre>
+
+<div class="info-box">
+  <strong>GeoFeatureModelSerializer</strong> retourne les données au format <strong>GeoJSON</strong> — standard utilisé par Leaflet.js pour afficher des marqueurs sur une carte.
+</div>
+
+<hr class="section-divider">
+
+<h2>5. <code>reclamations/views.py</code> <span class="badge modified">Modifié</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Les vues exposent les endpoints API. On a ajouté un endpoint pour récupérer les réclamations avec leurs coordonnées GPS pour la carte interactive.</p>
+
+<pre>
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_gis.filters import InBBoxFilter
+
+class ReclamationViewSet(viewsets.ModelViewSet):
+    queryset = Reclamation.objects.all()
+    serializer_class = ReclamationSerializer
+    permission_classes = [IsAuthenticated]
+    bbox_filter_field = 'location'        <span class="comment"># Filtre par zone géographique</span>
+    filter_backends = (InBBoxFilter,)
+
+    def get_queryset(self):
+        <span class="comment"># Un citoyen ne voit que ses propres réclamations</span>
+        <span class="comment"># Un agent voit toutes les réclamations</span>
+        user = self.request.user
+        if user.user_type == 'agent' or user.is_staff:
+            return Reclamation.objects.all()
+        return Reclamation.objects.filter(citizen=user)
+</pre>
+
+<hr class="section-divider">
+
+<h2>6. <code>seed_data.py</code> <span class="badge new">Nouveau</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Script de peuplement de la base de données avec des données réalistes de Kélibia — évite de créer les comptes un par un via l'admin panel.</p>
+
+<h3>Ce que le script crée :</h3>
+<table>
+<tr><th>Type</th><th>Quantité</th><th>Email example</th><th>Mot de passe</th></tr>
+<tr><td>Superadmin</td><td>1</td><td>admin@mairie-kelibia.tn</td><td>Admin@Kelibia2025</td></tr>
+<tr><td>Agents municipaux</td><td>3</td><td>agent1@mairie-kelibia.tn</td><td>Agent@2025!</td></tr>
+<tr><td>Citoyens</td><td>12</td><td>citoyen1@kelibia.tn</td><td>Citoyen@2025!</td></tr>
+<tr><td>Réclamations</td><td>30</td><td>—</td><td>—</td></tr>
+</table>
+
+<h3>Caractéristiques techniques :</h3>
+<pre>
+from django.contrib.gis.geos import Point
+
+<span class="comment"># Coordonnées GPS réelles de Kélibia (légèrement randomisées)</span>
+KELIBIA_GPS = [
+    (36.8535, 11.0941),   <span class="comment"># Centre-ville</span>
+    (36.8612, 11.1023),   <span class="comment"># Port de Kélibia</span>
+    (36.8478, 11.0889),   <span class="comment"># Quartier résidentiel</span>
+    <span class="comment"># ... etc</span>
+]
+
+<span class="comment"># Point(longitude, latitude, srid=4326) — attention à l'ordre lon/lat !</span>
+location = Point(lon, lat, srid=4326)
+
+<span class="comment"># get_or_create = idempotent (safe à relancer plusieurs fois)</span>
+user, created = CustomUser.objects.get_or_create(
+    email=email,
+    defaults={...}
+)
+</pre>
+
+<h3>Utilisation :</h3>
+<pre>
+python seed_data.py              <span class="comment"># Créer les données</span>
+python seed_data.py --reset      <span class="comment"># Supprimer et recréer</span>
+</pre>
+
+<hr class="section-divider">
+
+<h2>7. <code>frontend/login.html</code> <span class="badge modified">Modifié</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Page de connexion redesignée avec le thème sombre voulu — fond noir, carte centrée, icône bleue, champs sombres.</p>
+
+<h3>Design :</h3>
+<table>
+<tr><th>Élément</th><th>Valeur CSS</th></tr>
+<tr><td>Fond de page</td><td><code>#0d1117</code> (noir profond)</td></tr>
+<tr><td>Carte login</td><td><code>#161b22</code> (gris très sombre)</td></tr>
+<tr><td>Bordure carte</td><td><code>#30363d</code> (gris subtil)</td></tr>
+<tr><td>Icône</td><td>Cercle bleu dégradé <code>#1f6feb → #388bfd</code></td></tr>
+<tr><td>Bouton</td><td>Bleu dégradé, <code>border-radius: 8px</code></td></tr>
+<tr><td>Champs input</td><td>Fond <code>#0d1117</code>, bordure <code>#30363d</code></td></tr>
+</table>
+
+<h3>Logique JavaScript (JWT) :</h3>
+<pre>
+<span class="comment">// Appel à l'API Django pour obtenir un token JWT</span>
+const response = await fetch('http://127.0.0.1:8000/api/token/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+});
+
+const data = await response.json();
+
+<span class="comment">// Stockage des tokens dans localStorage</span>
+localStorage.setItem('accessToken', data.access);
+localStorage.setItem('refreshToken', data.refresh);
+
+<span class="comment">// Redirection selon le rôle de l'utilisateur</span>
+if (data.is_staff || data.is_superuser) {
+    window.location.href = 'http://127.0.0.1:8000/admin/';
+} else if (data.user_type === 'agent') {
+    window.location.href = 'agent_dashboard.html';
+} else {
+    window.location.href = 'dashboard.html';
+}
+</pre>
+
+<hr class="section-divider">
+
+<h2>8. <code>manage.py</code> <span class="badge fixed">Corrigé</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Ajout de l'encodage UTF-8 en tête de fichier pour éviter les erreurs d'encodage sur Windows avec Python 3.13.</p>
+
+<pre>
+# -*- coding: utf-8 -*-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+</pre>
+
+<hr class="section-divider">
+
+<h2>9. <code>run_frontend.py</code> <span class="badge modified">Modifié</span></h2>
+<h3>Quoi et pourquoi ?</h3>
+<p>Serveur HTTP simple pour servir les fichiers HTML/JS/CSS du frontend. Le port a été changé de 5500 à 5501 car 5500 était déjà occupé (VS Code Live Server).</p>
+
+<pre>
+import http.server, socketserver, os
+
+PORT = 5501                              <span class="comment"># Changé de 5500 → 5501</span>
+FRONTEND_DIR = os.path.join(
+    os.path.dirname(__file__), 'frontend'
+)
+
+os.chdir(FRONTEND_DIR)
+with socketserver.TCPServer(("", PORT), http.server.SimpleHTTPRequestHandler) as httpd:
+    print(f"Serving Frontend at http://127.0.0.1:{PORT}")
+    httpd.serve_forever()
+</pre>
+
+<hr class="section-divider">
+
+<h2>10. Fichiers frontend (dashboard + géodonnées)</h2>
+
+<h3><code>frontend/dashboard.html</code> <span class="badge modified">Modifié</span></h3>
+<p>Dashboard citoyen avec carte Leaflet.js intégrée. Affiche les réclamations du citoyen connecté sur une carte interactive de Kélibia.</p>
+
+<h3><code>frontend/agent_dashboard.html</code> <span class="badge modified">Modifié</span></h3>
+<p>Dashboard agent municipal. Affiche toutes les réclamations de la ville avec statistiques (en attente, en cours, résolues) et marqueurs sur la carte.</p>
+
+<h3><code>frontend/geodata/</code> <span class="badge new">Nouveau dossier</span></h3>
+<p>Contient les fichiers GeoJSON pour les limites géographiques de Kélibia utilisées par Leaflet.js pour tracer les contours de la commune sur la carte.</p>
+
+<hr class="section-divider">
+
+<h2>Résumé — Architecture complète</h2>
+
+<table>
+<tr><th>Couche</th><th>Technologie</th><th>Port</th><th>Rôle</th></tr>
+<tr><td>Base de données</td><td>PostgreSQL + PostGIS</td><td>5432</td><td>Stockage données + géospatial</td></tr>
+<tr><td>Backend API</td><td>Django + DRF + SimpleJWT</td><td>8000</td><td>API REST + authentification JWT</td></tr>
+<tr><td>Frontend</td><td>HTML/CSS/JS + Leaflet.js</td><td>5501</td><td>Interface utilisateur + carte</td></tr>
+</table>
+
+<h2>Commandes pour démarrer le projet</h2>
+<pre>
+<span class="comment"># Terminal 1 — Backend Django</span>
+cd C:\Users\MSI\Desktop\kelibia_smart_city
+python manage.py runserver 8000
+
+<span class="comment"># Terminal 2 — Frontend</span>
+cd C:\Users\MSI\Desktop\kelibia_smart_city
+python run_frontend.py
+
+<span class="comment"># Navigateur</span>
+http://127.0.0.1:5501/login.html
+</pre>
+
+<h2>Comptes de test</h2>
+<table>
+<tr><th>Rôle</th><th>Email</th><th>Mot de passe</th><th>Redirection</th></tr>
+<tr><td>Superadmin</td><td>admin@mairie-kelibia.tn</td><td>Admin@Kelibia2025</td><td>/admin/</td></tr>
+<tr><td>Agent</td><td>agent1@mairie-kelibia.tn</td><td>Agent@2025!</td><td>agent_dashboard.html</td></tr>
+<tr><td>Citoyen</td><td>citoyen1@kelibia.tn</td><td>Citoyen@2025!</td><td>dashboard.html</td></tr>
+</table>
+
+<hr class="section-divider">
+<p style="text-align:center; color:#888; font-size:0.85em;">Rapport généré pour le projet Kélibia Smart City — Mars 2026</p>
+
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Réclamations — Kélibia Smart City</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        :root {
+            --green-dark:    #0d2b4e;
+            --green-mid:     #1565c0;
+            --green-light:   #1e88e5;
+            --red-tn:        #c62828;
+            --sidebar-bg:    #0d1b2e;
+            --sidebar-hover: #1a2f4a;
+            --body-bg:       #eef2f7;
+            --card-shadow:   0 2px 16px rgba(0,0,0,.07);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--body-bg); min-height: 100vh; }
+
+        .topbar {
+            background: var(--green-dark); color: rgba(255,255,255,.8);
+            font-size: .75rem; padding: 5px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .topbar a { color: rgba(255,255,255,.65); text-decoration: none; margin: 0 8px; }
+
+        .main-navbar {
+            background: #fff; border-bottom: 3px solid var(--green-mid);
+            padding: 0 24px; display: flex; align-items: center;
+            justify-content: space-between; height: 66px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+        }
+        .navbar-brand-area { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+        .navbar-logo {
+            width: 50px; height: 50px; background: var(--green-mid);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.3rem; box-shadow: 0 2px 8px rgba(46,125,50,.3);
+        }
+        .navbar-title .main-title { font-size: 1rem; font-weight: 700; color: var(--green-dark); display: block; }
+        .navbar-title .sub-title  { font-size: .72rem; color: #999; }
+        .navbar-actions { display: flex; align-items: center; gap: 10px; }
+        .user-pill {
+            background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+            color: #fff; border-radius: 50px; padding: 5px 14px 5px 5px;
+            display: flex; align-items: center; gap: 8px; font-size: .82rem;
+        }
+        .user-pill .avatar {
+            width: 28px; height: 28px; background: rgba(255,255,255,.25);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: .72rem; font-weight: 700; border: 1.5px solid rgba(255,255,255,.5);
+        }
+        .logout-btn {
+            background: var(--red-tn); color: #fff; border: none; border-radius: 6px;
+            padding: 6px 12px; font-size: .8rem; cursor: pointer;
+            display: flex; align-items: center; gap: 5px; transition: background .2s;
+        }
+        .logout-btn:hover { background: #b71c1c; }
+
+        .page-body { display: flex; min-height: calc(100vh - 96px); }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px; min-width: 240px; background: var(--sidebar-bg);
+            color: #a8c4a8; padding: 20px 0; flex-shrink: 0;
+        }
+        .sidebar-logo-area {
+            padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,.06); margin-bottom: 10px;
+        }
+        .sidebar-logo-area .site-name { font-size: .8rem; font-weight: 700; color: #fff; letter-spacing: .5px; }
+        .sidebar-logo-area .site-sub  { font-size: .68rem; color: rgba(255,255,255,.35); }
+        .sidebar-section-title {
+            font-size: .64rem; text-transform: uppercase; letter-spacing: 1.2px;
+            color: rgba(255,255,255,.25); padding: 14px 20px 5px;
+        }
+        .sidebar-item {
+            display: flex; align-items: center; gap: 11px; padding: 10px 20px;
+            border-left: 3px solid transparent; transition: all .2s;
+            font-size: .85rem; text-decoration: none; color: #a8c4a8;
+        }
+        .sidebar-item:hover  { background: var(--sidebar-hover); color: #d4f4d4; border-left-color: var(--green-light); }
+        .sidebar-item.active { background: var(--sidebar-hover); color: #fff; border-left-color: var(--green-light); }
+        .sidebar-item i { width: 18px; text-align: center; font-size: .88rem; }
+        .sidebar-divider { border-top: 1px solid rgba(255,255,255,.05); margin: 10px 0; }
+
+        /* MAIN */
+        .main-content { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+
+        /* PAGE HEADER */
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .page-header-left h1 { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); }
+        .page-header-left p  { font-size: .82rem; color: #888; margin-top: 2px; }
+        .btn-new-rec {
+            background: var(--green-mid); color: #fff; border: none; border-radius: 8px;
+            padding: 10px 20px; font-size: .85rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 3px 12px rgba(21,101,192,.3); transition: all .2s;
+        }
+        .btn-new-rec:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+        /* FILTER BAR */
+        .filter-bar {
+            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 7px 16px; border-radius: 20px; border: 1.5px solid #dde3ec;
+            background: #fff; font-size: .8rem; font-weight: 500; cursor: pointer;
+            transition: all .2s; color: #555;
+        }
+        .filter-btn:hover  { border-color: var(--green-mid); color: var(--green-mid); }
+        .filter-btn.active {
+            background: var(--green-mid); color: #fff; border-color: var(--green-mid);
+        }
+        .filter-btn .count {
+            background: rgba(255,255,255,.25); border-radius: 10px;
+            padding: 1px 7px; font-size: .72rem; margin-left: 4px;
+        }
+        .filter-btn:not(.active) .count {
+            background: #f0f4f0; color: #888;
+        }
+
+        /* RECLAMATION CARDS */
+        .rec-grid { display: flex; flex-direction: column; gap: 12px; }
+
+        .rec-card {
+            background: #fff; border-radius: 12px; border: 1px solid #eaeef0;
+            box-shadow: var(--card-shadow); padding: 18px 20px;
+            display: flex; gap: 16px; align-items: flex-start;
+            transition: box-shadow .2s, transform .2s;
+        }
+        .rec-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.1); transform: translateY(-1px); }
+
+        .rec-card .rec-icon {
+            width: 46px; height: 46px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        .rec-card .rec-body { flex: 1; min-width: 0; }
+        .rec-card .rec-title {
+            font-size: .9rem; font-weight: 700; color: #1a1a2e;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .rec-card .rec-desc {
+            font-size: .78rem; color: #888; line-height: 1.5;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .rec-card .rec-meta {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        }
+        .rec-card .rec-date { font-size: .72rem; color: #bbb; display: flex; align-items: center; gap: 4px; }
+
+        .cat-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600;
+        }
+        .cat-lighting  { background: #fff8e1; color: #f57f17; }
+        .cat-trash     { background: #e3f2fd; color: #1565c0; }
+        .cat-roads     { background: #ede7f6; color: #4527a0; }
+        .cat-noise     { background: #fce4ec; color: #880e4f; }
+        .cat-other     { background: #eceff1; color: #37474f; }
+
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 20px; font-size: .72rem; font-weight: 600;
+        }
+        .status-pending     { background: #fff3e0; color: #e65100; }
+        .status-in_progress { background: #e3f2fd; color: #1565c0; }
+        .status-resolved    { background: #e3f2fd; color: #0d47a1; }
+        .status-rejected    { background: #ffebee; color: #b71c1c; }
+
+        /* status dot */
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .dot-pending     { background: #e65100; }
+        .dot-in_progress { background: #1565c0; animation: pulse 1.5s infinite; }
+        .dot-resolved    { background: #0d47a1; }
+        .dot-rejected    { background: #b71c1c; }
+        @keyframes pulse {
+            0%,100% { opacity:1; } 50% { opacity:.4; }
+        }
+
+        .empty-state {
+            text-align: center; padding: 60px 20px; color: #bbb;
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 14px; opacity: .3; display: block; }
+        .empty-state p { font-size: .88rem; margin-bottom: 16px; }
+
+        .spinner-wrap { text-align: center; padding: 50px; color: var(--green-mid); }
+
+
+        /* MODAL */
+        .modal-content { border: none; border-radius: 14px; overflow: hidden; }
+        .modal-header-custom {
+            background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+            color: #fff; padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-title-custom { font-size: .95rem; font-weight: 700; }
+        .btn-close-custom {
+            background: rgba(255,255,255,.2); border: none; color: #fff;
+            width: 28px; height: 28px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: .9rem; transition: background .2s;
+        }
+        .btn-close-custom:hover { background: rgba(255,255,255,.4); }
+        .modal-body { padding: 22px; }
+        .form-label-custom { font-size: .82rem; font-weight: 600; color: #444; margin-bottom: 5px; display: block; }
+        .form-control-custom, .form-select-custom {
+            border: 1.5px solid #dde3ec; border-radius: 8px;
+            padding: 9px 12px; font-size: .88rem; transition: border-color .2s; width: 100%;
+        }
+        .form-control-custom:focus, .form-select-custom:focus {
+            outline: none; border-color: var(--green-mid);
+            box-shadow: 0 0 0 3px rgba(46,125,50,.1);
+        }
+        .submit-btn-custom {
+            background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+            color: #fff; border: none; border-radius: 8px;
+            padding: 11px; font-size: .9rem; font-weight: 600;
+            width: 100%; cursor: pointer; transition: opacity .2s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .submit-btn-custom:hover { opacity: .9; }
+        .submit-btn-custom:disabled { opacity: .6; cursor: not-allowed; }
+        #pickMap {
+            height: 220px; border-radius: 8px; border: 2px solid #dde3ec; cursor: crosshair;
+        }
+        .loc-coords {
+            background: #e8f0fe; border: 1px solid #90caf9; border-radius: 6px;
+            padding: 6px 10px; font-size: .78rem; color: var(--green-dark);
+            display: flex; align-items: center; gap: 6px; margin-top: 6px;
+        }
+        .loc-coords.empty { background: #f8f9fa; border-color: #dde3ec; color: #aaa; }
+        .loc-hint { font-size: .74rem; color: #888; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+        .page-footer {
+            background: var(--sidebar-bg); color: rgba(255,255,255,.4);
+            text-align: center; font-size: .74rem; padding: 12px;
+        }
+        .page-footer span { color: #6abf6a; }
+
+        @media(max-width:900px) { .sidebar { display:none; } }
+        @media(max-width:640px) { .main-content { padding:16px; } }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div><i class="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
+    <div>
+        <a href="#"><i class="fas fa-phone me-1"></i>+216 72 295 XXX</a>
+        <a href="#"><i class="fas fa-envelope me-1"></i>contact@kelibia.tn</a>
+    </div>
+</div>
+
+<nav class="main-navbar">
+    <a class="navbar-brand-area" href="dashboard.html">
+        <div class="navbar-logo"><i class="fas fa-city"></i></div>
+        <div class="navbar-title">
+            <span class="main-title">Commune de Kélibia</span>
+            <span class="sub-title">Portail Citoyen — Kelibia Smart City</span>
+        </div>
+    </a>
+    <div class="navbar-actions">
+        <div class="user-pill">
+            <div class="avatar" id="userInitials">?</div>
+            <span id="userName">Chargement...</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Déconnexion
+        </button>
+    </div>
+</nav>
+
+<div class="page-body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo-area">
+            <div class="site-name">Kélibia Smart City</div>
+            <div class="site-sub">Portail Citoyen</div>
+        </div>
+        <div class="sidebar-section-title">Navigation</div>
+        <a class="sidebar-item" href="dashboard.html"><i class="fas fa-home"></i> Tableau de bord</a>
+        <a class="sidebar-item active" href="mes_reclamations.html"><i class="fas fa-bullhorn"></i> Mes Réclamations</a>
+        <a class="sidebar-item" href="services.html"><i class="fas fa-file-alt"></i> Services Admin.</a>
+        <a class="sidebar-item" href="#"><i class="fas fa-newspaper"></i> Actualités</a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-title">Compte</div>
+        <a class="sidebar-item" href="#"><i class="fas fa-user-circle"></i> Mon Profil</a>
+        <a class="sidebar-item" href="login.html" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1><i class="fas fa-bullhorn me-2" style="color:var(--green-mid);font-size:1.1rem;"></i>Mes Réclamations</h1>
+                <p>Historique de tous vos signalements auprès de la commune</p>
+            </div>
+            <button class="btn-new-rec" data-bs-toggle="modal" data-bs-target="#reclamationModal">
+                <i class="fas fa-plus-circle"></i> Nouveau Signalement
+            </button>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" data-filter="all" onclick="filterRecs('all')">
+                <i class="fas fa-list me-1"></i>Toutes <span class="count" id="cnt-all">0</span>
+            </button>
+            <button class="filter-btn" data-filter="pending" onclick="filterRecs('pending')">
+                <i class="fas fa-clock me-1"></i>En attente <span class="count" id="cnt-pending">0</span>
+            </button>
+            <button class="filter-btn" data-filter="in_progress" onclick="filterRecs('in_progress')">
+                <i class="fas fa-spinner me-1"></i>En cours <span class="count" id="cnt-in_progress">0</span>
+            </button>
+            <button class="filter-btn" data-filter="resolved" onclick="filterRecs('resolved')">
+                <i class="fas fa-check-circle me-1"></i>Résolues <span class="count" id="cnt-resolved">0</span>
+            </button>
+            <button class="filter-btn" data-filter="rejected" onclick="filterRecs('rejected')">
+                <i class="fas fa-times-circle me-1"></i>Rejetées <span class="count" id="cnt-rejected">0</span>
+            </button>
+        </div>
+
+        <!-- LOADING -->
+        <div id="recSpinner" class="spinner-wrap">
+            <div class="spinner-border text-primary" style="width:2.2rem;height:2.2rem;"></div>
+            <div class="mt-2" style="font-size:.82rem;color:#888;">Chargement de vos réclamations...</div>
+        </div>
+
+        <!-- RECLAMATIONS LIST -->
+        <div id="recGrid" class="rec-grid" style="display:none;"></div>
+
+        <!-- EMPTY -->
+        <div id="recEmpty" class="empty-state" style="display:none;">
+            <i class="fas fa-inbox"></i>
+            <p>Aucune réclamation dans cette catégorie.</p>
+            <button class="btn-new-rec mx-auto" data-bs-toggle="modal" data-bs-target="#reclamationModal" style="justify-content:center;">
+                <i class="fas fa-plus-circle"></i> Créer un signalement
+            </button>
+        </div>
+
+        <!-- ERROR -->
+        <div id="recError" class="empty-state" style="display:none;">
+            <i class="fas fa-exclamation-triangle" style="color:#e53935;"></i>
+            <p>Impossible de charger vos réclamations. Vérifiez que Django est démarré.</p>
+        </div>
+
+    </div>
+</div>
+
+<div class="page-footer">
+    © 2025 <span>Commune de Kélibia</span> — Portail Citoyen Kelibia Smart City &nbsp;|&nbsp; Tous droits réservés
+</div>
+
+
+<!-- ══ MODAL NOUVEAU SIGNALEMENT ══ -->
+<div class="modal fade" id="reclamationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header-custom">
+                <div class="modal-title-custom"><i class="fas fa-plus-circle me-2"></i>Nouveau Signalement</div>
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modalAlert" style="display:none;margin:12px 22px 0;border-radius:8px;padding:10px 14px;font-size:.84rem;"></div>
+            <div class="modal-body">
+                <form id="reclamationForm">
+                    <div class="mb-3">
+                        <label class="form-label-custom">Titre</label>
+                        <input type="text" class="form-control-custom" id="recTitle" required placeholder="Ex: Lampadaire cassé rue Ibn Khaldoun">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Catégorie</label>
+                        <select class="form-select-custom" id="recCategory">
+                            <option value="lighting">💡 Éclairage Public</option>
+                            <option value="trash">🗑️ Déchets / Hygiène</option>
+                            <option value="roads">🛣️ Voirie / Routes</option>
+                            <option value="noise">🔊 Nuisances Sonores</option>
+                            <option value="other">📌 Autre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Description</label>
+                        <textarea class="form-control-custom" id="recDescription" rows="3" required placeholder="Décrivez le problème en détail..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom"><i class="fas fa-camera me-1" style="color:var(--green-mid);"></i>Photo (optionnel)</label>
+                        <input type="file" class="form-control-custom" id="recImage" accept="image/*" style="padding:7px 12px;">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label-custom"><i class="fas fa-map-pin me-1" style="color:var(--green-mid);"></i>Localisation <span style="font-weight:400;color:#aaa;font-size:.72rem;">(cliquez pour pointer)</span></label>
+                        <div id="pickMap"></div>
+                        <div id="locCoords" class="loc-coords empty">
+                            <i class="fas fa-location-dot"></i>
+                            <span id="locCoordsText">Aucune localisation sélectionnée</span>
+                        </div>
+                        <div class="loc-hint">
+                            <i class="fas fa-info-circle"></i> Cliquez sur la carte pour géolocaliser.
+                            <button type="button" onclick="useMyLocation()" style="margin-left:6px;background:none;border:1px solid var(--green-mid);border-radius:5px;padding:1px 8px;font-size:.72rem;color:var(--green-mid);cursor:pointer;">
+                                <i class="fas fa-crosshairs me-1"></i>Ma position
+                            </button>
+                        </div>
+                        <input type="hidden" id="recLatitude">
+                        <input type="hidden" id="recLongitude">
+                    </div>
+                    <button type="submit" class="submit-btn-custom" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> Envoyer le signalement
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const token = localStorage.getItem('accessToken');
+    if (!token) window.location.href = 'login.html';
+    const API = 'http://127.0.0.1:8000';
+
+    const CAT = {
+        lighting: { label: '💡 Éclairage',  cls: 'cat-lighting', icon: 'fa-lightbulb',    bg: '#fff8e1', col: '#f57f17' },
+        trash:    { label: '🗑️ Déchets',    cls: 'cat-trash',    icon: 'fa-trash',         bg: '#e3f2fd', col: '#1565c0' },
+        roads:    { label: '🛣️ Voirie',      cls: 'cat-roads',    icon: 'fa-road',          bg: '#ede7f6', col: '#4527a0' },
+        noise:    { label: '🔊 Nuisances',  cls: 'cat-noise',    icon: 'fa-volume-high',   bg: '#fce4ec', col: '#880e4f' },
+        other:    { label: '📌 Autre',       cls: 'cat-other',    icon: 'fa-circle-dot',    bg: '#eceff1', col: '#37474f' },
+    };
+    const STATUS = {
+        pending:     { label: 'En attente',  cls: 'status-pending',     dot: 'dot-pending'     },
+        in_progress: { label: 'En cours',    cls: 'status-in_progress', dot: 'dot-in_progress' },
+        resolved:    { label: 'Résolue',     cls: 'status-resolved',    dot: 'dot-resolved'    },
+        rejected:    { label: 'Rejetée',     cls: 'status-rejected',    dot: 'dot-rejected'    },
+    };
+
+    let allRecs = [];
+    let currentFilter = 'all';
+
+    function formatDate(iso) {
+        if (!iso) return '—';
+        return new Date(iso).toLocaleDateString('fr-TN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function initials(name) {
+        if (!name || !name.trim()) return '?';
+        return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    /* ── FETCH USER ── */
+    async function fetchUserInfo() {
+        try {
+            const res = await fetch(`${API}/api/accounts/me/`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
+            const user = await res.json();
+            const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email;
+            document.getElementById('userName').textContent    = fullName;
+            document.getElementById('userInitials').textContent = initials(fullName);
+        } catch { document.getElementById('userName').textContent = 'Citoyen'; }
+    }
+
+    /* ── FETCH RECLAMATIONS ── */
+    async function fetchReclamations() {
+        try {
+            const res = await fetch(`${API}/api/reclamations/`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            allRecs = Array.isArray(data) ? data : (data.results || data.features?.map(f => f.properties) || []);
+
+            // Update counts
+            document.getElementById('cnt-all').textContent        = allRecs.length;
+            document.getElementById('cnt-pending').textContent    = allRecs.filter(r => r.status === 'pending').length;
+            document.getElementById('cnt-in_progress').textContent = allRecs.filter(r => r.status === 'in_progress').length;
+            document.getElementById('cnt-resolved').textContent   = allRecs.filter(r => r.status === 'resolved').length;
+            document.getElementById('cnt-rejected').textContent   = allRecs.filter(r => r.status === 'rejected').length;
+
+            document.getElementById('recSpinner').style.display = 'none';
+            renderRecs(allRecs);
+        } catch {
+            document.getElementById('recSpinner').style.display = 'none';
+            document.getElementById('recError').style.display   = 'block';
+        }
+    }
+
+    function renderRecs(recs) {
+        const grid  = document.getElementById('recGrid');
+        const empty = document.getElementById('recEmpty');
+        grid.innerHTML = '';
+
+        if (recs.length === 0) {
+            grid.style.display  = 'none';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+        grid.style.display  = 'flex';
+
+        recs.forEach(r => {
+            const cat    = CAT[r.category]    || CAT.other;
+            const status = STATUS[r.status]   || STATUS.pending;
+
+            const card = document.createElement('div');
+            card.className = 'rec-card';
+            card.innerHTML = `
+                <div class="rec-icon" style="background:${cat.bg};color:${cat.col};">
+                    <i class="fas ${cat.icon}"></i>
+                </div>
+                <div class="rec-body">
+                    <div class="rec-title">${r.title}</div>
+                    <div class="rec-desc">${r.description || 'Aucune description.'}</div>
+                    <div class="rec-meta">
+                        <span class="cat-badge ${cat.cls}">${cat.label}</span>
+                        <span class="status-badge ${status.cls}">
+                            <span class="status-dot ${status.dot}"></span>
+                            ${status.label}
+                        </span>
+                        <span class="rec-date"><i class="fas fa-calendar-alt"></i>${formatDate(r.created_at)}</span>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function filterRecs(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.filter === filter);
+        });
+        const filtered = filter === 'all' ? allRecs : allRecs.filter(r => r.status === filter);
+        document.getElementById('recEmpty').style.display = 'none';
+        renderRecs(filtered);
+    }
+
+    /* ── CARTE MODAL ── */
+    let pickMap = null, pickMarker = null;
+    document.getElementById('reclamationModal').addEventListener('shown.bs.modal', function () {
+        if (!pickMap) {
+            pickMap = L.map('pickMap').setView([36.8467, 11.1047], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(pickMap);
+            pickMap.on('click', e => placePickMarker(e.latlng.lat, e.latlng.lng));
+        }
+        setTimeout(() => pickMap.invalidateSize(), 100);
+    });
+    document.getElementById('reclamationModal').addEventListener('hidden.bs.modal', function () {
+        if (pickMarker) { pickMap.removeLayer(pickMarker); pickMarker = null; }
+        document.getElementById('recLatitude').value  = '';
+        document.getElementById('recLongitude').value = '';
+        document.getElementById('locCoords').classList.add('empty');
+        document.getElementById('locCoordsText').textContent = 'Aucune localisation sélectionnée';
+    });
+    function placePickMarker(lat, lng) {
+        if (pickMarker) pickMap.removeLayer(pickMarker);
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="background:#1565c0;color:#fff;border-radius:50% 50% 50% 0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);"><i class="fas fa-map-pin" style="transform:rotate(45deg);"></i></div>`,
+            iconSize: [30, 30], iconAnchor: [15, 30],
+        });
+        pickMarker = L.marker([lat, lng], { icon }).addTo(pickMap);
+        document.getElementById('recLatitude').value  = lat.toFixed(6);
+        document.getElementById('recLongitude').value = lng.toFixed(6);
+        document.getElementById('locCoords').classList.remove('empty');
+        document.getElementById('locCoordsText').textContent = `Lat: ${lat.toFixed(5)}  •  Lng: ${lng.toFixed(5)}`;
+    }
+    function useMyLocation() {
+        if (!navigator.geolocation) { alert('Géolocalisation non supportée.'); return; }
+        navigator.geolocation.getCurrentPosition(
+            pos => { pickMap.setView([pos.coords.latitude, pos.coords.longitude], 16); placePickMarker(pos.coords.latitude, pos.coords.longitude); },
+            () => alert('Impossible d\'obtenir votre position.')
+        );
+    }
+
+    /* ── SUBMIT ── */
+    function showModalAlert(msg, type='danger') {
+        const el = document.getElementById('modalAlert');
+        el.style.display  = 'block';
+        el.style.background = type==='success'?'#e3f2fd':'#ffebee';
+        el.style.color      = type==='success'?'#0d47a1':'#b71c1c';
+        el.style.border     = type==='success'?'1px solid #90caf9':'1px solid #ef9a9a';
+        el.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'} me-2"></i>${msg}`;
+    }
+    document.getElementById('reclamationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours...`;
+        document.getElementById('modalAlert').style.display = 'none';
+        const lat = document.getElementById('recLatitude').value;
+        const lng = document.getElementById('recLongitude').value;
+        const imageFile = document.getElementById('recImage').files[0];
+        let body, headers;
+        if (imageFile) {
+            body = new FormData();
+            body.append('title',       document.getElementById('recTitle').value);
+            body.append('category',    document.getElementById('recCategory').value);
+            body.append('description', document.getElementById('recDescription').value);
+            body.append('image', imageFile);
+            if (lat && lng) { body.append('latitude', lat); body.append('longitude', lng); }
+            headers = { 'Authorization': `Bearer ${token}` };
+        } else {
+            const payload = { title: document.getElementById('recTitle').value, category: document.getElementById('recCategory').value, description: document.getElementById('recDescription').value };
+            if (lat && lng) { payload.latitude = parseFloat(lat); payload.longitude = parseFloat(lng); }
+            body = JSON.stringify(payload);
+            headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        }
+        try {
+            const res = await fetch(`${API}/api/reclamations/`, { method: 'POST', headers, body });
+            if (res.ok) {
+                showModalAlert('Signalement envoyé avec succès !', 'success');
+                document.getElementById('reclamationForm').reset();
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('reclamationModal')).hide();
+                    document.getElementById('modalAlert').style.display = 'none';
+                    // Reload list
+                    document.getElementById('recGrid').style.display   = 'none';
+                    document.getElementById('recSpinner').style.display = 'block';
+                    fetchReclamations();
+                }, 1400);
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                showModalAlert(Object.values(errData).flat().join(' ') || 'Erreur lors de l\'envoi.');
+            }
+        } catch { showModalAlert('Erreur réseau. Vérifiez votre connexion.'); }
+        finally { btn.disabled = false; btn.innerHTML = `<i class="fas fa-paper-plane"></i> Envoyer le signalement`; }
+    });
+
+    function logout() {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = 'login.html';
+    }
+
+    fetchUserInfo();
+    fetchReclamations();
+</script>
+</body>
+</html>

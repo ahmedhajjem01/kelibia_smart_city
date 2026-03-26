@@ -1,69 +1,297 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Kelibia Smart City</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="css/style.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Kélibia Smart City – Connexion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #0d1117;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e6edf3;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 40px 36px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .city-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #1f6feb, #388bfd);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 16px rgba(31, 111, 235, 0.4);
+        }
+
+        .city-icon svg {
+            width: 38px;
+            height: 38px;
+            fill: white;
+        }
+
+        .login-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #e6edf3;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .login-header p {
+            font-size: 0.88rem;
+            color: #8b949e;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #c9d1d9;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-size: 0.92rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #388bfd;
+            box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: #484f58;
+        }
+
+        #error-msg {
+            display: none;
+            background-color: rgba(248, 81, 73, 0.12);
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            color: #f85149;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1f6feb, #388bfd);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
+            margin-top: 4px;
+        }
+
+        .btn-login:hover {
+            opacity: 0.88;
+        }
+
+        .btn-login:active {
+            transform: scale(0.99);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .login-footer a {
+            color: #388bfd;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+
+        .login-footer a:hover {
+            color: #58a6ff;
+            text-decoration: underline;
+        }
+
+        .divider {
+            color: #484f58;
+            margin: 0 10px;
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-light d-flex align-items-center vh-100">
+    <div class="login-container">
+        <div class="login-card">
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-5 col-lg-4">
-                <div class="card shadow-lg border-0 rounded-lg mt-5">
-                    <div class="card-header bg-primary text-white text-center py-4">
-                        <h3 class="font-weight-light my-2">Kelibia Smart City</h3>
-                        <p class="small mb-0">Portail Citoyen & Agent</p>
-                    </div>
-                    <div class="card-body p-4">
-                        <form id="loginForm">
-                            <div class="form-floating mb-3">
-                                <input type="email" class="form-control" id="email" placeholder="nom@exemple.com"
-                                    required>
-                                <label for="email">Adresse Email</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input type="password" class="form-control" id="password" placeholder="Mot de passe"
-                                    required>
-                                <label for="password">Mot de passe</label>
-                            </div>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" value="" id="rememberPasswordCheck">
-                                <label class="form-check-label" for="rememberPasswordCheck">
-                                    Se souvenir de moi
-                                </label>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary btn-lg" type="submit" id="loginBtn">
-                                    <span class="spinner-border spinner-border-sm d-none" role="status"
-                                        aria-hidden="true"></span>
-                                    Se connecter
-                                </button>
-                            </div>
-                            <div id="error-message" class="alert alert-danger mt-3 d-none" role="alert"></div>
-                        </form>
-                    </div>
-                    <div class="card-footer text-center py-3">
-                        <div class="small"><a href="forgot-password.html">Mot de passe oublié ?</a></div>
-                        <div class="small mt-2"><a href="signup.html" class="btn btn-sm btn-outline-primary">Créer un
-                                compte (Nouveau)</a></div>
-                    </div>
+            <div class="login-header">
+                <div class="city-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 11V5l-3-3-3 3v2H3v14h18V11h-6zm-8 8H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5v-2h2v2zm6 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2zm6 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/>
+                    </svg>
                 </div>
+                <h1>Kélibia Smart City</h1>
+                <p>Portail citoyen &amp; agent municipal</p>
             </div>
+
+            <div id="error-msg"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Adresse email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="votre@email.com"
+                        required
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="••••••••"
+                        required
+                        autocomplete="current-password"
+                    />
+                </div>
+
+                <button type="submit" class="btn-login" id="login-btn">
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a href="register.html">Créer un compte</a>
+                <span class="divider">|</span>
+                <a href="forgot-password.html">Mot de passe oublié ?</a>
+            </div>
+
         </div>
     </div>
 
-    <!-- Bootstrap & JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
-</body>
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
 
+        const form = document.getElementById('login-form');
+        const errorMsg = document.getElementById('error-msg');
+        const loginBtn = document.getElementById('login-btn');
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMsg.style.display = 'none';
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideError();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showError('Veuillez remplir tous les champs.');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Connexion…';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/token/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.detail || 'Email ou mot de passe incorrect.');
+                    return;
+                }
+
+                // Store tokens
+                localStorage.setItem('accessToken', data.access);
+                localStorage.setItem('refreshToken', data.refresh);
+                localStorage.setItem('user_type', data.user_type || '');
+                localStorage.setItem('user_email', email);
+
+                // Role-based redirect
+                if (data.is_staff || data.is_superuser) {
+                    window.location.href = `${API_BASE}/admin/`;
+                } else if (data.user_type === 'agent') {
+                    window.location.href = 'agent_dashboard.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+
+            } catch (err) {
+                showError('Impossible de contacter le serveur. Vérifiez que Django est démarré sur le port 8000.');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Se connecter';
+            }
+        });
+    </script>
+
+</body>
 </html>
