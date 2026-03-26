@@ -1,4 +1,5 @@
 import os, django
+from typing import Optional
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
@@ -10,12 +11,20 @@ CustomUser = get_user_model()
 # Trouve un citoyen (Père) qui a des enfants enregistrés
 pere = Citoyen.objects.filter(enfants_pere__isnull=False).first()
 
+# IMPORTANT: évite d'avoir des identifiants en dur dans le code.
+test_email: Optional[str] = os.getenv('TEST_USER_EMAIL')
+test_password: Optional[str] = os.getenv('TEST_USER_PASSWORD')
+
 if not pere:
     print("Erreur: Aucun citoyen parent n'a été trouvé dans la base de données.")
 else:
+    if not test_email or not test_password:
+        raise ValueError(
+            "Pour créer un compte de test, définis TEST_USER_EMAIL et TEST_USER_PASSWORD dans tes variables d'environnement."
+        )
     # Crée ou récupère le compte
     user, created = CustomUser.objects.get_or_create(
-        email='citizen@kelibia.tn',
+        email=test_email,
         defaults={
             'username': 'citizen_test',
             'first_name': pere.prenom_fr,
@@ -32,14 +41,13 @@ else:
         user.first_name = pere.prenom_fr
         user.last_name = pere.nom_fr
     
-    user.set_password('Kelibia2026!')
+    user.set_password(test_password)
     user.save()
     
     print("\n" + "="*50)
     print("✅ COMPTE CITOYEN CRÉÉ AVEC SUCCÈS ✅")
     print("="*50)
-    print(f"Email   : citizen@kelibia.tn")
-    print(f"Mot de passe  : Kelibia2026!")
+    print(f"Compte créé pour l'email de test défini dans TEST_USER_EMAIL.")
     print(f"CIN lié : {pere.cin}")
     print(f"Nom     : {pere.prenom_fr} {pere.nom_fr}")
     print("="*50)

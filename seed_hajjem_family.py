@@ -12,6 +12,14 @@ from django.contrib.auth import get_user_model
 
 CustomUser = get_user_model()
 
+test_email = os.getenv('TEST_USER_EMAIL')
+test_password = os.getenv('TEST_USER_PASSWORD')
+
+if not test_email or not test_password:
+    raise ValueError(
+        "Pour utiliser ce script de seed, définis TEST_USER_EMAIL et TEST_USER_PASSWORD dans l'environnement."
+    )
+
 def create_citoyen(prenom_fr, prenom_ar, nom_fr, nom_ar, date_n, sexe, pere=None, mere=None, cin=None):
     n_ec = f"{random.randint(1000, 9999)}/{date_n.year}"
     citoyen = Citoyen.objects.create(
@@ -111,14 +119,14 @@ def seed_hajjem():
     ines = create_citoyen("Ines", "إيناس", "Hajjem", "حجام", date(2010, 5, 5), 'F', pere=ahmed, mere=leila)
 
     # 7. Update User Account
-    user, _ = CustomUser.objects.get_or_create(email='citizen@kelibia.tn')
+    user, _ = CustomUser.objects.get_or_create(email=test_email)
     user.cin = ahmed.cin
     user.first_name = ahmed.prenom_fr
     user.last_name = ahmed.nom_fr
-    user.set_password('Kelibia2026!')
+    user.set_password(test_password)
     user.save()
 
-    print(f"Realistic Hajjem family seeded for user {user.email}")
+    print("Realistic Hajjem family seeded for the configured test user account.")
     print(f"Relationships: {ahmed} (User) has children {sami}, {ines} and deceased father {ali}.")
 
 if __name__ == "__main__":

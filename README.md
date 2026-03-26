@@ -44,13 +44,11 @@ python recreate_superuser.py
 ```
 
 ### 7. Comptes de Test
-Utilisez ces comptes pour tester les différentes fonctionnalités :
+Les comptes de test ne sont pas fournis en dur (emails / mots de passe) dans ce README.
 
-| Role | Email | Mot de Passe |
-| :--- | :--- | :--- |
-| **Admin** | `admin@kelibiasmartcity.tn` | `admin` |
-| **Agent** | `agent1@kelibiasmartcity.tn` | `agent123` |
-| **Citoyen** | `testuser@example.com` | `password123` |
+Pour créer des comptes de test, utilisez les scripts fournis et définissez les identifiants via des variables d'environnement (ex. `TEST_USER_EMAIL` et `TEST_USER_PASSWORD`).
+
+Pour réinitialiser les mots de passe des utilisateurs déjà existants (en base), utilisez plutôt la fonctionnalité **“Mot de passe oublié ?”**.
 
 ## 🏁 Lancer le Projet
 Double-cliquez sur le fichier :
