@@ -269,7 +269,7 @@ const governorates = [
 
 export default function SignupPage() {
   const navigate = useNavigate()
-  const { t } = useI18n()
+  const { t, setLang } = useI18n()
   const webcamRef = useRef<Webcam>(null)
   const [loading, setLoading] = useState(false)
 
@@ -311,6 +311,12 @@ export default function SignupPage() {
         })
     }
   }, [showCamera])
+
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user"
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -391,38 +397,42 @@ export default function SignupPage() {
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-7">
             <div className="card shadow-lg border-0 rounded-lg">
-              <div className="card-header bg-success text-white text-center py-4">
-                <h3 className="font-weight-light my-2">Créer un compte Citoyen</h3>
-                <p className="small mb-0">Rejoignez Tunisia Smart City</p>
+              <div className="card-header bg-success text-white text-center py-4 position-relative">
+                <div className="position-absolute top-0 end-0 m-2">
+                   <button className="btn btn-sm btn-outline-light py-0 px-1 me-1" onClick={() => setLang('fr')}>FR</button>
+                   <button className="btn btn-sm btn-outline-light py-0 px-1" onClick={() => setLang('ar')}>AR</button>
+                </div>
+                <h3 className="font-weight-light my-2">{t('create_citizen_account')}</h3>
+                <p className="small mb-0">{t('join_smart_city')}</p>
               </div>
 
               <div className="card-body p-4">
                 <form id="registerForm" onSubmit={onSubmit}>
-                  <h5 className="mb-3 text-muted border-bottom pb-2">Identité</h5>
+                  <h5 className="mb-3 text-muted border-bottom pb-2">{t('identity')}</h5>
                   <div className="row g-2 mb-3">
                     <div className="col-md-6 form-floating">
                       <input
                         type="text"
                         className="form-control"
                         id="first_name"
-                        placeholder="Prénom"
+                        placeholder={t('first_name')}
                         required
                         value={firstName}
                         onChange={(ev) => setFirstName(ev.target.value)}
                       />
-                      <label htmlFor="first_name">Prénom</label>
+                      <label htmlFor="first_name">{t('first_name')}</label>
                     </div>
                     <div className="col-md-6 form-floating">
                       <input
                         type="text"
                         className="form-control"
                         id="last_name"
-                        placeholder="Nom"
+                        placeholder={t('last_name')}
                         required
                         value={lastName}
                         onChange={(ev) => setLastName(ev.target.value)}
                       />
-                      <label htmlFor="last_name">Nom</label>
+                      <label htmlFor="last_name">{t('last_name')}</label>
                     </div>
                   </div>
 
@@ -431,18 +441,18 @@ export default function SignupPage() {
                       type="text"
                       className="form-control"
                       id="cin"
-                      placeholder="CIN (8 chiffres)"
+                      placeholder={t('cin_label')}
                       pattern="\\d{8}"
                       maxLength={8}
                       required
                       value={cin}
                       onChange={(ev) => setCin(ev.target.value)}
                     />
-                    <label htmlFor="cin">Numéro de CIN (8 chiffres)</label>
+                    <label htmlFor="cin">{t('cin_label')}</label>
                   </div>
 
                   {/* CIN IMAGE CAPTURE SECTION */}
-                  <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">Documents (CIN)</h5>
+                  <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">{t('documents_cin')}</h5>
                   <div className="row g-3 mb-4">
                     {/* Face Avant */}
                     <div className="col-md-6 text-center">
@@ -479,7 +489,7 @@ export default function SignupPage() {
                         <button type="button" className="btn btn-outline-success" onClick={() => setShowCamera('back')}>
                           <i className="bi bi-camera me-1"></i>{t('camera')}
                         </button>
-                        <input type="file" id="fileBack" hidden accept="image/*" onChange={(e) => e.target.files && setCinFront(e.target.files[0])} />
+                        <input type="file" id="fileBack" hidden accept="image/*" onChange={(e) => e.target.files && setCinBack(e.target.files[0])} />
                         <button type="button" className="btn btn-outline-secondary" onClick={() => document.getElementById('fileBack')?.click()}>
                            <i className="bi bi-upload me-1"></i>{t('upload')}
                         </button>
@@ -488,7 +498,7 @@ export default function SignupPage() {
                   </div>
 
                   <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">
-                    Contact & Localisation
+                    {t('contact_loc')}
                   </h5>
 
                   <div className="form-floating mb-3">
@@ -496,14 +506,14 @@ export default function SignupPage() {
                       type="tel"
                       className="form-control"
                       id="phone"
-                      placeholder="Téléphone (8 chiffres)"
+                      placeholder={t('phone_label')}
                       pattern="\\d{8}"
                       maxLength={8}
                       required
                       value={phone}
                       onChange={(ev) => setPhone(ev.target.value)}
                     />
-                    <label htmlFor="phone">Numéro de Téléphone</label>
+                    <label htmlFor="phone">{t('phone_label')}</label>
                   </div>
 
                   <div className="form-floating mb-3">
@@ -511,12 +521,12 @@ export default function SignupPage() {
                       type="email"
                       className="form-control"
                       id="email"
-                      placeholder="Email"
+                      placeholder={t('email')}
                       required
                       value={email}
                       onChange={(ev) => setEmail(ev.target.value)}
                     />
-                    <label htmlFor="email">Email</label>
+                    <label htmlFor="email">{t('email')}</label>
                   </div>
 
                   <div className="row g-2 mb-3">
@@ -532,7 +542,7 @@ export default function SignupPage() {
                         }}
                       >
                         <option value="" disabled>
-                          Choisir...
+                          {t('choose')}
                         </option>
                         {governorates.map((g) => (
                           <option key={g} value={g}>
@@ -540,7 +550,7 @@ export default function SignupPage() {
                           </option>
                         ))}
                       </select>
-                      <label htmlFor="governorate">Gouvernorat</label>
+                      <label htmlFor="governorate">{t('governorate_label')}</label>
                     </div>
 
                     <div className="col-md-6 form-floating">
@@ -553,7 +563,7 @@ export default function SignupPage() {
                         onChange={(ev) => setCity(ev.target.value)}
                       >
                         <option value="" disabled>
-                          Choisir...
+                          {t('choose')}
                         </option>
                         {cityOptions.map((c) => (
                           <option key={c} value={c}>
@@ -561,7 +571,7 @@ export default function SignupPage() {
                           </option>
                         ))}
                       </select>
-                      <label htmlFor="city">Ville</label>
+                      <label htmlFor="city">{t('city_label')}</label>
                     </div>
                   </div>
 
@@ -569,40 +579,40 @@ export default function SignupPage() {
                     <textarea
                       className="form-control"
                       id="address"
-                      placeholder="Adresse complète"
+                      placeholder={t('address_label')}
                       style={{ height: 80 }}
                       required
                       value={address}
                       onChange={(ev) => setAddress(ev.target.value)}
                     />
-                    <label htmlFor="address">Adresse complète (Rue, Immeuble...)</label>
+                    <label htmlFor="address">{t('address_label')}</label>
                   </div>
 
-                  <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">Sécurité</h5>
+                  <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">{t('security')}</h5>
                   <div className="row g-2 mb-3">
                     <div className="col-md-6 form-floating">
                       <input
                         type="password"
                         className="form-control"
                         id="password"
-                        placeholder="Mot de passe"
+                        placeholder={t('password_label')}
                         required
                         value={password}
                         onChange={(ev) => setPassword(ev.target.value)}
                       />
-                      <label htmlFor="password">Mot de passe</label>
+                      <label htmlFor="password">{t('password_label')}</label>
                     </div>
                     <div className="col-md-6 form-floating">
                       <input
                         type="password"
                         className="form-control"
                         id="re_password"
-                        placeholder="Confirmer"
+                        placeholder={t('confirm_password')}
                         required
                         value={rePassword}
                         onChange={(ev) => setRePassword(ev.target.value)}
                       />
-                      <label htmlFor="re_password">Confirmer</label>
+                      <label htmlFor="re_password">{t('confirm_password')}</label>
                     </div>
                   </div>
 
@@ -616,7 +626,7 @@ export default function SignupPage() {
                       {loading ? (
                         <span className="spinner-border spinner-border-sm me-2" />
                       ) : null}
-                      S'inscrire
+                      {t('signup_btn')}
                     </button>
                   </div>
 
@@ -635,7 +645,7 @@ export default function SignupPage() {
 
               <div className="card-footer text-center py-3">
                 <div className="small">
-                  <Link to="/login">Vous avez déjà un compte ? Connectez-vous</Link>
+                  <Link to="/login">{t('already_have_account')}</Link>
                 </div>
               </div>
             </div>
@@ -657,6 +667,8 @@ export default function SignupPage() {
                     audio={false}
                     ref={webcamRef}
                     screenshotFormat="image/jpeg"
+                    mirrored={true}
+                    videoConstraints={videoConstraints}
                     className="img-fluid rounded"
                   />
                </div>

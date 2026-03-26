@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
+import { useI18n } from '../i18n/LanguageProvider'
 
 type TokenResponse = {
   access: string
@@ -12,8 +13,10 @@ type TokenResponse = {
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { t, lang, setLang } = useI18n()
 
   const [email, setEmail] = useState('')
+// ...
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -95,9 +98,13 @@ export default function LoginPage() {
         <div className="row justify-content-center">
           <div className="col-md-5 col-lg-4">
             <div className="card shadow-lg border-0 rounded-lg mt-5">
-              <div className="card-header bg-primary text-white text-center py-4">
+              <div className="card-header bg-primary text-white text-center py-4 position-relative">
+                <div className="position-absolute top-0 end-0 m-2">
+                   <button className="btn btn-sm btn-outline-light py-0 px-1 me-1" onClick={() => setLang('fr')}>FR</button>
+                   <button className="btn btn-sm btn-outline-light py-0 px-1" onClick={() => setLang('ar')}>AR</button>
+                </div>
                 <h3 className="font-weight-light my-2">Kelibia Smart City</h3>
-                <p className="small mb-0">Portail Citoyen & Agent</p>
+                <p className="small mb-0">{t('portal_title')}</p>
               </div>
 
               <div className="card-body p-4">
@@ -112,7 +119,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(ev) => setEmail(ev.target.value)}
                     />
-                    <label htmlFor="email">Adresse Email</label>
+                    <label htmlFor="email">{t('email')}</label>
                   </div>
 
                   <div className="form-floating mb-3">
@@ -125,7 +132,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(ev) => setPassword(ev.target.value)}
                     />
-                    <label htmlFor="password">Mot de passe</label>
+                    <label htmlFor="password">{t('password_label')}</label>
                   </div>
 
                   <div className="form-check mb-3">
@@ -141,7 +148,7 @@ export default function LoginPage() {
                       className="form-check-label"
                       htmlFor="rememberPasswordCheck"
                     >
-                      Se souvenir de moi
+                      {t('remember_me')}
                     </label>
                   </div>
 
@@ -158,7 +165,7 @@ export default function LoginPage() {
                           aria-hidden="true"
                         />
                       ) : null}
-                      Se connecter
+                      {t('login_btn')}
                     </button>
                   </div>
 
@@ -176,14 +183,14 @@ export default function LoginPage() {
 
               <div className="card-footer text-center py-3">
                 <div className="small">
-                  <Link to="/forgot-password">Mot de passe oublié ?</Link>
+                  <Link to="/forgot-password">{t('forgot_password')}</Link>
                 </div>
                 <div className="small mt-2">
                   <Link
                     to="/signup"
                     className="btn btn-sm btn-outline-primary"
                   >
-                    Créer un compte (Nouveau)
+                    {t('create_account')}
                   </Link>
                 </div>
               </div>
