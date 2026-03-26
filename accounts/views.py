@@ -17,6 +17,7 @@ class RegisterView(APIView):
     def post(self, request):
         try:
             data = request.data
+            files = request.FILES
             password = data.get('password')
             
             required_fields = ['username', 'password', 'email', 'first_name', 'last_name', 'cin', 'phone', 'governorate', 'city', 'address']
@@ -41,16 +42,21 @@ class RegisterView(APIView):
                 address=data['address'],
                 governorate=data['governorate'],
                 city=data['city'],
-                is_active=False # Deactivate until verified
+                is_active=True, # Allow immediate login
+                is_verified=False # Pending admin review
             )
             
-            from djoser.email import ActivationEmail
-            context = {"user": user}
-            to = [user.email]
-            ActivationEmail(request, context).send(to)
+            # Save CIN images if provided
+            if 'cin_front_image' in files:
+                user.cin_front_image = files['cin_front_image']
+            if 'cin_back_image' in files:
+                user.cin_back_image = files['cin_back_image']
+            
+            if 'cin_front_image' in files or 'cin_back_image' in files:
+                user.save()
             
             return Response({
-                "message": "Utilisateur créé avec succès! Veuillez vérifier votre email pour activer votre compte.",
+                "message": "Utilisateur créé avec succès ! Votre compte est en attente de vérification par un administrateur.",
                 "username": user.username
             }, status=status.HTTP_201_CREATED)
 

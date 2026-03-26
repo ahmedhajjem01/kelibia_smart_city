@@ -101,6 +101,16 @@ const translations: Record<Lang, Record<string, string>> = {
     scan_error_invalid: 'Document non reconnu. Veuillez télécharger l\'إعلام ولادة original.',
     scan_error_blurry:
       'L\'image semble floue. Veuillez reprendre une photo plus nette.',
+    unverified_title: 'Compte en attente de vérification',
+    unverified_msg: 'Votre identité est en cours de validation par un agent municipal. Certaines fonctionnalités peuvent être limitées temporairement.',
+    signup_success_verified: 'Compte créé avec succès ! Vous pouvez vous connecter maintenant. Votre identité sera vérifiée par un agent municipal.',
+    cin_front: 'Face Avant',
+    cin_back: 'Face Arrière',
+    camera: 'Caméra',
+    upload: 'Upload',
+    capture_title: 'Capturer CIN',
+    take_photo: 'Prendre la photo',
+    cin_required_error: 'Veuillez fournir les deux faces de votre CIN (Photo ou Upload).',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -189,6 +199,16 @@ const translations: Record<Lang, Record<string, string>> = {
     scan_success: 'تم إثبات الأصالة: الوثيقة مطابقة للمعايير الاستشفائية.',
     scan_error_invalid: 'الوثيقة غير معترف بها. يرجى تحميل \'إعلام ولادة\' الأصلي.',
     scan_error_blurry: 'الصورة تبدو غير واضحة. يرجى التقاط صورة أكثر ووضوحًا.',
+    unverified_title: 'الحساب في انتظار التثبت',
+    unverified_msg: 'هويتك قيد التثبت من قبل عون بلدي. قد تكون بعض الوظائف محدودة مؤقتاً.',
+    signup_success_verified: 'تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن. سيتم التثبت من هويتك من قبل عون بلدي.',
+    cin_front: 'الواجهة الأمامية',
+    cin_back: 'الواجهة الخلفية',
+    camera: 'كاميرا',
+    upload: 'تحميل',
+    capture_title: 'التقاط صورة بطاقة التعريف',
+    take_photo: 'التقاط الصورة',
+    cin_required_error: 'يرجى تقديم كلا وجهي بطاقة التعريف الوطنية (صورة أو تحميل).',
   },
 }
 

@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Webcam from 'react-webcam'
+import { useI18n } from '../i18n/LanguageProvider'
 
 const cityData: Record<string, string[]> = {
+  // ... (keeping cityData as is)
   Nabeul: [
     'Nabeul',
     'Hammamet',
@@ -266,6 +269,8 @@ const governorates = [
 
 export default function SignupPage() {
   const navigate = useNavigate()
+  const { t } = useI18n()
+  const webcamRef = useRef<Webcam>(null)
   const [loading, setLoading] = useState(false)
 
   const [firstName, setFirstName] = useState('')
@@ -279,6 +284,11 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [rePassword, setRePassword] = useState('')
 
+  // CIN Images
+  const [cinFront, setCinFront] = useState<File | null>(null)
+  const [cinBack, setCinBack] = useState<File | null>(null)
+  const [showCamera, setShowCamera] = useState<'front' | 'back' | null>(null)
+
   const [message, setMessage] = useState<string | null>(null)
   const [messageType, setMessageType] = useState<'success' | 'danger'>('success')
 
@@ -286,6 +296,21 @@ export default function SignupPage() {
     if (!governorate) return []
     return cityData[governorate] || []
   }, [governorate])
+
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current?.getScreenshot()
+    if (imageSrc) {
+      // Logic to convert base64 to File
+      fetch(imageSrc)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], `cin_${showCamera}.jpg`, { type: 'image/jpeg' })
+          if (showCamera === 'front') setCinFront(file)
+          else setCinBack(file)
+          setShowCamera(null)
+        })
+    }
+  }, [showCamera])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -297,27 +322,33 @@ export default function SignupPage() {
       return
     }
 
+    if (!cinFront || !cinBack) {
+      setMessageType('danger')
+      setMessage(t('cin_required_error'))
+      return
+    }
+
     setLoading(true)
     try {
-      const payload = {
-        first_name: firstName,
-        last_name: lastName,
-        cin,
-        phone,
-        email,
-        governorate,
-        city,
-        address,
-        // Auto-generate username: Prenom + CIN
-        username: firstName.toLowerCase().trim() + cin,
-        password,
-        re_password: rePassword,
-      }
+      const formData = new FormData()
+      formData.append('first_name', firstName)
+      formData.append('last_name', lastName)
+      formData.append('cin', cin)
+      formData.append('phone', phone)
+      formData.append('email', email)
+      formData.append('governorate', governorate)
+      formData.append('city', city)
+      formData.append('address', address)
+      formData.append('username', firstName.toLowerCase().trim() + cin)
+      formData.append('password', password)
+      formData.append('re_password', rePassword)
+      
+      if (cinFront) formData.append('cin_front_image', cinFront)
+      if (cinBack) formData.append('cin_back_image', cinBack)
 
       const res = await fetch('/api/accounts/register/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: formData,
       })
 
       const data = (await res.json().catch(() => null)) as
@@ -329,9 +360,7 @@ export default function SignupPage() {
       }
 
       setMessageType('success')
-      setMessage(
-        "Compte créé avec succès ! <br>Veuillez vérifier votre <strong>Email</strong> pour l'activer."
-      )
+      setMessage(t('signup_success_verified'))
 
       // reset
       setFirstName('')
@@ -344,9 +373,10 @@ export default function SignupPage() {
       setAddress('')
       setPassword('')
       setRePassword('')
+      setCinFront(null)
+      setCinBack(null)
 
-      // Go to login for UX
-      setTimeout(() => navigate('/login'), 1500)
+      setTimeout(() => navigate('/login'), 2000)
     } catch (err) {
       setMessageType('danger')
       setMessage(err instanceof Error ? err.message : 'Erreur lors de l’inscription.')
@@ -359,7 +389,7 @@ export default function SignupPage() {
     <div className="bg-light d-flex align-items-center py-5">
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-md-8 col-lg-6">
+          <div className="col-md-8 col-lg-7">
             <div className="card shadow-lg border-0 rounded-lg">
               <div className="card-header bg-success text-white text-center py-4">
                 <h3 className="font-weight-light my-2">Créer un compte Citoyen</h3>
@@ -409,6 +439,52 @@ export default function SignupPage() {
                       onChange={(ev) => setCin(ev.target.value)}
                     />
                     <label htmlFor="cin">Numéro de CIN (8 chiffres)</label>
+                  </div>
+
+                  {/* CIN IMAGE CAPTURE SECTION */}
+                  <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">Documents (CIN)</h5>
+                  <div className="row g-3 mb-4">
+                    {/* Face Avant */}
+                    <div className="col-md-6 text-center">
+                      <label className="d-block mb-2 small fw-bold">{t('cin_front')}</label>
+                      <div className="border rounded p-2 bg-light mb-2" style={{ height: '150px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                         {cinFront ? (
+                           <img src={URL.createObjectURL(cinFront)} className="img-fluid rounded" style={{ maxHeight: '100%' }} alt="Avant" />
+                         ) : (
+                           <div className="text-muted small">{t('no_file')}</div>
+                         )}
+                      </div>
+                      <div className="btn-group btn-group-sm w-100">
+                        <button type="button" className="btn btn-outline-success" onClick={() => setShowCamera('front')}>
+                          <i className="bi bi-camera me-1"></i>{t('camera')}
+                        </button>
+                        <input type="file" id="fileFront" hidden accept="image/*" onChange={(e) => e.target.files && setCinFront(e.target.files[0])} />
+                        <button type="button" className="btn btn-outline-secondary" onClick={() => document.getElementById('fileFront')?.click()}>
+                           <i className="bi bi-upload me-1"></i>{t('upload')}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Face Arrière */}
+                    <div className="col-md-6 text-center">
+                      <label className="d-block mb-2 small fw-bold">{t('cin_back')}</label>
+                      <div className="border rounded p-2 bg-light mb-2" style={{ height: '150px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                         {cinBack ? (
+                           <img src={URL.createObjectURL(cinBack)} className="img-fluid rounded" style={{ maxHeight: '100%' }} alt="Arrière" />
+                         ) : (
+                           <div className="text-muted small">{t('no_file')}</div>
+                         )}
+                      </div>
+                      <div className="btn-group btn-group-sm w-100">
+                        <button type="button" className="btn btn-outline-success" onClick={() => setShowCamera('back')}>
+                          <i className="bi bi-camera me-1"></i>{t('camera')}
+                        </button>
+                        <input type="file" id="fileBack" hidden accept="image/*" onChange={(e) => e.target.files && setCinFront(e.target.files[0])} />
+                        <button type="button" className="btn btn-outline-secondary" onClick={() => document.getElementById('fileBack')?.click()}>
+                           <i className="bi bi-upload me-1"></i>{t('upload')}
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">
@@ -566,6 +642,33 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+
+      {/* MODAL FOR CAMERA */}
+      {showCamera && (
+        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
+           <div className="modal-dialog modal-dialog-centered">
+             <div className="modal-content">
+               <div className="modal-header border-0">
+                 <h5 className="modal-title">{t('capture_title')} ({showCamera === 'front' ? t('cin_front') : t('cin_back')})</h5>
+                 <button type="button" className="btn-close" onClick={() => setShowCamera(null)}></button>
+               </div>
+               <div className="modal-body text-center bg-dark">
+                  <Webcam
+                    audio={false}
+                    ref={webcamRef}
+                    screenshotFormat="image/jpeg"
+                    className="img-fluid rounded"
+                  />
+               </div>
+               <div className="modal-footer border-0 justify-content-center">
+                 <button type="button" className="btn btn-success btn-lg px-5" onClick={capture}>
+                    {t('take_photo')}
+                 </button>
+               </div>
+             </div>
+           </div>
+        </div>
+      )}
     </div>
   )
 }

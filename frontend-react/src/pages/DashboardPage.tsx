@@ -7,6 +7,7 @@ type UserInfo = {
   first_name: string
   last_name: string
   email: string
+  is_verified: boolean
 }
 
 type Reclamation = {
@@ -151,6 +152,21 @@ export default function DashboardPage() {
       <div className="container mt-5">
         <div className="row">
           <div className="col-md-8">
+            {user && !user.is_verified && (
+              <div className="alert alert-warning shadow-sm border-start border-4 border-warning">
+                <div className="d-flex align-items-center">
+                  <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+                  <div>
+                    <h5 className="alert-heading mb-1">Compte en attente de vérification</h5>
+                    <p className="mb-0 small text-dark">
+                      Votre identité est en cours de validation par un agent municipal. 
+                      Certaines fonctionnalités peuvent être limitées temporairement.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="alert alert-success">
               <h4>{t('welcome')}</h4>
               <p>{t('welcome_msg')}</p>
