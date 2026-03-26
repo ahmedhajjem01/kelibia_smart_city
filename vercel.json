@@ -30,6 +30,18 @@
       "dest": "core/wsgi.py"
     },
     {
+      "src": "/extrait-naissance/(.*)",
+      "dest": "core/wsgi.py"
+    },
+    {
+      "src": "/extrait-mariage/(.*)",
+      "dest": "core/wsgi.py"
+    },
+    {
+      "src": "/extrait-deces/(.*)",
+      "dest": "core/wsgi.py"
+    },
+    {
       "src": "/assets/(.*)",
       "dest": "frontend-react/assets/$1"
     },
@@ -40,7 +52,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|admin/|static/|media/|assets/|favicon\\.svg).*)",
+      "source": "/((?!api/|admin/|static/|media/|extrait-naissance/|extrait-mariage/|extrait-deces/|assets/|favicon\\.svg).*)",
       "destination": "/frontend-react/index.html"
     }
   ]
