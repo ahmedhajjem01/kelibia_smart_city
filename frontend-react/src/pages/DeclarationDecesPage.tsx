@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Webcam from 'react-webcam'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 
@@ -21,6 +22,27 @@ export default function DeclarationDecesPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const webcamRef = useRef<Webcam>(null)
+  const [showCamera, setShowCamera] = useState(false)
+  const [capturedFile, setCapturedFile] = useState<File | null>(null)
+
+  const videoConstraints = {
+    facingMode: 'environment', // Use back camera if available
+  }
+
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current?.getScreenshot()
+    if (imageSrc) {
+      fetch(imageSrc)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], 'rapport_police_camera.jpg', { type: 'image/jpeg' })
+          setCapturedFile(file)
+          setShowCamera(false)
+        })
+    }
+  }, [webcamRef])
 
   useEffect(() => {
     const access = getAccessToken()
@@ -67,6 +89,12 @@ export default function DeclarationDecesPage() {
     try {
       const form = e.currentTarget as HTMLFormElement
       const fd = new FormData(form)
+
+      // If we have a captured file, inject it. 
+      // Note: If the user also selected a file via the input, the captured one takes precedence or you can choose.
+      if (capturedFile) {
+        fd.set('police_report', capturedFile)
+      }
 
       const response = await fetch('/extrait-deces/api/declaration/', {
         method: 'POST',
@@ -172,26 +200,60 @@ export default function DeclarationDecesPage() {
                       <input type="datetime-local" className="form-control" id="date_deces" name="date_deces" required />
                     </div>
 
-                    <div className="row mb-4">
-                      <div className="col-md-6">
-                        <label htmlFor="lieu_deces_fr" className="form-label">
-                          {t('place_of_death_fr')}
-                        </label>
-                        <input type="text" className="form-control" id="lieu_deces_fr" name="lieu_deces_fr" placeholder="Hôpital de Kelibia" required />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="lieu_deces_ar" className="form-label">
-                          {t('place_of_death_ar')}
-                        </label>
-                        <input type="text" className="form-control" id="lieu_deces_ar" name="lieu_deces_ar" placeholder="مستشفى قليبية" required />
-                      </div>
+                    <div className="mb-4">
+                      <label htmlFor="lieu_deces" className="form-label">
+                        {lang === 'ar' ? t('place_of_death_ar') : t('place_of_death_fr')}
+                      </label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        id="lieu_deces" 
+                        name={lang === 'ar' ? 'lieu_deces_ar' : 'lieu_deces_fr'} 
+                        placeholder={lang === 'ar' ? 'مستشفى قليبية' : 'Hôpital de Kelibia'} 
+                        required 
+                      />
                     </div>
 
                     <div className="mb-4">
-                      <label htmlFor="police_report" className="form-label">
+                      <label htmlFor="police_report" className="form-label d-block">
                         {t('police_report')} <span className="text-muted small">{t('police_report_desc')}</span>
                       </label>
-                      <input type="file" className="form-control" id="police_report" name="police_report" accept="application/pdf,image/*" />
+                      
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <button 
+                          type="button" 
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => setShowCamera(true)}
+                        >
+                          <i className="fas fa-camera me-1" />
+                          {t('camera')}
+                        </button>
+                        <input 
+                          type="file" 
+                          className="form-control form-control-sm" 
+                          id="police_report" 
+                          name="police_report" 
+                          accept="application/pdf,image/*" 
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) setCapturedFile(null) // clear camera if file chosen
+                          }}
+                        />
+                      </div>
+
+                      {capturedFile && (
+                        <div className="mt-2 position-relative d-inline-block">
+                          <img src={URL.createObjectURL(capturedFile)} alt="Capture" className="img-thumbnail" style={{ maxHeight: 100 }} />
+                          <button 
+                            type="button" 
+                            className="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                            onClick={() => setCapturedFile(null)}
+                            style={{ padding: '0 5px' }}
+                          >
+                            &times;
+                          </button>
+                          <div className="small text-success mt-1">Photo capturée prête</div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mb-4">
@@ -229,6 +291,38 @@ export default function DeclarationDecesPage() {
           </div>
         </div>
       </div>
+      {/* CAMERA MODAL */}
+      {showCamera && (
+        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title text-primary fw-bold">
+                  {t('capture_title')}
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setShowCamera(false)}></button>
+              </div>
+              <div className="modal-body text-center bg-dark p-0 overflow-hidden mt-3" style={{ minHeight: '300px' }}>
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  mirrored={false}
+                  videoConstraints={videoConstraints}
+                  className="w-100"
+                  onUserMediaError={(err) => alert("Erreur caméra: " + err)}
+                />
+              </div>
+              <div className="modal-footer border-0 justify-content-center pt-3 pb-4">
+                <button type="button" className="btn btn-primary btn-lg rounded-pill px-5 shadow" onClick={capture}>
+                  <i className="fas fa-camera me-2" />
+                  {t('take_photo')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
