@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -10,19 +10,11 @@ type UserInfo = {
   is_verified: boolean
 }
 
-type Reclamation = {
-  title: string
-  category: string
-  description: string
-}
-
 export default function DashboardPage() {
   const { t, setLang } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserInfo | null>(null)
-
-  const modalRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const access = getAccessToken()
@@ -49,70 +41,9 @@ export default function DashboardPage() {
     navigate('/login')
   }
 
-  async function onCreateReclamation(e: React.FormEvent) {
-    e.preventDefault()
-
-    const access = getAccessToken()
-    if (!access) return
-
-    const form = e.target as HTMLFormElement
-    const formData = new FormData(form)
-
-    const payload: Reclamation = {
-      title: String(formData.get('title') || ''),
-      category: String(formData.get('category') || ''),
-      description: String(formData.get('description') || ''),
-    }
-
-    const submitBtn = document.getElementById('submitBtn')
-    const originalText = submitBtn?.textContent
-
-    try {
-      if (submitBtn) submitBtn.setAttribute('disabled', 'true')
-
-      const res = await fetch('/api/reclamations/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${access}`,
-        },
-        body: JSON.stringify(payload),
-      })
-
-      if (res.ok) {
-        alert(t('success_msg'))
-        form.reset()
-
-        // Hide modal (bootstrap)
-        type BootstrapInstance = { hide?: () => void } | null
-        type BootstrapLike = {
-          Modal: {
-            getInstance: (el: Element) => BootstrapInstance
-          }
-        }
-
-        const bs = (window as unknown as { bootstrap?: BootstrapLike }).bootstrap
-        const instance = modalRef.current
-          ? bs?.Modal.getInstance(modalRef.current)
-          : null
-        instance?.hide?.()
-      } else {
-        alert(t('error_msg'))
-      }
-    } catch (err) {
-      alert(t('error_msg'))
-      console.error(err)
-    } finally {
-      if (submitBtn) {
-        submitBtn.removeAttribute('disabled')
-        if (originalText) submitBtn.textContent = originalText
-      }
-    }
-  }
-
   return (
     <div>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div className="container">
           <a className="navbar-brand" href="#" data-i18n="home">
             Kelibia Smart City
@@ -233,21 +164,21 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="card shadow-sm mb-4">
+            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden">
               <div className="card-body">
-                <h5 className="card-title text-danger">
+                <h5 className="card-title text-danger fw-bold">
                   <i className="fas fa-bullhorn me-2" />
                   {t('my_reclamations')}
                 </h5>
-                <p className="card-text text-muted">{t('reclamations_desc')}</p>
-                <button
-                  className="btn btn-danger"
-                  type="button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#reclamationModal"
-                >
-                  {t('new_reclamation')}
-                </button>
+                <p className="card-text text-muted small">{t('reclamations_desc')}</p>
+                <div className="d-flex gap-2">
+                    <Link to="/nouvelle-reclamation" className="btn btn-danger rounded-pill px-4 shadow-sm">
+                        <i className="fas fa-plus me-2"></i> {t('new_reclamation')}
+                    </Link>
+                    <Link to="/mes-reclamations" className="btn btn-outline-danger rounded-pill px-4">
+                        <i className="fas fa-list me-2"></i> {t('view_reclamations')}
+                    </Link>
+                </div>
               </div>
             </div>
 
@@ -280,63 +211,6 @@ export default function DashboardPage() {
                 <h6>{user ? `${user.first_name} ${user.last_name}` : 'Chargement...'}</h6>
                 <p className="text-muted small">{user ? user.email : '...'}</p>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Reclamation Modal */}
-      <div
-        className="modal fade"
-        id="reclamationModal"
-        tabIndex={-1}
-        aria-hidden="true"
-        ref={modalRef}
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{t('new_reclamation')}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" />
-            </div>
-
-            <div className="modal-body">
-              <form id="reclamationForm" onSubmit={onCreateReclamation}>
-                <div className="mb-3">
-                  <label className="form-label">Titre</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="title"
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Catégorie</label>
-                  <select className="form-select" name="category" defaultValue="lighting">
-                    <option value="lighting">Éclairage Public</option>
-                    <option value="trash">Déchets / Hygiène</option>
-                    <option value="roads">Voirie / Routes</option>
-                    <option value="noise">Nuisances Sonores</option>
-                    <option value="other">Autre</option>
-                  </select>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    className="form-control"
-                    name="description"
-                    rows={3}
-                    required
-                  />
-                </div>
-
-                <button type="submit" className="btn btn-primary w-100" id="submitBtn">
-                  {t('submit')}
-                </button>
-              </form>
             </div>
           </div>
         </div>

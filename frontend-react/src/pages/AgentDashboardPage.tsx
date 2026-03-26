@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 
@@ -144,9 +144,14 @@ export default function AgentDashboardPage() {
                   <i className="fas fa-bullhorn me-2" />
                   {t('reclamations_mgnt')}
                 </h5>
-                <p className="card-text text-muted">
-                  G\u00e9rez les signalements des citoyens (bruit, voirie, etc.).
-                </p>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <p className="card-text text-muted mb-0">
+                      Gérez les signalements des citoyens (bruit, voirie, etc.).
+                    </p>
+                    <Link to="/agent-reclamations" className="btn btn-success rounded-pill px-4 shadow-sm">
+                        <i className="fas fa-map-marked-alt me-2"></i> Ouvrir le Centre de Commandement
+                    </Link>
+                </div>
 
                 <div id="reclamationsList" className="mt-3">
                   {reclamations === null ? (

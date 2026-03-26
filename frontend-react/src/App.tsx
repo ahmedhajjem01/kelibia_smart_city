@@ -16,6 +16,9 @@ import MesDecesPage from './pages/MesDecesPage'
 import MesMariagesPage from './pages/MesMariagesPage'
 import DemandeResidencePage from './pages/DemandeResidencePage'
 import MesResidencesPage from './pages/MesResidencesPage'
+import ReclamationFormPage from './pages/ReclamationFormPage'
+import MesReclamationsPage from './pages/MesReclamationsPage'
+import AgentReclamationsPage from './pages/AgentReclamationsPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 export default function App() {
@@ -77,6 +80,18 @@ export default function App() {
           <Route
             path="/mes-residences"
             element={<MesResidencesPage />}
+          />
+          <Route
+            path="/nouvelle-reclamation"
+            element={<ReclamationFormPage />}
+          />
+          <Route
+            path="/mes-reclamations"
+            element={<MesReclamationsPage />}
+          />
+          <Route
+            path="/agent-reclamations"
+            element={<AgentReclamationsPage />}
           />
 
           {/* Backward-compatible aliases with old .html URLs */}
