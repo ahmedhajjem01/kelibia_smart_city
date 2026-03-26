@@ -1,4 +1,4 @@
-from django.contrib.gis.db import models
+from django.db import models
 from django.conf import settings
 
 class Complaint(models.Model):
@@ -38,7 +38,8 @@ class Complaint(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='en_attente')
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='normale')
     photo = models.ImageField(upload_to='complaints/', blank=True, null=True)
-    location = models.PointField()
+    latitude = models.FloatField(verbose_name="Latitude", default=36.8481)
+    longitude = models.FloatField(verbose_name="Longitude", default=11.0939)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_duplicate = models.BooleanField(default=False)

@@ -1,6 +1,19 @@
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
+import math
 
+def haversine_distance(lat1, lon1, lat2, lon2):
+    R = 6371000  # Radius of the Earth in meters
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+
+    a = math.sin(delta_phi / 2.0) ** 2 + \
+        math.cos(phi1) * math.cos(phi2) * \
+        math.sin(delta_lambda / 2.0) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    meters = R * c
+    return meters
 PRIORITY_RULES = {
     "urgente": [
         "danger", "urgent", "accident", "blessé", "fuite", "inondation",
@@ -41,20 +54,24 @@ def classify_priority(text):
             return priority
     return "normale"
 
-def detect_duplicate(location, category, radius_meters=100):
+def detect_duplicate(lat, lon, category, radius_meters=100):
     from .models import Complaint
-    nearby = Complaint.objects.filter(
-        category=category,
-        location__distance_lte=(location, D(m=radius_meters))
-    )
-    return nearby.exists()
+    # Get all recent complaints of the same category (limit to recent to optimize)
+    recent_complaints = Complaint.objects.filter(category=category).order_by('-created_at')[:50]
+    
+    for c in recent_complaints:
+        if c.latitude and c.longitude:
+            dist = haversine_distance(lat, lon, c.latitude, c.longitude)
+            if dist <= radius_meters:
+                return True
+    return False
 
-def classify(text, location=None, category=None):
+def classify(text, lat=None, lon=None, category=None):
     result = {
         "category": classify_category(text),
         "priority": classify_priority(text),
         "is_duplicate": False
     }
-    if location and category:
-        result["is_duplicate"] = detect_duplicate(location, category)
+    if lat is not None and lon is not None and category:
+        result["is_duplicate"] = detect_duplicate(lat, lon, category)
     return result

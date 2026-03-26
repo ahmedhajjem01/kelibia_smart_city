@@ -28,10 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.gis",
     "rest_framework",
-    "rest_framework_gis",
-    "djoser",
     "corsheaders",
     "rest_framework_simplejwt",
     "accounts",
@@ -168,9 +165,7 @@ DJOSER = {
     },
 }
 
-# GIS Library Paths (Only for local Windows env)
-if os.name == 'nt':
-    GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, '.venv', 'Lib', 'site-packages', 'osgeo', 'gdal.dll')
-    GEOS_LIBRARY_PATH = os.path.join(BASE_DIR, '.venv', 'Lib', 'site-packages', 'osgeo', 'geos_c.dll')
+# GIS Library Paths (Removed)
+# GeoDjango has been replaced with standard numeric fields and Haversine distance.
 
 

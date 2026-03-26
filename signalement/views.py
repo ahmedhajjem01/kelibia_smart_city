@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.gis.geos import Point
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -39,9 +38,7 @@ def add_complaint(request):
             longitude = float(request.POST.get("longitude"))
             photo = request.FILES.get("photo")
 
-            location = Point(longitude, latitude, srid=4326)
-
-            classification = classify(description, location=location, category=category)
+            classification = classify(description, lat=latitude, lon=longitude, category=category)
             priority = classification["priority"]
             is_duplicate = classification["is_duplicate"]
 
@@ -52,7 +49,8 @@ def add_complaint(request):
                 title=title,
                 description=description,
                 category=category,
-                location=location,
+                latitude=latitude,
+                longitude=longitude,
                 photo=photo,
                 priority=priority,
                 is_duplicate=is_duplicate,
@@ -96,8 +94,8 @@ def get_complaints(request):
             "category": c.get_category_display(),
             "status": c.get_status_display(),
             "priority": c.get_priority_display(),
-            "latitude": c.location.y,
-            "longitude": c.location.x,
+            "latitude": c.latitude,
+            "longitude": c.longitude,
             "is_duplicate": c.is_duplicate,
         })
     return JsonResponse(data, safe=False)
