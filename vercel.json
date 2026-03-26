@@ -10,8 +10,11 @@
       }
     },
     {
-      "src": "frontend/**",
-      "use": "@vercel/static"
+      "src": "frontend-react/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
@@ -30,10 +33,12 @@
     {
       "src": "/media/(.*)",
       "dest": "core/wsgi.py"
-    },
+    }
+  ],
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "frontend/$1"
+      "source": "/((?!api/.*|admin/.*|static/.*|media/.*|assets/.*|favicon.svg$).*)",
+      "destination": "/index.html"
     }
   ]
 }
