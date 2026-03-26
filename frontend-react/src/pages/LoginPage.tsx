@@ -100,8 +100,14 @@ export default function LoginPage() {
             <div className="card shadow-lg border-0 rounded-lg mt-5">
               <div className="card-header bg-primary text-white text-center py-4 position-relative">
                 <div className="position-absolute top-0 end-0 m-2">
-                   <button className="btn btn-sm btn-outline-light py-0 px-1 me-1" onClick={() => setLang('fr')}>FR</button>
-                   <button className="btn btn-sm btn-outline-light py-0 px-1" onClick={() => setLang('ar')}>AR</button>
+                   <div className="btn-group btn-group-sm">
+                     <button className="btn btn-outline-light" onClick={() => setLang('fr')} title="Français">
+                       <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
+                     </button>
+                     <button className="btn btn-outline-light" onClick={() => setLang('ar')} title="العربية">
+                       <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
+                     </button>
+                   </div>
                 </div>
                 <h3 className="font-weight-light my-2">Kelibia Smart City</h3>
                 <p className="small mb-0">{t('portal_title')}</p>

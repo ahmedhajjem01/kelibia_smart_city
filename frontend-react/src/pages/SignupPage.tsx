@@ -313,8 +313,6 @@ export default function SignupPage() {
   }, [showCamera])
 
   const videoConstraints = {
-    width: 1280,
-    height: 720,
     facingMode: "user"
   };
 
@@ -399,8 +397,14 @@ export default function SignupPage() {
             <div className="card shadow-lg border-0 rounded-lg">
               <div className="card-header bg-success text-white text-center py-4 position-relative">
                 <div className="position-absolute top-0 end-0 m-2">
-                   <button className="btn btn-sm btn-outline-light py-0 px-1 me-1" onClick={() => setLang('fr')}>FR</button>
-                   <button className="btn btn-sm btn-outline-light py-0 px-1" onClick={() => setLang('ar')}>AR</button>
+                   <div className="btn-group btn-group-sm">
+                     <button className="btn btn-outline-light" onClick={() => setLang('fr')} title="Français">
+                       <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
+                     </button>
+                     <button className="btn btn-outline-light" onClick={() => setLang('ar')} title="العربية">
+                       <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
+                     </button>
+                   </div>
                 </div>
                 <h3 className="font-weight-light my-2">{t('create_citizen_account')}</h3>
                 <p className="small mb-0">{t('join_smart_city')}</p>
@@ -669,6 +673,11 @@ export default function SignupPage() {
                     screenshotFormat="image/jpeg"
                     mirrored={true}
                     videoConstraints={videoConstraints}
+                    onUserMedia={() => console.log("Camera access granted")}
+                    onUserMediaError={(err) => {
+                      console.error("Camera access error:", err);
+                      alert("Erreur d'accès à la caméra: " + err);
+                    }}
                     className="img-fluid rounded"
                   />
                </div>
