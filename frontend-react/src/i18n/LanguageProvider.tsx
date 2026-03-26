@@ -55,8 +55,7 @@ const translations: Record<Lang, Record<string, string>> = {
       "Utilisez ce formulaire pour signaler le décès d'un parent ou d'un membre de votre famille.",
     select_relative: 'Sélectionnez le défunt',
     date_of_death: 'Date et heure du décès',
-    place_of_death_fr: 'Lieu du décès (Français)',
-    place_of_death_ar: 'Lieu du décès (Arabe)',
+    place_of_death_fr: 'Lieu du décès ',
     comments: 'Commentaires / Observations',
     declaration_success:
       'Votre déclaration a été soumise avec succès et est en cours de traitement.',
@@ -145,6 +144,7 @@ const translations: Record<Lang, Record<string, string>> = {
     view_extraits: 'Voir les documents',
     police_report: 'Rapport de police',
     police_report_desc: '(si décès dans des conditions suspectes) (Optionnel)',
+    capture_police_report: 'Capturer le Rapport de Police',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -277,6 +277,7 @@ const translations: Record<Lang, Record<string, string>> = {
     view_extraits: 'عرض الوثائق',
     police_report: 'تقرير الشرطة',
     police_report_desc: '(في صورة وجود شبهة في سبب الوفاة) (اختياري)',
+    capture_police_report: 'تصوير تقرير الشرطة',
   },
 }
 

@@ -305,7 +305,7 @@ export default function DeclarationDecesPage() {
             <div className="modal-content border-0 shadow-lg">
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title text-primary fw-bold">
-                  {t('capture_title')}
+                  {t('capture_police_report')}
                 </h5>
                 <button type="button" className="btn-close" onClick={() => setShowCamera(false)}></button>
               </div>
