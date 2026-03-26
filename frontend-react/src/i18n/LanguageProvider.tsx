@@ -1,0 +1,246 @@
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+
+type Lang = 'fr' | 'ar'
+
+const translations: Record<Lang, Record<string, string>> = {
+  fr: {
+    dashboard: 'Tableau de bord',
+    logout: 'Déconnexion',
+    welcome: 'Bienvenue !',
+    welcome_msg: 'Vous êtes connecté avec succès au portail Kelibia Smart City.',
+    admin_services: 'Services Administratifs',
+    services_desc:
+      'Consultez la liste des documents requis pour vos démarches municipales (État civil, Urbanisme, etc.).',
+    services_desc_long:
+      'Retrouvez ici tous les documents nécessaires pour vos démarches municipales à Kelibia.',
+    view_services: 'Voir les services',
+    your_token: "Votre Token d'Accès :",
+    profile: 'Profil',
+    loading: 'Chargement...',
+    retrieval_error:
+      'Erreur lors de la récupération des services. Veuillez réessayer plus tard.',
+    no_services: 'Aucun service disponible pour le moment.',
+    documents_required: 'Documents requis :',
+    estimated_time: 'Délai estimé',
+    close: 'Fermer',
+    request_online: 'Demander en ligne (Bientôt)',
+    loading_services: 'Chargement des services...',
+    details_title: 'Détails du service',
+    home: 'Accueil',
+    download_form: 'Télécharger le formulaire',
+    download_form_ar: 'Télécharger (Version Arabe)',
+    agent_dashboard: 'Tableau de bord Agent',
+    reclamations_mgnt: 'Gestion des Réclamations',
+    view_reclamations: 'Voir les réclamations',
+    agent_welcome: 'Bienvenue Agent !',
+    my_reclamations: 'Mes Réclamations',
+    new_reclamation: 'Nouvelle Réclamation',
+    reclamations_desc:
+      'Signalez un problème (éclairage, déchets, voirie) et suivez sa résolution.',
+    news_title: 'Actualités de Kélibia',
+    news_desc:
+      'Restez informé des derniers événements et annonces de votre commune.',
+    submit: 'Envoyer',
+    processing: 'Traitement en cours...',
+    success_msg: 'Opération réussie !',
+    error_msg: 'Une erreur est survenue.',
+    my_deces: 'Mes Actes de Décès',
+    deces_desc:
+      'Consultez les actes de décès des membres de votre famille enregistrés.',
+    view_deces: 'Voir les actes',
+    declare_death: 'Déclarer un décès',
+    death_decl_title: 'Service de Déclaration de Décès',
+    death_decl_desc:
+      "Utilisez ce formulaire pour signaler le décès d'un parent ou d'un membre de votre famille.",
+    select_relative: 'Sélectionnez le défunt',
+    date_of_death: 'Date et heure du décès',
+    place_of_death_fr: 'Lieu du décès (Français)',
+    place_of_death_ar: 'Lieu du décès (Arabe)',
+    comments: 'Commentaires / Observations',
+    declaration_success:
+      'Votre déclaration a été soumise avec succès et est en cours de traitement.',
+    no_eligible_relatives:
+      "Aucun membre de la famille éligible pour une déclaration n'a été trouvé.",
+    declare_birth: 'Déclarer une naissance',
+    birth_decl_title: 'Service de Déclaration de Naissance',
+    birth_decl_desc:
+      "Utilisez ce formulaire pour signaler la naissance d'un nouveau-né.",
+    newborn_info: 'Informations du nouveau-né',
+    first_name_fr: 'Prénom (Français)',
+    first_name_ar: 'الاسم (بالعربية)',
+    last_name_fr: 'Nom (Français)',
+    last_name_ar: 'اللقب (بالعربية)',
+    date_of_birth: 'Date et heure de naissance',
+    place_of_birth_fr: 'Lieu de naissance (Français)',
+    place_of_birth_ar: 'مكان الولادة (بالعربية)',
+    gender: 'Sexe',
+    male: 'Masculin / ذكر',
+    female: 'Féminin / أنثى',
+    father_cin: 'CIN du Père (Optionnel si vous êtes la mère)',
+    mother_cin: 'CIN de la Mère (Optionnel si vous êtes le père)',
+    birth_declaration_success: 'La déclaration de naissance a été soumise avec succès.',
+    agent_birth_decl: 'Gestion des Déclarations de Naissance',
+    agent_birth_desc:
+      'Validez les déclarations soumises par les citoyens et vérifiez les pièces jointes.',
+    status_pending: 'En attente',
+    status_in_progress: 'En cours',
+    status_resolved: 'Résolue',
+    status_validated: 'Validée',
+    status_rejected: 'Rejetée',
+    view_details: 'Voir Détails',
+    attachment_scan: 'Scan du document',
+    validate: 'Valider',
+    reject: 'Rejeter',
+    no_declarations: 'Aucune déclaration trouvée.',
+    scan_quality_check: "Vérifier l'authenticité",
+    view_example: 'Voir un exemple',
+    scan_processing: "Vérification de l'authenticité...",
+    scan_success:
+      'Certificat authentifié : Document conforme aux normes hospitalières.',
+    scan_error_invalid: 'Document non reconnu. Veuillez télécharger l\'إعلام ولادة original.',
+    scan_error_blurry:
+      'L\'image semble floue. Veuillez reprendre une photo plus nette.',
+  },
+  ar: {
+    dashboard: 'لوحة القيادة',
+    logout: 'تسجيل الخروج',
+    welcome: 'مرحباً بك!',
+    welcome_msg: 'لقد سجلت دخولك بنجاح في بوابة قليبية مدينة ذكية.',
+    admin_services: 'الخدمات الإدارية',
+    services_desc:
+      'اطلع على قائمة الوثائق المطلوبة لمعاملاتك البلدية (الحالة المدنية، التعمير، إلخ).',
+    services_desc_long:
+      'تجدون هنا جميع الوثائق اللازمة لمختلف الإجراءات البلدية في قليبية.',
+    view_services: 'عرض الخدمات',
+    your_token: "رمز الدخول الخاص بك:",
+    profile: 'الملف الشخصي',
+    loading: 'جاري التحميل...',
+    retrieval_error: 'خطأ أثناء جلب الخدمات. يرجى المحاولة مرة أخرى لاحقاً.',
+    no_services: 'لا توجد خدمات متاحة حالياً.',
+    documents_required: 'الوثائق المطلوبة:',
+    estimated_time: 'الوقت المقدر',
+    close: 'إغلاق',
+    request_online: 'الطلب عبر الإنترنت (قريباً)',
+    loading_services: 'جاري تحميل الخدمات...',
+    details_title: 'تفاصيل الخدمة',
+    home: 'الرئيسية',
+    download_form: 'تحميل المطبوعة',
+    download_form_ar: 'تحميل (نسخة عربية)',
+    agent_dashboard: 'لوحة قيادة العون',
+    reclamations_mgnt: 'إدارة الشكاوى',
+    view_reclamations: 'عرض الشكاوى',
+    agent_welcome: 'مرحباً أيها العون!',
+    my_reclamations: 'شكاويّ',
+    new_reclamation: 'شكوى جديدة',
+    reclamations_desc: 'أبلغ عن مشكل (إضاءة، نفايات، طرقات) وتابع عملية الإصلاح.',
+    news_title: 'أخبار قليبية',
+    news_desc: 'ابق على اطلاع بآخر الأحداث والبلاغات الصادرة عن بلديتك.',
+    submit: 'إرسال',
+    processing: 'جاري المعالجة...',
+    success_msg: 'تمت العملية بنجاح!',
+    error_msg: 'حدث خطأ ما.',
+    my_deces: 'مضامين الوفاة',
+    deces_desc: 'اطلع على مضامين الوفاة الخاصة بأفراد عائلتك المسجلين.',
+    view_deces: 'عرض المضامين',
+    declare_death: 'التصريح بوفاة',
+    death_decl_title: 'خدمة التصريح بالوفاة',
+    death_decl_desc:
+      "استخدم هذا النموذج للإبلاغ عن وفاة أحد الأقارب أو أفراد العائلة.",
+    select_relative: 'اختر المتوفى',
+    date_of_death: 'تاريخ وساعة الوفاة',
+    place_of_death_fr: 'مكان الوفاة (بالفرنسية)',
+    place_of_death_ar: 'مكان الوفاة (بالعربية)',
+    comments: 'ملاحظات',
+    declaration_success: 'تم تقديم تصريحك بنجاح وهو قيد المعالجة الآن.',
+    no_eligible_relatives: 'لم يتم العثور على أفراد عائلة مؤهلين للتصريح.',
+    declare_birth: 'التصريح بولادة',
+    birth_decl_title: 'خدمة التصريح بالولادة',
+    birth_decl_desc: 'استخدم هذا النموذج للإبلاغ عن ولادة مولود جديد.',
+    newborn_info: 'معلومات المولود الجديد',
+    first_name_fr: 'الاسم (بالفرنسية)',
+    first_name_ar: 'الاسم (بالعربية)',
+    last_name_fr: 'اللقب (بالفرنسية)',
+    last_name_ar: 'اللقب (بالعربية)',
+    date_of_birth: 'تاريخ وساعة الولادة',
+    place_of_birth_fr: 'مكان الولادة (بالفرنسية)',
+    place_of_birth_ar: 'مكان الولادة (بالعربية)',
+    gender: 'الجنس',
+    male: 'ذكر',
+    female: 'أنثى',
+    father_cin: 'رقم بطاقة تعريف الأب (اختياري إذا كنت الأم)',
+    mother_cin: 'رقم بطاقة تعريف الأم (اختياري إذا كنت الأب)',
+    birth_declaration_success: 'تم تقديم تصريح الولادة بنجاح.',
+    agent_birth_decl: 'إدارة تصاريح الولادة',
+    agent_birth_desc: 'صادق على التصاريح المقدمة من قبل المواطنين وتحقق من المرفقات.',
+    status_pending: 'قيد الانتظار',
+    status_in_progress: 'قيد التنفيذ',
+    status_resolved: 'تم الحل',
+    status_validated: 'تمت المصادقة',
+    status_rejected: 'مرفوض',
+    view_details: 'عرض التفاصيل',
+    attachment_scan: 'مسح الوثيقة',
+    validate: 'مصادقة',
+    reject: 'رفض',
+    no_declarations: 'لم يتم العثور على أي تصريح.',
+    scan_quality_check: "التحقق من الأصالة",
+    view_example: 'مشاهدة مثال',
+    scan_processing: "جاري التحقق من الأصالة...",
+    scan_success: 'تم إثبات الأصالة: الوثيقة مطابقة للمعايير الاستشفائية.',
+    scan_error_invalid: 'الوثيقة غير معترف بها. يرجى تحميل \'إعلام ولادة\' الأصلي.',
+    scan_error_blurry: 'الصورة تبدو غير واضحة. يرجى التقاط صورة أكثر ووضوحًا.',
+  },
+}
+
+type LanguageContextValue = {
+  lang: Lang
+  setLang: (lang: Lang) => void
+  t: (key: string) => string
+}
+
+const LanguageContext = createContext<LanguageContextValue | undefined>(undefined)
+
+export function useI18n() {
+  const ctx = useContext(LanguageContext)
+  if (!ctx) throw new Error('useI18n must be used inside LanguageProvider')
+  return ctx
+}
+
+export default function LanguageProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [lang, setLangState] = useState<Lang>(() => {
+    const saved = localStorage.getItem('preferredLanguage')
+    return saved === 'ar' ? 'ar' : 'fr'
+  })
+
+  useEffect(() => {
+    localStorage.setItem('preferredLanguage', lang)
+    document.documentElement.lang = lang
+
+    if (lang === 'ar') {
+      document.body.dir = 'rtl'
+      document.body.classList.add('arabic-font')
+    } else {
+      document.body.dir = 'ltr'
+      document.body.classList.remove('arabic-font')
+    }
+  }, [lang])
+
+  const value = useMemo<LanguageContextValue>(() => {
+    return {
+      lang,
+      setLang: (next) => setLangState(next),
+      t: (key) => translations[lang][key] || key,
+    }
+  }, [lang])
+
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  )
+}
+

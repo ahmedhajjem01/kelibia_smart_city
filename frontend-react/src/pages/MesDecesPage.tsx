@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
 
 type ActeDeces = {
   numero_registre: string | number
@@ -12,8 +13,6 @@ type ActeDeces = {
   url_fr: string
   url_ar: string
 }
-
-const baseUrl = 'http://127.0.0.1:8000'
 
 export default function MesDecesPage() {
   const { setLang, lang } = useI18n()
@@ -143,7 +142,7 @@ export default function MesDecesPage() {
                         </p>
                         <div className="d-flex gap-2">
                           <a
-                            href={`${baseUrl}${d.url_fr}`}
+                            href={resolveBackendUrl(d.url_fr)}
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-dark flex-fill fw-bold"
@@ -151,7 +150,7 @@ export default function MesDecesPage() {
                             <i className="fas fa-print me-1" /> Version FR
                           </a>
                           <a
-                            href={`${baseUrl}${d.url_ar}`}
+                            href={resolveBackendUrl(d.url_ar)}
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-outline-dark flex-fill arabic-font fw-bold"

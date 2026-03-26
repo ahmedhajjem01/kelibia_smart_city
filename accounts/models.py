@@ -42,6 +42,8 @@ class CustomUser(AbstractUser):
     city = models.CharField(max_length=100, verbose_name="Ville", default='Kelibia')
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
     is_verified = models.BooleanField(default=False, verbose_name="Est vérifié")
+    cin_front_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Avant")
+    cin_back_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Arrière")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'cin', 'phone']

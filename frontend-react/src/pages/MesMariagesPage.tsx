@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
 
 type ActeMariage = {
   numero_registre: string | number
@@ -12,8 +13,6 @@ type ActeMariage = {
   url_fr: string
   url_ar: string
 }
-
-const baseUrl = 'http://127.0.0.1:8000'
 
 export default function MesMariagesPage() {
   const { setLang, lang } = useI18n()
@@ -148,7 +147,7 @@ export default function MesMariagesPage() {
                           </p>
                           <div className="d-flex gap-2">
                             <a
-                              href={`${baseUrl}${m.url_fr}`}
+                              href={resolveBackendUrl(m.url_fr)}
                               target="_blank"
                               rel="noreferrer"
                               className="btn btn-warning flex-fill fw-bold"
@@ -156,7 +155,7 @@ export default function MesMariagesPage() {
                               <i className="fas fa-print me-1" /> Version Française
                             </a>
                             <a
-                              href={`${baseUrl}${m.url_ar}`}
+                              href={resolveBackendUrl(m.url_ar)}
                               target="_blank"
                               rel="noreferrer"
                               className="btn btn-outline-warning flex-fill arabic-font fw-bold"

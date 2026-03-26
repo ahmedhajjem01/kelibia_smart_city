@@ -1,0 +1,15 @@
+/* Neutralize the default Vite scaffold layout so our pages can use Bootstrap normally. */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+  border-inline: 0;
+  min-height: unset;
+  display: block;
+}
+
+body {
+  margin: 0;
+}
+
