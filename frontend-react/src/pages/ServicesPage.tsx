@@ -253,37 +253,46 @@ export default function ServicesPage() {
                     </h3>
                   </div>
                   <div className="row g-4">
-                    {cat.services.map((service) => {
-                      const svcName = lang === 'ar' ? service.name_ar : service.name_fr
-                      const svcDesc =
-                        lang === 'ar' ? service.description_ar : service.description_fr
-                      return (
-                        <div key={service.id} className="col-md-4">
-                          <div
-                            className="card h-100 service-card border-0 shadow-sm"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => showModalById(cat.id, service.id)}
-                          >
-                            <div className="card-body">
-                              <h5 className="card-title fw-bold">{svcName}</h5>
-                              <p
-                                className="card-text small text-muted text-truncate"
-                                style={{ maxHeight: '3rem' }}
-                              >
-                                {svcDesc}
-                              </p>
-                              <div className="d-flex justify-content-between align-items-center mt-3">
-                                <span className="badge bg-light text-primary border">
-                                  {service.requirements.length} documents
-                                </span>
-                                <i className="fas fa-chevron-right text-primary opacity-50" />
+                    {cat.services
+                      .filter((s) => {
+                        const nameFr = s.name_fr.toLowerCase()
+                        const nameAr = s.name_ar
+                        return (
+                          !nameFr.includes('extrait') &&
+                          !nameAr.includes('مضمون')
+                        )
+                      })
+                      .map((service) => {
+                        const svcName = lang === 'ar' ? service.name_ar : service.name_fr
+                        const svcDesc =
+                          lang === 'ar' ? service.description_ar : service.description_fr
+                        return (
+                          <div key={service.id} className="col-md-4">
+                            <div
+                              className="card h-100 service-card border-0 shadow-sm"
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => showModalById(cat.id, service.id)}
+                            >
+                              <div className="card-body">
+                                <h5 className="card-title fw-bold">{svcName}</h5>
+                                <p
+                                  className="card-text small text-muted text-truncate"
+                                  style={{ maxHeight: '3rem' }}
+                                >
+                                  {svcDesc}
+                                </p>
+                                <div className="d-flex justify-content-between align-items-center mt-3">
+                                  <span className="badge bg-light text-primary border">
+                                    {service.requirements.length} documents
+                                  </span>
+                                  <i className="fas fa-chevron-right text-primary opacity-50" />
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
                   </div>
                 </div>
               )

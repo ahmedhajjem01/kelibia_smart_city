@@ -22,6 +22,8 @@ class MesMariagesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        if not request.user.is_verified:
+            return Response({"error": "Votre compte doit être vérifié pour accéder à ce service."}, status=403)
         user = request.user
         
         # 1. Try to find by user link

@@ -185,18 +185,45 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="card shadow-sm mb-4">
-              <div className="card-body">
-                <h5 className="card-title text-success">
-                  <i className="fas fa-baby me-2" />
-                  {t('my_extraits')}
-                </h5>
-                <p className="card-text text-muted">{t('extraits_desc')}</p>
-                <Link to="/mes-extraits" className="btn btn-success">
-                  {t('view_extraits')}
-                </Link>
+            {user && user.is_verified && (
+              <div className="card shadow-lg mb-4 border-0 rounded-4 overflow-hidden">
+                <div className="card-header bg-gradient bg-primary text-white py-3">
+                  <h5 className="mb-0">
+                    <i className="fas fa-id-card-alt me-2" />
+                    {t('civil_documents_hub')}
+                  </h5>
+                </div>
+                <div className="card-body bg-light">
+                  <p className="text-muted small mb-4">{t('civil_docs_desc')}</p>
+                  <div className="row g-3">
+                    <div className="col-4 text-center">
+                      <Link to="/mes-extraits" className="text-decoration-none">
+                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-success h-100 d-flex flex-column align-items-center justify-content-center">
+                          <i className="fas fa-baby fa-2x text-success mb-2"></i>
+                          <span className="fw-bold small">{t('birth_cert')}</span>
+                        </div>
+                      </Link>
+                    </div>
+                    <div className="col-4 text-center">
+                      <Link to="/mes-mariages" className="text-decoration-none">
+                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-primary h-100 d-flex flex-column align-items-center justify-content-center">
+                          <i className="fas fa-ring fa-2x text-primary mb-2"></i>
+                          <span className="fw-bold small">{t('mariage_cert')}</span>
+                        </div>
+                      </Link>
+                    </div>
+                    <div className="col-4 text-center">
+                      <Link to="/mes-deces" className="text-decoration-none">
+                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-dark h-100 d-flex flex-column align-items-center justify-content-center">
+                          <i className="fas fa-dove fa-2x text-dark mb-2"></i>
+                          <span className="fw-bold small">{t('deces_cert')}</span>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="card shadow-sm mb-4">
               <div className="card-body">
@@ -213,19 +240,6 @@ export default function DashboardPage() {
                 >
                   {t('new_reclamation')}
                 </button>
-              </div>
-            </div>
-
-            <div className="card shadow-sm mb-4">
-              <div className="card-body">
-                <h5 className="card-title text-dark">
-                  <i className="fas fa-file-invoice me-2" />
-                  {t('my_deces')}
-                </h5>
-                <p className="card-text text-muted">{t('deces_desc')}</p>
-                <Link to="/mes-deces" className="btn btn-dark">
-                  {t('view_deces')}
-                </Link>
               </div>
             </div>
 

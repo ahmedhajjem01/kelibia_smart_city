@@ -23,6 +23,9 @@ class MesExtraitsAPIView(APIView):
         if not user_cin:
             return Response({"error": "CIN non défini pour cet utilisateur."}, status=400)
             
+        if not request.user.is_verified:
+            return Response({"error": "Votre compte doit être vérifié par l'administration pour accéder à ce service."}, status=403)
+            
         try:
             citoyen = Citoyen.objects.get(cin=user_cin)
         except Citoyen.DoesNotExist:
