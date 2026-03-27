@@ -50,7 +50,6 @@ export default function ServicesPage() {
     description: string
     requirements: { ar: string; fr: string }[]
     timeText: string
-    downloadHref: string | null
     requestButton: RequestButtonState
   } | null>(null)
 
@@ -102,20 +101,16 @@ export default function ServicesPage() {
 
     const reqs = svc.requirements.map((r) => ({ ar: r.name_ar, fr: r.name_fr }))
 
-    // Download logic
-    let downloadHref: string | null = null
-    let requestButton: RequestButtonState = { kind: 'disabled', label: t('request_online') }
-
-    if (lang === 'ar') {
-      downloadHref = svc.form_pdf_ar || null
-    } else {
-      if (svc.form_pdf_fr) downloadHref = svc.form_pdf_fr
-      else if (svc.form_pdf_ar) downloadHref = svc.form_pdf_ar
-    }
-
     // Determine request target based on service name
     const nameLower = svc.name_fr.toLowerCase().trim()
     const nameAr = svc.name_ar.trim()
+
+    const isBirthReg =
+      nameLower.includes('naissance') ||
+      nameAr.includes('ولادة') ||
+      nameAr.includes('ترسيم')
+
+    let requestButton: RequestButtonState = { kind: 'disabled', label: t('request_online') }
 
     if (nameLower === 'extrait de naissance' || nameAr === 'مضمون ولادة') {
       requestButton = {
@@ -123,12 +118,7 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
         target: '/mes-extraits',
       }
-    } else if (
-      nameLower.includes('naissance') ||
-      nameAr.includes('ولادة') ||
-      nameAr.includes('ترسيم')
-    ) {
-      downloadHref = null // Remove PDF button for birth registration/declaration
+    } else if (isBirthReg) {
       requestButton = {
         kind: 'declare_birth',
         label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
@@ -174,7 +164,6 @@ export default function ServicesPage() {
       description: svcDesc,
       requirements: reqs,
       timeText,
-      downloadHref,
       requestButton,
     })
 
@@ -368,18 +357,6 @@ export default function ServicesPage() {
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
                 {t('close')}
               </button>
-
-              {modalState?.downloadHref ? (
-                <a
-                  href={modalState.downloadHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-outline-primary d-inline-flex align-items-center"
-                >
-                  <i className="fas fa-download me-2" />
-                  {lang === 'ar' ? t('download_form_ar') : t('download_form')}
-                </a>
-              ) : null}
 
               <button
                 type="button"
