@@ -98,9 +98,19 @@ class DeclarationDecesAPIView(APIView):
             if citoyen.mere: family_members.append(citoyen.mere)
             for c in conjoints: family_members.append(c)
 
+            # Ajout des enfants
             enfants = Citoyen.objects.filter(models.Q(pere=citoyen) | models.Q(mere=citoyen))
             for e in enfants:
                 family_members.append(e)
+
+            # Ajout des frères et sœurs (même père ou même mère)
+            if citoyen.pere or citoyen.mere:
+                siblings = Citoyen.objects.filter(
+                    (models.Q(pere=citoyen.pere) & models.Q(pere__isnull=False)) |
+                    (models.Q(mere=citoyen.mere) & models.Q(mere__isnull=False))
+                ).exclude(id=citoyen.id)
+                for s in siblings:
+                    family_members.append(s)
 
             already_dead_ids = set(ExtraitDeces.objects.values_list('defunt_id', flat=True))
             pending_decl_ids = set(DeclarationDeces.objects.filter(status='pending').values_list('defunt_id', flat=True))
