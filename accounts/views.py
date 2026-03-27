@@ -124,5 +124,8 @@ def admin_logout(request):
     """
     Custom logout view for the admin to redirect to the frontend.
     """
+    from django.conf import settings
     logout(request)
-    return redirect('http://127.0.0.1:5500/login.html')
+    protocol = "https" if not settings.DEBUG else "http"
+    domain = settings.DOMAIN
+    return redirect(f'{protocol}://{domain}/login')

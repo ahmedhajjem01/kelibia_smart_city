@@ -146,7 +146,7 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "harounahajjem@gmail.com")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "lxjsjbfypcwfujlw")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-DOMAIN = os.getenv("DOMAIN", "127.0.0.1:5500")
+DOMAIN = os.getenv("DOMAIN", os.getenv("VERCEL_URL", "127.0.0.1:5500"))
 SITE_NAME = "Tunisia Smart City"
 
 # Djoser Configuration
