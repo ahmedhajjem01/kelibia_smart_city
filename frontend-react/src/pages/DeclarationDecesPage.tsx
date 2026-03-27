@@ -241,7 +241,15 @@ export default function DeclarationDecesPage() {
                       <label htmlFor="date_deces" className="form-label">
                         {t('date_of_death')}
                       </label>
-                      <input type="datetime-local" className="form-control" id="date_deces" name="date_deces" required />
+                      <input 
+                        type="datetime-local" 
+                        className="form-control" 
+                        id="date_deces" 
+                        name="date_deces" 
+                        required 
+                        max={new Date().toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
+                        min={new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
+                      />
                     </div>
 
                     <div className="mb-4">
