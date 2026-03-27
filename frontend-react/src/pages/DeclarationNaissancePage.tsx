@@ -106,6 +106,25 @@ export default function DeclarationNaissancePage() {
       payload.append('cin_mere', String(fd.get('cin_mere') || ''))
       payload.append('commentaire', String(fd.get('commentaire') || ''))
 
+      // Manual date validation (10 days rule)
+      const dateNaissanceStr = fd.get('date_naissance') as string
+      if (dateNaissanceStr) {
+        const dateNav = new Date(dateNaissanceStr)
+        const now = new Date()
+        const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000)
+        
+        if (dateNav > now) {
+          alert('La date de naissance ne peut pas être dans le futur.')
+          setSubmitting(false)
+          return
+        }
+        if (dateNav < tenDaysAgo) {
+          alert('Le délai légal de déclaration est de 10 jours. Veuillez contacter la municipalité pour une procédure de jugement.')
+          setSubmitting(false)
+          return
+        }
+      }
+
       // Files
       const attachment = attachmentRef.current?.files?.[0]
       if (attachment) payload.append('attachment', attachment)
@@ -241,7 +260,19 @@ export default function DeclarationNaissancePage() {
                         <label htmlFor="date_naissance" className="form-label">
                           {t('date_of_birth')}
                         </label>
-                        <input type="datetime-local" className="form-control" id="date_naissance" name="date_naissance" required />
+                        <input 
+                          type="datetime-local" 
+                          className="form-control" 
+                          id="date_naissance" 
+                          name="date_naissance" 
+                          required 
+                          max={new Date().toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
+                          min={new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
+                        />
+                        <div className="form-text small text-primary">
+                          <i className="fas fa-info-circle me-1"></i>
+                          Le délai légal de déclaration est de 10 jours maximum.
+                        </div>
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="sexe" className="form-label">

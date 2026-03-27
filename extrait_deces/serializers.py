@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DeclarationDeces
+from .models import DeclarationDeces, DemandeInhumation
 from extrait_naissance.models import Citoyen
 
 class CitoyenSimpleSerializer(serializers.ModelSerializer):
@@ -39,3 +39,15 @@ class DeclarationDecesSerializer(serializers.ModelSerializer):
                 {'lieu_deces_fr': "Veuillez saisir le lieu du décès (en français ou en arabe)."}
             )
         return attrs
+
+class DemandeInhumationSerializer(serializers.ModelSerializer):
+    declaration_detail = DeclarationDecesSerializer(source='declaration_deces', read_only=True)
+    
+    class Meta:
+        model = DemandeInhumation
+        fields = [
+            'id', 'declaration_deces', 'declaration_detail', 
+            'cimetiere_fr', 'cimetiere_ar', 'date_souhaitee',
+            'status', 'created_at'
+        ]
+        read_only_fields = ['status', 'created_at']

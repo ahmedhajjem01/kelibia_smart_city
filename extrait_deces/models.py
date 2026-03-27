@@ -113,3 +113,39 @@ class DeclarationDeces(models.Model):
     class Meta:
         verbose_name = "Déclaration de Décès"
         verbose_name_plural = "Déclarations de Décès"
+
+class DemandeInhumation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente / قيد الانتظار'),
+        ('approved', 'Approuvée / تمت الموافقة'),
+        ('rejected', 'Refusée / مرفوضة'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="demandes_inhumation",
+        verbose_name="Demandeur"
+    )
+    declaration_deces = models.OneToOneField(
+        DeclarationDeces,
+        on_delete=models.CASCADE,
+        related_name="demande_inhumation",
+        verbose_name="Déclaration de décès associée"
+    )
+    
+    cimetiere_ar = models.CharField(max_length=200, verbose_name="Cimetière (AR)", default="مقبرة قليبية")
+    cimetiere_fr = models.CharField(max_length=200, verbose_name="Cimetière (FR)", default="Cimetière de Kelibia")
+    
+    date_souhaitee = models.DateTimeField(verbose_name="Date et heure souhaitées d'inhumation")
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Inhumation: {self.declaration_deces.defunt.prenom_fr} - {self.status}"
+
+    class Meta:
+        verbose_name = "Demande d'inhumation"
+        verbose_name_plural = "Demandes d'inhumation"

@@ -37,7 +37,7 @@ type ServiceCategory = {
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
   | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' }
-  | { kind: 'declare_death'; label: string; target: '/declaration-deces' }
+  | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
 export default function ServicesPage() {
@@ -152,12 +152,18 @@ export default function ServicesPage() {
         target: '/declaration-deces',
       }
     } else if (nameLower.includes('mariage') || nameAr.includes('زواج')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: t('request_online'),
-        target: '/demande-mariage',
-      }
-    } else {
+        requestButton = {
+          kind: 'declare_birth',
+          label: t('request_online'),
+          target: '/demande-mariage',
+        }
+      } else if (nameLower.includes('inhumation') || nameAr.includes('دفن')) {
+        requestButton = {
+          kind: 'declare_death',
+          label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
+          target: '/demande-inhumation',
+        }
+      } else {
       requestButton = {
         kind: 'disabled',
         label: lang === 'ar' ? 'طلب عن بعد (قريبا)' : 'Demander en ligne (Bientôt)',

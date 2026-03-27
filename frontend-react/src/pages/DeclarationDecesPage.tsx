@@ -343,12 +343,27 @@ export default function DeclarationDecesPage() {
                     </div>
                   </form>
                 ) : (
-                  <div id="successMsg" className="alert alert-success mt-4">
-                    <i className="fas fa-check-circle me-2" />
-                    {t('declaration_success')}
-                    <div className="mt-3">
-                      <Link to="/dashboard" className="btn btn-success btn-sm">
+                  <div id="successMsg" className="alert alert-success mt-4 rounded-4 shadow-sm">
+                    <div className="d-flex align-items-center gap-3 mb-3">
+                      <i className="fas fa-check-circle fa-2x" />
+                      <h4 className="mb-0 fw-bold">{t('declaration_success')}</h4>
+                    </div>
+                    <p className="mb-3">Votre déclaration a été enregistrée. Elle sera examinée par un agent municipal sous peu.</p>
+                    <div className="d-flex gap-2 flex-wrap mb-3">
+                      <Link to="/dashboard" className="btn btn-success btn-sm rounded-pill px-3">
                         {t('dashboard')}
+                      </Link>
+                      <Link to="/mes-demandes" className="btn btn-outline-success btn-sm rounded-pill px-3">
+                        Suivre mes demandes
+                      </Link>
+                    </div>
+                    <div className="mt-4 pt-3 border-top border-success border-opacity-25">
+                       <p className="small text-muted mb-2">
+                        <i className="fas fa-info-circle me-1 text-primary"></i>
+                        <strong>Étape suivante :</strong> Dès que cette déclaration sera validée, vous pourrez demander un <strong>permis d'inhumation</strong>.
+                      </p>
+                      <Link to="/demande-inhumation" className="btn btn-link btn-sm p-0 text-success fw-bold text-decoration-none">
+                        Aller vers le service d'inhumation <i className="fas fa-arrow-right ms-1"></i>
                       </Link>
                     </div>
                   </div>

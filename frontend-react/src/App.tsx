@@ -22,6 +22,7 @@ import MesReclamationsPage from './pages/MesReclamationsPage'
 import AgentReclamationsPage from './pages/AgentReclamationsPage'
 import MariageContractPage from './pages/MariageContractPage'
 import MesDemandesPage from './pages/MesDemandesPage'
+import DemandeInhumationPage from './pages/DemandeInhumationPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 export default function App() {
@@ -103,6 +104,10 @@ export default function App() {
           <Route
             path="/demande-mariage"
             element={<MariageContractPage />}
+          />
+          <Route
+            path="/demande-inhumation"
+            element={<DemandeInhumationPage />}
           />
 
           {/* Backward-compatible aliases with old .html URLs */}

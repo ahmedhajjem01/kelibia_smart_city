@@ -28,10 +28,10 @@ class Migration(migrations.Migration):
             name="type_contrat",
             field=models.CharField(
                 choices=[
-                    ("baladi", "Baladi (Municipal) / بلدي"),
-                    ("adli", "Adli (Notaire) / عدلي"),
+                    ("municipal", "Municipal / بلدي"),
+                    ("notaire", "Notaire / عدلي"),
                 ],
-                default="baladi",
+                default="municipal",
                 max_length=20,
                 verbose_name="Type de contrat",
             ),

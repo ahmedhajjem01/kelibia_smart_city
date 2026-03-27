@@ -6,7 +6,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation'
   title: string
   status: string
   date: string
@@ -35,11 +35,12 @@ export default function MesDemandesPage() {
         const headers = { Authorization: `Bearer ${token}` }
         
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/api/residence/demande/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-deces/api/inhumation/'), { headers }),
         ])
 
         const unified: UnifiedRequest[] = []
@@ -105,6 +106,22 @@ export default function MesDemandesPage() {
           })
         }
 
+        // 5. Inhumation
+        if (resInhumation.ok) {
+          const data = await resInhumation.json()
+          const inhumations = data.my_requests || []
+          inhumations.forEach((i: any) => {
+            unified.push({
+              id: i.id,
+              type: 'inhumation',
+              title: t('inhumation_requests_title'),
+              status: i.status,
+              date: i.created_at,
+              details: i.declaration_detail ? (lang === 'ar' ? `المتوفى: ${i.declaration_detail.defunt_detail.prenom_ar}` : `Défunt: ${i.declaration_detail.defunt_detail.prenom_fr}`) : '---'
+            })
+          })
+        }
+
         // Sort by date descending
         unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         setRequests(unified)
@@ -139,6 +156,7 @@ export default function MesDemandesPage() {
       case 'marriage': return <i className="fas fa-ring text-primary"></i>
       case 'death': return <i className="fas fa-dove text-dark"></i>
       case 'residence': return <i className="fas fa-home text-warning"></i>
+      case 'inhumation': return <i className="fas fa-monument text-secondary"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }

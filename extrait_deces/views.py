@@ -3,7 +3,12 @@ from django.db import models
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import ExtraitDeces, DeclarationDeces
+from rest_framework import status
+from .models import ExtraitDeces, DeclarationDeces, DemandeInhumation
+from .serializers import (
+    DeclarationDecesSerializer, CitoyenSimpleSerializer, 
+    DemandeInhumationSerializer
+)
 from extrait_naissance.models import Citoyen
 
 def deces_certificate_view(request, pk, lang='ar'):
@@ -145,5 +150,43 @@ class DeclarationDecesAPIView(APIView):
         serializer = DeclarationDecesSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(declarant=request.user)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DemandeInhumationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Lister les déclarations de décès validées de l'utilisateur qui n'ont pas encore de demande d'inhumation
+        available_declarations = DeclarationDeces.objects.filter(
+            declarant=request.user, 
+            status='validated',
+            demande_inhumation__isnull=True
+        )
+        
+        my_requests = DemandeInhumation.objects.filter(citizen=request.user)
+        
+        return Response({
+            "available_declarations": DeclarationDecesSerializer(available_declarations, many=True).data,
+            "my_requests": DemandeInhumationSerializer(my_requests, many=True).data
+        })
+
+    def post(self, request):
+        decl_id = request.data.get('declaration_deces')
+        if not decl_id:
+            return Response({"error": "ID de déclaration de décès requis."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            declaration = DeclarationDeces.objects.get(id=decl_id, declarant=request.user, status='validated')
+        except DeclarationDeces.DoesNotExist:
+            return Response({"error": "Déclaration valide non trouvée."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Vérifier si une demande existe déjà
+        if DemandeInhumation.objects.filter(declaration_deces=declaration).exists():
+            return Response({"error": "Une demande d'inhumation existe déjà pour ce décès."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = DemandeInhumationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(citizen=request.user, declaration_deces=declaration)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
