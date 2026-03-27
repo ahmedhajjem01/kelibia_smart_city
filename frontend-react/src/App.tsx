@@ -21,6 +21,7 @@ import ReclamationFormPage from './pages/ReclamationFormPage'
 import MesReclamationsPage from './pages/MesReclamationsPage'
 import AgentReclamationsPage from './pages/AgentReclamationsPage'
 import MariageContractPage from './pages/MariageContractPage'
+import MesDemandesPage from './pages/MesDemandesPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 export default function App() {
@@ -54,6 +55,10 @@ export default function App() {
           <Route
             path="/mes-extraits"
             element={<MesExtraitsPage />}
+          />
+          <Route
+            path="/mes-demandes"
+            element={<MesDemandesPage />}
           />
           <Route
             path="/mes-deces"

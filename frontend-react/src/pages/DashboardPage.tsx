@@ -156,7 +156,7 @@ export default function DashboardPage() {
                     <Link to="/services" className="btn btn-info text-white rounded-pill px-4 shadow-sm">
                         <i className="fas fa-plus me-2"></i> {t('new_request')}
                     </Link>
-                    <Link to="/mes-extraits" className="btn btn-outline-info rounded-pill px-4">
+                    <Link to="/mes-demandes" className="btn btn-outline-info rounded-pill px-4">
                         <i className="fas fa-history me-2"></i> {t('view_requests')}
                     </Link>
                 </div>
