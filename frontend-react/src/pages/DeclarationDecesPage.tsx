@@ -57,21 +57,34 @@ export default function DeclarationDecesPage() {
         const response = await fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), {
           headers: { Authorization: `Bearer ${access}` },
         })
+
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}))
-          if (response.status === 404) {
-            throw new Error(lang === 'ar' ? 'لم يتم العثور على سجل المواطن الخاص بك. يرجى الاتصال بالإدارة البلدية.' : 'Votre dossier citoyen est introuvable. Veuillez contacter l\'administration municipale.')
+          const msg =
+            errData.detail ||
+            errData.error ||
+            `Erreur ${response.status}: impossible de charger les membres éligibles.`
+          if (response.status === 401) {
+            clearTokens()
+            navigate('/login')
+            return
           }
-          throw new Error(errData.error || 'bad response')
+          throw new Error(msg)
         }
 
         const data = (await response.json()) as {
           eligible_relatives?: EligibleRelative[]
+          warning?: string
         }
 
         const rels = data.eligible_relatives || []
         setEligible(rels)
         setNoEligible(rels.length === 0)
+
+        // Show warning (no CIN / no Citoyen record) as a softer error
+        if (data.warning) {
+          setFetchError(data.warning)
+        }
       } catch (e: any) {
         console.error(e)
         setEligible([])
@@ -105,6 +118,13 @@ export default function DeclarationDecesPage() {
         if (!fd.has('lieu_deces_ar')) fd.append('lieu_deces_ar', '')
       }
 
+      // Inject camera-captured photo if present and no file was manually selected
+      const fileInput = form.querySelector<HTMLInputElement>('#police_report')
+      const hasManualFile = fileInput && fileInput.files && fileInput.files.length > 0
+      if (capturedFile && !hasManualFile) {
+        fd.set('police_report', capturedFile, capturedFile.name)
+      }
+
       const response = await fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), {
         method: 'POST',
         headers: {
@@ -115,7 +135,20 @@ export default function DeclarationDecesPage() {
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({}))
-        alert((err && err.detail) || t('error_msg'))
+        // DRF returns field-level errors as an object, extract the first message
+        let errorMsg: string = t('error_msg')
+        if (err) {
+          if (typeof err.detail === 'string') {
+            errorMsg = err.detail
+          } else {
+            const firstKey = Object.keys(err)[0]
+            if (firstKey) {
+              const val = err[firstKey]
+              errorMsg = Array.isArray(val) ? val[0] : String(val)
+            }
+          }
+        }
+        alert(errorMsg)
         return
       }
 
