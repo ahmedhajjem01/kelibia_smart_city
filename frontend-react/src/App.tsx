@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import LanguageProvider from './i18n/LanguageProvider'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
@@ -127,6 +128,7 @@ export default function App() {
           <Route path="*" element={<ComingSoonPage title="Page non trouvée" />} />
         </Routes>
       </BrowserRouter>
+      <SpeedInsights />
     </LanguageProvider>
   )
 }
