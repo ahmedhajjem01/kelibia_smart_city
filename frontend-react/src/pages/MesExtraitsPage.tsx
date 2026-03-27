@@ -42,12 +42,17 @@ export default function MesExtraitsPage() {
         const res = await fetch('/extrait-naissance/api/mes-extraits/', {
           headers: { Authorization: `Bearer ${token}` },
         })
-        if (!res.ok) throw new Error('db error')
+        if (!res.ok) {
+          const errorData = (await res.json().catch(() => null)) as
+            | { error?: string }
+            | null
+          throw new Error(errorData?.error || 'Impossible de trouver vos actes de naissance.')
+        }
         const json = (await res.json()) as MesExtraitsResponse
         setData(json)
-      } catch (e) {
+      } catch (e: any) {
         console.error(e)
-        setError("Erreur de connexion avec la base de données.")
+        setError(e.message || "Erreur de connexion avec la base de données.")
       } finally {
         setLoading(false)
       }
