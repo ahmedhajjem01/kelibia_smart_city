@@ -3,12 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 
-type ScanStatus =
-  | { kind: 'idle'; text: string }
-  | { kind: 'processing'; text: string }
-  | { kind: 'success'; text: string }
-  | { kind: 'error'; text: string }
-  | { kind: 'warning'; text: string }
 
 export default function DeclarationNaissancePage() {
   const { t, setLang } = useI18n()
@@ -25,12 +19,6 @@ export default function DeclarationNaissancePage() {
   const [submitting, setSubmitting] = useState(false)
   const [isDrawing, setIsDrawing] = useState(false)
 
-  const [scanStatus, setScanStatus] = useState<ScanStatus>(() => ({
-    kind: 'idle',
-    text: "Téléchargez une photo ou un scan du document papier remis par l'hôpital.",
-  }))
-  const [scanProgressVisible, setScanProgressVisible] = useState(false)
-  const [scanDisabled, setScanDisabled] = useState(false)
 
   useEffect(() => {
     if (!token) navigate('/login')
@@ -53,8 +41,11 @@ export default function DeclarationNaissancePage() {
     ctx.strokeStyle = '#000'
     
     const rect = canvas.getBoundingClientRect()
-    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left
-    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    
+    const x = (('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left) * scaleX
+    const y = (('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top) * scaleY
     
     ctx.beginPath()
     ctx.moveTo(x, y)
@@ -68,8 +59,11 @@ export default function DeclarationNaissancePage() {
     if (!canvas || !ctx) return
     
     const rect = canvas.getBoundingClientRect()
-    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left
-    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    
+    const x = (('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left) * scaleX
+    const y = (('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top) * scaleY
     
     ctx.lineTo(x, y)
     ctx.stroke()
@@ -87,39 +81,6 @@ export default function DeclarationNaissancePage() {
     }
   }
 
-  function simulateScan() {
-    const fileInput = attachmentRef.current
-    const file = fileInput?.files?.[0]
-    if (!file) {
-      alert(t('error_msg'))
-      return
-    }
-
-    const fileName = file.name.toLowerCase()
-
-    setScanDisabled(true)
-    setScanProgressVisible(true)
-    setScanStatus({ kind: 'processing', text: t('scan_processing') })
-
-    setTimeout(() => {
-      setScanProgressVisible(false)
-
-      if (fileName.includes('blurry') || fileName.includes('flou')) {
-        setScanStatus({ kind: 'error', text: t('scan_error_blurry') })
-      } else if (
-        fileName.includes('notification') ||
-        fileName.includes('birth') ||
-        fileName.includes('naissance') ||
-        fileName.includes('real')
-      ) {
-        setScanStatus({ kind: 'success', text: t('scan_success') })
-      } else {
-        setScanStatus({ kind: 'warning', text: t('scan_error_invalid') })
-      }
-
-      setScanDisabled(false)
-    }, 1500)
-  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -184,35 +145,6 @@ export default function DeclarationNaissancePage() {
     }
   }
 
-  const scanText = (() => {
-    switch (scanStatus.kind) {
-      case 'processing':
-        return <span className="text-primary fw-bold">{scanStatus.text}</span>
-      case 'success':
-        return (
-          <span className="text-success fw-bold">
-            <i className="fas fa-check-circle me-1" />
-            {scanStatus.text}
-          </span>
-        )
-      case 'error':
-        return (
-          <span className="text-danger fw-bold">
-            <i className="fas fa-exclamation-triangle me-1" />
-            {scanStatus.text}
-          </span>
-        )
-      case 'warning':
-        return (
-          <span className="text-warning fw-bold">
-            <i className="fas fa-question-circle me-1" />
-            {scanStatus.text}
-          </span>
-        )
-      default:
-        return scanStatus.text
-    }
-  })()
 
   return (
     <div className="bg-light">
@@ -275,30 +207,30 @@ export default function DeclarationNaissancePage() {
                     <h5 className="section-title fw-bold text-dark">{t('newborn_info')}</h5>
 
                     <div className="row mb-3">
-                      <div className="col-md-6">
+                      <div className="col-md-6 mb-2">
                         <label htmlFor="prenom_fr" className="form-label">
                           {t('first_name_fr')}
                         </label>
                         <input type="text" className="form-control" id="prenom_fr" name="prenom_fr" required />
                       </div>
-                      <div className="col-md-6">
-                        <label htmlFor="prenom_ar" className="form-label">
-                          {t('first_name_ar')}
+                      <div className="col-md-6 mb-2">
+                        <label htmlFor="prenom_ar" className="form-label d-flex justify-content-between">
+                          <span dir="rtl">{t('first_name_ar')}</span>
                         </label>
                         <input type="text" className="form-control" id="prenom_ar" name="prenom_ar" dir="rtl" required />
                       </div>
                     </div>
 
                     <div className="row mb-3">
-                      <div className="col-md-6">
+                      <div className="col-md-6 mb-2">
                         <label htmlFor="nom_fr" className="form-label">
                           {t('last_name_fr')}
                         </label>
                         <input type="text" className="form-control" id="nom_fr" name="nom_fr" required />
                       </div>
-                      <div className="col-md-6">
-                        <label htmlFor="nom_ar" className="form-label">
-                          {t('last_name_ar')}
+                      <div className="col-md-6 mb-2">
+                        <label htmlFor="nom_ar" className="form-label d-flex justify-content-between">
+                          <span dir="rtl">{t('last_name_ar')}</span>
                         </label>
                         <input type="text" className="form-control" id="nom_ar" name="nom_ar" dir="rtl" required />
                       </div>
@@ -323,7 +255,7 @@ export default function DeclarationNaissancePage() {
                     </div>
 
                     <div className="row mb-4">
-                      <div className="col-md-6">
+                      <div className="col-md-6 mb-2">
                         <label htmlFor="lieu_naissance_fr" className="form-label">
                           {t('place_of_birth_fr')}
                         </label>
@@ -336,13 +268,13 @@ export default function DeclarationNaissancePage() {
                           required
                         />
                       </div>
-                      <div className="col-md-6">
-                        <label htmlFor="lieu_naissance_ar" className="form-label">
-                          {t('place_of_birth_ar')}
+                      <div className="col-md-6 mb-2">
+                        <label htmlFor="lieu_naissance_ar" className="form-label d-flex justify-content-between">
+                          <span dir="rtl">{t('place_of_birth_ar')}</span>
                         </label>
                         <input
                           type="text"
-                          className="form-control"
+                          className="form-control text-end"
                           id="lieu_naissance_ar"
                           name="lieu_naissance_ar"
                           dir="rtl"
@@ -378,16 +310,6 @@ export default function DeclarationNaissancePage() {
                     </div>
 
                     <div className="mb-4">
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <label htmlFor="attachment" className="form-label mb-0">
-                          {t('attachment_scan')}
-                        </label>
-                        <a href="img/real_birth_notification.png" target="_blank" rel="noreferrer" className="btn btn-sm btn-link text-decoration-none">
-                          <i className="fas fa-image me-1" />
-                          {t('view_example')}
-                        </a>
-                      </div>
-
                       <div className="input-group">
                         <input
                           ref={attachmentRef}
@@ -396,27 +318,11 @@ export default function DeclarationNaissancePage() {
                           id="attachment"
                           name="attachment"
                           accept="image/*,application/pdf"
+                          required
                         />
-                        <button
-                          className="btn btn-outline-primary"
-                          type="button"
-                          id="scanBtn"
-                          disabled={scanDisabled}
-                          onClick={simulateScan}
-                        >
-                          <i className="fas fa-check-double me-2" />
-                          {t('scan_quality_check')}
-                        </button>
                       </div>
-
-                      {scanProgressVisible ? (
-                        <div id="scanProgress" className="progress mt-2" style={{ height: 10 }}>
-                          <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{ width: '100%' }} />
-                        </div>
-                      ) : null}
-
                       <div id="scanStatus" className="form-text">
-                        {scanText}
+                        {t('birth_decl_desc')}
                       </div>
                     </div>
 

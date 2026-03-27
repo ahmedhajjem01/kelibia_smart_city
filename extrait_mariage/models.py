@@ -132,7 +132,7 @@ class DemandeMariage(models.Model):
         related_name='demandes_mariage'
     )
 
-    type_contrat = models.CharField(max_length=20, choices=TYPE_CHOICES, default='baladi', verbose_name="Type de contrat")
+    type_contrat = models.CharField(max_length=20, choices=TYPE_CHOICES, default='municipal', verbose_name="Type de contrat")
     lieu_mariage = models.CharField(max_length=20, choices=LIEU_CHOICES, default='municipality', verbose_name="Lieu du mariage")
 
     # Spouse 1 (Groom - default context in portal usually)

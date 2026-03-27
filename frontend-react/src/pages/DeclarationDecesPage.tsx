@@ -97,12 +97,6 @@ export default function DeclarationDecesPage() {
         if (!fd.has('lieu_deces_ar')) fd.append('lieu_deces_ar', '')
       }
 
-      // If we have a captured file, inject it. 
-      // Note: If the user also selected a file via the input, the captured one takes precedence or you can choose.
-      if (capturedFile) {
-        fd.set('police_report', capturedFile)
-      }
-
       const response = await fetch('/extrait-deces/api/declaration/', {
         method: 'POST',
         headers: {

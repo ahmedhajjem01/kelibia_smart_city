@@ -240,11 +240,11 @@ export default function MariageContractPage() {
                         required
                         style={{ borderRadius: '12px' }}
                       >
-                        <option value="baladi">{t('baladi')}</option>
+                        <option value="municipal">{t('municipal')}</option>
                         <option value="notaire">{t('notaire')}</option>
                       </select>
                     </div>
-                    {formData.type_contrat === 'baladi' && (
+                    {formData.type_contrat === 'municipal' && (
                       <div className="col-md-6">
                         <label className="form-label fw-bold small text-uppercase text-muted">{t('lieu_mariage')}</label>
                         <select
@@ -300,7 +300,7 @@ export default function MariageContractPage() {
                     </div>
                   </div>
 
-                  {formData.type_contrat === 'baladi' && (
+                  {formData.type_contrat === 'municipal' && (
                     <>
                       <div className="row">
                         <div className="col-md-6">{renderFileControl('cin_recto_epoux', t('cin_recto_label'), true)}</div>
@@ -343,7 +343,7 @@ export default function MariageContractPage() {
                     </div>
                   </div>
 
-                  {formData.type_contrat === 'baladi' && (
+                  {formData.type_contrat === 'municipal' && (
                     <>
                       <div className="row">
                         <div className="col-md-6">{renderFileControl('cin_recto_epouse', t('cin_recto_label'), true)}</div>
