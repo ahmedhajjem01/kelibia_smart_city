@@ -56,6 +56,7 @@ class MesDecesAPIView(APIView):
             if citoyen.mere.mere: family_ids.append(citoyen.mere.mere.id)
 
         deces_qs = ExtraitDeces.objects.filter(
+            models.Q(user=request.user) |
             models.Q(defunt_id__in=family_ids) |
             models.Q(defunt__pere=citoyen) |
             models.Q(defunt__mere=citoyen)

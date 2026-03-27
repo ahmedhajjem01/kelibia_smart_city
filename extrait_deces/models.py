@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from extrait_naissance.models import Citoyen
 
 class ExtraitDeces(models.Model):
@@ -149,3 +151,48 @@ class DemandeInhumation(models.Model):
     class Meta:
         verbose_name = "Demande d'inhumation"
         verbose_name_plural = "Demandes d'inhumation"
+
+# --- SIGNALS ---
+
+@receiver(post_save, sender=DeclarationDeces)
+def create_extrait_deces_on_validation(sender, instance, created, **kwargs):
+    """
+    Automatically creates an ExtraitDeces official record when a death declaration is validated.
+    """
+    if instance.status == 'validated':
+        # Avoid circular import
+        from .models import ExtraitDeces
+        import datetime
+
+        # Check if an official extract already exists for this deceased person
+        if not ExtraitDeces.objects.filter(defunt=instance.defunt).exists():
+            now = datetime.datetime.now()
+            
+            # Auto-calculate acting year and registry number
+            acting_year = instance.date_deces.year if instance.date_deces else now.year
+            
+            # Get last registry number for this year to increment correctly
+            last_record = ExtraitDeces.objects.filter(annee_acte=acting_year).order_by('-numero_registre').first()
+            next_num = 1
+            if last_record and str(last_record.numero_registre).isdigit():
+                next_num = int(last_record.numero_registre) + 1
+
+            # Determine declarant names (fallback to authenticated user profile)
+            declarant_name_fr = f"{instance.declarant.first_name} {instance.declarant.last_name}".strip() or instance.declarant.username
+            declarant_name_ar = f"{instance.declarant.first_name} {instance.declarant.last_name}".strip() or instance.declarant.username
+
+            # Create the official record
+            ExtraitDeces.objects.create(
+                user=instance.declarant, # Link to citizen's account for tracking
+                defunt=instance.defunt,
+                annee_acte=acting_year,
+                numero_registre=str(next_num),
+                date_deces=instance.date_deces,
+                lieu_deces_ar=instance.lieu_deces_ar or "قليبية",
+                lieu_deces_fr=instance.lieu_deces_fr or "Kelibia",
+                declarant_ar=declarant_name_ar,
+                declarant_fr=declarant_name_fr,
+                officer_etat_civil_ar="ضابط الحالة المدنية",
+                officer_etat_civil_fr="Officier d'État Civil",
+                numero_ordre=str(next_num),
+            )
