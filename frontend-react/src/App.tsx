@@ -20,6 +20,7 @@ import MesResidencesPage from './pages/MesResidencesPage'
 import ReclamationFormPage from './pages/ReclamationFormPage'
 import MesReclamationsPage from './pages/MesReclamationsPage'
 import AgentReclamationsPage from './pages/AgentReclamationsPage'
+import MariageContractPage from './pages/MariageContractPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 export default function App() {
@@ -94,6 +95,10 @@ export default function App() {
             path="/agent-reclamations"
             element={<AgentReclamationsPage />}
           />
+          <Route
+            path="/demande-mariage"
+            element={<MariageContractPage />}
+          />
 
           {/* Backward-compatible aliases with old .html URLs */}
           <Route path="/agent_dashboard.html" element={<AgentDashboardPage />} />
@@ -123,6 +128,10 @@ export default function App() {
           <Route
             path="/declaration-deces.html"
             element={<DeclarationDecesPage />}
+          />
+          <Route
+            path="/demande-mariage.html"
+            element={<MariageContractPage />}
           />
 
           <Route path="*" element={<ComingSoonPage title="Page non trouvée" />} />

@@ -73,9 +73,8 @@ export default function DemandeResidencePage() {
     profession: '',
     telephone: '',
     motif_demande: '',
-    demande_text: lang === 'ar' 
-        ? 'أنا الموقع أسفله [الاسم و اللقب]، صاحب بطاقة التعريف الوطنية رقم [الرقم]، القاطن بـ [العنوان]، أطلب من سيادتكم الحصول على شهادة إقامة لـ [السبب].'
-        : 'Je soussigné [Prénom Nom], titulaire de la CIN n° [CIN], exerçant la profession de [Profession], demeurant à [Adresse], sollicite par la présente l\'obtention d\'un certificat de résidence pour [Motif].'
+    nom_prenom: '',
+    cin: '',
   })
   
   const [files, setFiles] = useState<{ [key: string]: File | Blob | null }>({
@@ -114,7 +113,10 @@ export default function DemandeResidencePage() {
     data.append('adresse_demandee', formData.adresse_demandee)
     data.append('profession', formData.profession)
     data.append('telephone', formData.telephone)
-    data.append('motif_demande', `${formData.motif_demande}\n\n Texte de la Demande:\n${formData.demande_text}`)
+    const demandeText = lang === 'ar'
+      ? `أنا الموقع أسفله ${formData.nom_prenom}، صاحب بطاقة التعريف الوطنية رقم ${formData.cin}، المزاول لمهنة ${formData.profession}، القاطن بـ ${formData.adresse_demandee}، أطلب من سيادتكم الحصول على شهادة إقامة لـ ${formData.motif_demande}.`
+      : `Je soussigné ${formData.nom_prenom}, titulaire de la CIN n° ${formData.cin}, exerçant la profession de ${formData.profession}, demeurant à ${formData.adresse_demandee}, sollicite par la présente l'obtention d'un certificat de résidence pour ${formData.motif_demande}.`
+    data.append('motif_demande', `${formData.motif_demande}\n\n Texte de la Demande:\n${demandeText}`)
 
     if (files.cin_recto) data.append('cin_recto', files.cin_recto as Blob)
     if (files.cin_verso) data.append('cin_verso', files.cin_verso as Blob)
@@ -234,50 +236,13 @@ export default function DemandeResidencePage() {
                 <form onSubmit={handleSubmit}>
                   {error && <div className="alert alert-danger rounded-3 mb-4">{error}</div>}
 
-                  <div className="row g-4 mb-4">
-                    <div className="col-md-6">
-                      <label className="form-label fw-bold small text-uppercase text-muted">{t('profession')}</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-lg bg-light border-0"
-                        value={formData.profession}
-                        onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-                        required
-                        style={{ borderRadius: '12px' }}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-bold small text-uppercase text-muted">{t('telephone')}</label>
-                      <input
-                        type="tel"
-                        className="form-control form-control-lg bg-light border-0"
-                        value={formData.telephone}
-                        onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
-                        required
-                        style={{ borderRadius: '12px' }}
-                      />
-                    </div>
-                  </div>
-
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-uppercase text-muted">{t('adresse_actuelle')}</label>
-                    <textarea
-                      className="form-control form-control-lg bg-light border-0"
-                      rows={2}
-                      value={formData.adresse_demandee}
-                      onChange={(e) => setFormData({ ...formData, adresse_demandee: e.target.value })}
-                      required
-                      style={{ borderRadius: '12px' }}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="form-label fw-bold small text-uppercase text-muted">{t('motif')}</label>
+                    <label className="form-label fw-bold small text-uppercase text-muted">{t('telephone')}</label>
                     <input
-                      type="text"
+                      type="tel"
                       className="form-control form-control-lg bg-light border-0"
-                      value={formData.motif_demande}
-                      onChange={(e) => setFormData({ ...formData, motif_demande: e.target.value })}
+                      value={formData.telephone}
+                      onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
                       required
                       style={{ borderRadius: '12px' }}
                     />
@@ -285,16 +250,122 @@ export default function DemandeResidencePage() {
 
                   <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                        <label className="form-label fw-bold small text-uppercase text-muted mb-0">Modèle de Demande</label>
-                        <span className="badge bg-light text-primary border rounded-pill px-3">Texte éditable</span>
+                        <label className="form-label fw-bold small text-uppercase text-muted mb-0">{t('demande_template_title')}</label>
+                        <span className="badge bg-warning text-dark border rounded-pill px-3">
+                          <i className="fas fa-info-circle me-1"></i>
+                          {t('demande_fields_only')}
+                        </span>
                     </div>
-                    <textarea
-                      className="form-control bg-light border-0 p-3"
-                      rows={4}
-                      value={formData.demande_text}
-                      onChange={(e) => setFormData({ ...formData, demande_text: e.target.value })}
-                      style={{ borderRadius: '16px', fontSize: '0.95rem', lineHeight: '1.6' }}
-                    />
+                    <div
+                      className="p-4 rounded-4 border"
+                      style={{
+                        background: 'linear-gradient(135deg, #fefefe 0%, #f8f6f0 100%)',
+                        fontSize: '1.05rem',
+                        lineHeight: '2.4',
+                        direction: lang === 'ar' ? 'rtl' : 'ltr',
+                        fontFamily: lang === 'ar' ? 'inherit' : '"Georgia", serif',
+                      }}
+                    >
+                      {lang === 'ar' ? (
+                        <p className="mb-0" style={{ textAlign: 'right' }}>
+                          أنا الموقع أسفله{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.nom_prenom}
+                            onChange={(e) => setFormData({ ...formData, nom_prenom: e.target.value })}
+                            placeholder={t('full_name_placeholder')}
+                            required
+                          />
+                          ، صاحب بطاقة التعريف الوطنية رقم{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.cin}
+                            onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                            placeholder={t('cin_placeholder')}
+                            required
+                          />
+                          ، المزاول لمهنة{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.profession}
+                            onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                            placeholder={t('profession')}
+                            required
+                          />
+                          ، القاطن بـ{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input demande-inline-input--wide"
+                            value={formData.adresse_demandee}
+                            onChange={(e) => setFormData({ ...formData, adresse_demandee: e.target.value })}
+                            placeholder={t('adresse_actuelle')}
+                            required
+                          />
+                          ، أطلب من سيادتكم الحصول على شهادة إقامة لـ{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.motif_demande}
+                            onChange={(e) => setFormData({ ...formData, motif_demande: e.target.value })}
+                            placeholder={t('motif_placeholder')}
+                            required
+                          />
+                          .
+                        </p>
+                      ) : (
+                        <p className="mb-0">
+                          Je soussigné{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.nom_prenom}
+                            onChange={(e) => setFormData({ ...formData, nom_prenom: e.target.value })}
+                            placeholder={t('full_name_placeholder')}
+                            required
+                          />
+                          , titulaire de la CIN n°{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.cin}
+                            onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                            placeholder={t('cin_placeholder')}
+                            required
+                          />
+                          , exerçant la profession de{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.profession}
+                            onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                            placeholder={t('profession')}
+                            required
+                          />
+                          , demeurant à{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input demande-inline-input--wide"
+                            value={formData.adresse_demandee}
+                            onChange={(e) => setFormData({ ...formData, adresse_demandee: e.target.value })}
+                            placeholder={t('adresse_actuelle')}
+                            required
+                          />
+                          , sollicite par la présente l'obtention d'un certificat de résidence pour{' '}
+                          <input
+                            type="text"
+                            className="demande-inline-input"
+                            value={formData.motif_demande}
+                            onChange={(e) => setFormData({ ...formData, motif_demande: e.target.value })}
+                            placeholder={t('motif_placeholder')}
+                            required
+                          />
+                          .
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <hr className="my-5 opacity-25" />
@@ -361,6 +432,34 @@ export default function DemandeResidencePage() {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
+        }
+        .demande-inline-input {
+            border: none;
+            border-bottom: 2px solid #dee2e6;
+            background: transparent;
+            padding: 0 8px;
+            color: #0d6efd;
+            font-weight: 600;
+            width: 180px;
+            transition: all 0.2s;
+            outline: none;
+            text-align: center;
+        }
+        .demande-inline-input:focus {
+            border-bottom-color: #ffc107;
+            background: rgba(255, 193, 7, 0.05);
+        }
+        .demande-inline-input::placeholder {
+            font-weight: normal;
+            color: #adb5bd;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+        .demande-inline-input--wide {
+            width: 300px;
+        }
+        [dir="rtl"] .demande-inline-input {
+            font-family: inherit;
         }
       `}</style>
     </div>

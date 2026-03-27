@@ -31,7 +31,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' }
   | { kind: 'disabled'; label: string }
 
@@ -145,11 +145,17 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
         target: '/mes-deces',
       }
-    } else if (nameLower === 'déclaration de décès' || nameAr === 'تصريح بوفاة') {
+    } else if (nameLower.includes('déclaration de décès') || nameAr === 'تصريح بوفاة') {
       requestButton = {
         kind: 'declare_death',
         label: t('declare_death'),
         target: '/declaration-deces',
+      }
+    } else if (nameLower.includes('mariage') || nameAr.includes('زواج')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: t('request_online'),
+        target: '/demande-mariage',
       }
     } else {
       requestButton = {
@@ -259,7 +265,9 @@ export default function ServicesPage() {
                         const nameAr = s.name_ar
                         return (
                           !nameFr.includes('extrait') &&
-                          !nameAr.includes('مضمون')
+                          !nameAr.includes('مضمون') &&
+                          !nameFr.includes('résidence') &&
+                          !nameAr.includes('مسكن')
                         )
                       })
                       .map((service) => {

@@ -1,10 +1,11 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ExtraitMariageViewSet, DemandeMariageViewSet
+
+router = DefaultRouter()
+router.register(r'extraits', ExtraitMariageViewSet, basename='extrait-mariage')
+router.register(r'demandes', DemandeMariageViewSet, basename='demande-mariage')
 
 urlpatterns = [
-    path('<int:pk>/certificate/', views.wedding_certificate_view, name='wedding_certificate_ar'),
-    path('<int:pk>/certificate/fr/', views.wedding_certificate_view, {'lang': 'fr'}, name='wedding_certificate_fr'),
-    path('api/mes-mariages/', views.MesMariagesAPIView.as_view(), name='mes_mariages_api'),
-    path('verify/<uuid:cert_uuid>/', views.verify_mariage_certificate_view, name='verify_certificate'),
-    path('verify/<uuid:cert_uuid>/<str:lang>/', views.verify_mariage_certificate_view, name='verify_certificate_lang'),
+    path('', include(router.urls)),
 ]

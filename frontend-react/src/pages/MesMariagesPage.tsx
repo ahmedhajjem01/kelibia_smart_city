@@ -20,7 +20,7 @@ export default function MesMariagesPage() {
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [mariage, setMariage] = useState<ActeMariage | null>(null)
+  const [mariages, setMariages] = useState<ActeMariage[]>([])
 
   useEffect(() => {
     const token = getAccessToken()
@@ -34,21 +34,18 @@ export default function MesMariagesPage() {
 
     ;(async () => {
       try {
-        const res = await fetch('/extrait-mariage/api/mes-mariages/', {
+        const res = await fetch('/extrait-mariage/extraits/', {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) {
-          const errorData = (await res.json().catch(() => null)) as
-            | { error?: string }
-            | null
-          throw new Error(errorData?.error || 'Impossible de trouver vos actes de mariage.')
+          throw new Error('Impossible de trouver vos actes de mariage.')
         }
-        const json = (await res.json()) as { mon_mariage?: ActeMariage | null }
-        setMariage(json.mon_mariage || null)
+        const json = (await res.json()) as ActeMariage[]
+        setMariages(json)
       } catch (e) {
         console.error(e)
         setError('Erreur de connexion avec la base de données.')
-        setMariage(null)
+        setMariages([])
       } finally {
         setLoading(false)
       }
@@ -122,16 +119,15 @@ export default function MesMariagesPage() {
           <div className="alert alert-danger">{error}</div>
         ) : (
           <div>
-            <h4 className="mb-3 border-bottom pb-2">Mon Acte de Mariage</h4>
-            {mariage ? (
+            <h4 className="mb-3 border-bottom pb-2">Mes Actes de Mariage</h4>
+            {mariages.length > 0 ? (
               <div className="row mb-5">
-                {(() => {
-                  const m = mariage
+                {mariages.map((m) => {
                   const conjoint = lang === 'ar' ? m.conjoint_ar : m.conjoint_fr
                   const label =
                     lang === 'ar' ? `زواج مع ${conjoint}` : `Mariage avec ${conjoint}`
                   return (
-                    <div className="col-md-6 col-lg-4 mb-4" key="mariage">
+                    <div className="col-md-6 col-lg-4 mb-4" key={`${m.numero_registre}-${m.annee_acte}`}>
                       <div className="card shadow-sm h-100 border-warning" style={{ borderWidth: 2 }}>
                         <div className="card-body">
                           <div className="d-flex justify-content-between align-items-center mb-3">
@@ -167,7 +163,7 @@ export default function MesMariagesPage() {
                       </div>
                     </div>
                   )
-                })()}
+                })}
               </div>
             ) : (
               <div className="alert alert-secondary text-muted">

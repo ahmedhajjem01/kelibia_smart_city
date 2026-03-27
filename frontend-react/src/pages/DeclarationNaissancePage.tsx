@@ -17,9 +17,13 @@ export default function DeclarationNaissancePage() {
   const token = useMemo(() => getAccessToken(), [])
 
   const attachmentRef = useRef<HTMLInputElement | null>(null)
+  const pereIdRef = useRef<HTMLInputElement | null>(null)
+  const mereIdRef = useRef<HTMLInputElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [isDrawing, setIsDrawing] = useState(false)
 
   const [scanStatus, setScanStatus] = useState<ScanStatus>(() => ({
     kind: 'idle',
@@ -35,6 +39,52 @@ export default function DeclarationNaissancePage() {
   function logout() {
     clearTokens()
     navigate('/login')
+  }
+
+  // Canvas Drawing logic
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    ctx.lineWidth = 2
+    ctx.lineCap = 'round'
+    ctx.strokeStyle = '#000'
+    
+    const rect = canvas.getBoundingClientRect()
+    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left
+    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top
+    
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    setIsDrawing(true)
+  }
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return
+    
+    const rect = canvas.getBoundingClientRect()
+    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : e.clientX - rect.left
+    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : e.clientY - rect.top
+    
+    ctx.lineTo(x, y)
+    ctx.stroke()
+  }
+
+  const stopDrawing = () => {
+    setIsDrawing(false)
+  }
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (canvas && ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
   }
 
   function simulateScan() {
@@ -81,7 +131,6 @@ export default function DeclarationNaissancePage() {
       const form = e.currentTarget as HTMLFormElement
       const fd = new FormData(form)
 
-      const file = fd.get('attachment')
       const payload = new FormData()
 
       payload.append('prenom_fr', String(fd.get('prenom_fr') || ''))
@@ -96,8 +145,21 @@ export default function DeclarationNaissancePage() {
       payload.append('cin_mere', String(fd.get('cin_mere') || ''))
       payload.append('commentaire', String(fd.get('commentaire') || ''))
 
-      if (file && file instanceof File && file.size > 0) {
-        payload.append('attachment', file)
+      // Files
+      const attachment = attachmentRef.current?.files?.[0]
+      if (attachment) payload.append('attachment', attachment)
+      
+      const pereId = pereIdRef.current?.files?.[0]
+      if (pereId) payload.append('cin_pere_scan', pereId)
+      
+      const mereId = mereIdRef.current?.files?.[0]
+      if (mereId) payload.append('cin_mere_scan', mereId)
+
+      // Signature to Blob
+      if (canvasRef.current) {
+        const dataUrl = canvasRef.current.toDataURL('image/png')
+        const blob = await (await fetch(dataUrl)).blob()
+        payload.append('signature_declarant', blob, 'signature.png')
       }
 
       const res = await fetch('/extrait-naissance/api/declaration/', {
@@ -293,17 +355,25 @@ export default function DeclarationNaissancePage() {
                     <h5 className="section-title fw-bold text-dark">{t('profile')}</h5>
 
                     <div className="row mb-4">
-                      <div className="col-md-6">
+                      <div className="col-md-6 mb-3">
                         <label htmlFor="cin_pere" className="form-label">
                           CIN Père
                         </label>
                         <input type="text" className="form-control" id="cin_pere" name="cin_pere" maxLength={8} />
+                        <div className="mt-2 text-start">
+                          <label className="form-label small text-muted d-block">{t('parent_id_pere')}</label>
+                          <input type="file" ref={pereIdRef} className="form-control form-control-sm" accept="image/*" />
+                        </div>
                       </div>
-                      <div className="col-md-6">
+                      <div className="col-md-6 mb-3">
                         <label htmlFor="cin_mere" className="form-label">
                           CIN Mère
                         </label>
                         <input type="text" className="form-control" id="cin_mere" name="cin_mere" maxLength={8} />
+                        <div className="mt-2 text-start">
+                          <label className="form-label small text-muted d-block">{t('parent_id_mere')}</label>
+                          <input type="file" ref={mereIdRef} className="form-control form-control-sm" accept="image/*" />
+                        </div>
                       </div>
                     </div>
 
@@ -355,6 +425,34 @@ export default function DeclarationNaissancePage() {
                         {t('comments')}
                       </label>
                       <textarea className="form-control" id="commentaire" name="commentaire" rows={2} />
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="form-label d-flex justify-content-between">
+                        <span>{t('signature_label')}</span>
+                        <button type="button" className="btn btn-sm btn-outline-secondary py-0" onClick={clearSignature}>
+                          {t('signature_clear')}
+                        </button>
+                      </label>
+                      <div className="border rounded bg-white shadow-sm" style={{ height: 150, cursor: 'crosshair', touchAction: 'none' }}>
+                        <canvas
+                          ref={canvasRef}
+                          width={600}
+                          height={150}
+                          className="w-100 h-100"
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseLeave={stopDrawing}
+                          onTouchStart={startDrawing}
+                          onTouchMove={draw}
+                          onTouchEnd={stopDrawing}
+                        />
+                      </div>
+                      <small className="form-text text-muted">
+                        <i className="fas fa-info-circle me-1" />
+                        {t('signature_help')}
+                      </small>
                     </div>
 
                     <div className="d-grid pt-3">

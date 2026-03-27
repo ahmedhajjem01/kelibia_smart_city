@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserInfo | null>(null)
+  const [marriageNotifications, setMarriageNotifications] = useState<any[]>([])
 
   useEffect(() => {
     const access = getAccessToken()
@@ -24,12 +25,23 @@ export default function DashboardPage() {
     }
     ;(async () => {
       try {
+        // Fetch user info
         const res = await fetch('/api/accounts/me/', {
           headers: { Authorization: `Bearer ${access}` },
         })
         if (!res.ok) throw new Error('Failed to fetch user info')
         const data = (await res.json()) as UserInfo
         setUser(data)
+
+        // Fetch marriage requests for notifications
+        const mRes = await fetch('/extrait-mariage/demandes/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (mRes.ok) {
+          const mData = await mRes.json()
+          const signed = mData.filter((d: any) => d.status === 'signed')
+          setMarriageNotifications(signed)
+        }
       } catch (e) {
         console.error(e)
       }
@@ -102,6 +114,23 @@ export default function DashboardPage() {
               <h4>{t('welcome')}</h4>
               <p>{t('welcome_msg')}</p>
             </div>
+
+            {marriageNotifications.length > 0 && (
+              <div className="alert alert-info shadow-lg border-0 rounded-4 p-4 mb-4 animate__animated animate__bounceIn">
+                <div className="d-flex align-items-center">
+                  <div className="bg-white rounded-circle p-3 me-4 shadow-sm">
+                    <i className="fas fa-ring fa-2x text-primary animate__animated animate__pulse animate__infinite"></i>
+                  </div>
+                  <div className="flex-grow-1">
+                    <h5 className="fw-bold text-dark mb-1">{t('notification_mariage_signed')}</h5>
+                    <p className="text-muted small mb-0">Kelibia Smart City - Service de l'État Civil</p>
+                  </div>
+                  <Link to="/mes-mariages" className="btn btn-primary rounded-pill px-4 shadow-sm">
+                    {t('view_mariage_cert')}
+                  </Link>
+                </div>
+              </div>
+            )}
 
             <div className="card shadow-sm mb-4">
               <div className="card-body">

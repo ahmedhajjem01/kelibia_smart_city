@@ -140,6 +140,13 @@ class DeclarationNaissance(models.Model):
     cin_pere = models.CharField(max_length=8, verbose_name="CIN Père", blank=True, null=True)
     cin_mere = models.CharField(max_length=8, verbose_name="CIN Mère", blank=True, null=True)
     
+    # Scans documents parents
+    cin_pere_scan = models.ImageField(upload_to='declarations/naissance/parents/pere/', verbose_name="Scan CIN Père", blank=True, null=True)
+    cin_mere_scan = models.ImageField(upload_to='declarations/naissance/parents/mere/', verbose_name="Scan CIN Mère", blank=True, null=True)
+
+    # Signature numérique du déclarant (Base64 data url or image)
+    signature_declarant = models.ImageField(upload_to='declarations/naissance/signatures/', verbose_name="Signature du déclarant", blank=True, null=True)
+
     commentaire = models.TextField(blank=True, verbose_name="Commentaire / ملاحظات")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
