@@ -56,19 +56,26 @@ export default function DeclarationDecesPage() {
         const response = await fetch('/extrait-deces/api/declaration/', {
           headers: { Authorization: `Bearer ${access}` },
         })
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}))
+          if (response.status === 404) {
+            throw new Error(lang === 'ar' ? 'لم يتم العثور على سجل المواطن الخاص بك. يرجى الاتصال بالإدارة البلدية.' : 'Votre dossier citoyen est introuvable. Veuillez contacter l\'administration municipale.')
+          }
+          throw new Error(errData.error || 'bad response')
+        }
+
         const data = (await response.json()) as {
           eligible_relatives?: EligibleRelative[]
         }
-        if (!response.ok) throw new Error('bad response')
 
         const rels = data.eligible_relatives || []
         setEligible(rels)
         setNoEligible(rels.length === 0)
-      } catch (e) {
+      } catch (e: any) {
         console.error(e)
         setEligible([])
         setNoEligible(true)
-        setFetchError('Erreur lors du chargement des membres éligibles.')
+        setFetchError(e.message || 'Erreur lors du chargement des membres éligibles.')
       }
     })()
   }, [navigate, lang])

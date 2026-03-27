@@ -19,6 +19,11 @@ type Service = {
   requirements: ServiceRequirement[]
   form_pdf_fr?: string | null
   form_pdf_ar?: string | null
+  availability?: {
+    is_available: boolean
+    reason_fr: string
+    reason_ar: string
+  }
 }
 
 type ServiceCategory = {
@@ -156,6 +161,14 @@ export default function ServicesPage() {
       requestButton = {
         kind: 'disabled',
         label: lang === 'ar' ? 'طلب عن بعد (قريبا)' : 'Demander en ligne (Bientôt)',
+      }
+    }
+
+    const availability = svc.availability || { is_available: true, reason_fr: '', reason_ar: '' }
+    if (!availability.is_available) {
+      requestButton = {
+        kind: 'disabled',
+        label: lang === 'ar' ? availability.reason_ar : availability.reason_fr,
       }
     }
 
