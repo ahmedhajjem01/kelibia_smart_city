@@ -123,10 +123,15 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
         target: '/mes-extraits',
       }
-    } else if (nameLower === 'déclaration de naissance' || nameAr === 'تصريح بولادة') {
+    } else if (
+      nameLower.includes('naissance') ||
+      nameAr.includes('ولادة') ||
+      nameAr.includes('ترسيم')
+    ) {
+      downloadHref = null // Remove PDF button for birth registration/declaration
       requestButton = {
         kind: 'declare_birth',
-        label: t('declare_birth'),
+        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
         target: '/declaration-naissance',
       }
     } else if (
@@ -383,6 +388,21 @@ export default function ServicesPage() {
                 onClick={() => {
                   if (!modalState) return
                   if (modalState.requestButton.kind === 'disabled') return
+
+                  // Hide modal before navigating to avoid persistent backdrop
+                  const modalEl = document.getElementById('serviceModal')
+                  const bootstrap = (window as any).bootstrap
+                  if (bootstrap?.Modal && modalEl) {
+                    const instance = bootstrap.Modal.getInstance(modalEl)
+                    if (instance) instance.hide()
+                  }
+
+                  // Cleanup backdrop and body classes manually to be safe in React
+                  document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
+                  document.body.classList.remove('modal-open')
+                  document.body.style.overflow = ''
+                  document.body.style.paddingRight = ''
+
                   navigate(modalState.requestButton.target)
                 }}
               >
