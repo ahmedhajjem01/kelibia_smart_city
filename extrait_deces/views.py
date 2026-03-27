@@ -32,11 +32,10 @@ class MesDecesAPIView(APIView):
         except Citoyen.DoesNotExist:
             return Response({"error": "Citoyen introuvable."}, status=404)
             
-        # Collect family members (Parents, Children, Spouse, Grandparents)
         from extrait_mariage.models import ExtraitMariage
         mariages = ExtraitMariage.objects.filter(
             models.Q(epoux=citoyen) | models.Q(epouse=citoyen)
-        )
+        ).only('epoux', 'epouse')
         conjoints = [m.epouse if m.epoux == citoyen else m.epoux for m in mariages]
         
         family_ids = []
@@ -91,7 +90,7 @@ class DeclarationDecesAPIView(APIView):
             from extrait_mariage.models import ExtraitMariage
             mariages = ExtraitMariage.objects.filter(
                 models.Q(epoux=citoyen) | models.Q(epouse=citoyen)
-            )
+            ).only('epoux', 'epouse')
             conjoints = [m.epouse if m.epoux == citoyen else m.epoux for m in mariages]
 
             family_members = []
