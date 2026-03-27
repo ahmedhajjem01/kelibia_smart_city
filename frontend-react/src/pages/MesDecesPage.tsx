@@ -34,7 +34,7 @@ export default function MesDecesPage() {
 
     ;(async () => {
       try {
-        const res = await fetch('/extrait-deces/api/mes-deces/', {
+        const res = await fetch(resolveBackendUrl('/extrait-deces/api/mes-deces/'), {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) {

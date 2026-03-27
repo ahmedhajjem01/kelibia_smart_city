@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
 
 type EligibleRelative = {
   id: number
@@ -53,7 +54,7 @@ export default function DeclarationDecesPage() {
 
     ;(async () => {
       try {
-        const response = await fetch('/extrait-deces/api/declaration/', {
+        const response = await fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), {
           headers: { Authorization: `Bearer ${access}` },
         })
         if (!response.ok) {
@@ -104,7 +105,7 @@ export default function DeclarationDecesPage() {
         if (!fd.has('lieu_deces_ar')) fd.append('lieu_deces_ar', '')
       }
 
-      const response = await fetch('/extrait-deces/api/declaration/', {
+      const response = await fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${access}`,

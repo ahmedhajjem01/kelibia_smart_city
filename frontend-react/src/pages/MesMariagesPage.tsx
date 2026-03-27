@@ -34,7 +34,7 @@ export default function MesMariagesPage() {
 
     ;(async () => {
       try {
-        const res = await fetch('/extrait-mariage/extraits/', {
+        const res = await fetch(resolveBackendUrl('/extrait-mariage/extraits/'), {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) {

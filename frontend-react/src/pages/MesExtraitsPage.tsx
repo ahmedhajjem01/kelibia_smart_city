@@ -39,7 +39,7 @@ export default function MesExtraitsPage() {
 
     ;(async () => {
       try {
-        const res = await fetch('/extrait-naissance/api/mes-extraits/', {
+        const res = await fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) {
