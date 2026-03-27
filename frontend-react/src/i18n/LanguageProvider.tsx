@@ -204,6 +204,10 @@ const translations: Record<Lang, Record<string, string>> = {
     private_place: 'Lieu Privé',
     notaire_info_msg: 'Veuillez remettre vos documents aux Notaires (Adoul). Votre état civil sera mis à jour dans l\'application dès réception de l\'avis par la municipalité.',
     notification_mariage_signed: 'Votre acte de mariage a été enregistré avec succès. Vous pouvez maintenant télécharger votre extrait.',
+    my_requests: 'Mes Demandes administratives',
+    my_requests_desc: 'Suivez l\'état de vos demandes de documents et de services en ligne.',
+    new_request: 'Nouvelle Demande',
+    view_requests: 'Voir mes demandes',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -395,6 +399,10 @@ const translations: Record<Lang, Record<string, string>> = {
     private_place: 'مكان خاص',
     notaire_info_msg: 'يرجى تسليم الوثائق لعدول الإشهاد، وسيتم تحديث حالتك المدنية في التطبيق فور وصول الإشعار من العدل إلى البلدية.',
     notification_mariage_signed: 'تم تسجيل عقد زواجك بنجاح. يمكنك الآن تحميل مضمون الولادة الخاص بك.',
+    my_requests: 'طلباتي الإدارية',
+    my_requests_desc: 'تابع حالة طلبات الوثائق والخدمات عبر الإنترنت.',
+    new_request: 'طلب جديد',
+    view_requests: 'عرض طلباتي',
   },
 }
 

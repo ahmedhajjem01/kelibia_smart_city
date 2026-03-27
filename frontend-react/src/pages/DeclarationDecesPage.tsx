@@ -111,6 +111,21 @@ export default function DeclarationDecesPage() {
       const form = e.currentTarget as HTMLFormElement
       const fd = new FormData(form)
 
+      // Manual date validation (72h rule)
+      const dateDecesStr = fd.get('date_deces') as string
+      if (dateDecesStr) {
+        const dateDeces = new Date(dateDecesStr)
+        const now = new Date()
+        const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
+        
+        if (dateDeces > now) {
+          throw new Error(lang === 'ar' ? 'لا يمكن أن يكون تاريخ الوفاة في المستقبل.' : 'La date de décès ne peut pas être dans le futur.')
+        }
+        if (dateDeces < threeDaysAgo) {
+          throw new Error(lang === 'ar' ? 'يجب التصريح بالوفاة في غضون 72 ساعة (3 أيام).' : 'Le décès doit être déclaré dans un délai de 3 jours (72 heures).')
+        }
+      }
+
       // Ensure both place of death fields are present even if only one was in the UI
       if (lang === 'ar') {
         if (!fd.has('lieu_deces_fr')) fd.append('lieu_deces_fr', '')

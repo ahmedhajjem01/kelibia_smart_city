@@ -145,6 +145,24 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden border-start border-4 border-info">
+              <div className="card-body">
+                <h5 className="card-title text-info fw-bold">
+                  <i className="fas fa-tasks me-2" />
+                  {t('my_requests')}
+                </h5>
+                <p className="card-text text-muted small">{t('my_requests_desc')}</p>
+                <div className="d-flex gap-2">
+                    <Link to="/services" className="btn btn-info text-white rounded-pill px-4 shadow-sm">
+                        <i className="fas fa-plus me-2"></i> {t('new_request')}
+                    </Link>
+                    <Link to="/mes-extraits" className="btn btn-outline-info rounded-pill px-4">
+                        <i className="fas fa-history me-2"></i> {t('view_requests')}
+                    </Link>
+                </div>
+              </div>
+            </div>
+
             {user && user.is_verified && (
               <div className="card shadow-lg mb-4 border-0 rounded-4 overflow-hidden">
                 <div className="card-header bg-gradient bg-primary text-white py-3">
