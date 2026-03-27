@@ -179,9 +179,9 @@ export default function MesDemandesPage() {
             </div>
 
             {loading ? (
-              <div className="text-center py-5 card shadow-sm border-0 rounded-4">
+              <div className="d-flex flex-column align-items-center justify-content-center p-5 card shadow-sm border-0 rounded-4">
                 <div className="spinner-border text-primary" role="status"></div>
-                <p className="mt-3 text-muted">{t('loading')}</p>
+                <p className="mt-3 text-muted mb-0">{t('loading')}</p>
               </div>
             ) : error ? (
               <div className="alert alert-danger rounded-4 shadow-sm">
