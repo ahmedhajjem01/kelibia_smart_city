@@ -51,7 +51,7 @@ const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => voi
               <i className="fas fa-check me-2"></i> Confirmer
             </button>
             <button type="button" onClick={() => setImgSrc(null)} className="btn btn-outline-warning rounded-pill px-4">
-                <i className="fas fa-undo me-2"></i> Reprendre
+              <i className="fas fa-undo me-2"></i> Reprendre
             </button>
           </div>
         </>
@@ -69,7 +69,7 @@ export default function MariageContractPage() {
   const [success, setSuccess] = useState(false)
 
   const [formData, setFormData] = useState({
-    type_contrat: 'baladi',
+    type_contrat: 'municipal',
     lieu_mariage: 'municipality',
     nom_epoux: '',
     cin_epoux: '',
@@ -78,7 +78,7 @@ export default function MariageContractPage() {
     date_souhaitee: '',
     regime_matrimonial: 'separation',
   })
-  
+
   const [files, setFiles] = useState<{ [key: string]: File | Blob | null }>({
     cin_recto_epoux: null,
     cin_verso_epoux: null,
@@ -120,7 +120,7 @@ export default function MariageContractPage() {
       data.append(key, value)
     })
 
-    if (formData.type_contrat === 'baladi') {
+    if (formData.type_contrat === 'municipal') {
       Object.entries(files).forEach(([key, value]) => {
         if (value) data.append(key, value)
       })
@@ -155,35 +155,35 @@ export default function MariageContractPage() {
         {label} {required && <span className="text-danger">*</span>}
       </label>
       {cameraActive === field ? (
-        <WebcamCapture 
-            onCapture={(blob) => handleCapture(blob, field)} 
-            onCancel={() => setCameraActive(null)} 
+        <WebcamCapture
+          onCapture={(blob) => handleCapture(blob, field)}
+          onCancel={() => setCameraActive(null)}
         />
       ) : (
         <div className="d-flex flex-wrap gap-2 align-items-center">
-            <div className="flex-grow-1 position-relative">
-                <input
-                    type="file"
-                    className="form-control form-control-lg bg-light border-0 shadow-sm"
-                    onChange={(e) => handleFileChange(e, field)}
-                    accept="image/*,application/pdf"
-                    required={required && !files[field]}
-                    style={{ borderRadius: '12px' }}
-                />
-            </div>
-            <button
-                type="button"
-                className="btn btn-warning rounded-pill px-3 shadow-sm hover-lift"
-                onClick={() => setCameraActive(field)}
-                title={t('take_photo')}
-            >
-                <i className="fas fa-camera"></i>
-            </button>
-            {files[field] && (
-                <span className="badge bg-success rounded-pill px-3 py-2">
-                    <i className="fas fa-check me-1"></i> {t('success_msg')}
-                </span>
-            )}
+          <div className="flex-grow-1 position-relative">
+            <input
+              type="file"
+              className="form-control form-control-lg bg-light border-0 shadow-sm"
+              onChange={(e) => handleFileChange(e, field)}
+              accept="image/*,application/pdf"
+              required={required && !files[field]}
+              style={{ borderRadius: '12px' }}
+            />
+          </div>
+          <button
+            type="button"
+            className="btn btn-warning rounded-pill px-3 shadow-sm hover-lift"
+            onClick={() => setCameraActive(field)}
+            title={t('take_photo')}
+          >
+            <i className="fas fa-camera"></i>
+          </button>
+          {files[field] && (
+            <span className="badge bg-success rounded-pill px-3 py-2">
+              <i className="fas fa-check me-1"></i> {t('success_msg')}
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -241,7 +241,7 @@ export default function MariageContractPage() {
                         style={{ borderRadius: '12px' }}
                       >
                         <option value="baladi">{t('baladi')}</option>
-                        <option value="adli">{t('adli')}</option>
+                        <option value="notaire">{t('notaire')}</option>
                       </select>
                     </div>
                     {formData.type_contrat === 'baladi' && (
@@ -261,11 +261,11 @@ export default function MariageContractPage() {
                     )}
                   </div>
 
-                  {formData.type_contrat === 'adli' ? (
+                  {formData.type_contrat === 'notaire' ? (
                     <div className="alert alert-info rounded-4 p-4 border-0 shadow-sm mb-5">
                       <div className="d-flex align-items-center">
                         <i className="fas fa-info-circle fa-3x me-4 text-info"></i>
-                        <p className="mb-0 fw-bold fs-5">{t('adli_info_msg')}</p>
+                        <p className="mb-0 fw-bold fs-5">{t('notaire_info_msg')}</p>
                       </div>
                     </div>
                   ) : null}

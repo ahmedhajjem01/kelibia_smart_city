@@ -118,8 +118,8 @@ class DemandeMariage(models.Model):
     ]
 
     TYPE_CHOICES = [
-        ('baladi', 'Baladi (Municipal) / بلدي'),
-        ('adli', 'Adli (Notaire) / عدلي'),
+        ('municipal ', ' Municipal / بلدي'),
+        ('notaire', 'Notaire / عدلي'),
     ]
     LIEU_CHOICES = [
         ('municipality', 'Salle de la Municipalité / قاعة البلدية'),
@@ -151,13 +151,13 @@ class DemandeMariage(models.Model):
         verbose_name="Régime Matrimonial"
     )
 
-    # Documents Epoux (Optional if Adli)
+    # Documents Epoux (Optional if notaire)
     cin_recto_epoux = models.ImageField(upload_to='declarations/mariage/epoux/cin_recto/', verbose_name="CIN Epoux Recto", null=True, blank=True)
     cin_verso_epoux = models.ImageField(upload_to='declarations/mariage/epoux/cin_verso/', verbose_name="CIN Epoux Verso", null=True, blank=True)
     extrait_naissance_epoux = models.FileField(upload_to='declarations/mariage/epoux/naissance/', verbose_name="Extrait Naissance Epoux", null=True, blank=True)
     certificat_medical_epoux = models.FileField(upload_to='declarations/mariage/epoux/medical/', verbose_name="Certificat Médical Epoux", null=True, blank=True)
 
-    # Documents Epouse (Optional if Adli)
+    # Documents Epouse (Optional if notaire)
     cin_recto_epouse = models.ImageField(upload_to='declarations/mariage/epouse/cin_recto/', verbose_name="CIN Epouse Recto", null=True, blank=True)
     cin_verso_epouse = models.ImageField(upload_to='declarations/mariage/epouse/cin_verso/', verbose_name="CIN Epouse Verso", null=True, blank=True)
     extrait_naissance_epouse = models.FileField(upload_to='declarations/mariage/epouse/naissance/', verbose_name="Extrait Naissance Epouse", null=True, blank=True)
@@ -170,7 +170,7 @@ class DemandeMariage(models.Model):
         verbose_name="Statut"
     )
 
-    # For Adli case: Agent uploads the scan of the contract received from the notary
+    # For notaire case: Agent uploads the scan of the contract received from the notary
     contrat_recu_scan = models.FileField(
         upload_to='declarations/mariage/agent/contrats/', 
         null=True, blank=True, 
@@ -227,8 +227,8 @@ class DemandeMariage(models.Model):
                 date_mariage_lettres_fr=self.date_souhaitee.strftime("%d/%m/%Y"),
                 date_mariage_lettres_ar=self.date_souhaitee.strftime("%d/%m/%Y"), # Simplified
                 regime_matrimonial=self.regime_matrimonial,
-                type_acte='notarial' if self.type_contrat == 'adli' else 'municipal',
-                contrat_scan=self.contrat_recu_scan if self.type_contrat == 'adli' else None,
+                type_acte='notarial' if self.type_contrat == 'notaire' else 'municipal',
+                contrat_scan=self.contrat_recu_scan if self.type_contrat == 'notaire' else None,
                 officer_etat_civil_fr="Agent Municipal (Automatique)",
                 officer_etat_civil_ar="عضو البلدية (آلي)"
             )

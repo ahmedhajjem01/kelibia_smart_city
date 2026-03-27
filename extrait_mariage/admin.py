@@ -21,7 +21,7 @@ class DemandeMariageAdmin(admin.ModelAdmin):
         ('Documents Notaire (Adouls)', {
             'fields': ('contrat_recu_scan',),
             'classes': ('collapse',),
-            'description': 'Pour les mariages Adli, l\'agent télécharge ici le contrat envoyé par le notaire.'
+            'description': 'Pour les mariages notaire, l\'agent télécharge ici le contrat envoyé par le notaire.'
         }),
         ('Époux (Groom)', {
             'fields': ('nom_epoux', 'cin_epoux', 'cin_recto_epoux', 'cin_verso_epoux', 'extrait_naissance_epoux', 'certificat_medical_epoux')
