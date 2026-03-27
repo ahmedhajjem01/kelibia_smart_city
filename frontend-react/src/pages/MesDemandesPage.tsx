@@ -1,50 +1,154 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
+
+interface UnifiedRequest {
+  id: number
+  type: 'birth' | 'marriage' | 'death' | 'residence'
+  title: string
+  status: string
+  date: string
+  details: string
+}
 
 export default function MesDemandesPage() {
   const { t, setLang, lang } = useI18n()
+  const navigate = useNavigate()
+  const [requests, setRequests] = useState<UnifiedRequest[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const categories = [
-    {
-      id: 'birth',
-      title: t('birth_requests_title'),
-      desc: t('birth_requests_desc'),
-      icon: 'fa-baby',
-      color: 'success',
-      link: '/mes-extraits',
-    },
-    {
-      id: 'marriage',
-      title: t('marriage_requests_title'),
-      desc: t('marriage_requests_desc'),
-      icon: 'fa-ring',
-      color: 'primary',
-      link: '/mes-mariages',
-    },
-    {
-      id: 'death',
-      title: t('death_requests_title'),
-      desc: t('death_requests_desc'),
-      icon: 'fa-dove',
-      color: 'dark',
-      link: '/mes-deces',
-    },
-    {
-      id: 'residence',
-      title: t('residence_requests_title'),
-      desc: t('residence_requests_desc'),
-      icon: 'fa-home',
-      color: 'warning',
-      link: '/mes-residences',
-    },
-  ]
+  useEffect(() => {
+    const token = getAccessToken()
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    const fetchAll = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` }
+        
+        // Parallel fetching
+        const [resBirth, resMarriage, resDeath, resResidence] = await Promise.all([
+          fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
+          fetch(resolveBackendUrl('/api/residence/demande/'), { headers }),
+        ])
+
+        const unified: UnifiedRequest[] = []
+
+        // 1. Birth
+        if (resBirth.ok) {
+          const births = await resBirth.json()
+          births.forEach((b: any) => {
+            unified.push({
+              id: b.id,
+              type: 'birth',
+              title: t('declare_birth'),
+              status: b.status,
+              date: b.created_at,
+              details: lang === 'ar' ? `${b.prenom_ar} ${b.nom_ar}` : `${b.prenom_fr} ${b.nom_fr}`
+            })
+          })
+        }
+
+        // 2. Marriage
+        if (resMarriage.ok) {
+          const marriages = await resMarriage.json()
+          marriages.forEach((m: any) => {
+            unified.push({
+              id: m.id,
+              type: 'marriage',
+              title: t('mariage_contract_title'),
+              status: m.status,
+              date: m.created_at,
+              details: lang === 'ar' ? `زوجين: ${m.nom_epoux_ar} & ${m.nom_epouse_ar}` : `Époux: ${m.nom_epoux_fr} & ${m.nom_epouse_fr}`
+            })
+          })
+        }
+
+        // 3. Death
+        if (resDeath.ok) {
+          const deathData = await resDeath.json()
+          const deaths = deathData.my_declarations || []
+          deaths.forEach((d: any) => {
+            unified.push({
+              id: d.id,
+              type: 'death',
+              title: t('declare_death'),
+              status: d.status,
+              date: d.created_at,
+              details: d.defunt_detail ? (lang === 'ar' ? `${d.defunt_detail.prenom_ar} ${d.defunt_detail.nom_ar}` : `${d.defunt_detail.prenom_fr} ${d.defunt_detail.nom_fr}`) : 'N/A'
+            })
+          })
+        }
+
+        // 4. Residence
+        if (resResidence.ok) {
+          const residences = await resResidence.json()
+          residences.forEach((r: any) => {
+            unified.push({
+              id: r.id,
+              type: 'residence',
+              title: t('req_residence'),
+              status: r.status,
+              date: r.created_at,
+              details: r.adresse_demandee
+            })
+          })
+        }
+
+        // Sort by date descending
+        unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        setRequests(unified)
+
+      } catch (err) {
+        console.error(err)
+        setError(t('error_msg'))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAll()
+  }, [navigate, lang, t])
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending': return <span className="badge bg-warning text-dark rounded-pill px-3"><i className="fas fa-clock me-1"></i> {t('status_pending')}</span>
+      case 'validated':
+      case 'approved':
+      case 'signed':
+      case 'resolved':
+        return <span className="badge bg-success rounded-pill px-3"><i className="fas fa-check-circle me-1"></i> {t('status_validated')}</span>
+      case 'rejected': return <span className="badge bg-danger rounded-pill px-3"><i className="fas fa-times-circle me-1"></i> {t('status_rejected')}</span>
+      default: return <span className="badge bg-secondary rounded-pill px-3">{status}</span>
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'birth': return <i className="fas fa-baby text-success"></i>
+      case 'marriage': return <i className="fas fa-ring text-primary"></i>
+      case 'death': return <i className="fas fa-dove text-dark"></i>
+      case 'residence': return <i className="fas fa-home text-warning"></i>
+      default: return <i className="fas fa-file-alt"></i>
+    }
+  }
 
   return (
     <div className="bg-light min-vh-100">
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div className="container">
           <Link className="navbar-brand" to="/dashboard">
-            Kelibia Smart City
+            <i className="fas fa-city me-2"></i> Kelibia Smart City
           </Link>
           <div className="d-flex align-items-center">
             <div className="btn-group me-3" role="group">
@@ -60,45 +164,86 @@ export default function MesDemandesPage() {
       </nav>
 
       <div className={`container py-5 ${lang === 'ar' ? 'text-end' : ''}`}>
-        <div className="text-center mb-5">
-          <h1 className="fw-bold text-primary">{t('my_requests')}</h1>
-          <p className="text-muted">{t('my_requests_desc')}</p>
-        </div>
-
-        <div className="row g-4">
-          {categories.map((cat) => (
-            <div key={cat.id} className="col-md-6 col-lg-3">
-              <Link to={cat.link} className="text-decoration-none h-100 d-block">
-                <div className={`card h-100 shadow-sm border-0 border-bottom border-4 border-${cat.color} hover-lift transition-all`}>
-                  <div className="card-body p-4 text-center">
-                    <div className={`bg-${cat.color} bg-opacity-10 rounded-circle p-3 d-inline-block mb-3`}>
-                      <i className={`fas ${cat.icon} fa-2x text-${cat.color}`}></i>
-                    </div>
-                    <h5 className="fw-bold text-dark mb-2">{cat.title}</h5>
-                    <p className="text-muted small mb-0">{cat.desc}</p>
-                  </div>
-                  <div className="card-footer bg-white border-0 text-center pb-4">
-                    <span className={`btn btn-sm btn-outline-${cat.color} rounded-pill px-3`}>
-                      {t('view_details')} <i className={`fas ${lang === 'ar' ? 'fa-chevron-left' : 'fa-chevron-right'} ms-1`}></i>
-                    </span>
-                  </div>
-                </div>
+        <div className="row justify-content-center">
+          <div className="col-lg-10">
+            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+              <div>
+                <h1 className="fw-bold text-primary mb-1">
+                  <i className="fas fa-tasks me-2"></i> {t('my_requests')}
+                </h1>
+                <p className="text-muted mb-0">{t('my_requests_desc')}</p>
+              </div>
+              <Link to="/services" className="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i className="fas fa-plus me-2"></i> {t('new_request')}
               </Link>
             </div>
-          ))}
-        </div>
 
-        <div className="mt-5 text-center">
-          <Link to="/dashboard" className="btn btn-outline-secondary rounded-pill px-4">
-            <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`}></i> {t('home')}
-          </Link>
+            {loading ? (
+              <div className="text-center py-5 card shadow-sm border-0 rounded-4">
+                <div className="spinner-border text-primary" role="status"></div>
+                <p className="mt-3 text-muted">{t('loading')}</p>
+              </div>
+            ) : error ? (
+              <div className="alert alert-danger rounded-4 shadow-sm">
+                <i className="fas fa-exclamation-circle me-2"></i> {error}
+              </div>
+            ) : requests.length === 0 ? (
+              <div className="text-center py-5 card shadow-sm border-0 rounded-4">
+                <div className="mb-4 opacity-25">
+                  <i className="fas fa-folder-open fa-4x text-muted"></i>
+                </div>
+                <h4 className="fw-bold text-muted">Aucune demande trouvée</h4>
+                <p className="text-muted mb-4">Vous n'avez pas encore soumis de demande administrative.</p>
+                <Link to="/services" className="btn btn-outline-primary rounded-pill px-4">
+                  Faire ma première demande
+                </Link>
+              </div>
+            ) : (
+              <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="bg-light">
+                      <tr>
+                        <th className="px-4 py-3 border-0">{lang === 'ar' ? 'الطلب' : 'Demande'}</th>
+                        <th className="py-3 border-0">{lang === 'ar' ? 'التوجيه' : 'Détails'}</th>
+                        <th className="py-3 border-0 text-center">{lang === 'ar' ? 'التاريخ' : 'Date'}</th>
+                        <th className="py-3 border-0 text-center">{lang === 'ar' ? 'الحالة' : 'Statut'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {requests.map((req) => (
+                        <tr key={`${req.type}-${req.id}`}>
+                          <td className="px-4 py-3">
+                            <div className="d-flex align-items-center gap-2">
+                              {getTypeIcon(req.type)}
+                              <span className="fw-bold text-dark">{req.title}</span>
+                            </div>
+                          </td>
+                          <td className="text-muted small">
+                            {req.details}
+                          </td>
+                          <td className="text-center text-muted small">
+                            {new Date(req.date).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')}
+                          </td>
+                          <td className="text-center">
+                            {getStatusBadge(req.status)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 text-center">
+              <Link to="/dashboard" className="btn btn-outline-secondary rounded-pill px-4">
+                <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`}></i> {t('home')}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-
-      <style>{`
-        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important; }
-      `}</style>
     </div>
   )
 }

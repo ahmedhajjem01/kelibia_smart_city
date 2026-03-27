@@ -117,8 +117,14 @@ class DeclarationDecesAPIView(APIView):
                     unique_eligible.append(m)
                     seen_ids.add(m.id)
 
+            my_declarations = DeclarationDeces.objects.filter(declarant=request.user).order_by('-created_at')
+            my_decl_serializer = DeclarationDecesSerializer(my_declarations, many=True)
+
             serializer = CitoyenSimpleSerializer(unique_eligible, many=True)
-            return Response({"eligible_relatives": serializer.data})
+            return Response({
+                "eligible_relatives": serializer.data,
+                "my_declarations": my_decl_serializer.data
+            })
 
         except Exception as exc:
             import traceback
