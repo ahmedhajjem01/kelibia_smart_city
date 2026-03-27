@@ -1,3 +1,4 @@
+import os
 from django.apps import AppConfig
 
 class ExtraitMariageConfig(AppConfig):
@@ -29,4 +30,3 @@ class ExtraitMariageConfig(AppConfig):
             except Exception as e:
                 print(f"Self-healing migration log: {e}")
 
-import os
