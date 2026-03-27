@@ -22,6 +22,18 @@ class DeclarationDecesSerializer(serializers.ModelSerializer):
         read_only_fields = ['status', 'created_at']
 
     def validate(self, attrs):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        date_deces = attrs.get('date_deces')
+        if date_deces:
+            now = timezone.now()
+            # 72 hours = 3 days
+            if date_deces > now:
+                raise serializers.ValidationError({"date_deces": "La date de décès ne peut pas être dans le futur."})
+            if date_deces < now - timedelta(hours=72):
+                raise serializers.ValidationError({"date_deces": "Le décès doit être déclaré dans un délai de 72 heures (3 jours)."})
+
         if not attrs.get('lieu_deces_fr') and not attrs.get('lieu_deces_ar'):
             raise serializers.ValidationError(
                 {'lieu_deces_fr': "Veuillez saisir le lieu du décès (en français ou en arabe)."}
