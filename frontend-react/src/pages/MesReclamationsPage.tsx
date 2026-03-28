@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 interface Reclamation {
   id: number
@@ -16,11 +18,12 @@ interface Reclamation {
 }
 
 export default function MesReclamationsPage() {
-  const { t, setLang } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
   const [reclamations, setReclamations] = useState<Reclamation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
   useEffect(() => {
     fetchReclamations()
@@ -34,6 +37,15 @@ export default function MesReclamationsPage() {
     }
 
     try {
+      // Fetch User Info
+      const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+        headers: { Authorization: `Bearer ${access}` },
+      })
+      if (userRes.ok) {
+        const userData = await userRes.json()
+        setUser(userData)
+      }
+
       const res = await fetch('/api/reclamations/', {
         headers: {
           Authorization: `Bearer ${access}`,
@@ -72,31 +84,21 @@ export default function MesReclamationsPage() {
   }
 
   return (
-    <div className="container py-5">
+    <MainLayout
+      user={user}
+      onLogout={() => {
+        // Simple logout
+        navigate('/login')
+      }}
+      breadcrumbs={[{ label: t('my_reclamations') }]}
+    >
       <div className="d-flex justify-content-between align-items-center mb-5">
-        <div className="d-flex align-items-center gap-3">
-            <div className="btn-group btn-group-sm">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => setLang('fr')}
-                title="Français"
-              >
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => setLang('ar')}
-                title="العربية"
-              >
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
-            </div>
-            <h2 className="fw-bold mb-1">
-                <i className="fas fa-bullhorn text-danger me-3"></i>
-                {t('my_reclamations')}
-            </h2>
+        <div>
+          <h2 className="fw-bold section-title mb-1">
+            <i className="fas fa-bullhorn text-danger me-3"></i>
+            {t('my_reclamations')}
+          </h2>
+          <p className="text-muted small">Suivi en temps réel de vos signalements citoyens.</p>
         </div>
         <Link to="/nouvelle-reclamation" className="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm hover-lift">
           <i className="fas fa-plus me-2"></i> {t('new_reclamation')}
@@ -110,7 +112,7 @@ export default function MesReclamationsPage() {
         </div>
       ) : error ? (
         <div className="alert alert-danger rounded-4 p-4 shadow-sm">
-            <i className="fas fa-exclamation-circle me-2"></i> {error}
+          <i className="fas fa-exclamation-circle me-2"></i> {error}
         </div>
       ) : reclamations.length === 0 ? (
         <div className="text-center py-5 bg-light rounded-4 border-2 border-dashed">
@@ -131,26 +133,26 @@ export default function MesReclamationsPage() {
                 <div className="card-body p-4">
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div className="d-flex flex-column gap-2">
-                        {getStatusBadge(rec.status)}
-                        {getPriorityBadge(rec.priority)}
+                      {getStatusBadge(rec.status)}
+                      {getPriorityBadge(rec.priority)}
                     </div>
                     <small className="text-muted">
-                        {new Date(rec.created_at).toLocaleDateString()}
+                      {new Date(rec.created_at).toLocaleDateString()}
                     </small>
                   </div>
                   <h5 className="fw-bold mb-2 text-dark">{rec.title}</h5>
-                  <p className="text-muted small mb-3 text-truncate-2">
+                  <p className="text-muted small mb-3 text-truncate-2" style={{ minHeight: '3rem' }}>
                     {rec.description}
                   </p>
-                  <div className="d-flex align-items-center text-muted small">
+                  <div className="d-flex align-items-center text-muted small mt-auto">
                     <i className="fas fa-tag me-2"></i>
                     {t(`category_${rec.category}`)}
                   </div>
                 </div>
                 <div className="card-footer bg-light border-0 p-3 text-center">
-                    <button className="btn btn-link btn-sm text-danger text-decoration-none fw-bold">
-                        Détails & Suivi <i className="fas fa-chevron-right ms-1"></i>
-                    </button>
+                  <button className="btn btn-link btn-sm text-danger text-decoration-none fw-bold">
+                    Détails & Suivi <i className="fas fa-chevron-right ms-1"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -168,6 +170,6 @@ export default function MesReclamationsPage() {
             overflow: hidden;
         }
       `}</style>
-    </div>
+    </MainLayout>
   )
 }

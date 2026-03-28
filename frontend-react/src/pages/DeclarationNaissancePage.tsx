@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { clearTokens, getAccessToken } from '../lib/authStorage'
+import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
-
+import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 export default function DeclarationNaissancePage() {
-  const { t, setLang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
-  const token = useMemo(() => getAccessToken(), [])
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+
+  const token = getAccessToken()
 
   const attachmentRef = useRef<HTMLInputElement | null>(null)
   const pereIdRef = useRef<HTMLInputElement | null>(null)
@@ -21,13 +24,19 @@ export default function DeclarationNaissancePage() {
 
 
   useEffect(() => {
-    if (!token) navigate('/login')
-  }, [navigate, token])
+    if (!token) {
+      navigate('/login')
+      return
+    }
 
-  function logout() {
-    clearTokens()
-    navigate('/login')
-  }
+    // Fetch User Info for MainLayout
+    fetch(resolveBackendUrl('/accounts/user/'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.ok && res.json())
+      .then((data) => data && setUser(data))
+      .catch(console.error)
+  }, [navigate, token])
 
   // Canvas Drawing logic
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
@@ -166,55 +175,15 @@ export default function DeclarationNaissancePage() {
 
 
   return (
-    <div className="bg-light">
-      <style>{`
-        .arabic-font { font-family: 'Cairo', sans-serif; }
-        .step-card { border-radius: 15px; border: none; }
-        .form-label { font-weight: 600; color: #495057; }
-        .section-title { border-left: 4px solid #0d6efd; padding-left: 10px; margin-bottom: 20px; }
-        [dir="rtl"] .section-title { border-left: none; border-right: 4px solid #0d6efd; padding-left: 0; padding-right: 10px; }
-        .verify-box { background: #e7f1ff; border-radius: 10px; padding: 20px; margin-bottom: 30px; border: 1px dashed #0d6efd; }
-      `}</style>
-
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <Link to="/dashboard" className="navbar-brand">
-            <i className="fas fa-city me-2" />
-            Kelibia Smart City
-          </Link>
-          <div className="d-flex align-items-center">
-            <div className="btn-group me-3" role="group">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('fr')}
-                title="Français"
-              >
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('ar')}
-                title="العربية"
-              >
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
-            </div>
-            <Link to="/services" className="btn btn-outline-light btn-sm me-2">
-              {t('admin_services')}
-            </Link>
-            <button className="btn btn-outline-light btn-sm" onClick={logout}>
-              {t('logout')}
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="container mt-5 mb-5">
+    <MainLayout
+      user={user}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('birth_decl_title') }]}
+    >
+      <div className="container py-2">
         <div className="row justify-content-center">
-          <div className="col-md-9">
-            <div className="card step-card shadow">
+          <div className="col-12">
+            <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
               <div className="card-header bg-white p-4 border-0">
                 <h2 className="fw-bold text-primary mb-1">{t('birth_decl_title')}</h2>
                 <p className="text-muted">{t('birth_decl_desc')}</p>
@@ -419,7 +388,7 @@ export default function DeclarationNaissancePage() {
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }
 

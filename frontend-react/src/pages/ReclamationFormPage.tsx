@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { getAccessToken } from '../lib/authStorage'
+import { getAccessToken, clearTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 // Fix for default marker icon in Leaflet + React
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
@@ -32,8 +34,10 @@ function LocationMarker({ position, setPosition }: { position: [number, number] 
 }
 
 export default function ReclamationFormPage() {
-  const { t, setLang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
+
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -60,6 +64,22 @@ export default function ReclamationFormPage() {
       })
     }
   }
+
+  useEffect(() => {
+    const access = getAccessToken()
+    if (!access) {
+      navigate('/login')
+      return
+    }
+
+    // Fetch User Info
+    fetch(resolveBackendUrl('/accounts/user/'), {
+      headers: { Authorization: `Bearer ${access}` },
+    })
+      .then((res) => res.ok && res.json())
+      .then((data) => data && setUser(data))
+      .catch(console.error)
+  }, [navigate])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -106,41 +126,15 @@ export default function ReclamationFormPage() {
   }
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
-            <div className="card-header bg-danger text-white p-4 border-0">
-              <div className="d-flex justify-content-between align-items-center">
-                <h3 className="mb-0 fw-bold">
-                    <i className="fas fa-exclamation-triangle me-3"></i>
-                    {t('new_reclamation_title')}
-                </h3>
-                <div className="d-flex align-items-center gap-2">
-                  <div className="btn-group btn-group-sm">
-                    <button
-                      type="button"
-                      className="btn btn-outline-light"
-                      onClick={() => setLang('fr')}
-                      title="Français"
-                    >
-                      <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-light"
-                      onClick={() => setLang('ar')}
-                      title="العربية"
-                    >
-                      <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-                    </button>
-                  </div>
-                  <Link to="/dashboard" className="btn btn-outline-light btn-sm rounded-circle shadow-sm">
-                    <i className="fas fa-times"></i>
-                  </Link>
-                </div>
-              </div>
-            </div>
+    <MainLayout
+      user={user}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('reclamation_title') }]}
+    >
+      <div className="container py-2 pb-5">
+        <div className="row justify-content-center">
+          <div className="col-12">
+            <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
             
             <div className="card-body p-4 p-md-5">
               {success ? (
@@ -248,17 +242,7 @@ export default function ReclamationFormPage() {
           </div>
         </div>
       </div>
-
-      <style>{`
-        .hover-lift { transition: transform 0.2s; }
-        .hover-lift:hover { transform: translateY(-3px); }
-        .pulse { animation: pulse-animation 2s infinite; }
-        @keyframes pulse-animation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-      `}</style>
     </div>
+    </MainLayout>
   )
 }

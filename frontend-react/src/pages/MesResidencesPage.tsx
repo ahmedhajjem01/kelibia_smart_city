@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 type Demande = {
   id: number
@@ -13,11 +15,11 @@ type Demande = {
 }
 
 export default function MesResidencesPage() {
-  const { t, lang, setLang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
   const [demandes, setDemandes] = useState<Demande[]>([])
   const [loading, setLoading] = useState(true)
-
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
   useEffect(() => {
     const access = getAccessToken()
     if (!access) {
@@ -25,18 +27,30 @@ export default function MesResidencesPage() {
       return
     }
 
-    fetch('/api/residence/demande/', {
-      headers: { Authorization: `Bearer ${access}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchAll = async () => {
+      try {
+        // Fetch User Info
+        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          setUser(userData)
+        }
+
+        const res = await fetch('/api/residence/demande/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        const data = await res.json()
         setDemandes(Array.isArray(data) ? data : [])
-        setLoading(false)
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err)
+      } finally {
         setLoading(false)
-      })
+      }
+    }
+
+    fetchAll()
   }, [navigate])
 
   const getStatusBadge = (status: Demande['status']) => {
@@ -53,31 +67,18 @@ export default function MesResidencesPage() {
   }
 
   return (
-    <div className="container py-5">
+    <MainLayout
+      user={user}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('mes_residences') }]}
+    >
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <div className="d-flex align-items-center gap-3">
-          <div className="btn-group btn-group-sm">
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-primary"
-              onClick={() => setLang('fr')}
-              title="Français"
-            >
-              <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-primary"
-              onClick={() => setLang('ar')}
-              title="العربية"
-            >
-              <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-            </button>
-          </div>
-          <h2 className="text-primary text-uppercase fw-bold m-0">
+        <div>
+          <h2 className="section-title text-primary text-uppercase fw-bold m-0">
             <i className="fas fa-home me-2"></i>
             {t('mes_residences')}
           </h2>
+          <p className="text-muted small">Historique de vos attestations de résidence.</p>
         </div>
         <Link to="/demande-residence" className="btn btn-primary rounded-pill shadow-sm">
           <i className="fas fa-plus me-2"></i>
@@ -89,8 +90,8 @@ export default function MesResidencesPage() {
         <div className="card-body p-0">
           {loading ? (
             <div className="text-center p-5">
-                <div className="spinner-border text-primary" role="status"></div>
-                <p className="mt-3 text-muted">{t('loading')}</p>
+              <div className="spinner-border text-primary" role="status"></div>
+              <p className="mt-3 text-muted">{t('loading')}</p>
             </div>
           ) : demandes.length === 0 ? (
             <div className="text-center p-5">
@@ -128,10 +129,10 @@ export default function MesResidencesPage() {
                             {t('download_doc')}
                           </a>
                         ) : (
-                            <button className="btn btn-sm btn-outline-secondary rounded-pill disabled" disabled>
-                                <i className="fas fa-hourglass-half me-1"></i>
-                                {t('status_pending')}
-                            </button>
+                          <button className="btn btn-sm btn-outline-secondary rounded-pill disabled" disabled>
+                            <i className="fas fa-hourglass-half me-1"></i>
+                            {t('status_pending')}
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -142,13 +143,6 @@ export default function MesResidencesPage() {
           )}
         </div>
       </div>
-      
-      <div className="mt-4">
-        <Link to="/dashboard" className="btn btn-link link-secondary text-decoration-none p-0">
-            <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`}></i>
-            {t('home')}
-        </Link>
-      </div>
-    </div>
+    </MainLayout>
   )
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 type Extrait = {
   n_etat_civil: string | number
@@ -20,12 +21,13 @@ type MesExtraitsResponse = {
 }
 
 export default function MesExtraitsPage() {
-  const { setLang, lang } = useI18n()
+  const { lang } = useI18n()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<MesExtraitsResponse | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -39,6 +41,15 @@ export default function MesExtraitsPage() {
 
     ;(async () => {
       try {
+        // Fetch User Info
+        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          setUser(userData)
+        }
+
         const res = await fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -104,104 +115,74 @@ export default function MesExtraitsPage() {
   }
 
   return (
-    <div className="bg-light">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <a className="navbar-brand" href="#" data-i18n="home">
-            <i className="fas fa-city me-2" />
-            Kelibia Smart City
-          </a>
-          <div className="d-flex align-items-center">
-            <div className="btn-group me-3" role="group">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('fr')}
-                title="Français"
-              >
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('ar')}
-                title="العربية"
-              >
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
-            </div>
-            <button className="btn btn-outline-light btn-sm" onClick={logout}>
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="container mt-5">
-        <div className="row mb-4">
-          <div className="col d-flex justify-content-between align-items-center">
-            <div>
-              <h2 className="fw-bold text-primary">
-                <i className="fas fa-folder-open me-2" />
-                Mes Extraits de Naissance
-              </h2>
-              <p className="text-muted">Extraction numérique immédiate connectée au registre d'État Civil.</p>
-            </div>
-            <Link to="/services" className="btn btn-outline-secondary">
-              <i className="fas fa-arrow-left me-2" />
-              Retour aux services
-            </Link>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status" />
-            <p className="mt-2 text-muted">Vérification de votre identité et recherche des actes en cours...</p>
-          </div>
-        ) : error ? (
-          <div className="alert alert-danger">{error}</div>
-        ) : (
+    <MainLayout
+      user={user}
+      onLogout={logout}
+      breadcrumbs={[{ label: 'Mes Extraits de Naissance' }]}
+    >
+      <div className="row mb-4">
+        <div className="col d-flex justify-content-between align-items-center">
           <div>
-            <h4 className="mb-3 border-bottom pb-2">Mon Extrait de Naissance</h4>
-            <div className="row mb-5">
-              {data?.mon_extrait ? (
-                card(data.mon_extrait)
-              ) : (
-                <div className="col-12">
-                  <div className="alert alert-secondary">
-                    Aucun extrait de naissance correspondant à votre profil n'a été trouvé rattaché à votre compte.
-                  </div>
-                </div>
-              )}
-            </div>
+            <h2 className="fw-bold section-title">
+              <i className="fas fa-folder-open me-2" />
+              Mes Extraits de Naissance
+            </h2>
+            <p className="text-muted">Extraction numérique immédiate connectée au registre d'État Civil.</p>
+          </div>
+          <Link to="/services" className="btn btn-outline-secondary">
+            <i className="fas fa-arrow-left me-2" />
+            Retour aux services
+          </Link>
+        </div>
+      </div>
 
-            <h4 className="mb-3 border-bottom pb-2 mt-4">Extraits de mes enfants</h4>
-            <div className="row">
-              {data?.enfants && data.enfants.length > 0 ? (
-                data.enfants.map((enf) => card(enf))
-              ) : (
-                <div className="col-12">
-                  <div className="alert alert-secondary text-muted">
-                    <i className="fas fa-info-circle me-2" />
-                    Aucun acte de naissance d'enfant n'est rattaché à votre CIN.
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {data?.conjoints && data.conjoints.length > 0 ? (
-              <div className="mt-4">
-                <h4 className="mb-3 border-bottom pb-2">Extrait de mon conjoint</h4>
-                <div className="row" id="conjointsList">
-                  {data.conjoints.map((c) => card(c))}
+      {loading ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status" />
+          <p className="mt-2 text-muted">Vérification de votre identité et recherche des actes en cours...</p>
+        </div>
+      ) : error ? (
+        <div className="alert alert-danger">{error}</div>
+      ) : (
+        <div>
+          <h4 className="mb-3 border-bottom pb-2">Mon Extrait de Naissance</h4>
+          <div className="row mb-5">
+            {data?.mon_extrait ? (
+              card(data.mon_extrait)
+            ) : (
+              <div className="col-12">
+                <div className="alert alert-secondary">
+                  Aucun extrait de naissance correspondant à votre profil n'a été trouvé rattaché à votre compte.
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
-        )}
-      </div>
-    </div>
+
+          <h4 className="mb-3 border-bottom pb-2 mt-4">Extraits de mes enfants</h4>
+          <div className="row">
+            {data?.enfants && data.enfants.length > 0 ? (
+              data.enfants.map((enf) => card(enf))
+            ) : (
+              <div className="col-12">
+                <div className="alert alert-secondary text-muted">
+                  <i className="fas fa-info-circle me-2" />
+                  Aucun acte de naissance d'enfant n'est rattaché à votre CIN.
+                </div>
+              </div>
+            )}
+          </div>
+
+          {data?.conjoints && data.conjoints.length > 0 ? (
+            <div className="mt-4">
+              <h4 className="mb-3 border-bottom pb-2">Extrait de mon conjoint</h4>
+              <div className="row" id="conjointsList">
+                {data.conjoints.map((c) => card(c))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </MainLayout>
   )
 }
 

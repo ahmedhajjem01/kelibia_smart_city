@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
@@ -14,11 +15,12 @@ interface UnifiedRequest {
 }
 
 export default function MesDemandesPage() {
-  const { t, setLang, lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
   const [requests, setRequests] = useState<UnifiedRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -34,6 +36,13 @@ export default function MesDemandesPage() {
       try {
         const headers = { Authorization: `Bearer ${token}` }
         
+        // Fetch User Info
+        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), { headers })
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          setUser(userData)
+        }
+
         // Parallel fetching
         const [resBirth, resMarriage, resDeath, resResidence, resInhumation] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
@@ -162,106 +171,82 @@ export default function MesDemandesPage() {
   }
 
   return (
-    <div className="bg-light min-vh-100">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <Link className="navbar-brand" to="/dashboard">
-            <i className="fas fa-city me-2"></i> Kelibia Smart City
+    <MainLayout
+      user={user}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('my_requests') }]}
+    >
+      <div className={`py-4 ${lang === 'ar' ? 'text-end' : ''}`}>
+        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div>
+            <h1 className="fw-bold section-title mb-1">
+              <i className="fas fa-tasks me-2"></i> {t('my_requests')}
+            </h1>
+            <p className="text-muted mb-0">{t('my_requests_desc')}</p>
+          </div>
+          <Link to="/services" className="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i className="fas fa-plus me-2"></i> {t('new_request')}
           </Link>
-          <div className="d-flex align-items-center">
-            <div className="btn-group me-3" role="group">
-              <button type="button" className="btn btn-sm btn-outline-light" onClick={() => setLang('fr')}>
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button type="button" className="btn btn-sm btn-outline-light" onClick={() => setLang('ar')}>
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
+        </div>
+
+        {loading ? (
+          <div className="d-flex flex-column align-items-center justify-content-center p-5 card shadow-sm border-0 rounded-4">
+            <div className="spinner-border text-primary" role="status"></div>
+            <p className="mt-3 text-muted mb-0">{t('loading')}</p>
+          </div>
+        ) : error ? (
+          <div className="alert alert-danger rounded-4 shadow-sm">
+            <i className="fas fa-exclamation-circle me-2"></i> {error}
+          </div>
+        ) : requests.length === 0 ? (
+          <div className="text-center py-5 card shadow-sm border-0 rounded-4">
+            <div className="mb-4 opacity-25">
+              <i className="fas fa-folder-open fa-4x text-muted"></i>
+            </div>
+            <h4 className="fw-bold text-muted">Aucune demande trouvée</h4>
+            <p className="text-muted mb-4">Vous n'avez pas encore soumis de demande administrative.</p>
+            <Link to="/services" className="btn btn-outline-primary rounded-pill px-4">
+              Faire ma première demande
+            </Link>
+          </div>
+        ) : (
+          <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div className="table-responsive">
+              <table className="table table-hover align-middle mb-0">
+                <thead className="bg-light">
+                  <tr>
+                    <th className="px-4 py-3 border-0">{lang === 'ar' ? 'الطلب' : 'Demande'}</th>
+                    <th className="py-3 border-0">{lang === 'ar' ? 'التوجيه' : 'Détails'}</th>
+                    <th className="py-3 border-0 text-center">{lang === 'ar' ? 'التاريخ' : 'Date'}</th>
+                    <th className="py-3 border-0 text-center">{lang === 'ar' ? 'الحالة' : 'Statut'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map((req) => (
+                    <tr key={`${req.type}-${req.id}`}>
+                      <td className="px-4 py-3">
+                        <div className="d-flex align-items-center gap-2">
+                          {getTypeIcon(req.type)}
+                          <span className="fw-bold text-dark">{req.title}</span>
+                        </div>
+                      </td>
+                      <td className="text-muted small">
+                        {req.details}
+                      </td>
+                      <td className="text-center text-muted small">
+                        {new Date(req.date).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')}
+                      </td>
+                      <td className="text-center">
+                        {getStatusBadge(req.status)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-      </nav>
-
-      <div className={`container py-5 ${lang === 'ar' ? 'text-end' : ''}`}>
-        <div className="row justify-content-center">
-          <div className="col-lg-10">
-            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-              <div>
-                <h1 className="fw-bold text-primary mb-1">
-                  <i className="fas fa-tasks me-2"></i> {t('my_requests')}
-                </h1>
-                <p className="text-muted mb-0">{t('my_requests_desc')}</p>
-              </div>
-              <Link to="/services" className="btn btn-primary rounded-pill px-4 shadow-sm">
-                <i className="fas fa-plus me-2"></i> {t('new_request')}
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="d-flex flex-column align-items-center justify-content-center p-5 card shadow-sm border-0 rounded-4">
-                <div className="spinner-border text-primary" role="status"></div>
-                <p className="mt-3 text-muted mb-0">{t('loading')}</p>
-              </div>
-            ) : error ? (
-              <div className="alert alert-danger rounded-4 shadow-sm">
-                <i className="fas fa-exclamation-circle me-2"></i> {error}
-              </div>
-            ) : requests.length === 0 ? (
-              <div className="text-center py-5 card shadow-sm border-0 rounded-4">
-                <div className="mb-4 opacity-25">
-                  <i className="fas fa-folder-open fa-4x text-muted"></i>
-                </div>
-                <h4 className="fw-bold text-muted">Aucune demande trouvée</h4>
-                <p className="text-muted mb-4">Vous n'avez pas encore soumis de demande administrative.</p>
-                <Link to="/services" className="btn btn-outline-primary rounded-pill px-4">
-                  Faire ma première demande
-                </Link>
-              </div>
-            ) : (
-              <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle mb-0">
-                    <thead className="bg-light">
-                      <tr>
-                        <th className="px-4 py-3 border-0">{lang === 'ar' ? 'الطلب' : 'Demande'}</th>
-                        <th className="py-3 border-0">{lang === 'ar' ? 'التوجيه' : 'Détails'}</th>
-                        <th className="py-3 border-0 text-center">{lang === 'ar' ? 'التاريخ' : 'Date'}</th>
-                        <th className="py-3 border-0 text-center">{lang === 'ar' ? 'الحالة' : 'Statut'}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {requests.map((req) => (
-                        <tr key={`${req.type}-${req.id}`}>
-                          <td className="px-4 py-3">
-                            <div className="d-flex align-items-center gap-2">
-                              {getTypeIcon(req.type)}
-                              <span className="fw-bold text-dark">{req.title}</span>
-                            </div>
-                          </td>
-                          <td className="text-muted small">
-                            {req.details}
-                          </td>
-                          <td className="text-center text-muted small">
-                            {new Date(req.date).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')}
-                          </td>
-                          <td className="text-center">
-                            {getStatusBadge(req.status)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-5 text-center">
-              <Link to="/dashboard" className="btn btn-outline-secondary rounded-pill px-4">
-                <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`}></i> {t('home')}
-              </Link>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
-    </div>
+    </MainLayout>
   )
 }

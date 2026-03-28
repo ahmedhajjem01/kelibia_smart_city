@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 interface Declaration {
   id: number
@@ -16,8 +17,8 @@ interface Declaration {
 }
 
 export default function DemandeInhumationPage() {
-  const { t, lang } = useI18n()
   const navigate = useNavigate()
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
   const [availableDecls, setAvailableDecls] = useState<Declaration[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -30,6 +31,14 @@ export default function DemandeInhumationPage() {
       navigate('/login')
       return
     }
+
+    // Fetch User Info
+    fetch(resolveBackendUrl('/accounts/user/'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.ok && res.json())
+      .then((data) => data && setUser(data))
+      .catch(console.error)
 
     fetch(resolveBackendUrl('/extrait-deces/api/inhumation/'), {
       headers: { Authorization: `Bearer ${token}` }
@@ -87,19 +96,15 @@ export default function DemandeInhumationPage() {
   if (loading) return <div className="p-5 text-center">{t('loading')}</div>
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-5">
-        <div className="container">
-          <Link className="navbar-brand" to="/dashboard">
-            <i className="fas fa-city me-2"></i> Kelibia Smart City
-          </Link>
-        </div>
-      </nav>
-
-      <div className={`container ${lang === 'ar' ? 'text-end' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <MainLayout
+      user={user}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('req_inhumation') }]}
+    >
+      <div className={`container py-2 pb-5 ${lang === 'ar' ? 'text-end' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="card shadow border-0 rounded-4">
+          <div className="col-12">
+            <div className="card shadow-sm border-0 rounded-4">
               <div className="card-header bg-white p-4 border-0">
                 <h2 className="fw-bold text-primary mb-1">{t('req_inhumation')}</h2>
                 <p className="text-muted">
@@ -173,6 +178,6 @@ export default function DemandeInhumationPage() {
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }

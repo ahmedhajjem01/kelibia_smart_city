@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import MainLayout from '../components/MainLayout'
 
 type ServiceRequirement = {
   id?: number
@@ -41,14 +42,13 @@ type RequestButtonState =
   | { kind: 'disabled'; label: string }
 
 export default function ServicesPage() {
-  const { t, setLang, lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   const [allCategories, setAllCategories] = useState<ServiceCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [errorText, setErrorText] = useState<string | null>(null)
-
-  // Bootstrap modal uses DOM; keep minimal refs.
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
   const [modalState, setModalState] = useState<{
     title: string
@@ -70,6 +70,12 @@ export default function ServicesPage() {
 
     ;(async () => {
       try {
+        // Fetch user for TopNav
+        const uRes = await fetch('/api/accounts/me/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (uRes.ok) setUser(await uRes.json())
+
         const response = await fetch('/api/services/categories/', {
           headers: { Authorization: `Bearer ${access}` },
         })
@@ -188,138 +194,95 @@ export default function ServicesPage() {
 
     // Show modal
     const modalEl = document.getElementById('serviceModal')
-    if (window.bootstrap?.Modal && modalEl) {
-      const instance = window.bootstrap.Modal.getOrCreateInstance(modalEl)
+    if ((window as any).bootstrap?.Modal && modalEl) {
+      const instance = (window as any).bootstrap.Modal.getOrCreateInstance(modalEl)
       instance.show()
     }
   }
 
   return (
-    <div className="bg-light">
-      <style>{`
-        .service-card { transition: transform 0.2s; cursor: pointer; }
-        .service-card:hover { transform: translateY(-5px); }
-        .category-header { border-left: 5px solid #0d6efd; padding-left: 15px; margin-bottom: 25px; }
-        [dir="rtl"] .category-header { border-left: none; border-right: 5px solid #0d6efd; padding-left: 0; padding-right: 15px; }
-      `}</style>
-
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <a className="navbar-brand" href="#" data-i18n="home">
-            <i className="fas fa-city me-2" />
-            Kelibia Smart City
-          </a>
-
-          <div className="d-flex align-items-center">
-            <div className="btn-group me-3" role="group">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('fr')}
-                title="Français"
-              >
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('ar')}
-                title="العربية"
-              >
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
-            </div>
-
-            <Link to="/dashboard" className="btn btn-outline-light btn-sm me-2">
-              Tableau de bord
-            </Link>
-            <button className="btn btn-light btn-sm" onClick={logout}>
-              {t('logout')}
-            </button>
-          </div>
+    <MainLayout
+      user={user}
+      onLogout={logout}
+      breadcrumbs={[{ label: t('admin_services') }]}
+    >
+      <div className="row mb-4">
+        <div className="col">
+          <h2 className="fw-bold section-title">{t('admin_services')}</h2>
+          <p className="text-muted small">{t('services_desc_long')}</p>
         </div>
-      </nav>
+      </div>
 
-      <div className="container mt-5 mb-5">
-        <div className="row mb-4">
-          <div className="col">
-            <h2 className="fw-bold" data-i18n="admin_services">
-              {t('admin_services')}
-            </h2>
-            <p className="text-muted">{t('services_desc_long')}</p>
+      <div id="servicesContainer">
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status" />
+            <p className="mt-2 text-muted">{t('loading_services')}</p>
           </div>
-        </div>
-
-        <div id="servicesContainer">
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status" />
-              <p className="mt-2 text-muted">{t('loading_services')}</p>
-            </div>
-          ) : errorText ? (
-            <div className="alert alert-danger">{errorText}</div>
-          ) : allCategories.length === 0 ? (
-            <p className="text-center text-muted">{lang === 'ar' ? 'لا توجد خدمات متاحة حالياً.' : 'Aucun service disponible pour le moment.'}</p>
-          ) : (
-            allCategories.map((cat) => {
-              const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
-              return (
-                <div key={cat.id} className="category-section mb-5">
-                  <div className="category-header">
-                    <h3 className="fw-bold">
-                      <i className={`fas ${cat.icon || 'fa-folder-open'} me-2`} />
-                      {catName}
-                    </h3>
-                  </div>
-                  <div className="row g-4">
-                    {cat.services
-                      .filter((s) => {
-                        const nameFr = s.name_fr.toLowerCase()
-                        const nameAr = s.name_ar
-                        return (
-                          !nameFr.includes('extrait') &&
-                          !nameAr.includes('مضمون') &&
-                          !nameFr.includes('résidence') &&
-                          !nameAr.includes('مسكن')
-                        )
-                      })
-                      .map((service) => {
-                        const svcName = lang === 'ar' ? service.name_ar : service.name_fr
-                        const svcDesc =
-                          lang === 'ar' ? service.description_ar : service.description_fr
-                        return (
-                          <div key={service.id} className="col-md-4">
-                            <div
-                              className="card h-100 service-card border-0 shadow-sm"
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => showModalById(cat.id, service.id)}
-                            >
-                              <div className="card-body">
-                                <h5 className="card-title fw-bold">{svcName}</h5>
-                                <p
-                                  className="card-text small text-muted text-truncate"
-                                  style={{ maxHeight: '3rem' }}
-                                >
-                                  {svcDesc}
-                                </p>
-                                <div className="d-flex justify-content-between align-items-center mt-3">
-                                  <span className="badge bg-light text-primary border">
-                                    {service.requirements.length} documents
-                                  </span>
-                                  <i className="fas fa-chevron-right text-primary opacity-50" />
-                                </div>
+        ) : errorText ? (
+          <div className="alert alert-danger">{errorText}</div>
+        ) : allCategories.length === 0 ? (
+          <p className="text-center text-muted">
+            {lang === 'ar' ? 'لا توجد خدمات متاحة حالياً.' : 'Aucun service disponible pour le moment.'}
+          </p>
+        ) : (
+          allCategories.map((cat) => {
+            const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
+            return (
+              <div key={cat.id} className="category-section mb-5">
+                <div className="category-header">
+                  <h4 className="fw-bold">
+                    <i className={`fas ${cat.icon || 'fa-folder-open'} me-2`} />
+                    {catName}
+                  </h4>
+                </div>
+                <div className="row g-4">
+                  {cat.services
+                    .filter((s) => {
+                      const nameFr = s.name_fr.toLowerCase()
+                      const nameAr = s.name_ar
+                      return (
+                        !nameFr.includes('extrait') &&
+                        !nameAr.includes('مضمون') &&
+                        !nameFr.includes('résidence') &&
+                        !nameAr.includes('مسكن')
+                      )
+                    })
+                    .map((service) => {
+                      const svcName = lang === 'ar' ? service.name_ar : service.name_fr
+                      const svcDesc = lang === 'ar' ? service.description_ar : service.description_fr
+                      return (
+                        <div key={service.id} className="col-md-4">
+                          <div
+                            className="card h-100 service-card border-0 shadow-sm"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => showModalById(cat.id, service.id)}
+                          >
+                            <div className="card-body">
+                              <h6 className="card-title fw-bold">{svcName}</h6>
+                              <p
+                                className="card-text small text-muted text-truncate"
+                                style={{ maxHeight: '3rem' }}
+                              >
+                                {svcDesc}
+                              </p>
+                              <div className="d-flex justify-content-between align-items-center mt-3">
+                                <span className="badge bg-light text-primary border" style={{ fontSize: '0.7rem' }}>
+                                  {service.requirements.length} documents
+                                </span>
+                                <i className="fas fa-chevron-right text-primary opacity-50" />
                               </div>
                             </div>
                           </div>
-                        )
-                      })}
-                  </div>
+                        </div>
+                      )
+                    })}
                 </div>
-              )
-            })
-          )}
-        </div>
+              </div>
+            )
+          })
+        )}
       </div>
 
       {/* Modal for service details */}
@@ -380,40 +343,30 @@ export default function ServicesPage() {
               <button
                 type="button"
                 id="modalRequestBtn"
-                className={`btn ${modalState?.requestButton.kind === 'disabled' ? 'btn-primary disabled' : 'btn-primary'}`}
+                className={`btn ${
+                  modalState?.requestButton.kind === 'disabled' ? 'btn-primary disabled' : 'btn-primary'
+                }`}
                 onClick={() => {
                   if (!modalState) return
                   if (modalState.requestButton.kind === 'disabled') return
 
-                  // Hide modal before navigating to avoid persistent backdrop
                   const modalEl = document.getElementById('serviceModal')
                   const bootstrap = (window as any).bootstrap
                   if (bootstrap?.Modal && modalEl) {
                     const instance = bootstrap.Modal.getInstance(modalEl)
                     if (instance) instance.hide()
                   }
-
-                  // Cleanup backdrop and body classes manually to be safe in React
-                  document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
-                  document.body.classList.remove('modal-open')
-                  document.body.style.overflow = ''
-                  document.body.style.paddingRight = ''
-
-                  navigate(modalState.requestButton.target)
+                  navigate((modalState.requestButton as any).target)
                 }}
               >
                 <i className="fas fa-paper-plane me-2" />
-                <span>
-                  {modalState?.requestButton.kind === 'disabled'
-                    ? modalState?.requestButton.label
-                    : modalState?.requestButton.label}
-                </span>
+                <span>{modalState?.requestButton.label}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }
 
