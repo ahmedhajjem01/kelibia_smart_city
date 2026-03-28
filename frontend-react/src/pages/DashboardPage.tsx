@@ -87,13 +87,7 @@ export default function DashboardPage() {
     navigate('/login')
   }
 
-  const getMarkerIcon = (status: string) => {
-    let color = 'blue';
-    if (status === 'pending') color = 'gold';
-    if (status === 'in_progress') color = 'blue';
-    if (status === 'resolved') color = 'green';
-    if (status === 'rejected') color = 'red';
-    
+  const getMarkerIcon = (_status: string) => {
     // We can use custom colors or just stick to icons for now
     return DefaultIcon;
   }
