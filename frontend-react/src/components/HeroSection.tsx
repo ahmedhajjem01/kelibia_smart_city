@@ -24,11 +24,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
             <i className="fas fa-user-check me-1"></i>
             <span>Citoyen</span>
           </span>
-          <img 
+          <img
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png"
-            height="22" 
-            style={{ borderRadius: '3px' }} 
-            alt="Tunisie" 
+            height="22"
+            style={{ borderRadius: '3px' }}
+            alt="Tunisie"
           />
         </div>
       </div>
