@@ -30,13 +30,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {showHero && <HeroSection user={user} />}
 
       <div className="breadcrumb-bar">
-        <a href="/dashboard"><i className="fas fa-home me-1"></i><span>{t('home')}</span></a>
-        {breadcrumbs.map((bc, idx) => (
-          <React.Fragment key={idx}>
+        <i className="fas fa-home me-2 text-primary"></i>
+        <a href="/dashboard"><span>Accueil</span></a>
+        {breadcrumbs.length > 0 ? (
+          breadcrumbs.map((bc, idx) => (
+            <React.Fragment key={idx}>
+              <span className="mx-2 text-muted">/</span>
+              {bc.link ? <a href={bc.link}>{bc.label}</a> : <span>{bc.label}</span>}
+            </React.Fragment>
+          ))
+        ) : (
+          <>
             <span className="mx-2 text-muted">/</span>
-            {bc.link ? <a href={bc.link}>{bc.label}</a> : <span>{bc.label}</span>}
-          </React.Fragment>
-        ))}
+            <span>Portail Citoyen</span>
+          </>
+        )}
       </div>
 
       <div className="page-body">
