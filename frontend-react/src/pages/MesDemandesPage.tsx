@@ -44,17 +44,19 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/api/residence/demande/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/inhumation/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-mariage/extraits/'), { headers }),
         ])
 
         const unified: UnifiedRequest[] = []
 
-        // 1. Birth
+        // 1. Birth Declarations
         if (resBirth.ok) {
           const births = await resBirth.json()
           births.forEach((b: any) => {
@@ -69,7 +71,24 @@ export default function MesDemandesPage() {
           })
         }
 
-        // 2. Marriage
+        // 2. Birth Extraits (Signed)
+        if (resExtraits.ok) {
+          const extData = await resExtraits.json()
+          const processExtrait = (e: any, labelKey: string) => {
+            unified.push({
+              id: e.n_etat_civil,
+              type: 'birth',
+              title: t(labelKey),
+              status: 'signed',
+              date: e.date_naissance,
+              details: lang === 'ar' ? e.nom_complet_ar : e.nom_complet_fr
+            })
+          }
+          if (extData.mon_extrait) processExtrait(extData.mon_extrait, 'my_birth_cert')
+          if (extData.enfants) extData.enfants.forEach((e: any) => processExtrait(e, 'child_birth_cert'))
+        }
+
+        // 3. Marriage Declarations
         if (resMarriage.ok) {
           const marriages = await resMarriage.json()
           marriages.forEach((m: any) => {
@@ -84,7 +103,22 @@ export default function MesDemandesPage() {
           })
         }
 
-        // 3. Death
+        // 4. Marriage Extraits (Signed)
+        if (resExtraitsMariage.ok) {
+          const extM = await resExtraitsMariage.json()
+          extM.forEach((m: any) => {
+            unified.push({
+              id: m.numero_registre,
+              type: 'marriage',
+              title: t('view_mariage_cert'),
+              status: 'signed',
+              date: m.date_mariage,
+              details: lang === 'ar' ? m.conjoint_ar : m.conjoint_fr
+            })
+          })
+        }
+
+        // 5. Death
         if (resDeath.ok) {
           const deathData = await resDeath.json()
           const deaths = deathData.my_declarations || []
@@ -100,7 +134,7 @@ export default function MesDemandesPage() {
           })
         }
 
-        // 4. Residence
+        // 6. Residence
         if (resResidence.ok) {
           const residences = await resResidence.json()
           residences.forEach((r: any) => {
@@ -115,7 +149,7 @@ export default function MesDemandesPage() {
           })
         }
 
-        // 5. Inhumation
+        // 7. Inhumation
         if (resInhumation.ok) {
           const data = await resInhumation.json()
           const inhumations = data.my_requests || []
