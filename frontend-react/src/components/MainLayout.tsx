@@ -21,7 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   showHero = false,
   rightSidebar
 }) => {
-  const { t, lang } = useI18n();
+  const { lang } = useI18n();
 
   return (
     <div className={lang === 'ar' ? 'arabic-font' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>

@@ -28,7 +28,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
           <div className="navbar-logo"><i className="fas fa-city"></i></div>
           <div className="navbar-title">
             <span className="main-title">بلدية قليبية — Commune de Kélibia</span>
-            <span className="sub-title">Portail Citoyen — Kelibia Smart City</span>
+            <span className="sub-title">Portail Citoyen — <span className="text-primary">Kelibia Smart City</span></span>
           </div>
         </a>
         <div className="navbar-actions">
