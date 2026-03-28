@@ -106,10 +106,6 @@ export default function DeclarationDecesPage() {
     })()
   }, [navigate, lang])
 
-  function logout() {
-    clearTokens()
-    navigate('/login')
-  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()

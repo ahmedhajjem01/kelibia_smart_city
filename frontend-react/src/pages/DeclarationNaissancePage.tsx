@@ -6,7 +6,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
 export default function DeclarationNaissancePage() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)

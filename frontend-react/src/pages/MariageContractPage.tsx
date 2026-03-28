@@ -63,7 +63,7 @@ const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => voi
 }
 
 export default function MariageContractPage() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)

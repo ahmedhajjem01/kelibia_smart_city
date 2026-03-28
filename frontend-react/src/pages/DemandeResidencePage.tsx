@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Webcam from 'react-webcam'
-import { getAccessToken, clearTokens } from '../lib/authStorage'
+import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'

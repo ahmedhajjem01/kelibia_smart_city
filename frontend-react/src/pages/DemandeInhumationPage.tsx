@@ -17,6 +17,7 @@ interface Declaration {
 }
 
 export default function DemandeInhumationPage() {
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
   const [availableDecls, setAvailableDecls] = useState<Declaration[]>([])

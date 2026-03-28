@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { getAccessToken, clearTokens } from '../lib/authStorage'
+import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
@@ -34,7 +34,7 @@ function LocationMarker({ position, setPosition }: { position: [number, number] 
 }
 
 export default function ReclamationFormPage() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
