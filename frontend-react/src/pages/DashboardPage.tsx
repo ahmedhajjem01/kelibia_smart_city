@@ -241,15 +241,15 @@ export default function DashboardPage() {
           <div className="news-mini">
             <div className="news-dot"></div>
             <div>
-              <div className="news-text">Ramassage des ordures — Programme de mai 2025</div>
-              <div className="news-date">12 mai 2025</div>
+              <div className="news-text">{t('news_item_1')}</div>
+              <div className="news-date">{t('news_date_1')}</div>
             </div>
           </div>
           <div className="news-mini">
             <div className="news-dot"></div>
             <div>
-              <div className="news-text">Travaux d'entretien des routes côtières</div>
-              <div className="news-date">8 mai 2025</div>
+              <div className="news-text">{t('news_item_2')}</div>
+              <div className="news-date">{t('news_date_2')}</div>
             </div>
           </div>
         </div>

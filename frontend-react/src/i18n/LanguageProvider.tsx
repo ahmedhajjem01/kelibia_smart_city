@@ -222,6 +222,11 @@ const translations: Record<Lang, Record<string, string>> = {
     inhumation_success: 'Votre demande de permis d\'inhumer a été transmise avec succès.',
     residence_requests_title: 'Attestations de Résidence',
     residence_requests_desc: 'Consultez l\'état de vos demandes de certificat de résidence.',
+    citoyen_role: 'Citoyen',
+    news_item_1: 'Ramassage des ordures — Programme de mai 2025',
+    news_date_1: '12 mai 2025',
+    news_item_2: "Travaux d'entretien des routes côtières",
+    news_date_2: '8 mai 2025',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -431,6 +436,11 @@ const translations: Record<Lang, Record<string, string>> = {
     inhumation_success: 'تم إرسال طلب رخصة الدفن بنجاح.',
     residence_requests_title: 'شهادات الإقامة',
     residence_requests_desc: 'اطلع على حالة طلبات شهادة الإقامة الخاصة بك.',
+    citoyen_role: 'مواطن',
+    news_item_1: 'رفع الفضلات — برنامج ماي 2025',
+    news_date_1: '12 ماي 2025',
+    news_item_2: 'أشغال صيانة الطرقات الساحلية',
+    news_date_2: '8 ماي 2025',
   },
 }
 

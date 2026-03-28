@@ -16,14 +16,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
           <div className="greeting">
             <i className="fas fa-hand-wave me-2"></i>
             <span>{t('welcome')}, </span>
-            <strong>{user ? user.first_name : 'Citoyen'}</strong> !
+            <strong>{user ? user.first_name : t('citoyen_role')}</strong> !
           </div>
           <div className="sub">{t('welcome_msg')}</div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <span className="badge-role">
             <i className="fas fa-user-check me-1"></i>
-            <span>Citoyen</span>
+            <span>{t('citoyen_role')}</span>
           </span>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png"

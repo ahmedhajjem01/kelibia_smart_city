@@ -14,7 +14,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
       {/* TOP BAR */}
       <div className="topbar d-none d-md-flex">
         <div>
-          <i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul
+          <i className="fas fa-map-marker-alt me-1"></i> {lang === 'ar' ? 'بلدية قليبية — ولاية نابل' : 'Commune de Kélibia — Gouvernorat de Nabeul'}
         </div>
         <div>
           <a href="#"><i className="fas fa-phone me-1"></i>+216 72 295 XXX</a>
@@ -27,8 +27,8 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
         <a className="navbar-brand-area" href="/">
           <div className="navbar-logo"><i className="fas fa-city"></i></div>
           <div className="navbar-title">
-            <span className="main-title">بلدية قليبية — Commune de Kélibia</span>
-            <span className="sub-title">Portail Citoyen — <span className="text-primary">Kelibia Smart City</span></span>
+            <span className="main-title">{lang === 'ar' ? 'بلدية قليبية' : 'Commune de Kélibia'}</span>
+            <span className="sub-title">{lang === 'ar' ? 'بوابة المواطن —' : 'Portail Citoyen —'} <span className="text-primary">Kelibia Smart City</span></span>
           </div>
         </a>
         <div className="navbar-actions">
