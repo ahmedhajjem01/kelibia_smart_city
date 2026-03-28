@@ -136,35 +136,50 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* MARRIAGE NOTIFICATION */}
+      {marriageNotifications.length > 0 && (
+        <div className="alert alert-info shadow-sm border-0 rounded-3 p-3 mb-4 animate__animated animate__fadeIn">
+          <div className="d-flex align-items-center">
+            <i className="fas fa-ring fa-lg text-primary me-3"></i>
+            <div className="flex-grow-1">
+              <h6 className="fw-bold mb-0">{t('notification_mariage_signed')}</h6>
+            </div>
+            <Link to="/mes-mariages" className="btn btn-sm btn-primary rounded-pill px-3">
+              {t('view_mariage_cert')}
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* QUICK ACTIONS */}
       <div className="content-card mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
         <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
-          <span><i className="fas fa-bolt icon text-warning"></i><span>Actions Rapides</span></span>
+          <span><i className="fas fa-bolt icon text-warning"></i><span>{lang === 'ar' ? 'إجراءات سريعة' : 'Actions Rapides'}</span></span>
         </div>
         <div className="card-body-custom p-0">
           <div className="row g-0 text-center">
             <div className="col-6 col-md-3 border-end">
               <Link to="/nouvelle-reclamation" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-plus-circle fa-2x text-primary mb-2"></i>
-                <div className="small fw-bold">Nouveau Signalement</div>
+                <div className="small fw-bold">{t('new_reclamation')}</div>
               </Link>
             </div>
             <div className="col-6 col-md-3 border-end">
               <Link to="/mes-reclamations" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-tasks fa-2x text-primary mb-2"></i>
-                <div className="small fw-bold">Mes Réclamations</div>
+                <div className="small fw-bold">{t('my_reclamations')}</div>
               </Link>
             </div>
             <div className="col-6 col-md-3 border-end">
               <Link to="/services" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-file-invoice fa-2x text-primary mb-2"></i>
-                <div className="small fw-bold">Services Administratifs</div>
+                <div className="small fw-bold">{t('admin_services')}</div>
               </Link>
             </div>
             <div className="col-6 col-md-3">
               <Link to="/news" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-newspaper fa-2x text-primary mb-2"></i>
-                <div className="small fw-bold">Actualités</div>
+                <div className="small fw-bold">{t('news_title')}</div>
               </Link>
             </div>
           </div>
@@ -174,8 +189,8 @@ export default function DashboardPage() {
       {/* MAP CARD */}
       <div className="content-card mb-4" id="mapCard" style={{ minHeight: '450px' }}>
         <div className="card-header-custom d-flex justify-content-between align-items-center">
-          <span><i className="fas fa-map-marked-alt icon text-primary"></i><span>Carte de Kélibia — Signalements en temps réel</span></span>
-          <span className="badge bg-primary rounded-pill font-monospace" style={{ fontSize: '0.7rem' }}>{reclamations.length} signalement(s) affiché(s)</span>
+          <span><i className="fas fa-map-marked-alt icon text-primary"></i><span>{lang === 'ar' ? 'خريطة قليبية — بلاغات حقيقية' : 'Carte de Kélibia — Signalements en temps réel'}</span></span>
+          <span className="badge bg-primary rounded-pill font-monospace" style={{ fontSize: '0.7rem' }}>{reclamations.length} {lang === 'ar' ? 'بلاغات' : 'signalement(s) affiché(s)'}</span>
         </div>
         <div className="position-relative" style={{ height: '380px' }}>
           {loadingMap ? (
@@ -185,17 +200,17 @@ export default function DashboardPage() {
           ) : (
             <MapContainer center={KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
               <LayersControl position="topright">
-                <LayersControl.BaseLayer checked name="OpenStreetMap">
+                <LayersControl.BaseLayer checked name={lang === 'ar' ? 'خريطة عادية' : 'OpenStreetMap'}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Satellite (Esri)">
+                <LayersControl.BaseLayer name={lang === 'ar' ? 'قمر صناعي' : 'Satellite (Esri)'}>
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
                 </LayersControl.BaseLayer>
               </LayersControl>
               
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               
-              {reclamations.map(rec => rec.latitude && rec.longitude && (
+              {reclamations.map((rec : any) => rec.latitude && rec.longitude && (
                 <Marker key={rec.id} position={[rec.latitude, rec.longitude]} icon={getMarkerIcon(rec.status)}>
                   <Popup>
                     <div className="p-1">
@@ -209,12 +224,12 @@ export default function DashboardPage() {
 
               <div className="leaflet-bottom leaflet-left" style={{ zIndex: 1000, margin: '15px' }}>
                   <div className="card shadow-sm border-0 p-3 bg-white" style={{ borderRadius: '8px', opacity: 0.9 }}>
-                    <div className="small fw-bold mb-2 border-bottom pb-1">Légende</div>
+                    <div className="small fw-bold mb-2 border-bottom pb-1">{lang === 'ar' ? 'دليل الخريطة' : 'Légende'}</div>
                     <div className="d-flex flex-column gap-1">
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-warning me-2" style={{ fontSize: '0.6rem' }}></i> En attente</span>
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-primary me-2" style={{ fontSize: '0.6rem' }}></i> En cours</span>
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-success me-2" style={{ fontSize: '0.6rem' }}></i> Résolu</span>
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-danger me-2" style={{ fontSize: '0.6rem' }}></i> Rejeté</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-warning me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'قيد الانتظار' : 'En attente'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-primary me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'قيد الإنجاز' : 'En cours'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-success me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'تم الحل' : 'Résolu'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-danger me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'مرفوض' : 'Rejeté'}</span>
                     </div>
                   </div>
               </div>
