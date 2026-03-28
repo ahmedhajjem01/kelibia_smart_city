@@ -35,12 +35,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
 
       <div className="fort-banner">
         <img 
-          src="https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=1200" 
-          alt="Kelibia Coast" 
+          src="/fort.webp" 
+          alt="Fort de Kélibia" 
           style={{ position: 'relative', zIndex: 1 }} 
         />
         <span className="fort-caption" style={{ zIndex: 3 }}>
-          Kélibia — Panorama Méditerranéen
+          Fort de Kélibia — Patrimoine Historique
         </span>
       </div>
     </div>

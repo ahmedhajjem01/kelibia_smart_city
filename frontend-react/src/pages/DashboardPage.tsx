@@ -1,23 +1,43 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import MainLayout from '../components/MainLayout'
 import ProfileCard from '../components/ProfileCard'
+
+// Fix for Leaflet marker icons
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+
+let DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+})
+L.Marker.prototype.options.icon = DefaultIcon
+
+const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 
 type UserInfo = {
   first_name: string
   last_name: string
   email: string
   is_verified: boolean
+  phone?: string
 }
 
 export default function DashboardPage() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserInfo | null>(null)
   const [marriageNotifications, setMarriageNotifications] = useState<any[]>([])
+  const [reclamations, setReclamations] = useState<any[]>([])
+  const [loadingMap, setLoadingMap] = useState(true)
 
   useEffect(() => {
     const access = getAccessToken()
@@ -31,11 +51,21 @@ export default function DashboardPage() {
         const res = await fetch('/api/accounts/me/', {
           headers: { Authorization: `Bearer ${access}` },
         })
-        if (!res.ok) throw new Error('Failed to fetch user info')
-        const data = (await res.json()) as UserInfo
-        setUser(data)
+        if (res.ok) {
+          const data = (await res.json()) as UserInfo
+          setUser(data)
+        }
 
-        // Fetch marriage requests for notifications
+        // Fetch reclamations for map
+        const rRes = await fetch('/api/reclamations/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (rRes.ok) {
+          const rData = await rRes.json()
+          setReclamations(rData)
+        }
+
+        // Fetch marriage requests
         const mRes = await fetch('/extrait-mariage/demandes/', {
           headers: { Authorization: `Bearer ${access}` },
         })
@@ -46,6 +76,8 @@ export default function DashboardPage() {
         }
       } catch (e) {
         console.error(e)
+      } finally {
+        setLoadingMap(false)
       }
     })()
   }, [navigate])
@@ -53,6 +85,17 @@ export default function DashboardPage() {
   function logout() {
     clearTokens()
     navigate('/login')
+  }
+
+  const getMarkerIcon = (status: string) => {
+    let color = 'blue';
+    if (status === 'pending') color = 'gold';
+    if (status === 'in_progress') color = 'blue';
+    if (status === 'resolved') color = 'green';
+    if (status === 'rejected') color = 'red';
+    
+    // We can use custom colors or just stick to icons for now
+    return DefaultIcon;
   }
 
   return (
@@ -66,19 +109,19 @@ export default function DashboardPage() {
           
           <Link to="/mes-reclamations" 
                 className="btn w-100 mb-2 py-2 fw-bold text-white shadow-sm"
-                style={{ backgroundColor: 'var(--green-mid)', borderRadius: '8px', fontSize: '0.85rem' }}>
+                style={{ backgroundColor: 'var(--primary-navy)', borderRadius: '8px', fontSize: '0.85rem' }}>
             <i className="fas fa-list-check me-2"></i>Voir mes réclamations
           </Link>
 
           <Link to="/nouvelle-reclamation" 
-                className="btn w-100 py-2 fw-bold bg-white border shadow-sm"
-                style={{ color: 'var(--green-dark)', borderRadius: '8px', fontSize: '0.85rem' }}>
+                className="btn w-100 py-2 fw-bold bg-white border border-primary shadow-sm"
+                style={{ color: 'var(--primary-navy)', borderRadius: '8px', fontSize: '0.85rem' }}>
             <i className="fas fa-plus-circle me-2 text-primary"></i>Nouveau signalement
           </Link>
         </>
       }
     >
-      {/* VERIFICATION ALERT */}
+      {/* ... (alerts remain same) */}
       {user && !user.is_verified && (
         <div className="alert alert-warning shadow-sm border-start border-4 border-warning mb-4">
           <div className="d-flex align-items-center">
@@ -93,50 +136,35 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* MARRIAGE NOTIFICATION */}
-      {marriageNotifications.length > 0 && (
-        <div className="alert alert-info shadow-sm border-0 rounded-3 p-3 mb-4 animate__animated animate__fadeIn">
-          <div className="d-flex align-items-center">
-            <i className="fas fa-ring fa-lg text-primary me-3"></i>
-            <div className="flex-grow-1">
-              <h6 className="fw-bold mb-0">{t('notification_mariage_signed')}</h6>
-            </div>
-            <Link to="/mes-mariages" className="btn btn-sm btn-primary rounded-pill px-3">
-              {t('view_mariage_cert')}
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* QUICK ACTIONS */}
-      <div className="content-card mb-4">
-        <div className="card-header-custom">
-          <span><i className="fas fa-bolt icon"></i><span>{t('quick_actions')}</span></span>
+      <div className="content-card mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+        <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
+          <span><i className="fas fa-bolt icon text-warning"></i><span>Actions Rapides</span></span>
         </div>
-        <div className="card-body-custom">
-          <div className="row g-3 text-center">
-            <div className="col-6 col-md-3">
-              <Link to="/nouvelle-reclamation" className="quick-action-btn">
-                <i className="fas fa-plus-circle qa-icon"></i>
-                <span>{t('new_reclamation')}</span>
+        <div className="card-body-custom p-0">
+          <div className="row g-0 text-center">
+            <div className="col-6 col-md-3 border-end">
+              <Link to="/nouvelle-reclamation" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-plus-circle fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">Nouveau Signalement</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-3 border-end">
+              <Link to="/mes-reclamations" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-tasks fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">Mes Réclamations</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-3 border-end">
+              <Link to="/services" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-file-invoice fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">Services Administratifs</div>
               </Link>
             </div>
             <div className="col-6 col-md-3">
-              <Link to="/mes-reclamations" className="quick-action-btn">
-                <i className="fas fa-list-check qa-icon"></i>
-                <span>{t('my_reclamations')}</span>
-              </Link>
-            </div>
-            <div className="col-6 col-md-3">
-              <Link to="/services" className="quick-action-btn">
-                <i className="fas fa-file-invoice qa-icon"></i>
-                <span>{t('admin_services')}</span>
-              </Link>
-            </div>
-            <div className="col-6 col-md-3">
-              <Link to="/news" className="quick-action-btn">
-                <i className="fas fa-newspaper qa-icon"></i>
-                <span>{t('news_title')}</span>
+              <Link to="/news" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">Actualités</div>
               </Link>
             </div>
           </div>
@@ -144,15 +172,54 @@ export default function DashboardPage() {
       </div>
 
       {/* MAP CARD */}
-      <div className="content-card mb-4" id="mapCard">
-        <div className="card-header-custom">
-          <span><i className="fas fa-map-marked-alt icon"></i><span>Carte de Kélibia — Signalements</span></span>
+      <div className="content-card mb-4" id="mapCard" style={{ minHeight: '450px' }}>
+        <div className="card-header-custom d-flex justify-content-between align-items-center">
+          <span><i className="fas fa-map-marked-alt icon text-primary"></i><span>Carte de Kélibia — Signalements en temps réel</span></span>
+          <span className="badge bg-primary rounded-pill font-monospace" style={{ fontSize: '0.7rem' }}>{reclamations.length} signalement(s) affiché(s)</span>
         </div>
-        <div id="citizenMap" style={{ height: '320px', background: '#dde3ea' }} className="d-flex align-items-center justify-content-center text-muted">
-          <div>
-            <i className="fas fa-map fa-3x mb-2 opacity-50"></i><br/>
-            Chargement de la carte...
-          </div>
+        <div className="position-relative" style={{ height: '380px' }}>
+          {loadingMap ? (
+             <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                <div className="spinner-border text-primary" role="status"></div>
+             </div>
+          ) : (
+            <MapContainer center={KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
+              <LayersControl position="topright">
+                <LayersControl.BaseLayer checked name="OpenStreetMap">
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name="Satellite (Esri)">
+                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                </LayersControl.BaseLayer>
+              </LayersControl>
+              
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              
+              {reclamations.map(rec => rec.latitude && rec.longitude && (
+                <Marker key={rec.id} position={[rec.latitude, rec.longitude]} icon={getMarkerIcon(rec.status)}>
+                  <Popup>
+                    <div className="p-1">
+                      <div className="fw-bold text-primary mb-1">{rec.title}</div>
+                      <div className="small text-muted mb-2">{rec.description}</div>
+                      <span className={`badge bg-${rec.status === 'resolved' ? 'success' : 'warning'} small`}>{rec.status}</span>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              <div className="leaflet-bottom leaflet-left" style={{ zIndex: 1000, margin: '15px' }}>
+                  <div className="card shadow-sm border-0 p-3 bg-white" style={{ borderRadius: '8px', opacity: 0.9 }}>
+                    <div className="small fw-bold mb-2 border-bottom pb-1">Légende</div>
+                    <div className="d-flex flex-column gap-1">
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-warning me-2" style={{ fontSize: '0.6rem' }}></i> En attente</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-primary me-2" style={{ fontSize: '0.6rem' }}></i> En cours</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-success me-2" style={{ fontSize: '0.6rem' }}></i> Résolu</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-danger me-2" style={{ fontSize: '0.6rem' }}></i> Rejeté</span>
+                    </div>
+                  </div>
+              </div>
+            </MapContainer>
+          )}
         </div>
       </div>
 

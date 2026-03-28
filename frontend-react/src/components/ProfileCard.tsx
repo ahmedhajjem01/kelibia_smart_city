@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ProfileCardProps {
-  user: { first_name: string; last_name: string; email: string } | null;
+  user: { first_name: string; last_name: string; email: string; phone?: string } | null;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
@@ -21,16 +21,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
       </div>
       <div className="profile-body">
         <div className="profile-row">
-          <span className="lbl">Rôle</span>
-          <span className="val" style={{ color: 'var(--green-mid)' }}>Citoyen</span>
-        </div>
-        <div className="profile-row">
           <span className="lbl">Ville</span>
           <span className="val">Kélibia</span>
         </div>
         <div className="profile-row">
           <span className="lbl">Tél.</span>
-          <span className="val">—</span>
+          <span className="val">{user?.phone || '—'}</span>
         </div>
       </div>
     </div>
