@@ -17,8 +17,8 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
           <i className="fas fa-map-marker-alt me-1"></i> {lang === 'ar' ? 'بلدية قليبية — ولاية نابل' : 'Commune de Kélibia — Gouvernorat de Nabeul'}
         </div>
         <div>
-          <a href="#"><i className="fas fa-phone me-1"></i>+216 72 295 XXX</a>
-          <a href="#"><i className="fas fa-envelope me-1"></i>contact@kelibia.tn</a>
+          <a href="#"><i className="fas fa-phone me-1"></i>+216 72 296 239</a>
+          <a href="#"><i className="fas fa-envelope me-1"></i>webmaster.commune-kelibia@topnet.tn</a>
         </div>
       </div>
 
