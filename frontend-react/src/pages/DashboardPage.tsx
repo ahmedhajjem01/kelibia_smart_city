@@ -28,6 +28,9 @@ type UserInfo = {
   email: string
   is_verified: boolean
   phone?: string
+  user_type?: string
+  is_staff?: boolean
+  is_superuser?: boolean
 }
 
 type ForumNotif = {
@@ -60,6 +63,11 @@ export default function DashboardPage() {
         if (res.ok) {
           const data = (await res.json()) as UserInfo
           setUser(data)
+          // REDIRECTION GUARD: If user is an agent/admin, send them to the agent dashboard
+          if (data.user_type === 'agent' || data.is_staff || data.is_superuser) {
+            navigate('/agent-dashboard')
+            return
+          }
         }
 
         // Fetch reclamations for map
