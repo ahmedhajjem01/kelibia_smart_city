@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Webcam from 'react-webcam'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
+import Webcam from 'react-webcam'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
+import MainLayout from '../components/MainLayout'
 
 type EligibleRelative = {
   id: number
@@ -15,8 +16,10 @@ type EligibleRelative = {
 }
 
 export default function DeclarationDecesPage() {
-  const { t, setLang, lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
+
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
   const [eligible, setEligible] = useState<EligibleRelative[] | null>(null)
   const [noEligible, setNoEligible] = useState(false)
@@ -54,6 +57,15 @@ export default function DeclarationDecesPage() {
 
     ;(async () => {
       try {
+        // Fetch User Info
+        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          setUser(userData)
+        }
+
         const response = await fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), {
           headers: { Authorization: `Bearer ${access}` },
         })
@@ -94,10 +106,6 @@ export default function DeclarationDecesPage() {
     })()
   }, [navigate, lang])
 
-  function logout() {
-    clearTokens()
-    navigate('/login')
-  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -177,47 +185,15 @@ export default function DeclarationDecesPage() {
   }
 
   return (
-    <div className="bg-light">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <Link to="/dashboard" className="navbar-brand">
-            <i className="fas fa-city me-2" />
-            Kelibia Smart City
-          </Link>
-
-          <div className="d-flex align-items-center">
-            <div className="btn-group me-3" role="group">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('fr')}
-                title="Français"
-              >
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('ar')}
-                title="العربية"
-              >
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
-            </div>
-            <Link to="/services" className="btn btn-outline-light btn-sm me-2">
-              {t('admin_services')}
-            </Link>
-            <button className="btn btn-outline-light btn-sm" onClick={logout}>
-              {t('logout')}
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="container mt-5 mb-5">
+    <MainLayout
+      user={user}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('death_decl_title') }]}
+    >
+      <div className="container py-2 pb-5">
         <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="card step-card shadow">
+          <div className="col-12">
+            <div className="card shadow-sm border-0 rounded-4">
               <div className="card-header bg-white p-4 border-0">
                 <h2 className="fw-bold text-primary mb-1">{t('death_decl_title')}</h2>
                 <p className="text-muted">{t('death_decl_desc')}</p>
@@ -405,7 +381,7 @@ export default function DeclarationDecesPage() {
           </div>
         </div>
       )}
-    </div>
+    </MainLayout>
   )
 }
 

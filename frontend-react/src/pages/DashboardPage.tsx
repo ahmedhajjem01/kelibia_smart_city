@@ -1,13 +1,33 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import MainLayout from '../components/MainLayout'
+import ProfileCard from '../components/ProfileCard'
+
+// Fix for Leaflet marker icons
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+
+let DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+})
+L.Marker.prototype.options.icon = DefaultIcon
+
+const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 
 type UserInfo = {
   first_name: string
   last_name: string
   email: string
   is_verified: boolean
+  phone?: string
 }
 
 type ForumNotif = {
@@ -16,12 +36,14 @@ type ForumNotif = {
 }
 
 export default function DashboardPage() {
-  const { t, setLang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserInfo | null>(null)
   const [marriageNotifications, setMarriageNotifications] = useState<any[]>([])
   const [forumUnread, setForumUnread] = useState(0)
+  const [reclamations, setReclamations] = useState<any[]>([])
+  const [loadingMap, setLoadingMap] = useState(true)
 
   useEffect(() => {
     const access = getAccessToken()
@@ -35,11 +57,21 @@ export default function DashboardPage() {
         const res = await fetch('/api/accounts/me/', {
           headers: { Authorization: `Bearer ${access}` },
         })
-        if (!res.ok) throw new Error('Failed to fetch user info')
-        const data = (await res.json()) as UserInfo
-        setUser(data)
+        if (res.ok) {
+          const data = (await res.json()) as UserInfo
+          setUser(data)
+        }
 
-        // Fetch marriage requests for notifications
+        // Fetch reclamations for map
+        const rRes = await fetch('/api/reclamations/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (rRes.ok) {
+          const rData = await rRes.json()
+          setReclamations(rData)
+        }
+
+        // Fetch marriage requests
         const mRes = await fetch('/extrait-mariage/demandes/', {
           headers: { Authorization: `Bearer ${access}` },
         })
@@ -60,6 +92,8 @@ export default function DashboardPage() {
         }
       } catch (e) {
         console.error(e)
+      } finally {
+        setLoadingMap(false)
       }
     })()
   }, [navigate])
@@ -69,234 +103,193 @@ export default function DashboardPage() {
     navigate('/login')
   }
 
+  const getMarkerIcon = (_status: string) => {
+    // We can use custom colors or just stick to icons for now
+    return DefaultIcon;
+  }
+
   return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <a className="navbar-brand" href="#" data-i18n="home">
-            Kelibia Smart City
-          </a>
+    <MainLayout 
+      user={user} 
+      onLogout={logout} 
+      showHero={true}
+      rightSidebar={
+        <>
+          <ProfileCard user={user} />
+          
+          <Link to="/mes-reclamations" 
+                className="btn w-100 mb-2 py-2 fw-bold text-white shadow-sm"
+                style={{ backgroundColor: 'var(--primary-navy)', borderRadius: '8px', fontSize: '0.85rem' }}>
+            <i className="fas fa-list-check me-2"></i>Voir mes réclamations
+          </Link>
 
+          <Link to="/nouvelle-reclamation" 
+                className="btn w-100 py-2 fw-bold bg-white border border-primary shadow-sm"
+                style={{ color: 'var(--primary-navy)', borderRadius: '8px', fontSize: '0.85rem' }}>
+            <i className="fas fa-plus-circle me-2 text-primary"></i>Nouveau signalement
+          </Link>
+        </>
+      }
+    >
+      {/* ... (alerts remain same) */}
+      {user && !user.is_verified && (
+        <div className="alert alert-warning shadow-sm border-start border-4 border-warning mb-4">
           <div className="d-flex align-items-center">
-            <div className="btn-group me-3" role="group" aria-label="Language">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('fr')}
-                title="Français"
-              >
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-light"
-                onClick={() => setLang('ar')}
-                title="العربية"
-              >
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-              </button>
+            <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+            <div>
+              <h5 className="alert-heading mb-1">Compte en attente de vérification</h5>
+              <p className="mb-0 small">
+                Votre identité est en cours de validation par un agent municipal. 
+              </p>
             </div>
-
-            <button
-              className="btn btn-outline-light btn-sm"
-              onClick={logout}
-              type="button"
-            >
-              {t('logout')}
-            </button>
           </div>
         </div>
-      </nav>
+      )}
 
-      <div className="container mt-5">
-        <div className="row">
-          <div className="col-md-8">
-            {user && !user.is_verified && (
-              <div className="alert alert-warning shadow-sm border-start border-4 border-warning">
-                <div className="d-flex align-items-center">
-                  <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
-                  <div>
-                    <h5 className="alert-heading mb-1">Compte en attente de vérification</h5>
-                    <p className="mb-0 small text-dark">
-                      Votre identité est en cours de validation par un agent municipal. 
-                      Certaines fonctionnalités peuvent être limitées temporairement.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="alert alert-success">
-              <h4>{t('welcome')}</h4>
-              <p>{t('welcome_msg')}</p>
+      {/* MARRIAGE NOTIFICATION */}
+      {marriageNotifications.length > 0 && (
+        <div className="alert alert-info shadow-sm border-0 rounded-3 p-3 mb-4 animate__animated animate__fadeIn">
+          <div className="d-flex align-items-center">
+            <i className="fas fa-ring fa-lg text-primary me-3"></i>
+            <div className="flex-grow-1">
+              <h6 className="fw-bold mb-0">{t('notification_mariage_signed')}</h6>
             </div>
-
-            {marriageNotifications.length > 0 && (
-              <div className="alert alert-info shadow-lg border-0 rounded-4 p-4 mb-4 animate__animated animate__bounceIn">
-                <div className="d-flex align-items-center">
-                  <div className="bg-white rounded-circle p-3 me-4 shadow-sm">
-                    <i className="fas fa-ring fa-2x text-primary animate__animated animate__pulse animate__infinite"></i>
-                  </div>
-                  <div className="flex-grow-1">
-                    <h5 className="fw-bold text-dark mb-1">{t('notification_mariage_signed')}</h5>
-                    <p className="text-muted small mb-0">Kelibia Smart City - Service de l'État Civil</p>
-                  </div>
-                  <Link to="/mes-mariages" className="btn btn-primary rounded-pill px-4 shadow-sm">
-                    {t('view_mariage_cert')}
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            <div className="card shadow-sm mb-4">
-              <div className="card-body">
-                <h5 className="card-title text-primary">
-                  <i className="fas fa-file-invoice me-2" />
-                  {t('admin_services')}
-                </h5>
-                <p className="card-text text-muted">{t('services_desc')}</p>
-                <Link to="/services" className="btn btn-primary">
-                  {t('view_services')}
-                </Link>
-              </div>
-            </div>
-
-            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden border-start border-4 border-info">
-              <div className="card-body">
-                <h5 className="card-title text-info fw-bold">
-                  <i className="fas fa-tasks me-2" />
-                  {t('my_requests')}
-                </h5>
-                <p className="card-text text-muted small">{t('my_requests_desc')}</p>
-                <div className="d-flex gap-2">
-                    <Link to="/services" className="btn btn-info text-white rounded-pill px-4 shadow-sm">
-                        <i className="fas fa-plus me-2"></i> {t('new_request')}
-                    </Link>
-                    <Link to="/mes-demandes" className="btn btn-outline-info rounded-pill px-4">
-                        <i className="fas fa-history me-2"></i> {t('view_requests')}
-                    </Link>
-                </div>
-              </div>
-            </div>
-
-            {user && user.is_verified && (
-              <div className="card shadow-lg mb-4 border-0 rounded-4 overflow-hidden">
-                <div className="card-header bg-gradient bg-primary text-white py-3">
-                  <h5 className="mb-0">
-                    <i className="fas fa-id-card-alt me-2" />
-                    {t('civil_documents_hub')}
-                  </h5>
-                </div>
-                <div className="card-body bg-light">
-                  <p className="text-muted small mb-4">{t('civil_docs_desc')}</p>
-                  <div className="row g-3">
-                    <div className="col-md-3 col-6 text-center">
-                      <Link to="/mes-extraits" className="text-decoration-none">
-                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-success h-100 d-flex flex-column align-items-center justify-content-center">
-                          <i className="fas fa-baby fa-2x text-success mb-2"></i>
-                          <span className="fw-bold small">{t('birth_cert')}</span>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className="col-md-3 col-6 text-center">
-                      <Link to="/mes-mariages" className="text-decoration-none">
-                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-primary h-100 d-flex flex-column align-items-center justify-content-center">
-                          <i className="fas fa-ring fa-2x text-primary mb-2"></i>
-                          <span className="fw-bold small">{t('mariage_cert')}</span>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className="col-md-3 col-6 text-center">
-                      <Link to="/mes-deces" className="text-decoration-none">
-                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-dark h-100 d-flex flex-column align-items-center justify-content-center">
-                          <i className="fas fa-dove fa-2x text-dark mb-2"></i>
-                          <span className="fw-bold small">{t('deces_cert')}</span>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className="col-md-3 col-6 text-center">
-                      <Link to="/mes-residences" className="text-decoration-none">
-                        <div className="p-3 bg-white rounded-3 shadow-sm hover-lift border-bottom border-4 border-warning h-100 d-flex flex-column align-items-center justify-content-center">
-                          <i className="fas fa-home fa-2x text-warning mb-2"></i>
-                          <span className="fw-bold small">{t('residence_cert')}</span>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden">
-              <div className="card-body">
-                <h5 className="card-title text-danger fw-bold">
-                  <i className="fas fa-bullhorn me-2" />
-                  {t('my_reclamations')}
-                </h5>
-                <p className="card-text text-muted small">{t('reclamations_desc')}</p>
-                <div className="d-flex gap-2">
-                    <Link to="/nouvelle-reclamation" className="btn btn-danger rounded-pill px-4 shadow-sm">
-                        <i className="fas fa-plus me-2"></i> {t('new_reclamation')}
-                    </Link>
-                    <Link to="/mes-reclamations" className="btn btn-outline-danger rounded-pill px-4">
-                        <i className="fas fa-list me-2"></i> {t('view_reclamations')}
-                    </Link>
-                </div>
-              </div>
-            </div>
-
-            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden" style={{ borderLeft: '5px solid #6f42c1' }}>
-              <div className="card-body">
-                <h5 className="card-title fw-bold" style={{ color: '#6f42c1' }}>
-                  <i className="fas fa-comments me-2" />
-                  {t('forum')}
-                  {forumUnread > 0 && (
-                    <span className="badge bg-danger rounded-pill ms-2" style={{ fontSize: '0.7rem' }}>
-                      {forumUnread}
-                    </span>
-                  )}
-                </h5>
-                <p className="card-text text-muted small">{t('forum_desc')}</p>
-                <Link to="/forum" className="btn btn-outline-secondary rounded-pill px-4" style={{ borderColor: '#6f42c1', color: '#6f42c1' }}>
-                  <i className="fas fa-arrow-right me-2" />{t('forum')}
-                </Link>
-              </div>
-            </div>
-
-            <div className="card shadow-sm mb-4">
-              <div className="card-body">
-                <h5 className="card-title text-warning">
-                  <i className="fas fa-newspaper me-2" />
-                  {t('news_title')}
-                </h5>
-                <p className="card-text text-muted">{t('news_desc')}</p>
-                <a href="#" className="btn btn-warning">
-                  Lire les articles
-                </a>
-              </div>
-            </div>
+            <Link to="/mes-mariages" className="btn btn-sm btn-primary rounded-pill px-3">
+              {t('view_mariage_cert')}
+            </Link>
           </div>
+        </div>
+      )}
 
-          <div className="col-md-4">
-            <div className="card shadow-sm">
-              <div className="card-header bg-white">
-                <h6 className="mb-0">{t('profile')}</h6>
-              </div>
-              <div className="card-body text-center">
-                <img
-                  src="https://ui-avatars.com/api/?name=User&background=0D6EFD&color=fff"
-                  className="rounded-circle mb-3"
-                  width="80"
-                  alt="User avatar"
-                />
-                <h6>{user ? `${user.first_name} ${user.last_name}` : 'Chargement...'}</h6>
-                <p className="text-muted small">{user ? user.email : '...'}</p>
-              </div>
+      {/* QUICK ACTIONS */}
+      <div className="content-card mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+        <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
+          <span><i className="fas fa-bolt icon text-warning"></i><span>{lang === 'ar' ? 'إجراءات سريعة' : 'Actions Rapides'}</span></span>
+        </div>
+        <div className="card-body-custom p-0">
+          <div className="row g-0 text-center">
+            <div className="col-6 col-md-3 border-end">
+              <Link to="/nouvelle-reclamation" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-plus-circle fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">{t('new_reclamation')}</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-3 border-end">
+              <Link to="/mes-reclamations" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-tasks fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">{t('my_reclamations')}</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-3 border-end">
+              <Link to="/services" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-file-invoice fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">{t('admin_services')}</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-3">
+              <Link to="/news" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">{t('news_title')}</div>
+              </Link>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* MAP CARD */}
+      <div className="content-card mb-4" id="mapCard" style={{ minHeight: '450px' }}>
+        <div className="card-header-custom d-flex justify-content-between align-items-center">
+          <span><i className="fas fa-map-marked-alt icon text-primary"></i><span>{lang === 'ar' ? 'خريطة قليبية — بلاغات حقيقية' : 'Carte de Kélibia — Signalements en temps réel'}</span></span>
+          <span className="badge bg-primary rounded-pill font-monospace" style={{ fontSize: '0.7rem' }}>{reclamations.length} {lang === 'ar' ? 'بلاغات' : 'signalement(s) affiché(s)'}</span>
+        </div>
+        <div className="position-relative" style={{ height: '380px' }}>
+          {loadingMap ? (
+             <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                <div className="spinner-border text-primary" role="status"></div>
+             </div>
+          ) : (
+            <MapContainer center={KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
+              <LayersControl position="topright">
+                <LayersControl.BaseLayer checked name={lang === 'ar' ? 'خريطة عادية' : 'OpenStreetMap'}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name={lang === 'ar' ? 'قمر صناعي' : 'Satellite (Esri)'}>
+                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                </LayersControl.BaseLayer>
+              </LayersControl>
+              
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              
+              {reclamations.map((rec : any) => rec.latitude && rec.longitude && (
+                <Marker key={rec.id} position={[rec.latitude, rec.longitude]} icon={getMarkerIcon(rec.status)}>
+                  <Popup>
+                    <div className="p-1">
+                      <div className="fw-bold text-primary mb-1">{rec.title}</div>
+                      <div className="small text-muted mb-2">{rec.description}</div>
+                      <span className={`badge bg-${rec.status === 'resolved' ? 'success' : 'warning'} small`}>{rec.status}</span>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              <div className="leaflet-bottom leaflet-left" style={{ zIndex: 1000, margin: '15px' }}>
+                  <div className="card shadow-sm border-0 p-3 bg-white" style={{ borderRadius: '8px', opacity: 0.9 }}>
+                    <div className="small fw-bold mb-2 border-bottom pb-1">{lang === 'ar' ? 'دليل الخريطة' : 'Légende'}</div>
+                    <div className="d-flex flex-column gap-1">
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-warning me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'قيد الانتظار' : 'En attente'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-primary me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'قيد الإنجاز' : 'En cours'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-success me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'تم الحل' : 'Résolu'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-danger me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'مرفوض' : 'Rejeté'}</span>
+                    </div>
+                  </div>
+              </div>
+            </MapContainer>
+          )}
+        </div>
+      </div>
+
+      {/* FORUM CARD */}
+      <div className="content-card mb-4" style={{ borderLeft: '5px solid #6f42c1' }}>
+        <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
+          <span>
+            <i className="fas fa-comments icon"></i>
+            <span>{t('forum')}</span>
+            {forumUnread > 0 && (
+              <span className="badge bg-danger rounded-pill ms-2" style={{ fontSize: '0.7rem' }}>{forumUnread}</span>
+            )}
+          </span>
+        </div>
+        <div className="card-body-custom p-3">
+          <p className="text-muted small mb-3">{t('forum_desc')}</p>
+          <Link to="/forum" className="btn btn-sm rounded-pill px-4" style={{ borderColor: '#6f42c1', color: '#6f42c1', border: '1px solid #6f42c1' }}>
+            <i className="fas fa-arrow-right me-2" />{t('forum')}
+          </Link>
+        </div>
+      </div>
+
+      {/* NEWS MINI CARDS */}
+      <div className="content-card">
+        <div className="card-header-custom">
+          <span><i className="fas fa-newspaper icon"></i><span>{t('news_title')}</span></span>
+        </div>
+        <div className="card-body-custom">
+          <div className="news-mini">
+            <div className="news-dot"></div>
+            <div>
+              <div className="news-text">{t('news_item_1')}</div>
+              <div className="news-date">{t('news_date_1')}</div>
+            </div>
+          </div>
+          <div className="news-mini">
+            <div className="news-dot"></div>
+            <div>
+              <div className="news-text">{t('news_item_2')}</div>
+              <div className="news-date">{t('news_date_2')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MainLayout>
   )
 }
 

@@ -258,6 +258,11 @@ const translations: Record<Lang, Record<string, string>> = {
     search_topics: 'Rechercher un sujet...',
     back_to_forum: 'Retour au forum',
     agent_badge: 'Agent Municipal',
+    citoyen_role: 'Citoyen',
+    news_item_1: 'Ramassage des ordures — Programme de mai 2025',
+    news_date_1: '12 mai 2025',
+    news_item_2: "Travaux d'entretien des routes côtières",
+    news_date_2: '8 mai 2025',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -503,6 +508,11 @@ const translations: Record<Lang, Record<string, string>> = {
     search_topics: 'البحث عن موضوع...',
     back_to_forum: 'العودة إلى المنتدى',
     agent_badge: 'عون بلدي',
+    citoyen_role: 'مواطن',
+    news_item_1: 'رفع الفضلات — برنامج ماي 2025',
+    news_date_1: '12 ماي 2025',
+    news_item_2: 'أشغال صيانة الطرقات الساحلية',
+    news_date_2: '8 ماي 2025',
   },
 }
 
