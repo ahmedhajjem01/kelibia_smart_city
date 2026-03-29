@@ -35,6 +35,7 @@ const translations: Record<Lang, Record<string, string>> = {
     view_reclamations: 'Voir les réclamations',
     agent_welcome: 'Bienvenue Agent !',
     my_reclamations: 'Mes Réclamations',
+    mes_extraits: 'Mes Extraits',
     new_reclamation: 'Nouvelle Réclamation',
     reclamations_desc:
       'Signalez un problème (éclairage, déchets, voirie) et suivez sa résolution.',
@@ -294,6 +295,7 @@ const translations: Record<Lang, Record<string, string>> = {
     view_reclamations: 'عرض الشكاوى',
     agent_welcome: 'مرحباً أيها العون!',
     my_reclamations: 'شكاويّ',
+    mes_extraits: 'وثائق الحالة المدنية',
     new_reclamation: 'شكوى جديدة',
     reclamations_desc: 'أبلغ عن مشكل (إضاءة، نفايات، طرقات) وتابع عملية الإصلاح.',
     news_title: 'أخبار قليبية',

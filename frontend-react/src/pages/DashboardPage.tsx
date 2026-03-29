@@ -176,25 +176,37 @@ export default function DashboardPage() {
         </div>
         <div className="card-body-custom p-0">
           <div className="row g-0 text-center">
-            <div className="col-6 col-md-3 border-end">
+            <div className="col-6 col-md-4 border-end border-bottom">
               <Link to="/nouvelle-reclamation" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-plus-circle fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('new_reclamation')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-3 border-end">
+            <div className="col-6 col-md-4 border-end border-bottom">
+              <Link to="/mes-extraits" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-file-contract fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">{t('mes_extraits')}</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-4 border-bottom">
               <Link to="/mes-reclamations" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
-                <i className="fas fa-tasks fa-2x text-primary mb-2"></i>
+                <i className="fas fa-bullhorn fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('my_reclamations')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-3 border-end">
+            <div className="col-6 col-md-4 border-end">
+              <Link to="/mes-demandes" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-tasks fa-2x text-primary mb-2"></i>
+                <div className="small fw-bold">{t('my_requests')}</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-4 border-end">
               <Link to="/services" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-file-invoice fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('admin_services')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-3">
+            <div className="col-6 col-md-4">
               <Link to="/news" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-newspaper fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('news_title')}</div>
