@@ -138,6 +138,19 @@ export default function AgentDashboardPage() {
               <p>{t('welcome_msg')}</p>
             </div>
 
+            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden" style={{ borderLeft: '5px solid #6f42c1' }}>
+              <div className="card-body">
+                <h5 className="card-title fw-bold" style={{ color: '#6f42c1' }}>
+                  <i className="fas fa-comments me-2" />
+                  {t('forum')}
+                </h5>
+                <p className="card-text text-muted small">{t('forum_desc')}</p>
+                <Link to="/forum" className="btn rounded-pill px-4 shadow-sm" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
+                  <i className="fas fa-comments me-2" />{t('forum')}
+                </Link>
+              </div>
+            </div>
+
             <div className="card shadow-sm mb-4 agent-card" style={{ borderLeft: '5px solid #198754' }}>
               <div className="card-body">
                 <h5 className="card-title text-success">

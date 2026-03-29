@@ -24,6 +24,8 @@ import MariageContractPage from './pages/MariageContractPage'
 import MesDemandesPage from './pages/MesDemandesPage'
 import DemandeInhumationPage from './pages/DemandeInhumationPage'
 import ComingSoonPage from './pages/ComingSoonPage'
+import ForumPage from './pages/ForumPage'
+import ForumTopicPage from './pages/ForumTopicPage'
 
 export default function App() {
   return (
@@ -109,6 +111,8 @@ export default function App() {
             path="/demande-inhumation"
             element={<DemandeInhumationPage />}
           />
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/:id" element={<ForumTopicPage />} />
 
           {/* Backward-compatible aliases with old .html URLs */}
           <Route path="/agent_dashboard.html" element={<AgentDashboardPage />} />

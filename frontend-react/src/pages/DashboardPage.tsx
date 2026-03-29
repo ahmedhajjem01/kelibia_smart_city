@@ -10,12 +10,18 @@ type UserInfo = {
   is_verified: boolean
 }
 
+type ForumNotif = {
+  id: number
+  is_read: boolean
+}
+
 export default function DashboardPage() {
   const { t, setLang } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserInfo | null>(null)
   const [marriageNotifications, setMarriageNotifications] = useState<any[]>([])
+  const [forumUnread, setForumUnread] = useState(0)
 
   useEffect(() => {
     const access = getAccessToken()
@@ -41,6 +47,16 @@ export default function DashboardPage() {
           const mData = await mRes.json()
           const signed = mData.filter((d: any) => d.status === 'signed')
           setMarriageNotifications(signed)
+        }
+
+        // Fetch forum unread notifications count
+        const nRes = await fetch('/api/forum/notifications/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+        if (nRes.ok) {
+          const nData = (await nRes.json()) as ForumNotif[]
+          const unread = nData.filter((n) => !n.is_read).length
+          setForumUnread(unread)
         }
       } catch (e) {
         console.error(e)
@@ -226,6 +242,24 @@ export default function DashboardPage() {
                         <i className="fas fa-list me-2"></i> {t('view_reclamations')}
                     </Link>
                 </div>
+              </div>
+            </div>
+
+            <div className="card shadow-sm mb-4 border-0 rounded-4 overflow-hidden" style={{ borderLeft: '5px solid #6f42c1' }}>
+              <div className="card-body">
+                <h5 className="card-title fw-bold" style={{ color: '#6f42c1' }}>
+                  <i className="fas fa-comments me-2" />
+                  {t('forum')}
+                  {forumUnread > 0 && (
+                    <span className="badge bg-danger rounded-pill ms-2" style={{ fontSize: '0.7rem' }}>
+                      {forumUnread}
+                    </span>
+                  )}
+                </h5>
+                <p className="card-text text-muted small">{t('forum_desc')}</p>
+                <Link to="/forum" className="btn btn-outline-secondary rounded-pill px-4" style={{ borderColor: '#6f42c1', color: '#6f42c1' }}>
+                  <i className="fas fa-arrow-right me-2" />{t('forum')}
+                </Link>
               </div>
             </div>
 
