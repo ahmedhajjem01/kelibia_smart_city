@@ -110,7 +110,7 @@ export default function DemandeResidencePage() {
     }
 
     // Fetch User Info
-    fetch(resolveBackendUrl('/accounts/user/'), {
+    fetch(resolveBackendUrl('/api/accounts/me/'), {
       headers: { Authorization: `Bearer ${access}` },
     })
       .then((res) => res.ok && res.json())

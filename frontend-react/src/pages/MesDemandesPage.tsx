@@ -37,7 +37,7 @@ export default function MesDemandesPage() {
         const headers = { Authorization: `Bearer ${token}` }
         
         // Fetch User Info
-        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), { headers })
+        const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers })
         if (userRes.ok) {
           const userData = await userRes.json()
           setUser(userData)

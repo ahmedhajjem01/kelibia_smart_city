@@ -34,7 +34,7 @@ export default function DemandeInhumationPage() {
     }
 
     // Fetch User Info
-    fetch(resolveBackendUrl('/accounts/user/'), {
+    fetch(resolveBackendUrl('/api/accounts/me/'), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.ok && res.json())

@@ -30,7 +30,7 @@ export default function DeclarationNaissancePage() {
     }
 
     // Fetch User Info for MainLayout
-    fetch(resolveBackendUrl('/accounts/user/'), {
+    fetch(resolveBackendUrl('/api/accounts/me/'), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.ok && res.json())

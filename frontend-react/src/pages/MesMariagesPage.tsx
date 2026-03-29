@@ -37,7 +37,7 @@ export default function MesMariagesPage() {
     ;(async () => {
       try {
         // Fetch User Info
-        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+        const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (userRes.ok) {
@@ -70,7 +70,8 @@ export default function MesMariagesPage() {
     clearTokens()
     navigate('/login')
   }
-  return (
+
+  return (
     <MainLayout
       user={user}
       onLogout={logout}

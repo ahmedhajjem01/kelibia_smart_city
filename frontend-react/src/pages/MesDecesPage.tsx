@@ -37,7 +37,7 @@ export default function MesDecesPage() {
     ;(async () => {
       try {
         // Fetch User Info
-        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+        const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (userRes.ok) {
