@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes as pc
 from .models import Reclamation
 from .serializers import ReclamationSerializer
-from .classifier import classify
 
 
 class ReclamationViewSet(viewsets.ModelViewSet):
@@ -22,6 +21,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
+        from .classifier import classify
         title       = self.request.data.get('title', '')
         description = self.request.data.get('description', '')
         category    = self.request.data.get('category', 'other')
@@ -34,6 +34,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         )
 
     def create(self, request, *args, **kwargs):
+        from .classifier import classify
         title       = request.data.get('title', '')
         description = request.data.get('description', '')
         category    = request.data.get('category', 'other')
@@ -51,6 +52,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def classify_preview(self, request):
         """POST /api/reclamations/classify_preview/ — ML preview without saving."""
+        from .classifier import classify
         title       = request.data.get('title', '')
         description = request.data.get('description', '')
         category    = request.data.get('category', 'other')

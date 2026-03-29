@@ -11,22 +11,9 @@ The models are loaded ONCE at startup (lazy singleton).
 If saved models don't exist, auto-training is triggered.
 """
 
-import os
 import re
 import logging
-import joblib
 import unicodedata
-
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem.snowball import FrenchStemmer
-
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.svm import LinearSVC
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.model_selection import cross_val_score
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -55,32 +42,39 @@ SERVICE_MAP = {
 # ─── NLP utilities ────────────────────────────────────────────────────────────
 def _download_nltk_data():
     """Download required NLTK data silently."""
-    for pkg in ["stopwords", "punkt"]:
+    import nltk
+    import os
+    nltk_dir = os.path.join(os.environ.get('TEMP', '/tmp'), 'nltk_data')
+    os.makedirs(nltk_dir, exist_ok=True)
+    if nltk_dir not in nltk.data.path:
+        nltk.data.path.append(nltk_dir)
+        
+    for pkg in ["stopwords", "punkt", "punkt_tab"]:
         try:
             nltk.data.find(
                 "corpora/" + pkg if pkg == "stopwords" else "tokenizers/" + pkg
             )
         except LookupError:
-            nltk.download(pkg, quiet=True)
+            nltk.download(pkg, download_dir=nltk_dir, quiet=True)
 
 
-_download_nltk_data()
-_stemmer = FrenchStemmer()
-
-try:
-    _FR_STOPWORDS = set(stopwords.words("french"))
-except Exception:
-    _FR_STOPWORDS = set()
-
-# Extra domain stopwords — very frequent, carry no discriminative signal
-_EXTRA_STOP = {
-    "rue", "quartier", "zone", "ville", "kelibia", "depuis",
-    "faire", "chez", "tres", "notre", "votre", "leur", "leurs",
-    "plus", "moins", "comme", "aussi", "donc", "mais", "pour", "avec",
-    "dans", "sur", "par", "il", "ya", "jai", "svp",
-    "merci", "bonjour", "probleme", "signaler", "demande",
-}
-_ALL_STOP = _FR_STOPWORDS | _EXTRA_STOP
+def _get_stopwords():
+    import nltk
+    from nltk.corpus import stopwords
+    _download_nltk_data()
+    try:
+        fr_stop = set(stopwords.words("french"))
+    except Exception:
+        fr_stop = set()
+    
+    extra_stop = {
+        "rue", "quartier", "zone", "ville", "kelibia", "depuis",
+        "faire", "chez", "tres", "notre", "votre", "leur", "leurs",
+        "plus", "moins", "comme", "aussi", "donc", "mais", "pour", "avec",
+        "dans", "sur", "par", "il", "ya", "jai", "svp",
+        "merci", "bonjour", "probleme", "signaler", "demande",
+    }
+    return fr_stop | extra_stop
 
 
 def _normalize(text: str) -> str:
@@ -93,24 +87,33 @@ def _normalize(text: str) -> str:
       5. Remove stopwords and very short tokens
       6. French Snowball stemming
     """
+    from nltk.stem.snowball import FrenchStemmer
+    _stemmer = FrenchStemmer()
+    all_stop = _get_stopwords()
+
     text = text.lower()
     text = unicodedata.normalize("NFD", text)
     text = "".join(c for c in text if unicodedata.category(c) != "Mn")
     text = re.sub(r"[^a-z0-9\s]", " ", text)
 
     tokens = text.split()
-    tokens = [t for t in tokens if t not in _ALL_STOP and len(t) > 1]
+    tokens = [t for t in tokens if t not in all_stop and len(t) > 1]
     tokens = [_stemmer.stem(t) for t in tokens]
 
     return " ".join(tokens)
 
 
 # ─── Model builder ────────────────────────────────────────────────────────────
-def _build_pipeline() -> Pipeline:
+def _build_pipeline() -> object:
     """
     TF-IDF (word unigrams + bigrams, sublinear TF) fed into a calibrated LinearSVC.
     CalibratedClassifierCV adds probability output to LinearSVC via isotonic regression.
     """
+    from sklearn.pipeline import Pipeline
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.svm import LinearSVC
+    from sklearn.calibration import CalibratedClassifierCV
+
     tfidf = TfidfVectorizer(
         analyzer="word",
         ngram_range=(1, 2),
@@ -134,6 +137,9 @@ def train(force: bool = False) -> dict:
     """
     from .training_data import TRAINING_DATA
 
+    from sklearn.model_selection import cross_val_score
+    import joblib
+
     texts      = [_normalize(t) for t, _, _ in TRAINING_DATA]
     categories = [c for _, c, _ in TRAINING_DATA]
     priorities = [p for _, _, p in TRAINING_DATA]
@@ -144,6 +150,7 @@ def train(force: bool = False) -> dict:
     cat_pipe = _build_pipeline()
     cat_cv   = cross_val_score(cat_pipe, texts, categories, cv=5, scoring="accuracy")
     cat_pipe.fit(texts, categories)
+    import joblib
     joblib.dump(cat_pipe, _CAT_MODEL)
     logger.info("Category  CV accuracy: %.3f +/- %.3f", cat_cv.mean(), cat_cv.std())
     print("[ML] Category  CV accuracy : %.1f%% +/- %.1f%%" % (cat_cv.mean() * 100, cat_cv.std() * 100))
@@ -169,6 +176,8 @@ def train(force: bool = False) -> dict:
 def _load_models():
     """Load saved models from disk; auto-train if they are missing."""
     global _category_model, _priority_model
+    import joblib
+    import os
     if _category_model is None or _priority_model is None:
         if not os.path.exists(_CAT_MODEL) or not os.path.exists(_PRIO_MODEL):
             logger.warning("ML models not found — running auto-training...")
@@ -200,6 +209,7 @@ def classify(title: str, description: str, category: str = "other") -> dict:
     text_norm = _normalize(text_raw)
 
     # ── Category prediction ─────────────────────────────────────────────────
+    import numpy as np
     try:
         cat_proba   = cat_model.predict_proba([text_norm])[0]
         cat_classes = cat_model.classes_
