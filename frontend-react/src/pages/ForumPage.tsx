@@ -26,7 +26,7 @@ function formatDate(iso: string) {
 }
 
 export default function ForumPage() {
-  const { t, setLang } = useI18n()
+  const { setLang } = useI18n()
   const navigate = useNavigate()
 
   const [topics, setTopics]       = useState<Topic[]>([])

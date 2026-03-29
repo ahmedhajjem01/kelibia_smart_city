@@ -79,7 +79,7 @@ export default function LoginPage() {
 
       // Role-based redirection
       if (data.is_staff || data.is_superuser) {
-        window.location.href = '/admin/'
+        navigate('/agent-dashboard')
       } else if (data.user_type === 'agent') {
         navigate('/agent-dashboard')
       } else {

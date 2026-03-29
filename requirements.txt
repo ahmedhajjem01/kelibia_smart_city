@@ -37,3 +37,9 @@ dj-database-url==2.3.0
 whitenoise==6.9.0
 qrcode==7.4.2
 
+# ML / NLP — reclamation classifier
+scikit-learn>=1.7.0
+nltk>=3.9.0
+joblib>=1.5.0
+numpy>=1.26.0
+
