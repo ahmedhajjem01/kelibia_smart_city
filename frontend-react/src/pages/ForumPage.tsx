@@ -404,3 +404,20 @@ export default function ForumPage() {
     </MainLayout>
   )
 }
+
+function QSSelect({ rec, onUpdate }: { rec: Reclamation; onUpdate: (id: number, ns: string, os: string, cb: (ok: boolean) => void) => void }) {
+  const [val, setVal] = useState(rec.status)
+  const [dis, setDis] = useState(false)
+  return (
+    <select className="ag-status-select" value={val} disabled={dis}
+      onChange={e => {
+        const ns = e.target.value, os = val; setDis(true)
+        onUpdate(rec.id, ns, os, ok => { if (ok) setVal(ns); else setVal(os); setDis(false) })
+      }}>
+      <option value="pending">⏳ En attente</option>
+      <option value="in_progress">🔧 En cours</option>
+      <option value="resolved">✅ Résolue</option>
+      <option value="rejected">❌ Rejetée</option>
+    </select>
+  )
+}
