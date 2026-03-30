@@ -1,15 +1,12 @@
 {
   "version": 2,
+  "buildCommand": "cd frontend-react && npm install && npm run build",
+  "outputDirectory": "frontend-react/dist",
   "builds": [
     {
       "src": "core/wsgi.py",
       "use": "@vercel/python",
       "config": { "runtime": "python3.12" }
-    },
-    {
-      "src": "frontend-react/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
     }
   ],
   "routes": [
@@ -24,13 +21,7 @@
     { "src": "/attestation-residence/(.*)", "dest": "core/wsgi.py" },
     { "src": "/signalement/(.*)",           "dest": "core/wsgi.py" },
     { "src": "/dashboard/(.*)",             "dest": "core/wsgi.py" },
-    { "src": "/assets/(.*)",                "dest": "frontend-react/assets/$1" },
-    { "src": "/favicon.svg",                "dest": "frontend-react/favicon.svg" }
-  ],
-  "rewrites": [
-    {
-      "source": "/((?!api/|admin/|admin$|static/|media/|extrait-naissance/|extrait-mariage/|extrait-deces/|attestation-residence/|signalement/|dashboard/|assets/|favicon\\.svg).*)",
-      "destination": "/frontend-react/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/(.*)",                       "dest": "/index.html" }
   ]
 }
