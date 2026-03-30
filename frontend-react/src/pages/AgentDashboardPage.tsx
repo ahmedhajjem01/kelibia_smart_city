@@ -631,7 +631,7 @@ export default function AgentDashboardPage() {
               </button>
             </div>
             <div style={{ padding: 20 }}>
-              {mlLoading && <div className="text-center py-4"><span className="spinner-border text-primary"></span><p className="mt-2 text-muted">Calcul des statistiques...</p></div>}
+              {mlLoading && <div className="text-center py-4"><span className="spinner-border text-primary"></span><p className="mt-2 text-muted">Calcul des statistiques IA en cours…</p><p style={{fontSize:'.75rem',color:'#aaa'}}>Première ouverture : entraînement du modèle en mémoire (~5s)</p></div>}
               {!mlLoading && mlStats && (
                 <>
                   {/* Accuracy summary */}
@@ -761,7 +761,10 @@ export default function AgentDashboardPage() {
                   <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 10 }}>
                     <i className="fas fa-flag me-2"></i>Tableau 4 — Rapport de classification (Priorité)
                   </h6>
-                  <div style={{ overflowX: 'auto' }}>
+                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
+                    Précision/Rappel/F1 pour chaque niveau de priorité : <b>Urgente</b>, <b>Normale</b>, <b>Faible</b>.
+                  </p>
+                  <div style={{ overflowX: 'auto', marginBottom: 24 }}>
                     <table className="ml-table">
                       <thead><tr><th>Priorité</th><th>Précision</th><th>Rappel</th><th>F1-Score</th><th>Support</th></tr></thead>
                       <tbody>
@@ -775,6 +778,49 @@ export default function AgentDashboardPage() {
                               <td>{Math.round(row.recall*100)}%</td>
                               <td><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1*100)}%</span></td>
                               <td style={{ color: '#888' }}>{row.support}</td>
+                            </tr>
+                          )
+                        })}
+                        <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
+                          <td>Moyenne</td>
+                          <td>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.precision,0)/mlStats.priority.report.length*100)}%</td>
+                          <td>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.recall,0)/mlStats.priority.report.length*100)}%</td>
+                          <td style={{ color: '#1565c0' }}>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.f1,0)/mlStats.priority.report.length*100)}%</td>
+                          <td style={{ color: '#888' }}>{mlStats.n_samples}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* ── Confusion Matrix — Priority */}
+                  <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 6 }}>
+                    <i className="fas fa-th me-2"></i>Tableau 4b — Matrice de confusion (Priorité)
+                  </h6>
+                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
+                    Lignes = priorité <b>réelle</b>, Colonnes = priorité <b>prédite</b>.
+                    Cases <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>vertes</span> = correct.
+                    Cases <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>rouges</span> = erreurs.
+                  </p>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="ml-table">
+                      <thead>
+                        <tr>
+                          <th style={{ fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
+                          {mlStats.priority.labels.map(l => {
+                            const lmap: Record<string,string> = { urgente:'🔴', normale:'🔵', faible:'🟣' }
+                            return <th key={l} className="cm-cell">{lmap[l]||l}</th>
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {mlStats.priority.confusion_matrix.map((row, i) => {
+                          const lmap: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
+                          return (
+                            <tr key={i}>
+                              <td><strong style={{ fontSize: '.78rem' }}>{lmap[mlStats.priority.labels[i]]||mlStats.priority.labels[i]}</strong></td>
+                              {row.map((val, j) => (
+                                <td key={j} className={`cm-cell ${i===j ? 'cm-diag' : val > 0 ? 'cm-off' : ''}`}>{val}</td>
+                              ))}
                             </tr>
                           )
                         })}
