@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret'
   title: string
   status: string
   date: string
@@ -44,7 +44,7 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
@@ -52,6 +52,7 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/extrait-deces/api/inhumation/'), { headers }),
           fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/extraits/'), { headers }),
+          fetch(resolveBackendUrl('/api/livret-famille/demandes/'), { headers }),
         ])
 
         const unified: UnifiedRequest[] = []
@@ -165,6 +166,21 @@ export default function MesDemandesPage() {
           })
         }
 
+        // 8. Livret de Famille
+        if (resLivret.ok) {
+          const livrets = await resLivret.json()
+          livrets.forEach((l: any) => {
+            unified.push({
+              id: l.id,
+              type: 'livret',
+              title: lang === 'ar' ? 'الدفتر العائلي' : 'Livret de Famille',
+              status: l.status,
+              date: l.created_at,
+              details: lang === 'ar' ? `للأب: ${l.prenom_chef_famille} ${l.nom_chef_famille}` : `Pour: ${l.prenom_chef_famille} ${l.nom_chef_famille}`
+            })
+          })
+        }
+
         // Sort by date descending
         unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         setRequests(unified)
@@ -200,6 +216,7 @@ export default function MesDemandesPage() {
       case 'death': return <i className="fas fa-dove text-dark"></i>
       case 'residence': return <i className="fas fa-home text-warning"></i>
       case 'inhumation': return <i className="fas fa-monument text-secondary"></i>
+      case 'livret': return <i className="fas fa-book-open text-info"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }

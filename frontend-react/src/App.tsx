@@ -25,6 +25,7 @@ import AgentReclamationsPage from './pages/AgentReclamationsPage'
 import MariageContractPage from './pages/MariageContractPage'
 import MesDemandesPage from './pages/MesDemandesPage'
 import DemandeInhumationPage from './pages/DemandeInhumationPage'
+import DemandeLivretFamillePage from './pages/DemandeLivretFamillePage'
 import ComingSoonPage from './pages/ComingSoonPage'
 import ForumPage from './pages/ForumPage'
 import ForumTopicPage from './pages/ForumTopicPage'
@@ -120,6 +121,10 @@ export default function App() {
           <Route
             path="/demande-inhumation"
             element={<DemandeInhumationPage />}
+          />
+          <Route
+            path="/demande-livret-famille"
+            element={<DemandeLivretFamillePage />}
           />
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<ForumTopicPage />} />

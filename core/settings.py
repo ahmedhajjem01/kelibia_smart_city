@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "signalement",
     "attestation_residence",
     "forum",
+    "livret_famille",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

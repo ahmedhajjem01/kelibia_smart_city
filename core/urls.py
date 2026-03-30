@@ -25,6 +25,7 @@ urlpatterns = [
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),
     path('login/', login_redirect, name='login'),
+    path('livret-famille/', include('livret_famille.urls')),
 ]
 
 if settings.DEBUG:
