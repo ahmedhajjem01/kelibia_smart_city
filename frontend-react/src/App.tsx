@@ -8,6 +8,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordConfirmPage from './pages/ResetPasswordConfirmPage'
 import DashboardPage from './pages/DashboardPage'
 import AgentDashboardPage from './pages/AgentDashboardPage'
+import AgentStatsPage from './pages/AgentStatsPage'
 import ServicesPage from './pages/ServicesPage'
 import MunicipaliteNaissancesPage from './pages/MunicipaliteNaissancesPage'
 import DeclarationNaissancePage from './pages/DeclarationNaissancePage'
@@ -50,6 +51,10 @@ export default function App() {
           <Route
             path="/agent-dashboard"
             element={<AgentDashboardPage />}
+          />
+          <Route
+            path="/agent-stats"
+            element={<AgentStatsPage />}
           />
           <Route
             path="/services"

@@ -14,20 +14,6 @@ type Reclamation = {
   confidence?: { category?: number; priority?: number }
 }
 
-type MlStats = {
-  n_samples: number
-  category: {
-    labels: string[]; accuracy: number
-    confusion_matrix: number[][]
-    report: { label: string; precision: number; recall: number; f1: number; support: number }[]
-    top_features: Record<string, { word: string; score: number }[]>
-  }
-  priority: {
-    labels: string[]; accuracy: number
-    confusion_matrix: number[][]
-    report: { label: string; precision: number; recall: number; f1: number; support: number }[]
-  }
-}
 const CAT: Record<string, { label: string; cls: string }> = {
   lighting: { label: '💡 Éclairage', cls: 'cat-lighting' },
   trash:    { label: '🗑️ Déchets',   cls: 'cat-trash'    },
@@ -160,19 +146,6 @@ const CSS = `
 /* reclassify box */
 .reclassify-box{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 14px;margin-top:12px}
 .reclassify-box .rc-title{font-size:.8rem;font-weight:700;color:#f57f17;margin-bottom:8px}
-/* ML stats panel */
-.ml-stats-panel{background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.1);margin:20px 0;overflow:hidden}
-.ml-stats-hdr{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
-.ml-stats-hdr h5{margin:0;font-size:1rem;font-weight:700}
-.ml-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.ml-table th{background:#f5f5f5;padding:8px 10px;text-align:left;font-weight:700;color:#333;border-bottom:2px solid #e0e0e0}
-.ml-table td{padding:7px 10px;border-bottom:1px solid #f0f0f0;color:#444}
-.ml-table tr:hover td{background:#fafafa}
-.ml-acc-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-weight:700;font-size:.82rem}
-.cm-cell{text-align:center;min-width:42px;padding:6px!important;font-size:.78rem}
-.cm-diag{background:#e8f5e9;color:#1b5e20;font-weight:700}
-.cm-off{background:#fce4ec;color:#b71c1c}
-.feat-word{display:inline-block;padding:2px 7px;background:#e3f2fd;border-radius:8px;font-size:.74rem;color:#1565c0;margin:2px}
 `
 
 export default function AgentDashboardPage() {
@@ -195,15 +168,11 @@ export default function AgentDashboardPage() {
   const [detailStatus, setDetailStatus] = useState('')
   const [detailSaving, setDetailSaving] = useState(false)
   const [showDupPanel, setShowDupPanel] = useState(false)
-  const [showMlPanel, setShowMlPanel] = useState(false)
-  const [mlStats, setMlStats] = useState<MlStats | null>(null)
-  const [mlLoading, setMlLoading] = useState(false)
   // reclassify modal state
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
   const mapRef = useRef<HTMLDivElement>(null)
-  const mlPanelRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
   const markersLayer = useRef<any>(null)
   const styleInjected = useRef(false)
@@ -373,25 +342,6 @@ export default function AgentDashboardPage() {
     finally { setDetailSaving(false) }
   }
 
-  async function fetchMlStats() {
-    setMlLoading(true)
-    console.log('[ml_stats] fetching...')
-    try {
-      const res = await fetch('/api/reclamations/ml_stats/', { headers: { Authorization: `Bearer ${access}` } })
-      console.log('[ml_stats] status:', res.status)
-      const text = await res.text()
-      console.log('[ml_stats] body:', text.slice(0, 500))
-      if (!res.ok) {
-        showToast(`Erreur ${res.status} — Stats IA indisponibles.`, 'error')
-        return
-      }
-      setMlStats(JSON.parse(text))
-    } catch (e) {
-      console.error('[ml_stats] network error', e)
-      showToast('Erreur réseau — Stats IA indisponibles.', 'error')
-    } finally { setMlLoading(false) }
-  }
-
   async function saveReclassify() {
     if (!detailRec) return
     if (!reClsCat && !reClsPrio) { showToast('Choisissez au moins catégorie ou priorité.', 'error'); return }
@@ -463,7 +413,7 @@ export default function AgentDashboardPage() {
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-recs-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-bullhorn"></i> Signalements<span className="ag-badge">{pending}</span></a>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-map-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-map-marked-alt"></i> Carte SIG</a>
           <a className="ag-nav-item" href="#"><i className="fas fa-newspaper"></i> Actualités</a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); setShowMlPanel(v => { const next = !v; if (next) { if (!mlStats) fetchMlStats(); setTimeout(() => mlPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); } return next; }) }}><i className="fas fa-brain"></i> Stats IA</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-stats') }}><i className="fas fa-brain"></i> Stats IA</a>
           <div className="ag-divider"></div>
           <div className="ag-sec-title">COMPTE</div>
           <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
@@ -630,219 +580,6 @@ export default function AgentDashboardPage() {
           </div>
         </div>
       </div>
-      {/* ── ML Statistics Panel ───────────────────────────────────── */}
-      {showMlPanel && (
-        <div ref={mlPanelRef} className="ag-main" style={{ maxWidth: '100%', padding: '0 24px 24px' }}>
-          <div className="ml-stats-panel">
-            <div className="ml-stats-hdr">
-              <h5><i className="fas fa-brain me-2"></i>Statistiques de classification IA</h5>
-              <button onClick={() => setShowMlPanel(false)} style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div style={{ padding: 20 }}>
-              {mlLoading && <div className="text-center py-4"><span className="spinner-border text-primary"></span><p className="mt-2 text-muted">Calcul des statistiques IA en cours…</p><p style={{fontSize:'.75rem',color:'#aaa'}}>Première ouverture : entraînement du modèle en mémoire (~5s)</p></div>}
-              {!mlLoading && mlStats && (
-                <>
-                  {/* Accuracy summary */}
-                  <div className="row g-3 mb-4">
-                    <div className="col-md-6">
-                      <div style={{ background: '#e8f5e9', borderRadius: 10, padding: '14px 18px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '.8rem', color: '#555', marginBottom: 4 }}>Précision — Classification Catégorie</div>
-                        <div className="ml-acc-pill" style={{ background: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', color: '#fff', fontSize: '1.4rem' }}>
-                          {Math.round(mlStats.category.accuracy * 100)}%
-                        </div>
-                        <div style={{ fontSize: '.72rem', color: '#888', marginTop: 4 }}>{mlStats.n_samples} exemples d'entraînement</div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div style={{ background: '#e3f2fd', borderRadius: 10, padding: '14px 18px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '.8rem', color: '#555', marginBottom: 4 }}>Précision — Classification Priorité</div>
-                        <div className="ml-acc-pill" style={{ background: mlStats.priority.accuracy >= 0.85 ? '#1565c0' : '#f57f17', color: '#fff', fontSize: '1.4rem' }}>
-                          {Math.round(mlStats.priority.accuracy * 100)}%
-                        </div>
-                        <div style={{ fontSize: '.72rem', color: '#888', marginTop: 4 }}>TF-IDF + LinearSVC (NLP)</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ── TABLE 1: Classification Report — Category */}
-                  <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 10 }}>
-                    <i className="fas fa-table me-2"></i>Tableau 1 — Rapport de classification (Catégorie)
-                  </h6>
-                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
-                    <b>Précision</b> = sur tout ce que le modèle a prédit "voirie", combien était vraiment voirie &nbsp;|&nbsp;
-                    <b>Rappel</b> = sur toutes les vraies "voirie", combien le modèle a trouvé &nbsp;|&nbsp;
-                    <b>F1</b> = moyenne harmonique précision/rappel &nbsp;|&nbsp;
-                    <b>Support</b> = nombre d'exemples de test
-                  </p>
-                  <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-                    <table className="ml-table">
-                      <thead><tr><th>Catégorie</th><th>Précision</th><th>Rappel</th><th>F1-Score</th><th>Support</th></tr></thead>
-                      <tbody>
-                        {mlStats.category.report.map(row => {
-                          const labels: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
-                          const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
-                          return (
-                            <tr key={row.label}>
-                              <td><strong>{labels[row.label] || row.label}</strong></td>
-                              <td>{Math.round(row.precision * 100)}%</td>
-                              <td>{Math.round(row.recall * 100)}%</td>
-                              <td><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1 * 100)}%</span></td>
-                              <td style={{ color: '#888' }}>{row.support}</td>
-                            </tr>
-                          )
-                        })}
-                        <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
-                          <td>Moyenne</td>
-                          <td>{Math.round(mlStats.category.report.reduce((s,r) => s+r.precision,0)/mlStats.category.report.length*100)}%</td>
-                          <td>{Math.round(mlStats.category.report.reduce((s,r) => s+r.recall,0)/mlStats.category.report.length*100)}%</td>
-                          <td style={{ color: '#1565c0' }}>{Math.round(mlStats.category.report.reduce((s,r) => s+r.f1,0)/mlStats.category.report.length*100)}%</td>
-                          <td style={{ color: '#888' }}>{mlStats.n_samples}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* ── TABLE 2: Confusion Matrix — Category */}
-                  <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 6 }}>
-                    <i className="fas fa-th me-2"></i>Tableau 2 — Matrice de confusion (Catégorie)
-                  </h6>
-                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
-                    Lignes = catégorie <b>réelle</b>, Colonnes = catégorie <b>prédite</b>.
-                    Cases <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>vertes</span> = prédictions correctes.
-                    Cases <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>rouges</span> = erreurs du modèle.
-                  </p>
-                  <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-                    <table className="ml-table">
-                      <thead>
-                        <tr>
-                          <th style={{ fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
-                          {mlStats.category.labels.map(l => {
-                            const lmap: Record<string,string> = { lighting:'💡', trash:'🗑️', roads:'🛣️', noise:'🔊', other:'📌' }
-                            return <th key={l} className="cm-cell">{lmap[l]||l}</th>
-                          })}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {mlStats.category.confusion_matrix.map((row, i) => {
-                          const lmap: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
-                          return (
-                            <tr key={i}>
-                              <td><strong style={{ fontSize: '.78rem' }}>{lmap[mlStats.category.labels[i]]||mlStats.category.labels[i]}</strong></td>
-                              {row.map((val, j) => (
-                                <td key={j} className={`cm-cell ${i===j ? 'cm-diag' : val > 0 ? 'cm-off' : ''}`}>{val}</td>
-                              ))}
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* ── TABLE 3: Top features per category */}
-                  <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 6 }}>
-                    <i className="fas fa-star me-2"></i>Tableau 3 — Mots les plus importants par catégorie (NLP)
-                  </h6>
-                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
-                    Les mots qui ont le plus de poids dans la décision du modèle TF-IDF + SVM.
-                    Plus le score est élevé, plus le mot est discriminatif pour cette catégorie.
-                  </p>
-                  <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-                    <table className="ml-table">
-                      <thead><tr><th>Catégorie</th><th>Mots-clés discriminatifs (NLP)</th></tr></thead>
-                      <tbody>
-                        {Object.entries(mlStats.category.top_features).map(([cat, words]) => {
-                          const lmap: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
-                          return (
-                            <tr key={cat}>
-                              <td><strong>{lmap[cat]||cat}</strong></td>
-                              <td>{words.map((w,i) => (
-                                <span key={i} className="feat-word" title={`Score: ${w.score}`}>{w.word}</span>
-                              ))}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Priority report */}
-                  <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 10 }}>
-                    <i className="fas fa-flag me-2"></i>Tableau 4 — Rapport de classification (Priorité)
-                  </h6>
-                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
-                    Précision/Rappel/F1 pour chaque niveau de priorité : <b>Urgente</b>, <b>Normale</b>, <b>Faible</b>.
-                  </p>
-                  <div style={{ overflowX: 'auto', marginBottom: 24 }}>
-                    <table className="ml-table">
-                      <thead><tr><th>Priorité</th><th>Précision</th><th>Rappel</th><th>F1-Score</th><th>Support</th></tr></thead>
-                      <tbody>
-                        {mlStats.priority.report.map(row => {
-                          const labels: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
-                          const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
-                          return (
-                            <tr key={row.label}>
-                              <td><strong>{labels[row.label]||row.label}</strong></td>
-                              <td>{Math.round(row.precision*100)}%</td>
-                              <td>{Math.round(row.recall*100)}%</td>
-                              <td><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1*100)}%</span></td>
-                              <td style={{ color: '#888' }}>{row.support}</td>
-                            </tr>
-                          )
-                        })}
-                        <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
-                          <td>Moyenne</td>
-                          <td>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.precision,0)/mlStats.priority.report.length*100)}%</td>
-                          <td>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.recall,0)/mlStats.priority.report.length*100)}%</td>
-                          <td style={{ color: '#1565c0' }}>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.f1,0)/mlStats.priority.report.length*100)}%</td>
-                          <td style={{ color: '#888' }}>{mlStats.n_samples}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* ── Confusion Matrix — Priority */}
-                  <h6 style={{ fontWeight: 700, color: '#1a237e', marginBottom: 6 }}>
-                    <i className="fas fa-th me-2"></i>Tableau 4b — Matrice de confusion (Priorité)
-                  </h6>
-                  <p style={{ fontSize: '.75rem', color: '#888', marginBottom: 8 }}>
-                    Lignes = priorité <b>réelle</b>, Colonnes = priorité <b>prédite</b>.
-                    Cases <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>vertes</span> = correct.
-                    Cases <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>rouges</span> = erreurs.
-                  </p>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="ml-table">
-                      <thead>
-                        <tr>
-                          <th style={{ fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
-                          {mlStats.priority.labels.map(l => {
-                            const lmap: Record<string,string> = { urgente:'🔴', normale:'🔵', faible:'🟣' }
-                            return <th key={l} className="cm-cell">{lmap[l]||l}</th>
-                          })}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {mlStats.priority.confusion_matrix.map((row, i) => {
-                          const lmap: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
-                          return (
-                            <tr key={i}>
-                              <td><strong style={{ fontSize: '.78rem' }}>{lmap[mlStats.priority.labels[i]]||mlStats.priority.labels[i]}</strong></td>
-                              {row.map((val, j) => (
-                                <td key={j} className={`cm-cell ${i===j ? 'cm-diag' : val > 0 ? 'cm-off' : ''}`}>{val}</td>
-                              ))}
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
       <div className="ag-footer">© 2025 <span>Commune de Kélibia</span> — Espace Agent Kelibia Smart City &nbsp;|&nbsp; Tous droits réservés</div>
       <div className="ag-toast-container">
         {toasts.map(t => <div key={t.id} className={`ag-toast ${t.type}`}><i className={`fas fa-${t.type === 'success' ? 'check-circle' : 'exclamation-circle'} ticon`}></i><span>{t.msg}</span></div>)}
