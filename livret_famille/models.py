@@ -12,6 +12,14 @@ class DemandeLivretFamille(models.Model):
     
     nom_chef_famille = models.CharField(max_length=100, verbose_name='Nom du chef de famille')
     prenom_chef_famille = models.CharField(max_length=100, verbose_name='Prénom du chef de famille')
+    cin_epoux = models.CharField(max_length=8, blank=True, null=True, verbose_name="CIN de l'époux")
+    cin_epouse = models.CharField(max_length=8, blank=True, null=True, verbose_name="CIN de l'épouse")
+    
+    etat_livret = models.CharField(max_length=20, choices=[
+        ('actif', 'Actif'),
+        ('divorce', 'Divorce'),
+        ('deces', "Décès d'un conjoint")
+    ], default='actif', verbose_name='État du Livret de Famille')
     motif_demande = models.CharField(max_length=50, choices=[
         ('premier_livret', 'Premier livret'),
         ('renouvellement', 'Renouvellement'),

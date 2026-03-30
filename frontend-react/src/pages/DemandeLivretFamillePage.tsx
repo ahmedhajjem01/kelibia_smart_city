@@ -76,6 +76,9 @@ export default function DemandeLivretFamillePage() {
     nom_chef_famille: '',
     prenom_chef_famille: '',
     motif_demande: 'premier_livret',
+    etat_livret: 'actif',
+    cin_epoux: '',
+    cin_epouse: '',
   })
 
   const [files, setFiles] = useState<{ [key: string]: File | Blob | null }>({
@@ -264,6 +267,44 @@ export default function DemandeLivretFamillePage() {
                           style={{ borderRadius: '12px' }}
                         />
                       </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold small text-uppercase text-muted">{lang === 'ar' ? 'بطاقة تعريف الزوج' : 'CIN de l\'époux'}</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-lg bg-light border-0 shadow-sm"
+                          value={formData.cin_epoux}
+                          onChange={(e) => setFormData({ ...formData, cin_epoux: e.target.value })}
+                          maxLength={8}
+                          required
+                          style={{ borderRadius: '12px' }}
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold small text-uppercase text-muted">{lang === 'ar' ? 'بطاقة تعريف الزوجة' : 'CIN de l\'épouse'}</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-lg bg-light border-0 shadow-sm"
+                          value={formData.cin_epouse}
+                          onChange={(e) => setFormData({ ...formData, cin_epouse: e.target.value })}
+                          maxLength={8}
+                          required
+                          style={{ borderRadius: '12px' }}
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold small text-uppercase text-muted">{lang === 'ar' ? 'الحالة المدنية' : 'État Civil'}</label>
+                        <select
+                          className="form-select form-select-lg border-0 shadow-sm"
+                          value={formData.etat_livret}
+                          onChange={(e) => setFormData({ ...formData, etat_livret: e.target.value })}
+                          required
+                          style={{ borderRadius: '12px' }}
+                        >
+                          <option value="actif">{lang === 'ar' ? 'متزوج(ة)' : 'Marié(e)'}</option>
+                          <option value="divorce">{lang === 'ar' ? 'مطلق(ة)' : 'Divorcé(e)'}</option>
+                          <option value="deces">{lang === 'ar' ? 'أرمل(ة)' : 'Veuf/Veuve'}</option>
+                        </select>
+                      </div>
                     </div>
 
                     <h5 className="fw-bold mb-4 text-primary border-bottom pb-2">
@@ -281,12 +322,18 @@ export default function DemandeLivretFamillePage() {
                     </div>
 
                     <div className="row">
-                      <div className="col-md-6">{renderFileControl('extraits_enfants', lang === 'ar' ? 'مضامين الأبناء' : 'Extraits des enfants', false)}</div>
-                      <div className="col-md-6">{renderFileControl('extrait_deces_epoux', lang === 'ar' ? 'مضمون وفاة الزوج' : 'Extrait décès Époux (veufs)', false)}</div>
+                      {(formData.motif_demande === 'renouvellement' || formData.motif_demande === 'duplicata') && (
+                        <div className="col-md-6">{renderFileControl('extraits_enfants', lang === 'ar' ? 'مضامين للأبناء' : 'Extraits des enfants', true)}</div>
+                      )}
+                      {formData.etat_livret === 'deces' && (
+                        <div className="col-md-6">{renderFileControl('extrait_deces_epoux', lang === 'ar' ? 'مضمون وفاة الزوج عند تسليم الدفتر للام' : 'Extrait décès Conjoint', true)}</div>
+                      )}
                     </div>
 
                     <div className="row">
-                      <div className="col-md-6">{renderFileControl('jugement_divorce', lang === 'ar' ? 'حكم طلاق' : 'Jugement de divorce (divorcés)', false)}</div>
+                      {formData.etat_livret === 'divorce' && (
+                        <div className="col-md-6">{renderFileControl('jugement_divorce', lang === 'ar' ? 'نسخة من حكم الطلاق (بالنسبة للزوجه المطلقة الحاضنة)' : 'Jugement de divorce (divorcés)', true)}</div>
+                      )}
                     </div>
 
                     <div className="d-grid gap-3 mt-5">
