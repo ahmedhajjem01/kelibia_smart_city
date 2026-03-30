@@ -75,7 +75,9 @@ class RegisterView(APIView):
                 return Response({"error": "Ce numéro de téléphone est déjà utilisé."}, status=status.HTTP_400_BAD_REQUEST)
             if 'username' in err_msg.lower():
                 return Response({"error": "Ce nom d'utilisateur est déjà utilisé."}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"error": "Erreur d'intégrité (conflit de données)."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Detailed fallback for debugging
+            return Response({"error": f"Conflit de données: {err_msg}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": "Une erreur interne est survenue."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
