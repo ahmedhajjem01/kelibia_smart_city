@@ -325,6 +325,32 @@ export default function SignupPage() {
     facingMode: { ideal: "environment" }
   };
 
+  const compressImage = async (file: File): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1000;
+          let width = img.width;
+          let height = img.height;
+          if (width > MAX_WIDTH) {
+            height = (MAX_WIDTH / width) * height;
+            width = MAX_WIDTH;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => resolve(blob as Blob), 'image/jpeg', 0.6);
+        };
+      };
+    });
+  };
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setMessage(null)
@@ -332,32 +358,38 @@ export default function SignupPage() {
     if (password !== rePassword) {
       setMessageType('danger')
       setMessage('Les mots de passe ne correspondent pas.')
-      return
-    }
-
-    if (!cinFront || !cinBack) {
-      setMessageType('danger')
-      setMessage(t('cin_required_error'))
+      setMessage(t('password_mismatch'))
       return
     }
 
     setLoading(true)
+    setMessage('')
+    setMessageType('success')
+
     try {
       const formData = new FormData()
       formData.append('first_name', firstName)
       formData.append('last_name', lastName)
-      formData.append('cin', cin)
-      formData.append('phone', phone)
       formData.append('email', email)
+      formData.append('phone', phone)
+      formData.append('address', address)
       formData.append('governorate', governorate)
       formData.append('city', city)
-      formData.append('address', address)
+      
+      // Generation auto de l'username
       formData.append('username', firstName.toLowerCase().trim() + cin)
       formData.append('password', password)
       formData.append('re_password', rePassword)
+      formData.append('cin', cin)
       
-      if (cinFront) formData.append('cin_front_image', cinFront)
-      if (cinBack) formData.append('cin_back_image', cinBack)
+      if (cinFront) {
+        const compressed = await compressImage(cinFront);
+        formData.append('cin_front_image', compressed, 'front.jpg');
+      }
+      if (cinBack) {
+        const compressed = await compressImage(cinBack);
+        formData.append('cin_back_image', compressed, 'back.jpg');
+      }
 
       formData.append('date_of_birth', dateOfBirth)
       formData.append('place_of_birth', placeOfBirth)
