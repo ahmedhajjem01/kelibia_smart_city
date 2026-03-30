@@ -460,7 +460,7 @@ export default function AgentDashboardPage() {
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-recs-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-bullhorn"></i> Signalements<span className="ag-badge">{pending}</span></a>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-map-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-map-marked-alt"></i> Carte SIG</a>
           <a className="ag-nav-item" href="#"><i className="fas fa-newspaper"></i> Actualités</a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); setShowMlPanel(v => !v); if (!mlStats) fetchMlStats() }}><i className="fas fa-brain"></i> Stats IA</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); console.log('[StatsIA] clicked, showMlPanel will toggle, access=', access?.slice(0,20)); setShowMlPanel(v => !v); if (!mlStats) fetchMlStats() }}><i className="fas fa-brain"></i> Stats IA</a>
           <div className="ag-divider"></div>
           <div className="ag-sec-title">COMPTE</div>
           <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
