@@ -4,8 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from livret_famille.models import DemandeLivretFamille
 from attestation_residence.models import DemandeResidence
-from extrait_naissance.models import ExtraitNaissance
+from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance
 from extrait_mariage.models import ExtraitMariage
+from extrait_deces.models import ExtraitDeces
 
 
 def login_redirect(request):
@@ -55,3 +56,33 @@ def confirm_payment(request):
     except (DemandeLivretFamille.DoesNotExist, DemandeResidence.DoesNotExist, ExtraitNaissance.DoesNotExist, ExtraitMariage.DoesNotExist):
         return Response({"error": "Demande ou extrait non trouvé"}, status=404)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_supervisor_services_summary(request):
+    """
+    Returns counts of pending requests across all administrative services
+    for the supervisor dashboard.
+    """
+    if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+        return Response({"error": "Accès refusé"}, status=403)
+
+    summary = {
+        "attestation_residence": DemandeResidence.objects.filter(status='pending').count(),
+        "livret_famille": DemandeLivretFamille.objects.filter(status='pending').count(),
+        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending').count(),
+        # Add others if models have a 'status' field. 
+        # Extraits are usually automatic or pay-and-get, but we check if they have pending status.
+    }
+    
+    # Try getting others if they exist with consistent naming
+    try:
+        from extrait_mariage.models import DeclarationMariage
+        summary["declaration_mariage"] = DeclarationMariage.objects.filter(status='pending').count()
+    except: pass
+    
+    try:
+        from extrait_deces.models import DeclarationDeces
+        summary["declaration_deces"] = DeclarationDeces.objects.filter(status='pending').count()
+    except: pass
+
+    return Response(summary)

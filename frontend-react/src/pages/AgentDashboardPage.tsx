@@ -182,6 +182,7 @@ export default function AgentDashboardPage() {
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
+  const [servicesSummary, setServicesSummary] = useState<any>(null)
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
@@ -213,8 +214,16 @@ export default function AgentDashboardPage() {
       fetchReclamations()
       if (u.user_type === 'supervisor' || u.is_staff || u.is_superuser) {
         fetchManagedUsers('unverified')
+        fetchServicesSummary()
       }
     } catch { setUser(null) }
+  }
+
+  async function fetchServicesSummary() {
+    try {
+      const res = await fetch('/api/supervisor/services-summary/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setServicesSummary(await res.json())
+    } catch (e) { console.error(e) }
   }
 
   async function fetchManagedUsers(mode: 'unverified' | 'all') {
@@ -665,14 +674,35 @@ export default function AgentDashboardPage() {
                   <span className="fw-bold"><i className="fas fa-file-invoice me-2"></i>Centre des Services Municipaux</span>
                </div>
                <div className="p-5 text-center">
-                  <i className="fas fa-tools fa-3x mb-3 text-muted"></i>
+                  <i className="fas fa-file-invoice fa-3x mb-3 text-muted"></i>
                   <h5 className="fw-bold">Gestion des Demandes de Services</h5>
-                  <p className="text-muted">Cette section permettra de centraliser toutes les demandes d'attestations et d'extraits (Naissance, Mariage, Résidence).</p>
+                  <p className="text-muted">Suivi en temps réel des demandes citoyennes nécessitant une validation.</p>
                   <div className="row g-3 mt-4">
-                     <div className="col-md-4"><div className="p-3 border rounded bg-light"><strong>Résidence</strong><div className="h3 mt-2">12</div><div className="small text-muted">Demandes à traiter</div></div></div>
-                     <div className="col-md-4"><div className="p-3 border rounded bg-light"><strong>Mariage</strong><div className="h3 mt-2">5</div><div className="small text-muted">Extraits commandés</div></div></div>
-                     <div className="col-md-4"><div className="p-3 border rounded bg-light"><strong>Décès</strong><div className="h3 mt-2">2</div><div className="small text-muted">Déclarations</div></div></div>
+                     <div className="col-md-4">
+                        <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #1a237e' }}>
+                           <div className="text-muted small fw-bold">RÉSIDENCE</div>
+                           <div className="h2 mt-2 mb-0 text-primary">{servicesSummary?.attestation_residence || 0}</div>
+                           <div className="small text-muted">Demandes en attente</div>
+                        </div>
+                     </div>
+                     <div className="col-md-4">
+                        <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #0d47a1' }}>
+                           <div className="text-muted small fw-bold">NAISSANCE</div>
+                           <div className="h2 mt-2 mb-0 text-primary">{servicesSummary?.declaration_naissance || 0}</div>
+                           <div className="small text-muted">Déclarations à valider</div>
+                        </div>
+                     </div>
+                     <div className="col-md-4">
+                        <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #01579b' }}>
+                           <div className="text-muted small fw-bold">LIIVRET FAMILLE</div>
+                           <div className="h2 mt-2 mb-0 text-primary">{servicesSummary?.livret_famille || 0}</div>
+                           <div className="small text-muted">Demandes à traiter</div>
+                        </div>
+                     </div>
                   </div>
+                  <button className="btn btn-primary mt-5" onClick={() => window.open('/admin/', '_blank')}>
+                     <i className="fas fa-external-link-alt me-2"></i>Accéder aux détails dans le Panel Admin
+                  </button>
                </div>
             </div>
           ) : (

@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView, UserVerificationView
 from rest_framework_simplejwt.views import TokenRefreshView
-from core.views import login_redirect, confirm_payment
+from core.views import login_redirect, confirm_payment, get_supervisor_services_summary
 
 urlpatterns = [
     path('admin/logout/', admin_logout, name='admin_logout'),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),
     path('login/', login_redirect, name='login'),
-    path('livret-famille/', include('livret_famille.urls')),
+    path('api/supervisor/services-summary/', get_supervisor_services_summary, name='supervisor_services_summary'),
 ]
 
 if settings.DEBUG:
