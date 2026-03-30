@@ -378,7 +378,8 @@ export default function SignupPage() {
         | null
 
       if (!res.ok) {
-        throw new Error(data?.error || "Une erreur est survenue lors de l'inscription.")
+        const errDetails = data?.error || `Erreur Serveur (Code: ${res.status}). Vérifiez vos fichiers ou la taille des photos.`
+        throw new Error(errDetails)
       }
 
       setMessage(t('signup_success_verified'))
