@@ -157,14 +157,14 @@ export default function ReclamationFormPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       required
-                      placeholder="Ex: Lampadaire en panne, Nid de poule..."
+                      placeholder={t('reclamation_placeholder_title')}
                       style={{ borderRadius: '12px' }}
                     />
                   </div>
 
                   <div className="row g-4 mb-4">
                     <div className="col-md-6">
-                        <label className="form-label fw-bold small text-uppercase text-muted">Catégorie</label>
+                        <label className="form-label fw-bold small text-uppercase text-muted">{t('category_label')}</label>
                         <select 
                             className="form-select form-select-lg bg-light border-0 shadow-sm"
                             value={category}
@@ -177,7 +177,7 @@ export default function ReclamationFormPage() {
                         </select>
                     </div>
                     <div className="col-md-6">
-                        <label className="form-label fw-bold small text-uppercase text-muted">Image / Preuve (Optionnel)</label>
+                        <label className="form-label fw-bold small text-uppercase text-muted">{t('image_label')}</label>
                         <input
                             type="file"
                             className="form-control form-control-lg bg-light border-0 shadow-sm"
@@ -189,14 +189,14 @@ export default function ReclamationFormPage() {
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-uppercase text-muted">Description</label>
+                    <label className="form-label fw-bold small text-uppercase text-muted">{t('description_label')}</label>
                     <textarea
                       className="form-control form-control-lg bg-light border-0 shadow-sm"
                       rows={3}
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       required
-                      placeholder="Décrivez le problème en quelques mots..."
+                      placeholder={t('description_placeholder')}
                       style={{ borderRadius: '12px' }}
                     />
                   </div>
