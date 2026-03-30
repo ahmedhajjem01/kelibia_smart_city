@@ -45,8 +45,8 @@ class CustomUser(AbstractUser):
     last_name_ar = models.CharField(max_length=150, blank=True, verbose_name="Nom (Arabe)")
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
     is_verified = models.BooleanField(default=False, verbose_name="Est vérifié")
-    cin_front_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Avant")
-    cin_back_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Arrière")
+    cin_front_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Avant (Base64)")
+    cin_back_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Arrière (Base64)")
 
     # Extra Information for Civil Registry
     date_of_birth = models.DateField(null=True, blank=True, verbose_name="Date de naissance")

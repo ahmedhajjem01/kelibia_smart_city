@@ -52,11 +52,14 @@ class RegisterView(APIView):
                 spouse_last_name=data.get('spouse_last_name', '')
             )
             
-            # Save CIN images if provided
+            # Handle CIN images as Base64 strings for Vercel compatibility
+            import base64
             if 'cin_front_image' in files:
-                user.cin_front_image = files['cin_front_image']
+                f = files['cin_front_image']
+                user.cin_front_image = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
             if 'cin_back_image' in files:
-                user.cin_back_image = files['cin_back_image']
+                f = files['cin_back_image']
+                user.cin_back_image = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
             
             user.save()
             
@@ -203,8 +206,8 @@ class UserVerificationView(APIView):
             "spouse_cin": u.spouse_cin,
             "spouse_first_name": u.spouse_first_name,
             "spouse_last_name": u.spouse_last_name,
-            "cin_front": u.cin_front_image.url if u.cin_front_image else None,
-            "cin_back": u.cin_back_image.url if u.cin_back_image else None,
+            "cin_front": u.cin_front_image if u.cin_front_image else None,
+            "cin_back": u.cin_back_image if u.cin_back_image else None,
         } for u in users]
         
         return Response(data)

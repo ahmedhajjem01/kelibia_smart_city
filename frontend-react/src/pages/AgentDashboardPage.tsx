@@ -933,8 +933,8 @@ export default function AgentDashboardPage() {
                                 <label className="small text-muted mb-1">FACE AVANT (RECTO)</label>
                                 <div className="ag-cin-preview mb-3">
                                    {selectedUser.cin_front ? (
-                                      <a href={resolveBackendUrl(selectedUser.cin_front)} target="_blank" rel="noreferrer">
-                                         <img src={resolveBackendUrl(selectedUser.cin_front)} className="rounded shadow-sm scale-on-hover" style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Front CIN" />
+                                      <a href={selectedUser.cin_front} target="_blank" rel="noreferrer">
+                                         <img src={selectedUser.cin_front} className="rounded shadow-sm scale-on-hover" style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Front CIN" />
                                       </a>
                                    ) : (
                                       <div className="p-5 text-center bg-light text-muted small rounded">Non fournie</div>
