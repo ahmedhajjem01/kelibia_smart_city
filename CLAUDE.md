@@ -259,6 +259,27 @@ python manage.py migrate
 
 ---
 
+## Pending Features (TODO)
+
+Services to build next (React frontend + Django backend as needed).
+**État Civil** is handled by the partner. **Problèmes & Signalements** is already done.
+
+| Service | Description | Priority |
+|---|---|---|
+| **Social & Événements** | Event listings, social aid requests, community announcements | Medium |
+| **Maison & Construction** | Building permits, renovation declarations, property documents | Medium |
+| **Argent & Impôts** | Municipal tax consultation, payment receipts, fines | Medium |
+| **Boutiques & Commerces** | Business license requests, commercial registration, market stalls | Medium |
+| **Eau, Lumière et Égouts** | Water/electricity connection requests, utility complaints, meter readings | Medium |
+
+Each service typically needs:
+1. A citizen-facing request form page (React)
+2. A Django model + serializer + viewset
+3. An agent-facing list/detail view to process requests
+4. Route registered in `App.tsx` and `core/urls.py`
+
+---
+
 ## Important Notes
 
 - Always activate `.venv` before running Django commands on Windows
