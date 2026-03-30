@@ -38,7 +38,7 @@ export default function MesReclamationsPage() {
 
     try {
       // Fetch User Info
-      const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+      const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), {
         headers: { Authorization: `Bearer ${access}` },
       })
       if (userRes.ok) {

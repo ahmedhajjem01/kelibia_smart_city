@@ -32,6 +32,7 @@ class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = [
         ('citizen', 'Citoyen'),
         ('agent', 'Agent Municipal'),
+        ('supervisor', 'Superviseur'),
     ]
 
     email = models.EmailField(unique=True, blank=False, verbose_name="Adresse Email")

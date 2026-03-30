@@ -56,6 +56,12 @@ function formatDate(iso: string) {
 }
 const PAGE_SIZE = 10
 
+function getRoleLabel(u: UserInfo | null) {
+  if (!u) return 'Chargement...'
+  if (u.is_superuser || u.user_type === 'supervisor') return 'Superviseur'
+  return 'Agent Municipal'
+}
+
 const CSS = `
 :root{--green-dark:#1a5c2a;--green-mid:#2e7d32;--green-light:#43a047;--red-tn:#c62828;--blue:#1565c0;--sidebar-bg:#1e2a3a;--sidebar-hover:#2d3f54;--body-bg:#eef2f7;--card-shadow:0 2px 12px rgba(0,0,0,.08)}
 .agent-page{font-family:"Segoe UI",sans-serif;background:var(--body-bg);min-height:100vh}
@@ -433,7 +439,7 @@ export default function AgentDashboardPage() {
           <div className="sub">Gérez les signalements des citoyens et assurez le suivi des interventions.</div>
         </div>
         <div className="d-flex align-items-center gap-2">
-          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>Agent Municipal</span>
+          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user)}</span>
           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
         </div>
       </div>
@@ -451,6 +457,11 @@ export default function AgentDashboardPage() {
           <div className="ag-divider"></div>
           <div className="ag-sec-title">COMPTE</div>
           <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
+          {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+            <a className="ag-nav-item" href="/admin/" style={{ color: '#ff6d00' }}>
+              <i className="fas fa-cog"></i> <strong>Panel Django Admin</strong>
+            </a>
+          )}
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</a>
         </div>
         <div className="ag-main">
@@ -570,7 +581,7 @@ export default function AgentDashboardPage() {
           <div className="ag-profile-card">
             <div className="ag-profile-hdr"><div className="ag-profile-av">{inits}</div><div className="ag-profile-name">{fullName}</div><div className="ag-profile-email">{user?.email || '...'}</div></div>
             <div className="ag-profile-body">
-              <div className="ag-profile-row"><span className="lbl">Rôle</span><span className="val" style={{ color: '#1565c0' }}>Agent Municipal</span></div>
+              <div className="ag-profile-row"><span className="lbl">Rôle</span><span className="val" style={{ color: '#1565c0' }}>{getRoleLabel(user)}</span></div>
               <div className="ag-profile-row"><span className="lbl">Ville</span><span className="val">{user?.city || 'Kélibia'}</span></div>
               <div className="ag-profile-row"><span className="lbl">Dossiers</span><span className="val">{inprog}</span></div>
             </div>

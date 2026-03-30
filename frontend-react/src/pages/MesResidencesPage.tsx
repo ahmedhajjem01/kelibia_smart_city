@@ -30,7 +30,7 @@ export default function MesResidencesPage() {
     const fetchAll = async () => {
       try {
         // Fetch User Info
-        const userRes = await fetch(resolveBackendUrl('/accounts/user/'), {
+        const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), {
           headers: { Authorization: `Bearer ${access}` },
         })
         if (userRes.ok) {

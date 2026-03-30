@@ -21,7 +21,7 @@ class UserCreateSerializer(DjoserUserCreateSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'cin', 'phone', 'address', 'governorate', 'city', 'user_type', 'is_verified')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'cin', 'phone', 'address', 'governorate', 'city', 'user_type', 'is_verified', 'is_staff', 'is_superuser')
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

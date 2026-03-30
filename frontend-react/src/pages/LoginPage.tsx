@@ -78,8 +78,13 @@ export default function LoginPage() {
       }
 
       // Role-based redirection
-      if (data.is_staff || data.is_superuser) {
-        navigate('/agent-dashboard')
+      if (data.is_staff || data.is_superuser || data.user_type === 'supervisor') {
+        // If it's the main admin account or a supervisor, redirect to the full Django Admin Panel
+        if (email === 'admin@kelibiasmartcity.tn' || data.user_type === 'supervisor') {
+          window.location.href = '/admin/'
+        } else {
+          navigate('/agent-dashboard')
+        }
       } else if (data.user_type === 'agent') {
         navigate('/agent-dashboard')
       } else {
