@@ -412,7 +412,9 @@ export default function AgentDashboardPage() {
           <a className="ag-nav-item active" href="#"><i className="fas fa-tachometer-alt"></i> Tableau de bord</a>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-recs-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-bullhorn"></i> Signalements<span className="ag-badge">{pending}</span></a>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-map-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-map-marked-alt"></i> Carte SIG</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/municipalite-livret') }}><i className="fas fa-book-open"></i> Livrets de Famille</a>
           <a className="ag-nav-item" href="#"><i className="fas fa-newspaper"></i> Actualités</a>
+
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-stats') }}><i className="fas fa-brain"></i> Stats IA</a>
           <div className="ag-divider"></div>
           <div className="ag-sec-title">COMPTE</div>

@@ -12,7 +12,9 @@ interface UnifiedRequest {
   status: string
   date: string
   details: string
+  isPaid?: boolean
 }
+
 
 export default function MesDemandesPage() {
   const { t, lang } = useI18n()
@@ -52,8 +54,9 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/extrait-deces/api/inhumation/'), { headers }),
           fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/extraits/'), { headers }),
-          fetch(resolveBackendUrl('/api/livret-famille/demandes/'), { headers }),
+          fetch(resolveBackendUrl('/livret-famille/demandes/'), { headers }),
         ])
+
 
         const unified: UnifiedRequest[] = []
 
@@ -145,10 +148,12 @@ export default function MesDemandesPage() {
               title: t('req_residence'),
               status: r.status,
               date: r.created_at,
-              details: r.adresse_demandee
+              details: r.adresse_demandee,
+              isPaid: r.is_paid
             })
           })
         }
+
 
         // 7. Inhumation
         if (resInhumation.ok) {
@@ -176,10 +181,12 @@ export default function MesDemandesPage() {
               title: lang === 'ar' ? 'الدفتر العائلي' : 'Livret de Famille',
               status: l.status,
               date: l.created_at,
-              details: lang === 'ar' ? `للأب: ${l.prenom_chef_famille} ${l.nom_chef_famille}` : `Pour: ${l.prenom_chef_famille} ${l.nom_chef_famille}`
+              details: lang === 'ar' ? `للأب: ${l.prenom_chef_famille} ${l.nom_chef_famille}` : `Pour: ${l.prenom_chef_famille} ${l.nom_chef_famille}`,
+              isPaid: l.is_paid
             })
           })
         }
+
 
         // Sort by date descending
         unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -198,13 +205,24 @@ export default function MesDemandesPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending': return <span className="badge bg-warning text-dark rounded-pill px-3"><i className="fas fa-clock me-1"></i> {t('status_pending')}</span>
+      case 'status_pending':
+      case 'pending': return (
+        <div className="d-flex flex-column align-items-center gap-1">
+          <span className="badge bg-warning text-dark rounded-pill px-3"><i className="fas fa-clock me-1"></i> {t('status_pending')}</span>
+        </div>
+      )
+      case 'in_progress': 
+        return <span className="badge bg-primary rounded-pill px-3"><i className="fas fa-spinner fa-spin me-1"></i> {lang === 'ar' ? 'قيد المعالجة' : 'En cours'}</span>
       case 'validated':
       case 'approved':
       case 'signed':
       case 'resolved':
         return <span className="badge bg-success rounded-pill px-3"><i className="fas fa-check-circle me-1"></i> {t('status_validated')}</span>
+      case 'ready':
+        return <span className="badge bg-info text-dark rounded-pill px-3"><i className="fas fa-box-open me-1"></i> {lang === 'ar' ? 'جاهز للاستلام' : 'Prêt pour retrait'}</span>
       case 'rejected': return <span className="badge bg-danger rounded-pill px-3"><i className="fas fa-times-circle me-1"></i> {t('status_rejected')}</span>
+
+
       default: return <span className="badge bg-secondary rounded-pill px-3">{status}</span>
     }
   }
@@ -288,8 +306,25 @@ export default function MesDemandesPage() {
                         {new Date(req.date).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')}
                       </td>
                       <td className="text-center">
-                        {getStatusBadge(req.status)}
+                        <div className="d-flex flex-column align-items-center gap-2">
+                           {getStatusBadge(req.status)}
+                           {req.status === 'pending' && !req.isPaid && (
+                             <button 
+                                className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
+                                style={{ fontSize: '0.65rem' }}
+                                onClick={() => navigate(`/paiement?amount=2.000&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}`)}
+                             >
+                                <i className="fas fa-credit-card me-1"></i> Payer 2 DT
+                             </button>
+                           )}
+                           {req.isPaid && (
+                             <span className="badge bg-light text-success border border-success extra-small" style={{ fontSize: '0.6rem' }}>
+                                PAYÉ <i className="fas fa-check"></i>
+                             </span>
+                           )}
+                        </div>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>

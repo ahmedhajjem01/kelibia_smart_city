@@ -6,13 +6,17 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
 type Extrait = {
+  id: number
   n_etat_civil: string | number
+
   nom_complet_fr: string
   nom_complet_ar: string
   date_naissance: string
   url_fr: string
   url_ar: string
+  is_paid: boolean
 }
+
 
 type MesExtraitsResponse = {
   mon_extrait?: Extrait | null
@@ -91,23 +95,35 @@ export default function MesNaissancesPage() {
               {extrait.date_naissance}
             </p>
             <div className="d-flex gap-2">
-              <a
-                href={resolveBackendUrl(extrait.url_fr)}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-outline-primary flex-fill"
-              >
-                <i className="fas fa-print me-1" /> FR
-              </a>
-              <a
-                href={resolveBackendUrl(extrait.url_ar)}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-primary flex-fill arabic-font"
-              >
-                <i className="fas fa-print me-1" /> بالعربية
-              </a>
+              {!extrait.is_paid ? (
+                <button
+                  className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
+                  onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait de Naissance&requestId=${extrait.id}&requestType=birth_extract`)}
+                >
+                  <i className="fas fa-lock me-2"></i> Payer 0.500 DT
+                </button>
+              ) : (
+                <>
+                  <a
+                    href={resolveBackendUrl(extrait.url_fr)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-primary flex-fill"
+                  >
+                    <i className="fas fa-print me-1" /> FR
+                  </a>
+                  <a
+                    href={resolveBackendUrl(extrait.url_ar)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-primary flex-fill arabic-font"
+                  >
+                    <i className="fas fa-print me-1" /> بالعربية
+                  </a>
+                </>
+              )}
             </div>
+
           </div>
         </div>
       </div>

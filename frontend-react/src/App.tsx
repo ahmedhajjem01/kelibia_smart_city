@@ -29,6 +29,10 @@ import DemandeLivretFamillePage from './pages/DemandeLivretFamillePage'
 import ComingSoonPage from './pages/ComingSoonPage'
 import ForumPage from './pages/ForumPage'
 import ForumTopicPage from './pages/ForumTopicPage'
+import MunicipaliteLivretPage from './pages/MunicipaliteLivretPage'
+import PaymentSimulationPage from './pages/PaymentSimulationPage'
+
+
 
 export default function App() {
   return (
@@ -122,11 +126,12 @@ export default function App() {
             path="/demande-inhumation"
             element={<DemandeInhumationPage />}
           />
-          <Route
-            path="/demande-livret-famille"
-            element={<DemandeLivretFamillePage />}
-          />
+          <Route path="/demande-livret-famille" element={<DemandeLivretFamillePage />} />
+          <Route path="/municipalite-livret" element={<MunicipaliteLivretPage />} />
+          <Route path="/paiement" element={<PaymentSimulationPage />} />
           <Route path="/forum" element={<ForumPage />} />
+
+
           <Route path="/forum/:id" element={<ForumTopicPage />} />
 
           {/* Backward-compatible aliases with old .html URLs */}

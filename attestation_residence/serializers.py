@@ -11,9 +11,10 @@ class DemandeResidenceSerializer(serializers.ModelSerializer):
             'adresse_demandee', 'motif_demande',
             'cin_recto', 'cin_verso', 'cin_copy', 
             'quitus_municipal', 'acte_deces_conjoint',
-            'status', 'issued_document', 'commentaire_agent',
+            'status', 'is_paid', 'issued_document', 'commentaire_agent',
             'created_at', 'updated_at'
         ]
+
         read_only_fields = ['citizen', 'status', 'issued_document', 'commentaire_agent', 'created_at', 'updated_at']
 
     def create(self, validated_data):

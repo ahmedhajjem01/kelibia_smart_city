@@ -48,7 +48,9 @@ export default function DashboardPage() {
   const [marriageNotifications, setMarriageNotifications] = useState<any[]>([])
   const [forumUnread, setForumUnread] = useState(0)
   const [reclamations, setReclamations] = useState<any[]>([])
+  const [livretNotifications, setLivretNotifications] = useState<any[]>([])
   const [loadingMap, setLoadingMap] = useState(true)
+
 
   useEffect(() => {
     const access = getAccessToken()
@@ -100,6 +102,18 @@ export default function DashboardPage() {
           const unread = nData.filter((n) => !n.is_read).length
           setForumUnread(unread)
         }
+
+        // Fetch Livret de famille requests
+        const lRes = await fetch('/livret-famille/demandes/', {
+          headers: { Authorization: `Bearer ${access}` },
+        })
+
+        if (lRes.ok) {
+          const lData = await lRes.json()
+          const ready = lData.filter((d: any) => d.status === 'ready')
+          setLivretNotifications(ready)
+        }
+
       } catch (e) {
         console.error(e)
       } finally {
@@ -169,7 +183,30 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* LIVRET NOTIFICATION */}
+      {livretNotifications.length > 0 && livretNotifications.map(notif => (
+        <div key={notif.id} className="alert alert-success shadow-sm border-0 rounded-3 p-3 mb-4 animate__animated animate__bounceIn">
+          <div className="d-flex align-items-center">
+            <i className="fas fa-book-open fa-lg text-success me-3"></i>
+            <div className="flex-grow-1">
+              <h6 className="fw-bold mb-1">
+                {lang === 'ar' ? 'دفتر العائلة جاهز!' : 'Votre livret de famille est prêt !'}
+              </h6>
+              <p className="mb-0 small">
+                {lang === 'ar' 
+                  ? `يمكنكم استلامه من الشباك رقم ${notif.guichet_recuperation || '..'} بمقر البلدية.` 
+                  : `Vous pouvez le récupérer au guichet n°${notif.guichet_recuperation || '..'} de la municipalité.`}
+              </p>
+            </div>
+            <Link to="/mes-demandes" className="btn btn-sm btn-success rounded-pill px-3">
+              {lang === 'ar' ? 'عرض الطلبات' : 'Voir mes demandes'}
+            </Link>
+          </div>
+        </div>
+      ))}
+
       {/* QUICK ACTIONS */}
+
       <div className="content-card mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
         <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
           <span><i className="fas fa-bolt icon text-warning"></i><span>{lang === 'ar' ? 'إجراءات سريعة' : 'Actions Rapides'}</span></span>

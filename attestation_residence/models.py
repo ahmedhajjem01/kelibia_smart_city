@@ -4,9 +4,13 @@ from django.conf import settings
 class DemandeResidence(models.Model):
     STATUS_CHOICES = [
         ('pending', 'En attente'),
+        ('in_progress', 'En cours'),
         ('approved', 'Approuvée'),
         ('rejected', 'Rejetée'),
     ]
+
+    is_paid = models.BooleanField(default=False, verbose_name="Paiement Reçu")
+
 
     citizen = models.ForeignKey(
         settings.AUTH_USER_MODEL,

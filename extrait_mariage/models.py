@@ -53,6 +53,8 @@ class ExtraitMariage(models.Model):
     
     numero_ordre = models.CharField(max_length=50, verbose_name="Numéro d'ordre", blank=True, default="")
     prix = models.DecimalField(max_digits=6, decimal_places=3, verbose_name="Prix", default=2.000)
+    is_paid = models.BooleanField(default=False, verbose_name="Payé")
+
 
     # Type of act
     TYPE_ACTE_CHOICES = [

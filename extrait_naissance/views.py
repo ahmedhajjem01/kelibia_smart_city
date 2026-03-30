@@ -9,11 +9,14 @@ from .serializers import DeclarationNaissanceSerializer
 
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitNaissance, pk=pk)
+    if not extrait.is_paid:
+        return render(request, 'errors/unpaid.html', {'extrait': extrait})
     if lang == 'fr':
         template = 'extrait_naissance/certificate_fr.html'
     else:
         template = 'extrait_naissance/certificate.html'
     return render(request, template, {'extrait': extrait})
+
 
 class MesExtraitsAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -52,10 +55,12 @@ class MesExtraitsAPIView(APIView):
                 "nom_complet_ar": f"{mon_extrait.titulaire.prenom_ar} {mon_extrait.titulaire.nom_ar}",
                 "date_naissance": mon_extrait.titulaire.date_naissance,
                 "url_ar": f"/extrait-naissance/{mon_extrait.id}/certificate/",
-                "url_fr": f"/extrait-naissance/{mon_extrait.id}/certificate/fr/"
+                "url_fr": f"/extrait-naissance/{mon_extrait.id}/certificate/fr/",
+                "is_paid": mon_extrait.is_paid
             } if mon_extrait else None,
             "enfants": [],
             "conjoints": []
+
         }
         
         for enfant in enfants_extraits:
@@ -66,8 +71,10 @@ class MesExtraitsAPIView(APIView):
                 "nom_complet_ar": f"{enfant.titulaire.prenom_ar} {enfant.titulaire.nom_ar}",
                 "date_naissance": enfant.titulaire.date_naissance,
                 "url_ar": f"/extrait-naissance/{enfant.id}/certificate/",
-                "url_fr": f"/extrait-naissance/{enfant.id}/certificate/fr/"
+                "url_fr": f"/extrait-naissance/{enfant.id}/certificate/fr/",
+                "is_paid": enfant.is_paid
             })
+
 
         for conjoint in conjoints_extraits:
             data["conjoints"].append({
@@ -77,10 +84,12 @@ class MesExtraitsAPIView(APIView):
                 "nom_complet_ar": f"{conjoint.titulaire.prenom_ar} {conjoint.titulaire.nom_ar}",
                 "date_naissance": conjoint.titulaire.date_naissance,
                 "url_ar": f"/extrait-naissance/{conjoint.id}/certificate/",
-                "url_fr": f"/extrait-naissance/{conjoint.id}/certificate/fr/"
+                "url_fr": f"/extrait-naissance/{conjoint.id}/certificate/fr/",
+                "is_paid": conjoint.is_paid
             })
             
         return Response(data)
+
 
 
 class DeclarationNaissanceAPIView(APIView):

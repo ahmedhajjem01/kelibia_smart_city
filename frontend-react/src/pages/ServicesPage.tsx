@@ -299,7 +299,71 @@ export default function ServicesPage() {
             )
           })
         )}
+
+        {/* MUNICIPAL PAYMENTS SIMULATION (FOR PFE) */}
+
+        {!loading && (
+          <div className="category-section mb-5 animate__animated animate__fadeInUp">
+            <div className="category-header border-bottom pb-2 mb-4 d-flex align-items-center">
+              <div className="bg-warning text-white rounded-circle p-2 me-3 shadow-sm" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fas fa-money-bill-wave fs-5"></i>
+              </div>
+              <h4 className="fw-bold mb-0">
+                {lang === 'ar' ? 'الأداء والجباية المحلية' : 'Paiements et Taxes Locales'}
+                <span className="badge bg-danger ms-3 rounded-pill" style={{ fontSize: '0.6rem' }}>SIMULATION PFE</span>
+              </h4>
+            </div>
+            
+            <div className="row g-4 text-start">
+              {[
+                { 
+                  id: 'taxe1', 
+                  title: lang === 'ar' ? 'معلوم على العقارات المبنية' : 'Taxe d\'habitation (TIB)', 
+                  desc: lang === 'ar' ? 'دفع المعاليم السنوية للعقارات السكنية ببلدية قليبية.' : 'Paiement des taxes annuelles pour les locaux résidentiels à Kélibia.',
+                  icon: 'fa-home',
+                  amount: '125.000',
+                  reason: 'Taxe Habitation 2024'
+                },
+                { 
+                  id: 'fine1', 
+                  title: lang === 'ar' ? 'الخطايا المرورية' : 'Amendes de Stationnement', 
+                  desc: lang === 'ar' ? 'تسوية مخالفات المرور والوقوف المحررة بالمجال البلدي.' : 'Règlement des amendes de circulation constatées sur la zone municipale.',
+                  icon: 'fa-car',
+                  amount: '20.000',
+                  reason: 'Amande Stationnement'
+                },
+                { 
+                  id: 'service1', 
+                  title: lang === 'ar' ? 'خلاص معلوم الخدمات' : 'Paiement Services Admin', 
+                  desc: lang === 'ar' ? 'دفع معلوم استخراج الوثائق الإدارية عن بعد.' : 'Paiement des frais pour l\'obtention de documents administratifs.',
+                  icon: 'fa-file-invoice',
+                  amount: '2.000',
+                  reason: 'Frais de Service'
+                }
+              ].map(pay => (
+                <div key={pay.id} className="col-md-4">
+                  <div className="card h-100 border-0 shadow-sm transition-hover" style={{ borderRadius: '15px' }}>
+                    <div className="card-body p-4">
+                      <div className={`mb-3 text-primary bg-light rounded-circle d-flex align-items-center justify-content-center`} style={{ width: '50px', height: '50px' }}>
+                        <i className={`fas ${pay.icon} fs-4`}></i>
+                      </div>
+                      <h5 className="fw-bold mb-2">{pay.title}</h5>
+                      <p className="small text-muted mb-4">{pay.desc}</p>
+                      <button 
+                        className="btn btn-primary w-100 rounded-pill fw-bold"
+                        onClick={() => navigate(`/paiement?amount=${pay.amount}&reason=${encodeURIComponent(pay.reason)}&ref=PAY-${Math.floor(Math.random()*9000)}`)}
+                      >
+                        {lang === 'ar' ? 'دفع الآن 💳' : 'Payer Maintenant 💳'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
 
       {/* Modal for service details */}
       <div className="modal fade" id="serviceModal" tabIndex={-1}>

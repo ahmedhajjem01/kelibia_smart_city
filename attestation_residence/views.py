@@ -9,6 +9,7 @@ class DemandeResidenceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.is_superuser or user.user_type == 'agent':
-            return DemandeResidence.objects.all()
+        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent':
+            return DemandeResidence.objects.filter(is_paid=True)
+
         return DemandeResidence.objects.filter(citizen=user)

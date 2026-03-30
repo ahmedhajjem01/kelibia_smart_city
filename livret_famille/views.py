@@ -10,7 +10,9 @@ class DemandeLivretFamilleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or getattr(user, 'user_type', None) == 'agent':
-            return DemandeLivretFamille.objects.all().order_by('-created_at')
+            # NEW: Only paid requests reach the agent queue
+            return DemandeLivretFamille.objects.filter(is_paid=True).order_by('-created_at')
+
         
         # Le livret de famille doit être visible au citoyen qui l'a demandé, 
         # mais aussi aux conjoints s'ils ont un compte connecté via leur CIN.

@@ -4,9 +4,14 @@ from django.conf import settings
 class DemandeLivretFamille(models.Model):
     STATUS_CHOICES = [
         ('pending', 'En attente'),
+        ('in_progress', 'En cours'),
         ('approved', 'Approuvée'),
         ('rejected', 'Rejetée'),
+        ('ready', 'Prêt pour retrait'),
     ]
+
+    is_paid = models.BooleanField(default=False, verbose_name="Paiement Reçu")
+
 
     citizen = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='demandes_livret')
     
@@ -14,6 +19,9 @@ class DemandeLivretFamille(models.Model):
     prenom_chef_famille = models.CharField(max_length=100, verbose_name='Prénom du chef de famille')
     cin_epoux = models.CharField(max_length=8, blank=True, null=True, verbose_name="CIN de l'époux")
     cin_epouse = models.CharField(max_length=8, blank=True, null=True, verbose_name="CIN de l'épouse")
+    
+    guichet_recuperation = models.CharField(max_length=50, blank=True, null=True, verbose_name='Guichet de récupération')
+
     
     etat_livret = models.CharField(max_length=20, choices=[
         ('actif', 'Actif'),
