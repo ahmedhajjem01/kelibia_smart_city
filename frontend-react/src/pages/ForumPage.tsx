@@ -109,7 +109,7 @@ export default function ForumPage() {
 
   async function createTopic() {
     if (!newTitle.trim() || !newContent.trim()) { setCreateError('Titre et contenu requis.'); return }
-    setCreating(true); setCreateError(''); setCreateSuccess(false)
+    setCreating(true); setCreateError('')
     const tagNames = newTags.split(',').map((tt: string) => tt.trim()).filter(Boolean)
     const res = await fetch('/api/forum/topics/', {
       method: 'POST',
@@ -118,7 +118,7 @@ export default function ForumPage() {
     })
     if (res.ok) {
       const topic = await res.json()
-      setNewTitle(''); setNewContent(''); setNewTags(''); setCreateSuccess(true)
+      setNewTitle(''); setNewContent(''); setNewTags('')
       navigate(`/forum/${topic.id}`)
     } else {
       setCreateError('Erreur lors de la création.')
