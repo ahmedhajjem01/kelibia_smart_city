@@ -83,8 +83,8 @@ const CSS = `
 .ag-hero .badge-role{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:4px 14px;font-size:.78rem}
 .ag-breadcrumb{background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 28px;font-size:.8rem;color:#666}
 .ag-breadcrumb a{color:var(--green-mid);text-decoration:none}
-.ag-body{display:flex;min-height:calc(100vh - 200px)}
-.ag-sidebar{width:240px;min-width:240px;background:var(--sidebar-bg);color:#c8d6e5;padding:20px 0;flex-shrink:0}
+.ag-body{display:flex;min-height:calc(100vh - 200px);align-items:flex-start}
+.ag-sidebar{width:240px;min-width:240px;background:var(--sidebar-bg);color:#c8d6e5;padding:20px 0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
 .ag-sec-title{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);padding:14px 20px 4px}
 .ag-nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;font-size:.88rem;text-decoration:none;color:#c8d6e5}
 .ag-nav-item:hover,.ag-nav-item.active{background:var(--sidebar-hover);color:#fff;border-left-color:#1565c0}
