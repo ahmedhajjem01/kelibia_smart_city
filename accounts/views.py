@@ -56,10 +56,10 @@ class RegisterView(APIView):
             import base64
             if 'cin_front_image' in files:
                 f = files['cin_front_image']
-                user.cin_front_image = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
+                user.cin_front_utf = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
             if 'cin_back_image' in files:
                 f = files['cin_back_image']
-                user.cin_back_image = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
+                user.cin_back_utf = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
             
             user.save()
             
@@ -206,8 +206,8 @@ class UserVerificationView(APIView):
             "spouse_cin": u.spouse_cin,
             "spouse_first_name": u.spouse_first_name,
             "spouse_last_name": u.spouse_last_name,
-            "cin_front": u.cin_front_image if u.cin_front_image else None,
-            "cin_back": u.cin_back_image if u.cin_back_image else None,
+            "cin_front": u.cin_front_utf if u.cin_front_utf else (u.cin_front_image if u.cin_front_image else None),
+            "cin_back": u.cin_back_utf if u.cin_back_utf else (u.cin_back_image if u.cin_back_image else None),
         } for u in users]
         
         return Response(data)

@@ -45,8 +45,12 @@ class CustomUser(AbstractUser):
     last_name_ar = models.CharField(max_length=255, blank=True, verbose_name="Nom (Arabe)")
     user_type = models.CharField(max_length=50, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
     is_verified = models.BooleanField(default=False, verbose_name="Est vérifié")
-    cin_front_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Avant (Base64)")
-    cin_back_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Arrière (Base64)")
+    cin_front_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Avant (Base64 Old)")
+    cin_back_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Arrière (Base64 Old)")
+    
+    # New completely fresh fields for Base64 to bypass Postgres varchar(100) lock
+    cin_front_utf = models.TextField(null=True, blank=True, verbose_name="CIN Front Base64 NEW")
+    cin_back_utf = models.TextField(null=True, blank=True, verbose_name="CIN Back Base64 NEW")
 
     # Extra Information for Civil Registry
     date_of_birth = models.DateField(null=True, blank=True, verbose_name="Date de naissance")
