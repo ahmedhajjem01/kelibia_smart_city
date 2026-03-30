@@ -11,16 +11,45 @@ type TokenResponse = {
   user_type?: 'agent' | string
 }
 
+const CSS = `
+.lp-root{min-height:100vh;background:#0f1117;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif}
+.lp-card{width:100%;max-width:400px;background:#1a1d27;border-radius:16px;padding:44px 40px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.lp-icon{width:52px;height:52px;background:#2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
+.lp-title{text-align:center;color:#f0f2f5;font-size:1.25rem;font-weight:700;margin-bottom:4px}
+.lp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:32px}
+.lp-label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:6px;font-weight:500}
+.lp-input{width:100%;background:#0f1117;border:1.5px solid #2a2d3a;border-radius:8px;padding:11px 14px;font-size:.9rem;color:#e5e7eb;outline:none;box-sizing:border-box;transition:border-color .2s}
+.lp-input:focus{border-color:#2563eb}
+.lp-input::placeholder{color:#4b5563}
+.lp-btn{width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.lp-btn:hover:not(:disabled){background:#1d4ed8}
+.lp-btn:disabled{opacity:.6;cursor:not-allowed}
+.lp-links{display:flex;justify-content:center;gap:20px;margin-top:22px}
+.lp-links a{color:#6b7280;font-size:.82rem;text-decoration:none;transition:color .2s}
+.lp-links a:hover{color:#9ca3af}
+.lp-error{background:#2d1515;border:1px solid #7f1d1d;border-radius:8px;padding:10px 14px;color:#fca5a5;font-size:.82rem;margin-top:14px}
+.lp-field{margin-bottom:18px}
+.lp-lang{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
+.lp-lang-btn{background:none;border:1px solid #2a2d3a;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem;color:#6b7280;display:flex;align-items:center;gap:5px;transition:all .2s}
+.lp-lang-btn:hover,.lp-lang-btn.active{border-color:#2563eb;color:#93c5fd}
+`
+
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { t, setLang } = useI18n()
+  const { t, lang, setLang } = useI18n()
 
   const [email, setEmail] = useState('')
-// ...
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const s = document.createElement('style')
+    s.textContent = CSS
+    document.head.appendChild(s)
+    return () => { document.head.removeChild(s) }
+  }, [])
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail')
@@ -79,7 +108,6 @@ export default function LoginPage() {
 
       // Role-based redirection
       if (data.is_staff || data.is_superuser || data.user_type === 'supervisor') {
-        // If it's the main admin account or a supervisor, redirect to the full Django Admin Panel
         if (email === 'admin@kelibiasmartcity.tn' || data.user_type === 'supervisor') {
           window.location.href = '/admin/'
         } else {
@@ -98,118 +126,76 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-light d-flex align-items-center vh-100">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-md-5 col-lg-4">
-            <div className="card shadow-lg border-0 rounded-lg mt-5">
-              <div className="card-header bg-primary text-white text-center py-4 position-relative">
-                <div className="position-absolute top-0 end-0 m-2">
-                   <div className="btn-group btn-group-sm">
-                     <button className="btn btn-outline-light" onClick={() => setLang('fr')} title="Français">
-                       <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-                     </button>
-                     <button className="btn btn-outline-light" onClick={() => setLang('ar')} title="العربية">
-                       <img src="https://flagcdn.com/w40/tn.png" width="20" alt="TN" />
-                     </button>
-                   </div>
-                </div>
-                <h3 className="font-weight-light my-2">Kelibia Smart City</h3>
-                <p className="small mb-0">{t('portal_title')}</p>
-              </div>
+    <div className="lp-root">
+      <div className="lp-card">
+        <div className="lp-icon">
+          <i className="fas fa-city"></i>
+        </div>
+        <div className="lp-title">Kélibia Smart City</div>
+        <div className="lp-sub">{t('portal_title')}</div>
 
-              <div className="card-body p-4">
-                <form onSubmit={onSubmit}>
-                  <div className="form-floating mb-3">
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="email"
-                      placeholder="nom@exemple.com"
-                      required
-                      value={email}
-                      onChange={(ev) => setEmail(ev.target.value)}
-                    />
-                    <label htmlFor="email">{t('email')}</label>
-                  </div>
+        <div className="lp-lang">
+          <button className={`lp-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>
+            <img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR
+          </button>
+          <button className={`lp-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>
+            <img src="https://flagcdn.com/w20/tn.png" width="16" alt="TN" /> عربي
+          </button>
+        </div>
 
-                  <div className="form-floating mb-3">
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      placeholder="Mot de passe"
-                      required
-                      value={password}
-                      onChange={(ev) => setPassword(ev.target.value)}
-                    />
-                    <label htmlFor="password">{t('password_label')}</label>
-                  </div>
-
-                  <div className="form-check mb-3">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="rememberPasswordCheck"
-                      checked={rememberMe}
-                      onChange={(ev) => setRememberMe(ev.target.checked)}
-                    />
-                    <label
-                      className="form-check-label"
-                      htmlFor="rememberPasswordCheck"
-                    >
-                      {t('remember_me')}
-                    </label>
-                  </div>
-
-                  <div className="d-grid gap-2">
-                    <button
-                      className="btn btn-primary btn-lg"
-                      type="submit"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                          aria-hidden="true"
-                        />
-                      ) : null}
-                      {t('login_btn')}
-                    </button>
-                  </div>
-
-                  {error ? (
-                    <div
-                      className="alert alert-danger mt-3"
-                      role="alert"
-                      aria-live="polite"
-                    >
-                      {error}
-                    </div>
-                  ) : null}
-                </form>
-              </div>
-
-              <div className="card-footer text-center py-3">
-                <div className="small">
-                  <Link to="/forgot-password">{t('forgot_password')}</Link>
-                </div>
-                <div className="small mt-2">
-                  <Link
-                    to="/signup"
-                    className="btn btn-sm btn-outline-primary"
-                  >
-                    {t('create_account')}
-                  </Link>
-                </div>
-              </div>
-            </div>
+        <form onSubmit={onSubmit}>
+          <div className="lp-field">
+            <label className="lp-label" htmlFor="email">{t('email')}</label>
+            <input
+              id="email"
+              type="email"
+              className="lp-input"
+              placeholder="nom@exemple.com"
+              required
+              value={email}
+              onChange={ev => setEmail(ev.target.value)}
+            />
           </div>
+
+          <div className="lp-field">
+            <label className="lp-label" htmlFor="password">{t('password_label')}</label>
+            <input
+              id="password"
+              type="password"
+              className="lp-input"
+              placeholder="••••••••"
+              required
+              value={password}
+              onChange={ev => setPassword(ev.target.value)}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={ev => setRememberMe(ev.target.checked)}
+              style={{ accentColor: '#2563eb', cursor: 'pointer' }}
+            />
+            <label htmlFor="rememberMe" style={{ fontSize: '.8rem', color: '#6b7280', cursor: 'pointer' }}>
+              {t('remember_me')}
+            </label>
+          </div>
+
+          <button className="lp-btn" type="submit" disabled={loading}>
+            {loading && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />}
+            {t('login_btn')}
+          </button>
+
+          {error && <div className="lp-error">{error}</div>}
+        </form>
+
+        <div className="lp-links">
+          <Link to="/signup">{t('create_account')}</Link>
+          <Link to="/forgot-password">{t('forgot_password')}</Link>
         </div>
       </div>
     </div>
   )
 }
-
