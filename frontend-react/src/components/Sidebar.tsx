@@ -47,6 +47,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         <i className="fas fa-newspaper"></i>
         <span>{t('news_title')}</span>
       </NavLink>
+      <NavLink to="/forum" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
+        <i className="fas fa-comments"></i>
+        <span>{t('forum') || 'Forum'}</span>
+      </NavLink>
 
       <div className="sidebar-divider"></div>
       <div className="sidebar-section-title">{t('account_title')}</div>

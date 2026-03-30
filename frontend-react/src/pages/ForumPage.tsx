@@ -20,6 +20,8 @@ type UserInfo = {
   is_verified: boolean
 }
 
+type SortKey = 'recent' | 'votes' | 'replies'
+
 const CATEGORY_LABELS: Record<string, string> = {
   questions: '🏛️ Questions aux agents',
   suggestions: '💡 Suggestions',
@@ -37,7 +39,7 @@ export default function ForumPage() {
   const { t } = useI18n()
   const navigate = useNavigate()
 
-  const [user, setUser] = useState<UserInfo | null>(null)
+  const [user, setUser]           = useState<UserInfo | null>(null)
   const [topics, setTopics]       = useState<Topic[]>([])
   const [stats, setStats]         = useState<Stats | null>(null)
   const [tags, setTags]           = useState<Tag[]>([])
@@ -46,12 +48,14 @@ export default function ForumPage() {
   const [search, setSearch]       = useState('')
   const [activeTag, setActiveTag] = useState('')
   const [notifCount, setNotifCount] = useState(0)
+  const [sortBy, setSortBy]       = useState<SortKey>('recent')
 
-  const [showModal, setShowModal]     = useState(false)
+  // Form state (in sidebar)
   const [newTitle, setNewTitle]       = useState('')
   const [newContent, setNewContent]   = useState('')
   const [newCategory, setNewCategory] = useState('questions')
   const [newTags, setNewTags]         = useState('')
+  const [showModal, setShowModal]     = useState(false)
   const [creating, setCreating]       = useState(false)
   const [createError, setCreateError] = useState('')
 
@@ -59,11 +63,9 @@ export default function ForumPage() {
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
-    // Fetch user info
     fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setUser(data) })
-
     Promise.all([fetchTopics(), fetchStats(), fetchTags(), fetchNotifCount()])
       .finally(() => setLoading(false))
   }, [])
@@ -107,8 +109,8 @@ export default function ForumPage() {
 
   async function createTopic() {
     if (!newTitle.trim() || !newContent.trim()) { setCreateError('Titre et contenu requis.'); return }
-    setCreating(true); setCreateError('')
-    const tagNames = newTags.split(',').map((t: string) => t.trim()).filter(Boolean)
+    setCreating(true); setCreateError(''); setCreateSuccess(false)
+    const tagNames = newTags.split(',').map((tt: string) => tt.trim()).filter(Boolean)
     const res = await fetch('/api/forum/topics/', {
       method: 'POST',
       headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' },
@@ -116,7 +118,7 @@ export default function ForumPage() {
     })
     if (res.ok) {
       const topic = await res.json()
-      setShowModal(false); setNewTitle(''); setNewContent(''); setNewTags('')
+      setNewTitle(''); setNewContent(''); setNewTags(''); setCreateSuccess(true)
       navigate(`/forum/${topic.id}`)
     } else {
       setCreateError('Erreur lors de la création.')
@@ -136,6 +138,17 @@ export default function ForumPage() {
     clearTokens()
     navigate('/login')
   }
+
+  // Sort topics frontend-side
+  const sortedTopics = [...topics].sort((a, b) => {
+    // Pinned always first
+    if (a.is_pinned && !b.is_pinned) return -1
+    if (!a.is_pinned && b.is_pinned) return 1
+    if (sortBy === 'votes') return b.votes_count - a.votes_count
+    if (sortBy === 'replies') return b.replies_count - a.replies_count
+    // recent: by date
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
 
   return (
     <MainLayout
@@ -171,14 +184,14 @@ export default function ForumPage() {
       {stats && (
         <div className="row g-3 mb-4">
           {[
-            { icon: 'fa-comments', label: 'Sujets', val: stats.total_topics, color: '#1565c0', bg: '#e3f2fd' },
-            { icon: 'fa-reply-all', label: 'Réponses', val: stats.total_replies, color: '#2e7d32', bg: '#e8f5e9' },
-            { icon: 'fa-users', label: 'Membres actifs', val: stats.active_members, color: '#6a1b9a', bg: '#f3e5f5' },
+            { icon: 'fa-comments', label: 'Sujets', val: stats.total_topics, color: '#1565c0' },
+            { icon: 'fa-reply-all', label: 'Réponses', val: stats.total_replies, color: '#2e7d32' },
+            { icon: 'fa-users', label: 'Membres actifs', val: stats.active_members, color: '#6a1b9a' },
           ].map(s => (
-            <div className="col-md-4 col-6" key={s.label}>
+            <div className="col-4" key={s.label}>
               <div className="card border-0 shadow-sm text-center py-3" style={{ borderTop: `3px solid ${s.color}` }}>
                 <div style={{ fontSize: '1.8rem', fontWeight: 700, color: s.color }}>{s.val}</div>
-                <div style={{ fontSize: '.80rem', color: '#666' }}>
+                <div style={{ fontSize: '.78rem', color: '#666' }}>
                   <i className={`fas ${s.icon} me-1`} style={{ color: s.color }}></i>{s.label}
                 </div>
               </div>
@@ -187,19 +200,39 @@ export default function ForumPage() {
         </div>
       )}
 
-      {/* Category Filters */}
-      <div className="d-flex gap-2 flex-wrap mb-3">
-        {[
-          { key: '', label: '📋 Tous' },
-          { key: 'questions', label: '🏛️ Questions aux agents' },
-          { key: 'suggestions', label: '💡 Suggestions' },
-          { key: 'debates', label: '🗣️ Débats' },
-        ].map(c => (
-          <button key={c.key} onClick={() => setCategory(c.key)}
-            className={`btn btn-sm ${category === c.key ? 'btn-primary' : 'btn-outline-secondary'}`}>
-            {c.label}
-          </button>
-        ))}
+      {/* Sort + Category Filters row */}
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        {/* Category filters */}
+        <div className="d-flex gap-2 flex-wrap">
+          {[
+            { key: '', label: '📋 Tous' },
+            { key: 'questions', label: '🏛️ Questions' },
+            { key: 'suggestions', label: '💡 Suggestions' },
+            { key: 'debates', label: '🗣️ Débats' },
+          ].map(c => (
+            <button key={c.key} onClick={() => setCategory(c.key)}
+              className={`btn btn-sm ${category === c.key ? 'btn-primary' : 'btn-outline-secondary'}`}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Sort buttons */}
+        <div className="d-flex align-items-center gap-1">
+          <span style={{ fontSize: '.78rem', color: '#888' }} className="me-1">
+            <i className="fas fa-sort me-1"></i>Trier :
+          </span>
+          {([
+            { key: 'recent', icon: 'fa-clock', label: 'Récent' },
+            { key: 'votes', icon: 'fa-thumbs-up', label: 'Plus aimé' },
+            { key: 'replies', icon: 'fa-comment', label: 'Plus actif' },
+          ] as { key: SortKey; icon: string; label: string }[]).map(s => (
+            <button key={s.key} onClick={() => setSortBy(s.key)}
+              className={`btn btn-sm ${sortBy === s.key ? 'btn-primary' : 'btn-outline-secondary'}`}>
+              <i className={`fas ${s.icon} me-1`}></i>{s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tags */}
@@ -230,22 +263,36 @@ export default function ForumPage() {
           <div className="spinner-border text-primary"></div>
           <p className="mt-2 text-muted">Chargement du forum...</p>
         </div>
-      ) : topics.length === 0 ? (
+      ) : sortedTopics.length === 0 ? (
         <div className="text-center py-5 text-muted">
           <i className="fas fa-inbox" style={{ fontSize: '3rem', opacity: .3, display: 'block', marginBottom: '12px' }}></i>
           <p>Aucun sujet pour le moment.</p>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
-            <i className="fas fa-plus me-1"></i>Créer le premier sujet
-          </button>
         </div>
       ) : (
         <div className="d-flex flex-column gap-3">
-          {topics.map(topic => (
+          {sortedTopics.map((topic, idx) => (
             <Link key={topic.id} to={`/forum/${topic.id}`} style={{ textDecoration: 'none' }}>
               <div className="card border-0 shadow-sm"
-                style={{ borderLeft: `4px solid ${CATEGORY_COLORS[topic.category] || '#1565c0'}`, transition: 'transform .15s' }}
+                style={{
+                  borderLeft: `4px solid ${CATEGORY_COLORS[topic.category] || '#1565c0'}`,
+                  transition: 'transform .15s',
+                  position: 'relative',
+                }}
                 onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
                 onMouseLeave={e => (e.currentTarget.style.transform = '')}>
+
+                {/* Top rank badge for most liked */}
+                {sortBy === 'votes' && idx < 3 && (
+                  <span style={{
+                    position: 'absolute', top: '10px', right: '10px',
+                    background: ['#ffd700', '#c0c0c0', '#cd7f32'][idx],
+                    color: '#fff', borderRadius: '50%',
+                    width: '24px', height: '24px', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    fontSize: '.75rem', fontWeight: 700,
+                  }}>#{idx + 1}</span>
+                )}
+
                 <div className="card-body py-3 px-4">
                   <div className="d-flex justify-content-between align-items-start gap-3">
                     <div className="flex-grow-1">
@@ -305,7 +352,6 @@ export default function ForumPage() {
           ))}
         </div>
       )}
-
       {/* Create Topic Modal */}
       {showModal && (
         <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,.5)', zIndex: 1050 }}
