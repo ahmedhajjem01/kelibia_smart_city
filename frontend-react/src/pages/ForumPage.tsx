@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getAccessToken } from '../lib/authStorage'
+import { getAccessToken, clearTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import MainLayout from '../components/MainLayout'
 
 interface Tag { id: number; name: string }
 interface Author { id: number; first_name: string; last_name: string; email: string; user_type: string }
@@ -11,6 +12,13 @@ interface Topic {
   replies_count: number; votes_count: number; has_voted: boolean; created_at: string
 }
 interface Stats { total_topics: number; total_replies: number; active_members: number }
+
+type UserInfo = {
+  first_name: string
+  last_name: string
+  email: string
+  is_verified: boolean
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   questions: '🏛️ Questions aux agents',
@@ -26,9 +34,10 @@ function formatDate(iso: string) {
 }
 
 export default function ForumPage() {
-  const { setLang } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
+  const [user, setUser] = useState<UserInfo | null>(null)
   const [topics, setTopics]       = useState<Topic[]>([])
   const [stats, setStats]         = useState<Stats | null>(null)
   const [tags, setTags]           = useState<Tag[]>([])
@@ -50,6 +59,11 @@ export default function ForumPage() {
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
+    // Fetch user info
+    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setUser(data) })
+
     Promise.all([fetchTopics(), fetchStats(), fetchTags(), fetchNotifCount()])
       .finally(() => setLoading(false))
   }, [])
@@ -118,174 +132,187 @@ export default function ForumPage() {
     if (res.ok) fetchTopics()
   }
 
-  return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <Link className="navbar-brand fw-bold" to="/dashboard">
-            <i className="fas fa-city me-2"></i>Kelibia Smart City
-          </Link>
-          <div className="d-flex align-items-center gap-2">
-            <div className="btn-group me-2">
-              <button className='btn btn-sm btn-outline-light' onClick={() => setLang('fr')}>
-                <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
-              </button>
-              <button className='btn btn-sm btn-outline-light' onClick={() => setLang('ar')}>
-                <img src="https://flagcdn.com/w40/tn.png" width="20" alt="AR" />
-              </button>
-            </div>
-            <Link to="/dashboard" className="btn btn-outline-light btn-sm">
-              <i className="fas fa-home me-1"></i>Tableau de bord
-            </Link>
-            <Link to="/forum" className="btn btn-outline-light btn-sm position-relative">
-              <i className="fas fa-bell"></i>
-              {notifCount > 0 && (
-                <span className='position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger' style={{ fontSize: '0.65rem' }}>
-                  {notifCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-      </nav>
+  function logout() {
+    clearTokens()
+    navigate('/login')
+  }
 
-      <div className="container mt-4 mb-5">
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-          <div>
-            <h2 className='fw-bold mb-1' style={{ color: '#1a1a2e' }}>
-              <i className='fas fa-comments me-2' style={{ color: '#1565c0' }}></i>Forum Citoyen
-            </h2>
-            <p className='text-muted mb-0' style={{ fontSize: '.88rem' }}>
-              Posez vos questions, partagez vos suggestions et débattez avec la communauté
-            </p>
-          </div>
+  return (
+    <MainLayout
+      user={user}
+      onLogout={logout}
+      breadcrumbs={[{ label: t('forum') || 'Forum Citoyen' }]}
+      showHero={false}
+    >
+      {/* Page Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <h4 className="fw-bold mb-1" style={{ color: '#1a1a2e' }}>
+            <i className="fas fa-comments me-2" style={{ color: '#1565c0' }}></i>
+            Forum Citoyen
+          </h4>
+          <p className="text-muted mb-0" style={{ fontSize: '.88rem' }}>
+            Posez vos questions, partagez vos suggestions et débattez avec la communauté
+          </p>
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          {notifCount > 0 && (
+            <span className="badge bg-danger rounded-pill">
+              <i className="fas fa-bell me-1"></i>{notifCount} non lu{notifCount > 1 ? 's' : ''}
+            </span>
+          )}
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
             <i className="fas fa-plus-circle me-2"></i>Nouveau sujet
           </button>
         </div>
+      </div>
 
-        {stats && (
-          <div className="row g-3 mb-4">
-            {[
-              { icon: 'fa-comments', label: 'Sujets', val: stats.total_topics, color: '#1565c0' },
-              { icon: 'fa-reply-all', label: 'Réponses', val: stats.total_replies, color: '#2e7d32' },
-              { icon: 'fa-users', label: 'Membres actifs', val: stats.active_members, color: '#6a1b9a' },
-            ].map(s => (
-              <div className="col-4" key={s.label}>
-                <div className="card border-0 shadow-sm text-center py-3">
-                  <div style={{ fontSize: '1.6rem', fontWeight: 700, color: s.color }}>{s.val}</div>
-                  <div style={{ fontSize: '.78rem', color: '#888' }}>
-                    <i className={`fas ${s.icon} me-1`}></i>{s.label}
-                  </div>
+      {/* Stats Cards */}
+      {stats && (
+        <div className="row g-3 mb-4">
+          {[
+            { icon: 'fa-comments', label: 'Sujets', val: stats.total_topics, color: '#1565c0', bg: '#e3f2fd' },
+            { icon: 'fa-reply-all', label: 'Réponses', val: stats.total_replies, color: '#2e7d32', bg: '#e8f5e9' },
+            { icon: 'fa-users', label: 'Membres actifs', val: stats.active_members, color: '#6a1b9a', bg: '#f3e5f5' },
+          ].map(s => (
+            <div className="col-md-4 col-6" key={s.label}>
+              <div className="card border-0 shadow-sm text-center py-3" style={{ borderTop: `3px solid ${s.color}` }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 700, color: s.color }}>{s.val}</div>
+                <div style={{ fontSize: '.80rem', color: '#666' }}>
+                  <i className={`fas ${s.icon} me-1`} style={{ color: s.color }}></i>{s.label}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        <div className="d-flex gap-2 flex-wrap mb-3">
-          {[
-            { key: '', label: '📋 Tous' },
-            { key: 'questions', label: '🏛️ Questions aux agents' },
-            { key: 'suggestions', label: '💡 Suggestions' },
-            { key: 'debates', label: '🗣️ Débats' },
-          ].map(c => (
-            <button key={c.key} onClick={() => setCategory(c.key)}
-              className={`btn btn-sm ${category === c.key ? 'btn-primary' : 'btn-outline-secondary'}`}>
-              {c.label}
-            </button>
+            </div>
           ))}
         </div>
+      )}
 
-        {tags.length > 0 && (
-          <div className="d-flex gap-2 flex-wrap mb-3">
-            {tags.slice(0, 15).map(tag => (
-              <span key={tag.id} onClick={() => setActiveTag(activeTag === tag.name ? '' : tag.name)}
-                className="badge" style={{
-                  cursor: 'pointer', fontSize: '.75rem', padding: '5px 10px',
-                  background: activeTag === tag.name ? '#1565c0' : '#e3f2fd',
-                  color: activeTag === tag.name ? '#fff' : '#1565c0',
-                }}>#{tag.name}
-              </span>
-            ))}
-          </div>
-        )}
+      {/* Category Filters */}
+      <div className="d-flex gap-2 flex-wrap mb-3">
+        {[
+          { key: '', label: '📋 Tous' },
+          { key: 'questions', label: '🏛️ Questions aux agents' },
+          { key: 'suggestions', label: '💡 Suggestions' },
+          { key: 'debates', label: '🗣️ Débats' },
+        ].map(c => (
+          <button key={c.key} onClick={() => setCategory(c.key)}
+            className={`btn btn-sm ${category === c.key ? 'btn-primary' : 'btn-outline-secondary'}`}>
+            {c.label}
+          </button>
+        ))}
+      </div>
 
-        <div className='input-group mb-4' style={{ maxWidth: '400px' }}>
-          <span className="input-group-text bg-white"><i className="fas fa-search text-muted"></i></span>
-          <input type="text" className="form-control" placeholder="Rechercher un sujet..."
-            value={search} onChange={e => setSearch(e.target.value)} />
+      {/* Tags */}
+      {tags.length > 0 && (
+        <div className="d-flex gap-2 flex-wrap mb-3">
+          {tags.slice(0, 15).map(tag => (
+            <span key={tag.id} onClick={() => setActiveTag(activeTag === tag.name ? '' : tag.name)}
+              className="badge" style={{
+                cursor: 'pointer', fontSize: '.75rem', padding: '5px 10px',
+                background: activeTag === tag.name ? '#1565c0' : '#e3f2fd',
+                color: activeTag === tag.name ? '#fff' : '#1565c0',
+              }}>#{tag.name}
+            </span>
+          ))}
         </div>
+      )}
 
-        {loading ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary"></div>
-            <p className="mt-2 text-muted">Chargement du forum...</p>
-          </div>
-        ) : topics.length === 0 ? (
-          <div className="text-center py-5 text-muted">
-            <i className='fas fa-inbox' style={{ fontSize: '3rem', opacity: .3, display: 'block', marginBottom: '12px' }}></i>
-            <p>Aucun sujet pour le moment.</p>
-            <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
-              <i className="fas fa-plus me-1"></i>Créer le premier sujet
-            </button>
-          </div>
-        ) : (
-          <div className="d-flex flex-column gap-3">
-            {topics.map(topic => (
-              <Link key={topic.id} to={`/forum/${topic.id}`} style={{ textDecoration: 'none' }}>
-                <div className="card border-0 shadow-sm"
-                  style={{ borderLeft: `4px solid ${CATEGORY_COLORS[topic.category] || '#1565c0'}`, transition: 'transform .15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
-                  onMouseLeave={e => (e.currentTarget.style.transform = '')}>
-                  <div className="card-body py-3 px-4">
-                    <div className="d-flex justify-content-between align-items-start gap-3">
-                      <div className="flex-grow-1">
-                        <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                          {topic.is_pinned && <span className='badge' style={{ background: '#fff3e0', color: '#e65100', fontSize: '.7rem' }}>📌 Épinglé</span>}
-                          {topic.is_resolved && <span className='badge' style={{ background: '#e8f5e9', color: '#1b5e20', fontSize: '.7rem' }}>✅ Résolu</span>}
-                          <span className='badge' style={{ background: (CATEGORY_COLORS[topic.category] || '#1565c0') + '22', color: CATEGORY_COLORS[topic.category] || '#1565c0', fontSize: '.7rem' }}>
-                            {CATEGORY_LABELS[topic.category] || topic.category}
-                          </span>
-                        </div>
-                        <h5 className='fw-bold mb-1' style={{ color: '#1a1a2e', fontSize: '1rem' }}>{topic.title}</h5>
-                        <div className='dw-flex align-items-center gap-3' style={{ fontSize: '.78rem', color: '#888' }}>
-                          <span><i className="fas fa-user me-1"></i>{topic.author.first_name} {topic.author.last_name}
-                            {topic.author.user_type === 'agent' && <span className='badge ms-1' style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.65rem' }}>Agent</span>}
-                          </span>
-                          <span><i className="fas fa-calendar me-1"></i>{formatDate(topic.created_at)}</span>
-                          <span><i className="fas fa-eye me-1"></i>{topic.views}</span>
-                        </div>
-                        {topic.tags.length > 0 && (
-                          <div className="mt-2 d-flex gap-1 flex-wrap">
-                            {topic.tags.map(tag => <span key={tag.id} className='badge' style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.68rem' }}>#{tag.name}</span>)}
-                          </div>
+      {/* Search */}
+      <div className="input-group mb-4" style={{ maxWidth: '420px' }}>
+        <span className="input-group-text bg-white"><i className="fas fa-search text-muted"></i></span>
+        <input type="text" className="form-control" placeholder="Rechercher un sujet..."
+          value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+
+      {/* Topics List */}
+      {loading ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary"></div>
+          <p className="mt-2 text-muted">Chargement du forum...</p>
+        </div>
+      ) : topics.length === 0 ? (
+        <div className="text-center py-5 text-muted">
+          <i className="fas fa-inbox" style={{ fontSize: '3rem', opacity: .3, display: 'block', marginBottom: '12px' }}></i>
+          <p>Aucun sujet pour le moment.</p>
+          <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
+            <i className="fas fa-plus me-1"></i>Créer le premier sujet
+          </button>
+        </div>
+      ) : (
+        <div className="d-flex flex-column gap-3">
+          {topics.map(topic => (
+            <Link key={topic.id} to={`/forum/${topic.id}`} style={{ textDecoration: 'none' }}>
+              <div className="card border-0 shadow-sm"
+                style={{ borderLeft: `4px solid ${CATEGORY_COLORS[topic.category] || '#1565c0'}`, transition: 'transform .15s' }}
+                onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
+                onMouseLeave={e => (e.currentTarget.style.transform = '')}>
+                <div className="card-body py-3 px-4">
+                  <div className="d-flex justify-content-between align-items-start gap-3">
+                    <div className="flex-grow-1">
+                      <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        {topic.is_pinned && (
+                          <span className="badge" style={{ background: '#fff3e0', color: '#e65100', fontSize: '.7rem' }}>📌 Épinglé</span>
                         )}
+                        {topic.is_resolved && (
+                          <span className="badge" style={{ background: '#e8f5e9', color: '#1b5e20', fontSize: '.7rem' }}>✅ Résolu</span>
+                        )}
+                        <span className="badge" style={{
+                          background: (CATEGORY_COLORS[topic.category] || '#1565c0') + '22',
+                          color: CATEGORY_COLORS[topic.category] || '#1565c0',
+                          fontSize: '.7rem'
+                        }}>
+                          {CATEGORY_LABELS[topic.category] || topic.category}
+                        </span>
                       </div>
-                      <div className='d-flex flex-column align-items-center gap-2 ms-3' style={{ minWidth: '60px' }}>
-                        <button onClick={e => voteTopic(topic.id, e)} className="btn btn-sm"
-                          style={{ background: topic.has_voted ? '#1565c0' : '#e3f2fd', color: topic.has_voted ? '#fff' : '#1565c0', border: 'none', borderRadius: '8px' }}>
-                          <i className="fas fa-thumbs-up me-1"></i>{topic.votes_count}
-                        </button>
-                        <div style={{ textAlign: 'center', fontSize: '.72rem', color: '#888' }}>
-                          <i className="fas fa-comment me-1"></i>{topic.replies_count}
+                      <h5 className="fw-bold mb-1" style={{ color: '#1a1a2e', fontSize: '1rem' }}>{topic.title}</h5>
+                      <div style={{ fontSize: '.78rem', color: '#888' }} className="d-flex flex-wrap gap-3">
+                        <span>
+                          <i className="fas fa-user me-1"></i>{topic.author.first_name} {topic.author.last_name}
+                          {topic.author.user_type === 'agent' && (
+                            <span className="badge ms-1" style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.65rem' }}>Agent</span>
+                          )}
+                        </span>
+                        <span><i className="fas fa-calendar me-1"></i>{formatDate(topic.created_at)}</span>
+                        <span><i className="fas fa-eye me-1"></i>{topic.views}</span>
+                      </div>
+                      {topic.tags.length > 0 && (
+                        <div className="mt-2 d-flex gap-1 flex-wrap">
+                          {topic.tags.map(tag => (
+                            <span key={tag.id} className="badge" style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.68rem' }}>
+                              #{tag.name}
+                            </span>
+                          ))}
                         </div>
+                      )}
+                    </div>
+                    <div className="d-flex flex-column align-items-center gap-2 ms-3" style={{ minWidth: '60px' }}>
+                      <button onClick={e => voteTopic(topic.id, e)} className="btn btn-sm"
+                        style={{
+                          background: topic.has_voted ? '#1565c0' : '#e3f2fd',
+                          color: topic.has_voted ? '#fff' : '#1565c0',
+                          border: 'none', borderRadius: '8px'
+                        }}>
+                        <i className="fas fa-thumbs-up me-1"></i>{topic.votes_count}
+                      </button>
+                      <div style={{ textAlign: 'center', fontSize: '.72rem', color: '#888' }}>
+                        <i className="fas fa-comment me-1"></i>{topic.replies_count}
                       </div>
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
 
+      {/* Create Topic Modal */}
       {showModal && (
-        <div className='modal fade show d-block' style={{ background: 'rgba(0,0,0,.5)', zIndex: 1050 }}
+        <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,.5)', zIndex: 1050 }}
           onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content border-0 shadow">
-              <div className='modal-header' style={{ background: 'linear-gradient(90deg,#0d2b4e,#1565c0)', color: '#fff' }}>
+              <div className="modal-header" style={{ background: 'linear-gradient(90deg,#0d2b4e,#1565c0)', color: '#fff' }}>
                 <h5 className="modal-title fw-bold"><i className="fas fa-plus-circle me-2"></i>Nouveau sujet</h5>
                 <button className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
@@ -318,13 +345,16 @@ export default function ForumPage() {
               <div className="modal-footer border-0">
                 <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Annuler</button>
                 <button className="btn btn-primary" onClick={createTopic} disabled={creating}>
-                  {creating ? <><span className="spinner-border spinner-border-sm me-2"></span>Envoi...</> : <><i className="fas fa-paper-plane me-2"></i>Publier</>}
+                  {creating
+                    ? <><span className="spinner-border spinner-border-sm me-2"></span>Envoi...</>
+                    : <><i className="fas fa-paper-plane me-2"></i>Publier</>
+                  }
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </MainLayout>
   )
 }
