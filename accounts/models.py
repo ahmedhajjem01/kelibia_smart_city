@@ -40,10 +40,10 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=8, unique=True, verbose_name="Numéro de Téléphone")
     address = models.TextField(verbose_name="Adresse")
     governorate = models.CharField(max_length=50, choices=GOVERNORATE_CHOICES, verbose_name="Gouvernorat", default='Nabeul')
-    city = models.CharField(max_length=100, verbose_name="Ville", default='Kelibia')
-    first_name_ar = models.CharField(max_length=150, blank=True, verbose_name="Prénom (Arabe)")
-    last_name_ar = models.CharField(max_length=150, blank=True, verbose_name="Nom (Arabe)")
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
+    city = models.CharField(max_length=255, verbose_name="Ville", default='Kelibia')
+    first_name_ar = models.CharField(max_length=255, blank=True, verbose_name="Prénom (Arabe)")
+    last_name_ar = models.CharField(max_length=255, blank=True, verbose_name="Nom (Arabe)")
+    user_type = models.CharField(max_length=50, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
     is_verified = models.BooleanField(default=False, verbose_name="Est vérifié")
     cin_front_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Avant (Base64)")
     cin_back_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Arrière (Base64)")
@@ -53,9 +53,9 @@ class CustomUser(AbstractUser):
     place_of_birth = models.CharField(max_length=255, null=True, blank=True, verbose_name="Lieu de naissance")
     
     is_married = models.BooleanField(default=False, verbose_name="Est marié(e)")
-    spouse_cin = models.CharField(max_length=8, blank=True, null=True, verbose_name="CIN du conjoint")
-    spouse_first_name = models.CharField(max_length=150, null=True, blank=True, verbose_name="Prénom du conjoint")
-    spouse_last_name = models.CharField(max_length=150, null=True, blank=True, verbose_name="Nom du conjoint")
+    spouse_cin = models.CharField(max_length=50, blank=True, null=True, verbose_name="CIN du conjoint")
+    spouse_first_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Prénom du conjoint")
+    spouse_last_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Nom du conjoint")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'cin', 'phone']
