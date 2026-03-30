@@ -13,17 +13,18 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)",                  "dest": "core/wsgi.py" },
-    { "src": "/admin/(.*)",                "dest": "core/wsgi.py" },
-    { "src": "/admin",                     "dest": "core/wsgi.py" },
-    { "src": "/static/(.*)",               "dest": "core/wsgi.py" },
-    { "src": "/media/(.*)",                "dest": "core/wsgi.py" },
-    { "src": "/extrait-naissance/(.*)",    "dest": "core/wsgi.py" },
-    { "src": "/extrait-mariage/(.*)",      "dest": "core/wsgi.py" },
-    { "src": "/extrait-deces/(.*)",        "dest": "core/wsgi.py" },
+    { "src": "/api/(.*)",                   "dest": "core/wsgi.py" },
+    { "src": "/admin/(.*)",                 "dest": "core/wsgi.py" },
+    { "src": "/admin",                      "dest": "core/wsgi.py" },
+    { "src": "/static/(.*)",                "dest": "core/wsgi.py" },
+    { "src": "/media/(.*)",                 "dest": "core/wsgi.py" },
+    { "src": "/extrait-naissance/(.*)",     "dest": "core/wsgi.py" },
+    { "src": "/extrait-mariage/(.*)",       "dest": "core/wsgi.py" },
+    { "src": "/extrait-deces/(.*)",         "dest": "core/wsgi.py" },
     { "src": "/attestation-residence/(.*)", "dest": "core/wsgi.py" },
-    { "src": "/signalement/(.*)",          "dest": "core/wsgi.py" },
-    { "src": "/dashboard/(.*)",            "dest": "core/wsgi.py" },
-    { "src": "/(.*)",                      "dest": "/index.html" }
+    { "src": "/signalement/(.*)",           "dest": "core/wsgi.py" },
+    { "src": "/dashboard/(.*)",             "dest": "core/wsgi.py" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)",                       "dest": "/index.html" }
   ]
 }
