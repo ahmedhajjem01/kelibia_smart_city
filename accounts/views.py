@@ -79,7 +79,9 @@ class RegisterView(APIView):
             # Detailed fallback for debugging
             return Response({"error": f"Conflit de données: {err_msg}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": "Une erreur interne est survenue."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            import traceback
+            error_details = traceback.format_exc()
+            return Response({"error": f"Erreur Interne: {str(e)}", "details": error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CustomActivationView(APIView):
