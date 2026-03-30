@@ -2,10 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "core/wsgi.py",
+      "src": "build_files.sh",
       "use": "@vercel/python",
-      "config": { "runtime": "python3.12", "maxLambdaSize": "50mb" }
+      "config": { "runtime": "python3.12" }
     },
+
     {
       "src": "frontend-react/package.json",
       "use": "@vercel/static-build",
