@@ -71,7 +71,7 @@ class TopicCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Topic
-        fields = ['title', 'content', 'category', 'tag_names']
+        fields = ['id', 'title', 'content', 'category', 'tag_names']
 
     def create(self, validated_data):
         tag_names = validated_data.pop('tag_names', [])

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
 
 interface TopNavProps {
@@ -24,13 +25,13 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
 
       {/* MAIN NAVBAR */}
       <nav className="main-navbar">
-        <a className="navbar-brand-area" href="/">
+        <Link className="navbar-brand-area" to="/dashboard">
           <div className="navbar-logo"><i className="fas fa-city"></i></div>
           <div className="navbar-title">
             <span className="main-title">{lang === 'ar' ? 'بلدية قليبية' : 'Commune de Kélibia'}</span>
             <span className="sub-title">{t('portal_citoyen')} — <span className="text-primary">Kelibia Smart City</span></span>
           </div>
-        </a>
+        </Link>
         <div className="navbar-actions">
           <button 
             className={`lang-btn ${lang === 'fr' ? 'active' : ''}`} 
