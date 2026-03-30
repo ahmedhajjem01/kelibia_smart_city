@@ -182,6 +182,7 @@ export default function AgentDashboardPage() {
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
   const [servicesSummary, setServicesSummary] = useState<any>(null)
 
   const mapRef = useRef<HTMLDivElement>(null)
@@ -213,7 +214,7 @@ export default function AgentDashboardPage() {
       setUser(u)
       fetchReclamations()
       if (u.user_type === 'supervisor' || u.is_staff || u.is_superuser) {
-        fetchManagedUsers('unverified')
+        fetchManagedUsers(usersMode)
         fetchServicesSummary()
       }
     } catch { setUser(null) }
@@ -248,8 +249,10 @@ export default function AgentDashboardPage() {
         if (action === 'verify') {
           if (usersMode === 'unverified') setManagedUsers(prev => prev.filter(u => u.id !== userId))
           else setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_verified: true } : u))
+          if (selectedUser?.id === userId) setSelectedUser((p: any) => p ? { ...p, is_verified: true } : null)
         } else {
           setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_active: data.is_active } : u))
+          if (selectedUser?.id === userId) setSelectedUser((p: any) => p ? { ...p, is_active: data.is_active } : null)
         }
       }
     } catch (e) { showToast('Erreur lors de l\'action.', 'error') }
@@ -628,11 +631,16 @@ export default function AgentDashboardPage() {
                       </thead>
                       <tbody>
                         {managedUsers.map(u => (
-                          <tr key={u.id} style={{ borderLeft: u.is_verified ? 'none' : '4px solid #ff9800' }}>
+                          <tr key={u.id} className="ag-row-clickable" onClick={() => setSelectedUser(u)} style={{ borderLeft: u.is_verified ? 'none' : '4px solid #ff9800' }}>
                             <td>
-                              <div className="fw-bold text-dark">{u.full_name}</div>
-                              <div className="text-muted small">{u.email}</div>
-                              <div className="text-muted" style={{ fontSize: '.7rem' }}>CIN: {u.cin} | Inscrit: {formatDate(u.date_joined)}</div>
+                              <div className="d-flex align-items-center gap-2">
+                                 <div className="ag-user-av-sm">{u.full_name?.charAt(0) || 'U'}</div>
+                                 <div className="flex-grow-1">
+                                    <div className="fw-bold text-dark">{u.full_name}</div>
+                                    <div className="text-muted small" style={{ fontSize: '11px' }}>{u.email}</div>
+                                    <div className="text-muted" style={{ fontSize: '.7rem' }}>CIN: {u.cin} | Inscrit: {formatDate(u.date_joined)}</div>
+                                 </div>
+                              </div>
                             </td>
                             <td>
                               <span className={`badge ${u.user_type === 'citizen' ? 'bg-light text-primary border' : 'bg-primary'}`}>
@@ -853,6 +861,110 @@ export default function AgentDashboardPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── CITIZEN VERIFICATION MODAL ── */}
+      {selectedUser && (
+        <div className="ag-modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedUser(null)}>
+           <div className="ag-modal-content animate__animated animate__zoomIn" style={{ maxWidth: 900 }}>
+              <div className="ag-modal-hdr" style={{ background: '#004d40' }}>
+                 <div className="title"><i className="fas fa-user-check me-2"></i>Vérification d'Identité : {selectedUser.full_name}</div>
+                 <button className="ag-close-btn" onClick={() => setSelectedUser(null)}><i className="fas fa-times"></i></button>
+              </div>
+              <div className="p-4 bg-light">
+                 <div className="row g-4">
+                    {/* Left: Inputted Info */}
+                    <div className="col-md-5">
+                       <div className="p-4 bg-white rounded shadow-sm">
+                          <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-info-circle me-2"></i>Données de l'inscription</h6>
+                          
+                          <div className="row mb-3">
+                             <div className="col-5 text-muted small">Nom & Prénom</div>
+                             <div className="col-7 fw-bold">{selectedUser.full_name}</div>
+                          </div>
+                          <div className="row mb-3">
+                             <div className="col-5 text-muted small">CIN Citoyen</div>
+                             <div className="col-7 fw-bold" style={{ letterSpacing: 2 }}>{selectedUser.cin}</div>
+                          </div>
+                          <div className="row mb-3">
+                             <div className="col-5 text-muted small">Naissance</div>
+                             <div className="col-7">
+                                {selectedUser.date_of_birth ? <div>{selectedUser.date_of_birth}</div> : <i className="text-muted">—</i>}
+                                <div className="small text-muted">{selectedUser.place_of_birth || 'Lieu inconnu'}</div>
+                             </div>
+                          </div>
+                          
+                          <div className="mb-4">
+                             <div className={`p-2 rounded mt-2 d-flex align-items-center gap-2 ${selectedUser.is_married ? 'bg-primary bg-opacity-10 text-primary' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
+                                <i className={`fas ${selectedUser.is_married ? 'fa-ring' : 'fa-user'}`}></i>
+                                <span className="small fw-bold">{selectedUser.is_married ? 'MARIÉ(E)' : 'CÉLIBATAIRE'}</span>
+                             </div>
+                             {selectedUser.is_married && (
+                                <div className="mt-2 text-dark bg-light p-2 rounded border small">
+                                   <div className="fw-bold text-muted mb-1" style={{ fontSize: '10px', textTransform: 'uppercase' }}>Conjoint(e)</div>
+                                   <div>{selectedUser.spouse_first_name} {selectedUser.spouse_last_name}</div>
+                                   <div className="text-muted">CIN: {selectedUser.spouse_cin}</div>
+                                </div>
+                             )}
+                          </div>
+
+                          <div className="d-grid gap-2">
+                             {!selectedUser.is_verified ? (
+                                <button className="btn btn-success" onClick={() => handleToggleUserStatus(selectedUser.id, 'verify')}>
+                                   <i className="fas fa-check-circle me-2"></i>Valider l'identité
+                                </button>
+                             ) : (
+                                <div className="alert alert-success d-flex align-items-center mb-0 py-2">
+                                   <i className="fas fa-check-double me-2"></i>Identité Validée
+                                </div>
+                             )}
+                             <button className={`btn ${selectedUser.is_active ? 'btn-outline-danger' : 'btn-danger'}`} onClick={() => handleToggleUserStatus(selectedUser.id, 'toggle_active')}>
+                                <i className={`fas ${selectedUser.is_active ? 'fa-user-slash' : 'fa-user-check'} me-2 rotate-hover`}></i>
+                                {selectedUser.is_active ? 'Bloquer ce compte' : 'Débloquer maintenant'}
+                             </button>
+                          </div>
+                       </div>
+                    </div>
+                    
+                    {/* Right: CIN Images */}
+                    <div className="col-md-7">
+                       <div className="p-4 bg-white rounded shadow-sm h-100">
+                          <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-id-card me-2"></i>Documents CIN à vérifier</h6>
+                          <div className="row g-2">
+                             <div className="col-12">
+                                <label className="small text-muted mb-1">FACE AVANT (RECTO)</label>
+                                <div className="ag-cin-preview mb-3">
+                                   {selectedUser.cin_front ? (
+                                      <a href={resolveBackendUrl(selectedUser.cin_front)} target="_blank" rel="noreferrer">
+                                         <img src={resolveBackendUrl(selectedUser.cin_front)} className="rounded shadow-sm scale-on-hover" style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Front CIN" />
+                                      </a>
+                                   ) : (
+                                      <div className="p-5 text-center bg-light text-muted small rounded">Non fournie</div>
+                                   )}
+                                </div>
+                             </div>
+                             <div className="col-12">
+                                <label className="small text-muted mb-1">FACE ARRIÈRE (VERSO)</label>
+                                <div className="ag-cin-preview">
+                                   {selectedUser.cin_back ? (
+                                      <a href={resolveBackendUrl(selectedUser.cin_back)} target="_blank" rel="noreferrer">
+                                         <img src={resolveBackendUrl(selectedUser.cin_back)} className="rounded shadow-sm scale-on-hover" style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Back CIN" />
+                                      </a>
+                                   ) : (
+                                      <div className="p-5 text-center bg-light text-muted small rounded">Non fournie</div>
+                                   )}
+                                </div>
+                             </div>
+                          </div>
+                          <div className="small text-muted text-center mt-3 bg-light p-2 rounded">
+                             <i className="fas fa-search-plus me-1"></i> Cliquez sur l'image pour l'agrandir et vérifier les détails.
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
         </div>
       )}
     </div>

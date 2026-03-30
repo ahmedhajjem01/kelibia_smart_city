@@ -285,6 +285,14 @@ export default function SignupPage() {
   const [rePassword, setRePassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
+  // Extra info
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [placeOfBirth, setPlaceOfBirth] = useState('')
+  const [isMarried, setIsMarried] = useState(false)
+  const [spouseCin, setSpouseCin] = useState('')
+  const [spouseFirstName, setSpouseFirstName] = useState('')
+  const [spouseLastName, setSpouseLastName] = useState('')
+
   // CIN Images
   const [cinFront, setCinFront] = useState<File | null>(null)
   const [cinBack, setCinBack] = useState<File | null>(null)
@@ -350,6 +358,15 @@ export default function SignupPage() {
       
       if (cinFront) formData.append('cin_front_image', cinFront)
       if (cinBack) formData.append('cin_back_image', cinBack)
+
+      formData.append('date_of_birth', dateOfBirth)
+      formData.append('place_of_birth', placeOfBirth)
+      formData.append('is_married', String(isMarried))
+      if (isMarried) {
+        formData.append('spouse_cin', spouseCin)
+        formData.append('spouse_first_name', spouseFirstName)
+        formData.append('spouse_last_name', spouseLastName)
+      }
 
       const res = await fetch('/api/accounts/register/', {
         method: 'POST',
@@ -456,6 +473,42 @@ export default function SignupPage() {
                     />
                     <label htmlFor="cin">{t('cin_label')}</label>
                   </div>
+
+                  <div className="row g-2 mb-3">
+                    <div className="col-md-6 form-floating">
+                      <input type="date" className="form-control" id="dob" required value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
+                      <label htmlFor="dob">{t('date_of_birth')}</label>
+                    </div>
+                    <div className="col-md-6 form-floating">
+                      <input type="text" className="form-control" id="pob" placeholder={t('place_of_birth')} required value={placeOfBirth} onChange={e => setPlaceOfBirth(e.target.value)} />
+                      <label htmlFor="pob">{t('place_of_birth')}</label>
+                    </div>
+                  </div>
+
+                  <div className="form-check form-switch mb-3 p-3 border rounded bg-light">
+                    <input className="form-check-input ms-0" type="checkbox" id="married" checked={isMarried} onChange={e => setIsMarried(e.target.checked)} />
+                    <label className="form-check-label ms-2 fw-bold" htmlFor="married">{t('is_married')}</label>
+                  </div>
+
+                  {isMarried && (
+                    <div className="p-3 border rounded mb-3 animate__animated animate__fadeIn" style={{ borderLeft: '4px solid #198754' }}>
+                        <h6 className="text-success mb-3 fw-bold"><i className="fas fa-heart me-2"></i>{t('spouse_info')}</h6>
+                        <div className="form-floating mb-2">
+                           <input type="text" className="form-control" id="scin" placeholder={t('spouse_cin')} pattern="[0-9]{8}" maxLength={8} value={spouseCin} onChange={e => setSpouseCin(e.target.value)} required={isMarried} />
+                           <label htmlFor="scin">{t('spouse_cin')}</label>
+                        </div>
+                        <div className="row g-2">
+                           <div className="col-6 form-floating">
+                              <input type="text" className="form-control" id="sfn" placeholder={t('spouse_first_name')} value={spouseFirstName} onChange={e => setSpouseFirstName(e.target.value)} required={isMarried} />
+                              <label htmlFor="sfn">{t('spouse_first_name')}</label>
+                           </div>
+                           <div className="col-6 form-floating">
+                              <input type="text" className="form-control" id="sln" placeholder={t('spouse_last_name')} value={spouseLastName} onChange={e => setSpouseLastName(e.target.value)} required={isMarried} />
+                              <label htmlFor="sln">{t('spouse_last_name')}</label>
+                           </div>
+                        </div>
+                    </div>
+                  )}
 
                   {/* CIN IMAGE CAPTURE SECTION */}
                   <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">{t('documents_cin')}</h5>

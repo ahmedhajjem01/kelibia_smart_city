@@ -188,6 +188,12 @@ class UserVerificationView(APIView):
             "is_verified": u.is_verified,
             "is_active": u.is_active,
             "user_type": u.user_type,
+            "date_of_birth": u.date_of_birth,
+            "place_of_birth": u.place_of_birth,
+            "is_married": u.is_married,
+            "spouse_cin": u.spouse_cin,
+            "spouse_first_name": u.spouse_first_name,
+            "spouse_last_name": u.spouse_last_name,
             "cin_front": u.cin_front_image.url if u.cin_front_image else None,
             "cin_back": u.cin_back_image.url if u.cin_back_image else None,
         } for u in users]

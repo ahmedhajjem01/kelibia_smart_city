@@ -48,6 +48,15 @@ class CustomUser(AbstractUser):
     cin_front_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Avant")
     cin_back_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Arrière")
 
+    # Extra Information for Civil Registry
+    date_of_birth = models.DateField(null=True, blank=True, verbose_name="Date de naissance")
+    place_of_birth = models.CharField(max_length=255, blank=True, verbose_name="Lieu de naissance")
+    
+    is_married = models.BooleanField(default=False, verbose_name="Est marié(e)")
+    spouse_cin = models.CharField(max_length=8, blank=True, null=True, verbose_name="CIN du conjoint")
+    spouse_first_name = models.CharField(max_length=150, blank=True, verbose_name="Prénom du conjoint")
+    spouse_last_name = models.CharField(max_length=150, blank=True, verbose_name="Nom du conjoint")
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'cin', 'phone']
 
