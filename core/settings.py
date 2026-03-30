@@ -78,7 +78,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 import dj_database_url
-_db_url = os.getenv("DATABASE_URL", "postgres://postgres:admin@127.0.0.1:5432/kelibia_db")
+_db_url = os.getenv("DATABASE_URL", "")
 _is_neon = "neon.tech" in _db_url
 DATABASES = {
     "default": dj_database_url.config(
@@ -152,8 +152,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "harounahajjem@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "lxjsjbfypcwfujlw")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DOMAIN = os.getenv("DOMAIN", os.getenv("VERCEL_URL", "127.0.0.1:8000"))
