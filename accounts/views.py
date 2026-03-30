@@ -120,7 +120,46 @@ class MyTokenObtainPairView(TokenObtainPairView):
                 login(request, user)
         return response
 
+from .models import SavedCard
+from rest_framework import permissions
+
+class SavedCardView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        cards = SavedCard.objects.filter(user=request.user).order_by('-created_at')
+        data = [{
+            "id": c.id,
+            "card_holder": c.card_holder,
+            "last_4": c.last_4,
+            "expiry": c.expiry,
+            "brand": c.brand
+        } for c in cards]
+        return Response(data)
+
+    def post(self, request):
+        data = request.data
+        # Simulated validation
+        if not all(k in data for k in ['number', 'expiry', 'name']):
+            return Response({"error": "Données de carte incomplètes"}, status=400)
+        
+        last_4 = data['number'][-4:]
+        
+        # Check if card already saved (simplified)
+        if SavedCard.objects.filter(user=request.user, last_4=last_4, expiry=data['expiry']).exists():
+            return Response({"message": "Carte déjà enregistrée"})
+
+        SavedCard.objects.create(
+            user=request.user,
+            card_holder=data['name'],
+            last_4=last_4,
+            expiry=data['expiry'],
+            brand='Visa' if data['number'].startswith('4') else 'Mastercard'
+        )
+        return Response({"message": "Carte enregistrée avec succès !"}, status=201)
+
 def admin_logout(request):
+
     """
     Custom logout view for the admin to redirect to the frontend.
     """

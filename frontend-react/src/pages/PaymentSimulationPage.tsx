@@ -18,6 +18,10 @@ export default function PaymentSimulationPage() {
   const [step, setStep] = useState(1) // 1: Card Selection, 3: Processing, 4: Success
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' })
   const [user, setUser] = useState<any>(null)
+  const [savedCards, setSavedCards] = useState<any[]>([])
+  const [selectedCardId, setSelectedCardId] = useState<number | 'new'>('new')
+  const [saveCard, setSaveCard] = useState(false)
+
 
 
   useEffect(() => {
@@ -25,7 +29,15 @@ export default function PaymentSimulationPage() {
     if (!access) { navigate('/login'); return }
     fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.json()).then(data => setUser(data))
+    
+    // Fetch Saved Cards
+    fetch('/api/accounts/cards/', { headers: { Authorization: `Bearer ${access}` } })
+      .then(r => r.json()).then(data => {
+        setSavedCards(data)
+        if (data.length > 0) setSelectedCardId(data[0].id)
+      })
   }, [navigate])
+
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,7 +56,7 @@ export default function PaymentSimulationPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: requestId ? `Bearer ${access}` : ''
+                    Authorization: `Bearer ${access}`
                 },
                 body: JSON.stringify({
                     request_id: requestId,
@@ -54,8 +66,21 @@ export default function PaymentSimulationPage() {
             })
             if (!res.ok) console.error('Failed to update backend payment status')
         }
+
+        // Save card if requested and it's a new card
+        if (selectedCardId === 'new' && saveCard) {
+            await fetch('/api/accounts/cards/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${access}`
+                },
+                body: JSON.stringify(cardDetails)
+            })
+        }
         
         setStep(4)
+
     } catch (err) {
         console.error(err)
         setStep(1)
@@ -112,34 +137,82 @@ export default function PaymentSimulationPage() {
                         </div>
                       </div>
 
+                      {savedCards.length > 0 && (
+                        <div className="mb-4">
+                           <label className="form-label small text-muted fw-bold">Mes Cartes Enregistrées</label>
+                           <div className="d-flex flex-column gap-2">
+                              {savedCards.map(c => (
+                                <div key={c.id} 
+                                     className={`card p-3 border-2 cursor-pointer transition-all ${selectedCardId === c.id ? 'border-primary bg-light shadow-sm' : 'border-light'}`}
+                                     onClick={() => setSelectedCardId(c.id)}>
+                                    <div className="d-flex align-items-center justify-content-between">
+                                        <div className="d-flex align-items-center gap-3">
+                                            <i className={`fab fa-cc-${c.brand.toLowerCase()} fa-2x text-primary`}></i>
+                                            <div>
+                                                <div className="fw-bold">**** **** **** {c.last_4}</div>
+                                                <div className="extra-small text-muted">{c.card_holder} | Exp: {c.expiry}</div>
+                                            </div>
+                                        </div>
+                                        <input type="radio" checked={selectedCardId === c.id} readOnly className="form-check-input" />
+                                    </div>
+                                </div>
+                              ))}
+                              <div className={`card p-3 border-2 cursor-pointer transition-all ${selectedCardId === 'new' ? 'border-primary bg-light shadow-sm' : 'border-light'}`}
+                                     onClick={() => setSelectedCardId('new')}>
+                                    <div className="d-flex align-items-center justify-content-between">
+                                        <div className="d-flex align-items-center gap-3">
+                                            <div className="bg-light rounded-circle p-2"><i className="fas fa-plus text-primary"></i></div>
+                                            <div className="fw-bold">Utiliser une autre carte</div>
+                                        </div>
+                                        <input type="radio" checked={selectedCardId === 'new'} readOnly className="form-check-input" />
+                                    </div>
+                                </div>
+                           </div>
+                        </div>
+                      )}
+
                       <form onSubmit={handlePay}>
-                        <div className="mb-3">
-                          <label className="form-label small text-muted">Nom sur la carte</label>
-                          <input type="text" className="form-control form-control-lg bg-light border-0" placeholder="M. HABIB BOURGUIBA" required 
-                                 onChange={e => setCardDetails({...cardDetails, name: e.target.value})} />
-                        </div>
-                        <div className="mb-3">
-                          <label className="form-label small text-muted">Numéro de carte</label>
-                          <div className="input-group input-group-lg">
-                            <span className="input-group-text bg-light border-0"><i className="far fa-credit-card"></i></span>
-                            <input type="text" className="form-control bg-light border-0" placeholder="XXXX XXXX XXXX XXXX" required maxLength={16}
-                                   onChange={e => setCardDetails({...cardDetails, number: e.target.value})} />
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="col-7">
+                        {selectedCardId === 'new' && (
+                          <div className="animate__animated animate__fadeIn">
                             <div className="mb-3">
-                              <label className="form-label small text-muted">Expiration</label>
-                              <input type="text" className="form-control bg-light border-0" placeholder="MM/AA" required maxLength={5} />
+                              <label className="form-label small text-muted">Nom sur la carte</label>
+                              <input type="text" className="form-control form-control-lg bg-light border-0" placeholder="M. HABIB BOURGUIBA" required 
+                                     onChange={e => setCardDetails({...cardDetails, name: e.target.value})} />
+                            </div>
+                            <div className="mb-3">
+                              <label className="form-label small text-muted">Numéro de carte</label>
+                              <div className="input-group input-group-lg">
+                                <span className="input-group-text bg-light border-0"><i className="far fa-credit-card"></i></span>
+                                <input type="text" className="form-control bg-light border-0" placeholder="XXXX XXXX XXXX XXXX" required maxLength={16}
+                                       onChange={e => setCardDetails({...cardDetails, number: e.target.value})} />
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-7">
+                                <div className="mb-3">
+                                  <label className="form-label small text-muted">Expiration</label>
+                                  <input type="text" className="form-control bg-light border-0" placeholder="MM/AA" required maxLength={5}
+                                         onChange={e => setCardDetails({...cardDetails, expiry: e.target.value})} />
+                                </div>
+                              </div>
+                              <div className="col-5">
+                                <div className="mb-3">
+                                  <label className="form-label small text-muted">CVV</label>
+                                  <input type="password" className="form-control bg-light border-0" placeholder="123" required maxLength={3}
+                                         onChange={e => setCardDetails({...cardDetails, cvv: e.target.value})} />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="form-check mb-3">
+                                <input className="form-check-input" type="checkbox" id="saveCardCheck" checked={saveCard} onChange={e => setSaveCard(e.target.checked)} />
+                                <label className="form-check-label small text-muted" htmlFor="saveCardCheck">
+                                    Enregistrer cette carte pour mes prochains paiements
+                                </label>
                             </div>
                           </div>
-                          <div className="col-5">
-                            <div className="mb-3">
-                              <label className="form-label small text-muted">CVV</label>
-                              <input type="password" className="form-control bg-light border-0" placeholder="123" required maxLength={3} />
-                            </div>
-                          </div>
-                        </div>
+                        )}
+
                         
                         <div className="alert alert-warning small border-0 py-2 mt-2">
                            <i className="fas fa-info-circle me-1"></i> SIMULATION (PFE) : Ne saisissez pas de vraies données.

@@ -53,3 +53,16 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.email} ({self.username})"
+
+class SavedCard(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='saved_cards')
+    card_holder = models.CharField(max_length=200)
+    last_4 = models.CharField(max_length=4)
+    expiry = models.CharField(max_length=5) # MM/YY
+    brand = models.CharField(max_length=20, default='Visa')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.brand} **** {self.last_4} ({self.user.email})"
+

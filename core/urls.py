@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import MyTokenObtainPairView, admin_logout
+from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView
 from rest_framework_simplejwt.views import TokenRefreshView
 from core.views import login_redirect, confirm_payment
 
@@ -10,6 +10,8 @@ urlpatterns = [
     path('admin/logout/', admin_logout, name='admin_logout'),
     path('admin/', admin.site.urls),
     path('api/payments/confirm/', confirm_payment, name='confirm_payment'),
+    path('api/accounts/cards/', SavedCardView.as_view(), name='saved_cards'),
+
 
     path('api/', include('djoser.urls')),
     path('api/', include('djoser.urls.jwt')),
