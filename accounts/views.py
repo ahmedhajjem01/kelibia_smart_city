@@ -44,12 +44,12 @@ class RegisterView(APIView):
                 city=data['city'],
                 is_active=True,
                 is_verified=False,
-                date_of_birth=data.get('date_of_birth'),
-                place_of_birth=data.get('place_of_birth'),
+                date_of_birth=data.get('date_of_birth') or None,
+                place_of_birth=data.get('place_of_birth', ''),
                 is_married=data.get('is_married') == 'true',
-                spouse_cin=data.get('spouse_cin'),
-                spouse_first_name=data.get('spouse_first_name'),
-                spouse_last_name=data.get('spouse_last_name')
+                spouse_cin=data.get('spouse_cin', ''),
+                spouse_first_name=data.get('spouse_first_name', ''),
+                spouse_last_name=data.get('spouse_last_name', '')
             )
             
             # Save CIN images if provided
