@@ -177,9 +177,10 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum'>('dashboard')
+  const [usersMode, setUsersMode] = useState<'unverified' | 'all'>('unverified')
 
-  const [unverifiedUsers, setUnverifiedUsers] = useState<any[]>([])
+  const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
 
   const mapRef = useRef<HTMLDivElement>(null)
@@ -211,32 +212,38 @@ export default function AgentDashboardPage() {
       setUser(u)
       fetchReclamations()
       if (u.user_type === 'supervisor' || u.is_staff || u.is_superuser) {
-        fetchUnverifiedUsers()
+        fetchManagedUsers('unverified')
       }
     } catch { setUser(null) }
   }
 
-  async function fetchUnverifiedUsers() {
+  async function fetchManagedUsers(mode: 'unverified' | 'all') {
     setLoadingUsers(true)
     try {
-      const res = await fetch('/api/accounts/verify-citizens/', { headers: { Authorization: `Bearer ${access}` } })
-      if (res.ok) setUnverifiedUsers(await res.json())
+      const res = await fetch(`/api/accounts/verify-citizens/?mode=${mode}`, { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setManagedUsers(await res.json())
     } catch (e) { console.error(e) }
     finally { setLoadingUsers(false) }
   }
 
-  async function handleVerifyUser(userId: number) {
+  async function handleToggleUserStatus(userId: number, action: 'verify' | 'toggle_active') {
     try {
       const res = await fetch('/api/accounts/verify-citizens/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
-        body: JSON.stringify({ user_id: userId, action: 'verify' })
+        body: JSON.stringify({ user_id: userId, action })
       })
       if (res.ok) {
-        showToast('Utilisateur vérifié avec succès !')
-        setUnverifiedUsers(prev => prev.filter(u => u.id !== userId))
+        const data = await res.json()
+        showToast(data.message || 'Action réussie !')
+        if (action === 'verify') {
+          if (usersMode === 'unverified') setManagedUsers(prev => prev.filter(u => u.id !== userId))
+          else setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_verified: true } : u))
+        } else {
+          setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_active: data.is_active } : u))
+        }
       }
-    } catch (e) { showToast('Erreur', 'error') }
+    } catch (e) { showToast('Erreur lors de l\'action.', 'error') }
   }
 
 
@@ -451,13 +458,19 @@ export default function AgentDashboardPage() {
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
             <>
               <div className="ag-divider"></div>
-              <div className="ag-sec-title">ADMINISTRATION</div>
-              <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users') }}>
-                <i className="fas fa-user-check"></i> Vérification Citoyens
-                {unverifiedUsers.length > 0 && <span className="ag-badge">{unverifiedUsers.length}</span>}
+              <div className="ag-sec-title">ADMINISTRATION HUB</div>
+              <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode) }}>
+                <i className="fas fa-users-cog"></i> Gestion Utilisateurs
+                {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
               </a>
-              <a className="ag-nav-item" href="/admin/" style={{ color: '#ff6d00' }} target="_blank">
-                <i className="fas fa-cog"></i> <strong>Panel Django Admin</strong>
+              <a className={`ag-nav-item${activeTab === 'services' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('services') }}>
+                <i className="fas fa-file-invoice"></i> Services Municipaux
+              </a>
+              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
+                <i className="fas fa-comments"></i> Modération Forum
+              </a>
+              <a className="ag-nav-item" href="/admin/" style={{ color: '#00c853' }} target="_blank">
+                <i className="fas fa-external-link-alt"></i> <strong>Panel Django Admin</strong>
               </a>
             </>
           )}
@@ -579,59 +592,103 @@ export default function AgentDashboardPage() {
                 )}
               </div>
             </>
-          ) : (
+          ) : activeTab === 'users' ? (
             <div className="ag-card animate__animated animate__fadeIn">
-              <div className="ag-card-hdr-green">
-                <span><i className="fas fa-user-check me-2"></i>Comptes Citoyens en attente de vérification</span>
-                <button onClick={fetchUnverifiedUsers} className="btn btn-sm btn-outline-light"><i className="fas fa-sync-alt"></i></button>
+              <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#004d40,#00695c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '50px', padding: '0 16px' }}>
+                <span className="fw-bold"><i className="fas fa-users-cog me-2"></i>Administration des Comptes</span>
+                <div className="btn-group btn-group-sm bg-white bg-opacity-10 p-1 rounded">
+                  <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>EN ATTENTE</button>
+                  <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>TOUS</button>
+                </div>
               </div>
               <div className="ag-card-body p-0">
                 {loadingUsers ? (
                    <div className="text-center p-5"><div className="spinner-border text-success"></div></div>
-                ) : unverifiedUsers.length === 0 ? (
-                  <div className="text-center p-5 text-muted"><i className="fas fa-check-circle fa-3x mb-3 opacity-25"></i><p>Tous les citoyens sont vérifiés.</p></div>
+                ) : managedUsers.length === 0 ? (
+                  <div className="text-center p-5 text-muted"><i className="fas fa-users fa-3x mb-3 opacity-25"></i><p>Aucun utilisateur trouvé.</p></div>
                 ) : (
-                  <table className="ag-table">
-                    <thead>
-                      <tr>
-                        <th>Citoyen</th>
-                        <th>CIN / Téléphone</th>
-                        <th>Documents CIN</th>
-                        <th>Date Inscription</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {unverifiedUsers.map(u => (
-                        <tr key={u.id}>
-                          <td>
-                            <div className="fw-bold">{u.full_name}</div>
-                            <div className="small text-muted">{u.email}</div>
-                          </td>
-                          <td>
-                            <div><i className="fas fa-id-card me-1 text-muted"></i>{u.cin}</div>
-                            <div><i className="fas fa-phone me-1 text-muted"></i>{u.phone}</div>
-                          </td>
-                          <td>
-                            <div className="d-flex gap-2">
-                               {u.cin_front && <a href={resolveBackendUrl(u.cin_front)} target="_blank" rel="noreferrer" className="btn btn-xs btn-outline-primary py-0 px-2 font-monospace" style={{ fontSize: '10px' }}>AVANT</a>}
-                               {u.cin_back && <a href={resolveBackendUrl(u.cin_back)} target="_blank" rel="noreferrer" className="btn btn-xs btn-outline-primary py-0 px-2 font-monospace" style={{ fontSize: '10px' }}>ARRIERE</a>}
-                            </div>
-                          </td>
-                          <td className="small text-muted">{new Date(u.date_joined).toLocaleDateString()}</td>
-                          <td>
-                            <button className="btn btn-success btn-sm rounded-pill px-3" onClick={() => handleVerifyUser(u.id)}>
-                              <i className="fas fa-check me-1"></i> Approuver
-                            </button>
-                          </td>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="ag-table shadow-sm">
+                      <thead>
+                        <tr>
+                          <th>Utilisateur</th>
+                          <th>Type / Rôle</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {managedUsers.map(u => (
+                          <tr key={u.id} style={{ borderLeft: u.is_verified ? 'none' : '4px solid #ff9800' }}>
+                            <td>
+                              <div className="fw-bold text-dark">{u.full_name}</div>
+                              <div className="text-muted small">{u.email}</div>
+                              <div className="text-muted" style={{ fontSize: '.7rem' }}>CIN: {u.cin} | Inscrit: {formatDate(u.date_joined)}</div>
+                            </td>
+                            <td>
+                              <span className={`badge ${u.user_type === 'citizen' ? 'bg-light text-primary border' : 'bg-primary'}`}>
+                                {u.user_type === 'citizen' ? 'Citoyen' : u.user_type === 'agent' ? 'Agent' : 'Superviseur'}
+                              </span>
+                            </td>
+                            <td>
+                               <div className="d-flex flex-column gap-1">
+                                  {u.is_verified ? <span className="badge bg-success" style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '10px' }}><i className="fas fa-check-circle me-1"></i>VÉRIFIÉ</span> 
+                                                 : <span className="badge bg-warning" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-clock me-1"></i>ATTENTE</span>}
+                                  {u.is_active ? <span className="badge bg-info" style={{ background: '#e1f5fe', color: '#0288d1', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>ACTIF</span> 
+                                               : <span className="badge bg-danger" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>BLOQUÉ</span>}
+                               </div>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                {!u.is_verified && (
+                                  <button className="btn btn-sm btn-success" title="Approuver" onClick={() => handleToggleUserStatus(u.id, 'verify')}><i className="fas fa-check"></i></button>
+                                )}
+                                <button className={`btn btn-sm ${u.is_active ? 'btn-outline-danger' : 'btn-danger'}`} title={u.is_active ? 'Bloquer' : 'Débloquer'} onClick={() => handleToggleUserStatus(u.id, 'toggle_active')}>
+                                  <i className={`fas ${u.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
+                                </button>
+                                {(u.cin_front || u.cin_back) && (
+                                  <a href={resolveBackendUrl(u.cin_front || u.cin_back)} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary" title="Voir CIN"><i className="fas fa-id-card"></i></a>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             </div>
+          ) : activeTab === 'services' ? (
+            <div className="ag-card animate__animated animate__fadeIn">
+               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a237e,#283593)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                  <span className="fw-bold"><i className="fas fa-file-invoice me-2"></i>Centre des Services Municipaux</span>
+               </div>
+               <div className="p-5 text-center">
+                  <i className="fas fa-tools fa-3x mb-3 text-muted"></i>
+                  <h5 className="fw-bold">Gestion des Demandes de Services</h5>
+                  <p className="text-muted">Cette section permettra de centraliser toutes les demandes d'attestations et d'extraits (Naissance, Mariage, Résidence).</p>
+                  <div className="row g-3 mt-4">
+                     <div className="col-md-4"><div className="p-3 border rounded bg-light"><strong>Résidence</strong><div className="h3 mt-2">12</div><div className="small text-muted">Demandes à traiter</div></div></div>
+                     <div className="col-md-4"><div className="p-3 border rounded bg-light"><strong>Mariage</strong><div className="h3 mt-2">5</div><div className="small text-muted">Extraits commandés</div></div></div>
+                     <div className="col-md-4"><div className="p-3 border rounded bg-light"><strong>Décès</strong><div className="h3 mt-2">2</div><div className="small text-muted">Déclarations</div></div></div>
+                  </div>
+               </div>
+            </div>
+          ) : (
+            <div className="ag-card animate__animated animate__fadeIn">
+               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                  <span className="fw-bold"><i className="fas fa-comments me-2"></i>Modération du Forum & Actualités</span>
+               </div>
+               <div className="p-5 text-center">
+                  <i className="fas fa-shield-alt fa-3x mb-3 text-muted"></i>
+                  <h5 className="fw-bold">Espace Modération Superviseur</h5>
+                  <p className="text-muted">Gérez les sujets du forum, modérez les commentaires et gérez les actualités de la ville.</p>
+                  <button className="btn btn-primary mt-3" onClick={() => navigate('/forum')}><i className="fas fa-external-link-alt me-2"></i>Aller au Forum</button>
+               </div>
+            </div>
           )}
+
         </div>
         <div style={{ width: 240, minWidth: 240, padding: '24px 16px 24px 0', flexShrink: 0 }}>
 

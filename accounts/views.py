@@ -160,7 +160,8 @@ class SavedCardView(APIView):
 
 class UserVerificationView(APIView):
     """
-    List and verify unverified citizens. Only for staff or supervisors.
+    Supervisor view for listing and approving unverified citizens,
+    and managing all users (listing, activating, deactivating).
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -168,7 +169,14 @@ class UserVerificationView(APIView):
         if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
             return Response({"error": "Accès refusé."}, status=403)
         
-        users = User.objects.filter(is_verified=False, user_type='citizen').order_by('-date_joined')
+        # Get mode: 'unverified' or 'all'
+        mode = request.query_params.get('mode', 'unverified')
+        
+        if mode == 'unverified':
+            users = User.objects.filter(is_verified=False, user_type='citizen').order_by('-date_joined')
+        else:
+            users = User.objects.all().order_by('-date_joined')
+
         data = [{
             "id": u.id,
             "username": u.username,
@@ -177,9 +185,13 @@ class UserVerificationView(APIView):
             "cin": u.cin,
             "phone": u.phone,
             "date_joined": u.date_joined,
+            "is_verified": u.is_verified,
+            "is_active": u.is_active,
+            "user_type": u.user_type,
             "cin_front": u.cin_front_image.url if u.cin_front_image else None,
             "cin_back": u.cin_back_image.url if u.cin_back_image else None,
         } for u in users]
+        
         return Response(data)
 
     def post(self, request):
@@ -187,17 +199,23 @@ class UserVerificationView(APIView):
             return Response({"error": "Accès refusé."}, status=403)
         
         user_id = request.data.get('user_id')
-        action = request.data.get('action') # 'verify' or 'reject'
+        action = request.data.get('action') # 'verify' or 'toggle_active'
         
         try:
             target_user = User.objects.get(id=user_id)
             if action == 'verify':
                 target_user.is_verified = True
                 target_user.save()
-                return Response({"message": f"Utilisateur {target_user.username} vérifié avec succès."})
-            elif action == 'reject':
-                # Simplified: just keep as unverified or delete? Let's just return a msg for now.
-                return Response({"message": "Action refusée/mise en attente."})
+                return Response({"message": "Compte citoyen vérifié avec succès."})
+            elif action == 'toggle_active':
+                target_user.is_active = not target_user.is_active
+                target_user.save()
+                return Response({
+                    "message": f"Statut du compte mis à jour (Actif: {target_user.is_active}).",
+                    "is_active": target_user.is_active
+                })
+            else:
+                return Response({"error": "Action non reconnue."}, status=400)
         except User.DoesNotExist:
             return Response({"error": "Utilisateur introuvable."}, status=404)
 
