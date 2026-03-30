@@ -447,8 +447,9 @@ export default function SignupPage() {
                       className="form-control"
                       id="cin"
                       placeholder={t('cin_label')}
-                      pattern="\\d{8}"
+                      pattern="[0-9]{8}"
                       maxLength={8}
+
                       required
                       value={cin}
                       onChange={(ev) => setCin(ev.target.value)}
@@ -512,8 +513,9 @@ export default function SignupPage() {
                       className="form-control"
                       id="phone"
                       placeholder={t('phone_label')}
-                      pattern="\\d{8}"
+                      pattern="[0-9]{8}"
                       maxLength={8}
+
                       required
                       value={phone}
                       onChange={(ev) => setPhone(ev.target.value)}
