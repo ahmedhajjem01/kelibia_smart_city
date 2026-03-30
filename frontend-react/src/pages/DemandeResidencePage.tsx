@@ -380,17 +380,6 @@ export default function DemandeResidencePage() {
 
                   {renderFileControl('quitus_municipal', t('quitus_label'), true)}
                   
-                  <div className="mb-4">
-                      <a 
-                        href="https://vitemp.finances.gov.tn/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="btn btn-outline-info btn-sm rounded-pill px-3"
-                      >
-                        <i className="fas fa-external-link-alt me-2"></i>
-                        {t('impot_service_link')}
-                      </a>
-                  </div>
 
                   {renderFileControl('acte_deces_conjoint', t('deces_conjoint_label'))}
 
