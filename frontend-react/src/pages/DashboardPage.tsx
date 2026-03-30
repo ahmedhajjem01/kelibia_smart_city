@@ -114,7 +114,6 @@ export default function DashboardPage() {
   }
 
   const getMarkerIcon = (_status: string) => {
-    // We can use custom colors or just stick to icons for now
     return DefaultIcon;
   }
 
@@ -141,7 +140,6 @@ export default function DashboardPage() {
         </>
       }
     >
-      {/* ... (alerts remain same) */}
       {user && !user.is_verified && (
         <div className="alert alert-warning shadow-sm border-start border-4 border-warning mb-4">
           <div className="d-flex align-items-center">
@@ -149,7 +147,7 @@ export default function DashboardPage() {
             <div>
               <h5 className="alert-heading mb-1">Compte en attente de vérification</h5>
               <p className="mb-0 small">
-                Votre identité est en cours de validation par un agent municipal. 
+                {lang === 'ar' ? 'يتم حالياً التحقق من هويتك من قبل وكيل البلدية.' : 'Votre identité est en cours de validation par un agent municipal.'}
               </p>
             </div>
           </div>
@@ -187,7 +185,7 @@ export default function DashboardPage() {
             <div className="col-6 col-md-4 border-end border-bottom">
               <Link to="/mes-extraits" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-file-contract fa-2x text-primary mb-2"></i>
-                <div className="small fw-bold">{t('mes_extraits')}</div>
+                <div className="small fw-bold">{t('extraits_hub_title')}</div>
               </Link>
             </div>
             <div className="col-6 col-md-4 border-bottom">

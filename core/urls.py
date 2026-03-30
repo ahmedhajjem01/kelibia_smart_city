@@ -4,8 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from accounts.views import MyTokenObtainPairView, admin_logout
 from rest_framework_simplejwt.views import TokenRefreshView
-from core.views import login_page
-
 urlpatterns = [
     path('admin/logout/', admin_logout, name='admin_logout'),
     path('admin/', admin.site.urls),
@@ -25,7 +23,6 @@ urlpatterns = [
     path('api/forum/', include('forum.urls')),
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),
-    path('', login_page, name='login'),
 ]
 
 if settings.DEBUG:

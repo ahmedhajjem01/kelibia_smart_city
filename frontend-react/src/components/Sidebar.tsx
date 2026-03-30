@@ -37,7 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       </NavLink>
       <NavLink to="/mes-extraits" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
         <i className="fas fa-file-contract"></i>
-        <span>{t('mes_extraits')}</span>
+        <span>{t('extraits_hub_title')}</span>
       </NavLink>
       <NavLink to="/services" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
         <i className="fas fa-file-alt"></i>
