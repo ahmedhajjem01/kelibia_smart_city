@@ -226,8 +226,10 @@ export default function ServicesPage() {
             {lang === 'ar' ? 'لا توجد خدمات متاحة حالياً.' : 'Aucun service disponible pour le moment.'}
           </p>
         ) : (
-          allCategories.map((cat) => {
-            const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
+          allCategories
+            .filter((cat) => !cat.name_fr.toLowerCase().includes('problèmes') && !cat.name_fr.toLowerCase().includes('signalements'))
+            .map((cat) => {
+              const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
             return (
               <div key={cat.id} className="category-section mb-5">
                 <div className="category-header">
