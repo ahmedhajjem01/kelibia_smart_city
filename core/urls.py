@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView
+from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView, UserVerificationView
 from rest_framework_simplejwt.views import TokenRefreshView
 from core.views import login_redirect, confirm_payment
 
@@ -11,6 +11,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/payments/confirm/', confirm_payment, name='confirm_payment'),
     path('api/accounts/cards/', SavedCardView.as_view(), name='saved_cards'),
+    path('api/accounts/verify-citizens/', UserVerificationView.as_view(), name='verify_citizens'),
+
 
 
     path('api/', include('djoser.urls')),

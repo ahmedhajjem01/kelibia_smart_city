@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 
+const resolveBackendUrl = (path: string) => {
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return `http://localhost:8000${path}`
+}
+
 type UserInfo = {
   first_name: string; last_name: string; email: string
   user_type?: string; is_staff?: boolean; is_superuser?: boolean; city?: string
@@ -168,10 +174,14 @@ export default function AgentDashboardPage() {
   const [detailStatus, setDetailStatus] = useState('')
   const [detailSaving, setDetailSaving] = useState(false)
   const [showDupPanel, setShowDupPanel] = useState(false)
-  // reclassify modal state
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users'>('dashboard')
+
+  const [unverifiedUsers, setUnverifiedUsers] = useState<any[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
   const markersLayer = useRef<any>(null)
@@ -197,11 +207,38 @@ export default function AgentDashboardPage() {
       const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
       if (!res.ok) throw new Error()
       const u: UserInfo = await res.json()
-      if (u.user_type !== 'agent' && !u.is_staff && !u.is_superuser) { navigate('/dashboard'); return }
+      if (u.user_type !== 'agent' && u.user_type !== 'supervisor' && !u.is_staff && !u.is_superuser) { navigate('/dashboard'); return }
       setUser(u)
       fetchReclamations()
+      if (u.user_type === 'supervisor' || u.is_staff || u.is_superuser) {
+        fetchUnverifiedUsers()
+      }
     } catch { setUser(null) }
   }
+
+  async function fetchUnverifiedUsers() {
+    setLoadingUsers(true)
+    try {
+      const res = await fetch('/api/accounts/verify-citizens/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setUnverifiedUsers(await res.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingUsers(false) }
+  }
+
+  async function handleVerifyUser(userId: number) {
+    try {
+      const res = await fetch('/api/accounts/verify-citizens/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ user_id: userId, action: 'verify' })
+      })
+      if (res.ok) {
+        showToast('Utilisateur vérifié avec succès !')
+        setUnverifiedUsers(prev => prev.filter(u => u.id !== userId))
+      }
+    } catch (e) { showToast('Erreur', 'error') }
+  }
+
 
   async function fetchReclamations() {
     setLoading(true); setRecError(false)
@@ -409,137 +446,195 @@ export default function AgentDashboardPage() {
       <div className="ag-body">
         <div className="ag-sidebar">
           <div className="ag-sec-title">NAVIGATION</div>
-          <a className="ag-nav-item active" href="#"><i className="fas fa-tachometer-alt"></i> Tableau de bord</a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-recs-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-bullhorn"></i> Signalements<span className="ag-badge">{pending}</span></a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); document.getElementById('ag-map-card')?.scrollIntoView({ behavior: 'smooth' }) }}><i className="fas fa-map-marked-alt"></i> Carte SIG</a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/municipalite-livret') }}><i className="fas fa-book-open"></i> Livrets de Famille</a>
-          <a className="ag-nav-item" href="#"><i className="fas fa-newspaper"></i> Actualités</a>
-
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-stats') }}><i className="fas fa-brain"></i> Stats IA</a>
-          <div className="ag-divider"></div>
-          <div className="ag-sec-title">COMPTE</div>
           <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
-          {(user?.user_type === 'supervisor' || user?.is_superuser) && (
-            <a className="ag-nav-item" href="/admin/" style={{ color: '#ff6d00' }}>
-              <i className="fas fa-cog"></i> <strong>Panel Django Admin</strong>
-            </a>
+          
+          {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
+            <>
+              <div className="ag-divider"></div>
+              <div className="ag-sec-title">ADMINISTRATION</div>
+              <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users') }}>
+                <i className="fas fa-user-check"></i> Vérification Citoyens
+                {unverifiedUsers.length > 0 && <span className="ag-badge">{unverifiedUsers.length}</span>}
+              </a>
+              <a className="ag-nav-item" href="/admin/" style={{ color: '#ff6d00' }} target="_blank">
+                <i className="fas fa-cog"></i> <strong>Panel Django Admin</strong>
+              </a>
+            </>
           )}
+
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</a>
         </div>
         <div className="ag-main">
-          <div className="row g-3 mb-4">
-            {([
-              { val: total,    lbl: 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
-              { val: pending,  lbl: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
-              { val: inprog,   lbl: 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
-              { val: resolved, lbl: 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
-              { val: rejected, lbl: 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
-              { val: dupCount, lbl: 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
-            ] as any[]).map((s, i) => (
-              <div key={i} className="col-6 col-md-2">
-                <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
-                  <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                  <div>
-                    <div className="val">{loading ? '—' : s.val}</div>
-                    <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
+          {activeTab === 'dashboard' ? (
+            <>
+              <div className="row g-3 mb-4">
+                {([
+                  { val: total,    lbl: 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
+                  { val: pending,  lbl: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
+                  { val: inprog,   lbl: 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
+                  { val: resolved, lbl: 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
+                  { val: rejected, lbl: 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
+                  { val: dupCount, lbl: 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
+                ] as any[]).map((s, i) => (
+                  <div key={i} className="col-6 col-md-2">
+                    <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                      <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
+                      <div>
+                        <div className="val">{loading ? '—' : s.val}</div>
+                        <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-          {showDupPanel && (
-            <div className="ag-dup-card">
-              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4a148c,#6a1b9a)' }}>
-                <span><i className="fas fa-copy me-2"></i>Signalements potentiellement en double</span>
-                <button onClick={() => setShowDupPanel(false)} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-times me-1"></i> Fermer</button>
-              </div>
-              <div style={{ padding: 16 }}>
-                {dupGroups.length === 0
-                  ? <div style={{ textAlign: 'center', padding: 30, color: '#888' }}><i className="fas fa-check-circle" style={{ color: '#2e7d32', fontSize: '2rem', display: 'block', marginBottom: 10 }}></i>Aucun doublon détecté.</div>
-                  : dupGroups.map((grp, gi) => (
-                    <div key={gi} style={{ background: '#f9f0ff', border: '1px solid #e1bee7', borderRadius: 8, padding: '12px 16px', marginBottom: 10 }}>
-                      <div style={{ fontSize: '.78rem', color: '#6a1b9a', fontWeight: 700, marginBottom: 8 }}><i className="fas fa-copy me-1"></i>{grp.length} signalements similaires</div>
-                      {grp.map((r: Reclamation) => (
-                        <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #ede7f6', fontSize: '.8rem' }}>
-                          <span><strong>#{r.id}</strong> — {r.title}</span><span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
+              {showDupPanel && (
+                <div className="ag-dup-card">
+                  <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4a148c,#6a1b9a)' }}>
+                    <span><i className="fas fa-copy me-2"></i>Signalements potentiellement en double</span>
+                    <button onClick={() => setShowDupPanel(false)} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-times me-1"></i> Fermer</button>
+                  </div>
+                  <div style={{ padding: 16 }}>
+                    {dupGroups.length === 0
+                      ? <div style={{ textAlign: 'center', padding: 30, color: '#888' }}><i className="fas fa-check-circle" style={{ color: '#2e7d32', fontSize: '2rem', display: 'block', marginBottom: 10 }}></i>Aucun doublon détecté.</div>
+                      : dupGroups.map((grp, gi) => (
+                        <div key={gi} style={{ background: '#f9f0ff', border: '1px solid #e1bee7', borderRadius: 8, padding: '12px 16px', marginBottom: 10 }}>
+                          <div style={{ fontSize: '.78rem', color: '#6a1b9a', fontWeight: 700, marginBottom: 8 }}><i className="fas fa-copy me-1"></i>{grp.length} signalements similaires</div>
+                          {grp.map((r: Reclamation) => (
+                            <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #ede7f6', fontSize: '.8rem' }}>
+                              <span><strong>#{r.id}</strong> — {r.title}</span><span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
+                            </div>
+                          ))}
                         </div>
                       ))}
-                    </div>
-                  ))}
+                  </div>
+                </div>
+              )}
+              <div className="ag-card" id="ag-map-card">
+                <div className="ag-card-hdr-blue">
+                  <span><i className="fas fa-map-marked-alt me-2"></i>Carte des Signalements — Kélibia</span>
+                  <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} signalement(s)</span>
+                </div>
+                <div id="ag-map" ref={mapRef} style={{ height: 380, width: '100%', borderRadius: '0 0 10px 10px' }}></div>
               </div>
-            </div>
-          )}
-          <div className="ag-card" id="ag-map-card">
-            <div className="ag-card-hdr-blue">
-              <span><i className="fas fa-map-marked-alt me-2"></i>Carte des Signalements — Kélibia</span>
-              <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} signalement(s)</span>
-            </div>
-            <div id="ag-map" ref={mapRef} style={{ height: 380, width: '100%', borderRadius: '0 0 10px 10px' }}></div>
-          </div>
-          <div className="ag-card" id="ag-recs-card">
-            <div className="ag-card-hdr-blue">
-              <span><i className="fas fa-bullhorn me-2"></i>Gestion des Signalements</span>
-              <button onClick={fetchReclamations} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-sync-alt me-1"></i> Actualiser</button>
-            </div>
-            <div className="ag-filter-bar">
-              <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} /></div>
-              <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="">Tous les statuts</option><option value="pending">En attente</option><option value="in_progress">En cours</option><option value="resolved">Résolus</option><option value="rejected">Rejetés</option></select>
-              <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}><option value="">Toutes catégories</option><option value="lighting">Éclairage</option><option value="trash">Déchets</option><option value="roads">Voirie</option><option value="noise">Nuisances</option><option value="other">Autre</option></select>
-              <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">Toutes priorités</option><option value="urgente">🔴 Urgente</option><option value="normale">🔵 Normale</option><option value="faible">🟣 Faible</option></select>
-              <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> Urgents seulement</button>
-              <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} résultat(s)</span>
-            </div>
-            {loading && <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#1565c0', width: '2rem', height: '2rem' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>Chargement des signalements...</div></div>}
-            {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>Erreur lors du chargement.</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> Réessayer</button></div>}
-            {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>Aucun signalement trouvé.</p></div>}
-            {!loading && !recError && filteredRecs.length > 0 && (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="ag-table">
-                  <thead><tr><th>#</th><th>Titre</th><th>Citoyen</th><th>Catégorie</th><th>Priorité</th><th>Confiance IA</th><th>Service</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
-                  <tbody>
-                    {pageRecs.map(r => {
-                      const cat = CAT[r.category] || CAT.other
-                      const prio = PRIORITY[r.priority] || PRIORITY.normale
-                      const svc = r.service_responsable || '—'
-                      return (
-                        <tr key={r.id}>
-                          <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{r.id}</td>
-                          <td><div style={{ fontWeight: 600, color: '#1a1a2e', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div><div style={{ fontSize: '.7rem', color: '#aaa', marginTop: 1 }}>{(r.description || '').slice(0, 40)}{(r.description || '').length > 40 ? '…' : ''}</div></td>
-                          <td style={{ fontSize: '.8rem', color: '#444' }}>{r.citizen_name || '—'}</td>
-                          <td><span className={`cat-badge ${cat.cls}`}>{cat.label}</span></td>
-                          <td><span className={`priority-badge ${prio.cls}`}>{prio.label}</span></td>
-                          <td>{(() => {
-                            const cc = r.confidence?.category
-                            const v = cc !== undefined ? cc : undefined
-                            if (v === undefined) return <span className="conf-badge conf-med">🤖 —</span>
-                            if (v >= 0.80) return <span className="conf-badge conf-high">🤖 {Math.round(v*100)}%</span>
-                            if (v >= 0.60) return <span className="conf-badge conf-med">⚠️ {Math.round(v*100)}%</span>
-                            return <span className="conf-badge conf-low">❌ {Math.round(v*100)}%</span>
-                          })()}</td>
-                          <td><span className="service-badge" title={svc}>{svc}</span></td>
-                          <td><QSSelect rec={r} onUpdate={quickUpdateStatus} /></td>
-                          <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(r.created_at)}</td>
-                          <td><button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button></td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-                {totalPages > 1 && (
-                  <div className="ag-pag-bar">
-                    <span>Page {currentPage} / {totalPages} — {filteredRecs.length} signalement(s)</span>
-                    <div className="d-flex gap-2">
-                      <button className="ag-page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><i className="fas fa-chevron-left"></i></button>
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const p = Math.max(1, currentPage - 2) + i; return p > totalPages ? null : <button key={p} className={`ag-page-btn${p === currentPage ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button> })}
-                      <button className="ag-page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><i className="fas fa-chevron-right"></i></button>
-                    </div>
+              <div className="ag-card" id="ag-recs-card">
+                <div className="ag-card-hdr-blue">
+                  <span><i className="fas fa-bullhorn me-2"></i>Gestion des Signalements</span>
+                  <button onClick={fetchReclamations} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-sync-alt me-1"></i> Actualiser</button>
+                </div>
+                <div className="ag-filter-bar">
+                  <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} /></div>
+                  <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="">Tous les statuts</option><option value="pending">En attente</option><option value="in_progress">En cours</option><option value="resolved">Résolus</option><option value="rejected">Rejetés</option></select>
+                  <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}><option value="">Toutes catégories</option><option value="lighting">Éclairage</option><option value="trash">Déchets</option><option value="roads">Voirie</option><option value="noise">Nuisances</option><option value="other">Autre</option></select>
+                  <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">Toutes priorités</option><option value="urgente">🔴 Urgente</option><option value="normale">🔵 Normale</option><option value="faible">🟣 Faible</option></select>
+                  <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> Urgents seulement</button>
+                  <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} résultat(s)</span>
+                </div>
+                {loading && <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#1565c0', width: '2rem', height: '2rem' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>Chargement des signalements...</div></div>}
+                {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>Erreur lors du chargement.</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> Réessayer</button></div>}
+                {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>Aucun signalement trouvé.</p></div>}
+                {!loading && !recError && filteredRecs.length > 0 && (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="ag-table">
+                      <thead><tr><th>#</th><th>Titre</th><th>Citoyen</th><th>Catégorie</th><th>Priorité</th><th>Confiance IA</th><th>Service</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                      <tbody>
+                        {pageRecs.map(r => {
+                          const cat = CAT[r.category] || CAT.other
+                          const prio = PRIORITY[r.priority] || PRIORITY.normale
+                          const svc = r.service_responsable || '—'
+                          return (
+                            <tr key={r.id}>
+                              <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{r.id}</td>
+                              <td><div style={{ fontWeight: 600, color: '#1a1a2e', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div><div style={{ fontSize: '.7rem', color: '#aaa', marginTop: 1 }}>{(r.description || '').slice(0, 40)}{(r.description || '').length > 40 ? '…' : ''}</div></td>
+                              <td style={{ fontSize: '.8rem', color: '#444' }}>{r.citizen_name || '—'}</td>
+                              <td><span className={`cat-badge ${cat.cls}`}>{cat.label}</span></td>
+                              <td><span className={`priority-badge ${prio.cls}`}>{prio.label}</span></td>
+                              <td>{(() => {
+                                const cc = r.confidence?.category
+                                const v = cc !== undefined ? cc : undefined
+                                if (v === undefined) return <span className="conf-badge conf-med">🤖 —</span>
+                                if (v >= 0.80) return <span className="conf-badge conf-high">🤖 {Math.round(v*100)}%</span>
+                                if (v >= 0.60) return <span className="conf-badge conf-med">⚠️ {Math.round(v*100)}%</span>
+                                return <span className="conf-badge conf-low">❌ {Math.round(v*100)}%</span>
+                              })()}</td>
+                              <td><span className="service-badge" title={svc}>{svc}</span></td>
+                              <td><QSSelect rec={r} onUpdate={quickUpdateStatus} /></td>
+                              <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(r.created_at)}</td>
+                              <td><button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button></td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                    {totalPages > 1 && (
+                      <div className="ag-pag-bar">
+                        <span>Page {currentPage} / {totalPages} — {filteredRecs.length} signalement(s)</span>
+                        <div className="d-flex gap-2">
+                          <button className="ag-page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><i className="fas fa-chevron-left"></i></button>
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const p = Math.max(1, currentPage - 2) + i; return p > totalPages ? null : <button key={p} className={`ag-page-btn${p === currentPage ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button> })}
+                          <button className="ag-page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><i className="fas fa-chevron-right"></i></button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-green">
+                <span><i className="fas fa-user-check me-2"></i>Comptes Citoyens en attente de vérification</span>
+                <button onClick={fetchUnverifiedUsers} className="btn btn-sm btn-outline-light"><i className="fas fa-sync-alt"></i></button>
+              </div>
+              <div className="ag-card-body p-0">
+                {loadingUsers ? (
+                   <div className="text-center p-5"><div className="spinner-border text-success"></div></div>
+                ) : unverifiedUsers.length === 0 ? (
+                  <div className="text-center p-5 text-muted"><i className="fas fa-check-circle fa-3x mb-3 opacity-25"></i><p>Tous les citoyens sont vérifiés.</p></div>
+                ) : (
+                  <table className="ag-table">
+                    <thead>
+                      <tr>
+                        <th>Citoyen</th>
+                        <th>CIN / Téléphone</th>
+                        <th>Documents CIN</th>
+                        <th>Date Inscription</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {unverifiedUsers.map(u => (
+                        <tr key={u.id}>
+                          <td>
+                            <div className="fw-bold">{u.full_name}</div>
+                            <div className="small text-muted">{u.email}</div>
+                          </td>
+                          <td>
+                            <div><i className="fas fa-id-card me-1 text-muted"></i>{u.cin}</div>
+                            <div><i className="fas fa-phone me-1 text-muted"></i>{u.phone}</div>
+                          </td>
+                          <td>
+                            <div className="d-flex gap-2">
+                               {u.cin_front && <a href={resolveBackendUrl(u.cin_front)} target="_blank" rel="noreferrer" className="btn btn-xs btn-outline-primary py-0 px-2 font-monospace" style={{ fontSize: '10px' }}>AVANT</a>}
+                               {u.cin_back && <a href={resolveBackendUrl(u.cin_back)} target="_blank" rel="noreferrer" className="btn btn-xs btn-outline-primary py-0 px-2 font-monospace" style={{ fontSize: '10px' }}>ARRIERE</a>}
+                            </div>
+                          </td>
+                          <td className="small text-muted">{new Date(u.date_joined).toLocaleDateString()}</td>
+                          <td>
+                            <button className="btn btn-success btn-sm rounded-pill px-3" onClick={() => handleVerifyUser(u.id)}>
+                              <i className="fas fa-check me-1"></i> Approuver
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         <div style={{ width: 240, minWidth: 240, padding: '24px 16px 24px 0', flexShrink: 0 }}>
+
           <div className="ag-profile-card">
             <div className="ag-profile-hdr"><div className="ag-profile-av">{inits}</div><div className="ag-profile-name">{fullName}</div><div className="ag-profile-email">{user?.email || '...'}</div></div>
             <div className="ag-profile-body">

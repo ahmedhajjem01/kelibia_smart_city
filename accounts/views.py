@@ -158,7 +158,51 @@ class SavedCardView(APIView):
         )
         return Response({"message": "Carte enregistrée avec succès !"}, status=201)
 
+class UserVerificationView(APIView):
+    """
+    List and verify unverified citizens. Only for staff or supervisors.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+            return Response({"error": "Accès refusé."}, status=403)
+        
+        users = User.objects.filter(is_verified=False, user_type='citizen').order_by('-date_joined')
+        data = [{
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "full_name": f"{u.first_name} {u.last_name}",
+            "cin": u.cin,
+            "phone": u.phone,
+            "date_joined": u.date_joined,
+            "cin_front": u.cin_front_image.url if u.cin_front_image else None,
+            "cin_back": u.cin_back_image.url if u.cin_back_image else None,
+        } for u in users]
+        return Response(data)
+
+    def post(self, request):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+            return Response({"error": "Accès refusé."}, status=403)
+        
+        user_id = request.data.get('user_id')
+        action = request.data.get('action') # 'verify' or 'reject'
+        
+        try:
+            target_user = User.objects.get(id=user_id)
+            if action == 'verify':
+                target_user.is_verified = True
+                target_user.save()
+                return Response({"message": f"Utilisateur {target_user.username} vérifié avec succès."})
+            elif action == 'reject':
+                # Simplified: just keep as unverified or delete? Let's just return a msg for now.
+                return Response({"message": "Action refusée/mise en attente."})
+        except User.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable."}, status=404)
+
 def admin_logout(request):
+
 
     """
     Custom logout view for the admin to redirect to the frontend.
