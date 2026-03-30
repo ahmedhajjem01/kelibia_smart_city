@@ -374,15 +374,17 @@ export default function AgentDashboardPage() {
 
   async function fetchMlStats() {
     setMlLoading(true)
+    console.log('[ml_stats] fetching...')
     try {
       const res = await fetch('/api/reclamations/ml_stats/', { headers: { Authorization: `Bearer ${access}` } })
+      console.log('[ml_stats] status:', res.status)
+      const text = await res.text()
+      console.log('[ml_stats] body:', text.slice(0, 500))
       if (!res.ok) {
-        const text = await res.text().catch(() => '')
-        console.error('[ml_stats] HTTP', res.status, text.slice(0, 300))
         showToast(`Erreur ${res.status} — Stats IA indisponibles.`, 'error')
         return
       }
-      setMlStats(await res.json())
+      setMlStats(JSON.parse(text))
     } catch (e) {
       console.error('[ml_stats] network error', e)
       showToast('Erreur réseau — Stats IA indisponibles.', 'error')
