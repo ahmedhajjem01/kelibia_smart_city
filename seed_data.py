@@ -446,7 +446,7 @@ print()
 from collections import Counter
 statuses = Counter(Reclamation.objects.values_list('status', flat=True))
 cats     = Counter(Reclamation.objects.values_list('category', flat=True))
-gps_ok   = Reclamation.objects.exclude(location__isnull=True).count()
+gps_ok   = Reclamation.objects.exclude(latitude__isnull=True).count()
 print(f'  TOTAL DB : {Reclamation.objects.count()} réclamations, {gps_ok} avec GPS')
 print(f'  Statuts  : {dict(statuses)}')
 print(f'  Catégor. : {dict(cats)}')

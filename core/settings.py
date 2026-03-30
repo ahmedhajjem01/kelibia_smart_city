@@ -8,9 +8,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]  # Update this to specific domains in production
+ALLOWED_HOSTS = ["*"]
 
 # Session and Cookie configuration for SSO
 SESSION_COOKIE_HTTPONLY = True
@@ -78,11 +78,13 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 import dj_database_url
+_db_url = os.getenv("DATABASE_URL", "postgres://postgres:admin@127.0.0.1:5432/kelibia_db")
+_is_neon = "neon.tech" in _db_url
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgres://postgres:admin@127.0.0.1:5432/kelibia_db"),
+        default=_db_url,
         conn_max_age=600,
-        ssl_require=not DEBUG
+        ssl_require=_is_neon,
     )
 }
 
@@ -115,12 +117,19 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5500",
     "http://127.0.0.1:5501",
     "http://localhost:5501",
+    "http://localhost:5173",       # Vite dev server
+    "http://127.0.0.1:5173",
+    # Production Vercel deployment
+    "https://kelibia-smart-city.vercel.app",
 ]
+# Dynamic Vercel preview URLs (auto-set by Vercel on each deploy)
 if os.getenv("VERCEL_URL"):
     CORS_ALLOWED_ORIGINS.append(f"https://{os.getenv('VERCEL_URL')}")
+if os.getenv("VERCEL_BRANCH_URL"):
+    CORS_ALLOWED_ORIGINS.append(f"https://{os.getenv('VERCEL_BRANCH_URL')}")
 
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
-CORS_ALLOW_ALL_ORIGINS = True  # Dev only
+CSRF_TRUSTED_ORIGINS = list(CORS_ALLOWED_ORIGINS)
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in local dev
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
@@ -147,7 +156,7 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "harounahajjem@gmail.com")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "lxjsjbfypcwfujlw")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-DOMAIN = os.getenv("DOMAIN", os.getenv("VERCEL_URL", "127.0.0.1:5500"))
+DOMAIN = os.getenv("DOMAIN", os.getenv("VERCEL_URL", "127.0.0.1:8000"))
 SITE_NAME = "Tunisia Smart City"
 
 # Djoser Configuration
