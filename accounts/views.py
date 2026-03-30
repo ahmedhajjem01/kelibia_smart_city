@@ -42,8 +42,14 @@ class RegisterView(APIView):
                 address=data['address'],
                 governorate=data['governorate'],
                 city=data['city'],
-                is_active=True, # Allow immediate login
-                is_verified=False # Pending admin review
+                is_active=True,
+                is_verified=False,
+                date_of_birth=data.get('date_of_birth'),
+                place_of_birth=data.get('place_of_birth'),
+                is_married=data.get('is_married') == 'true',
+                spouse_cin=data.get('spouse_cin'),
+                spouse_first_name=data.get('spouse_first_name'),
+                spouse_last_name=data.get('spouse_last_name')
             )
             
             # Save CIN images if provided
@@ -52,11 +58,10 @@ class RegisterView(APIView):
             if 'cin_back_image' in files:
                 user.cin_back_image = files['cin_back_image']
             
-            if 'cin_front_image' in files or 'cin_back_image' in files:
-                user.save()
+            user.save()
             
             return Response({
-                "message": "Utilisateur créé avec succès ! Votre compte est en attente de vérification par un administrateur.",
+                "message": "Utilisateur créé avec succès ! Veuillez vous connecter.",
                 "username": user.username
             }, status=status.HTTP_201_CREATED)
 

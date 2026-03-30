@@ -6,7 +6,10 @@ import { useI18n } from '../i18n/LanguageProvider'
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  return `http://localhost:8000${path}`
+  // If we are on localhost, use localhost:8000
+  // In production, we assume media is served from the same base as /api/
+  const base = window.location.hostname === 'localhost' ? 'http://localhost:8000' : ''
+  return `${base}${path}`
 }
 
 type UserInfo = {
@@ -50,7 +53,7 @@ const PAGE_SIZE = 10
 
 function getRoleLabel(u: UserInfo | null) {
   if (!u) return 'Chargement...'
-  if (u.is_superuser || u.user_type === 'supervisor') return 'Superviseur'
+  if (u.is_superuser || u.is_staff || u.user_type === 'supervisor' || u.user_type === 'Superviseur') return 'Superviseur'
   return 'Agent Municipal'
 }
 
@@ -451,8 +454,8 @@ export default function AgentDashboardPage() {
       </nav>
       <div className="ag-hero">
         <div>
-          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>Espace Agent — <strong>{user?.first_name || 'Agent'}</strong></div>
-          <div className="sub">Gérez les signalements des citoyens et assurez le suivi des interventions.</div>
+          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? 'Espace Superviseur' : 'Espace Agent'} — <strong>{user?.first_name || '...'}</strong></div>
+          <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? 'Supervisez les activités municipales et gérez les utilisateurs.' : 'Gérez les signalements des citoyens et assurez le suivi des interventions.'}</div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user)}</span>
@@ -480,9 +483,6 @@ export default function AgentDashboardPage() {
               </a>
               <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
                 <i className="fas fa-comments"></i> Modération Forum
-              </a>
-              <a className="ag-nav-item" href="/admin/" style={{ color: '#00c853' }} target="_blank">
-                <i className="fas fa-external-link-alt"></i> <strong>Panel Django Admin</strong>
               </a>
             </>
           )}
@@ -708,15 +708,12 @@ export default function AgentDashboardPage() {
                         </div>
                      </div>
                   </div>
-                  <button className="btn btn-primary mt-5" onClick={() => window.open('/admin/', '_blank')}>
-                     <i className="fas fa-external-link-alt me-2"></i>Accéder aux détails dans le Panel Admin
-                  </button>
                </div>
             </div>
           ) : (
             <div className="ag-card animate__animated animate__fadeIn">
                <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
-                  <span className="fw-bold"><i className="fas fa-comments me-2"></i>Modération du Forum & Actualités</span>
+                  <span className="fw-bold"><i className="fas fa-comments me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? 'Espace Superviseur' : 'Modération du Forum & Actualités'}</span>
                </div>
                <div className="p-5 text-center">
                   <i className="fas fa-shield-alt fa-3x mb-3 text-muted"></i>

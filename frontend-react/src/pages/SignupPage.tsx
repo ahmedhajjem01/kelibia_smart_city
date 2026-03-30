@@ -381,24 +381,9 @@ export default function SignupPage() {
         throw new Error(data?.error || "Une erreur est survenue lors de l'inscription.")
       }
 
-      setMessageType('success')
       setMessage(t('signup_success_verified'))
-
-      // reset
-      setFirstName('')
-      setLastName('')
-      setCin('')
-      setPhone('')
-      setEmail('')
-      setGovernorate('')
-      setCity('')
-      setAddress('')
-      setPassword('')
-      setRePassword('')
-      setCinFront(null)
-      setCinBack(null)
-
-      setTimeout(() => navigate('/login'), 2000)
+      // Immediate redirection
+      setTimeout(() => navigate('/login'), 300)
     } catch (err) {
       setMessageType('danger')
       setMessage(err instanceof Error ? err.message : 'Erreur lors de l’inscription.')
