@@ -322,7 +322,7 @@ export default function SignupPage() {
   }, [showCamera])
 
   const videoConstraints = {
-    facingMode: "user"
+    facingMode: { ideal: "environment" }
   };
 
   async function onSubmit(e: React.FormEvent) {
@@ -513,10 +513,11 @@ export default function SignupPage() {
                           <i className="bi bi-camera me-1"></i>{t('camera')}
                         </button>
                         <input type="file" id="fileFront" hidden accept="image/*" onChange={(e) => e.target.files && setCinFront(e.target.files[0])} />
-                        <button type="button" className="btn btn-outline-secondary" onClick={() => document.getElementById('fileFront')?.click()}>
+                        <button type="button" className="btn btn-outline-primary" onClick={() => document.getElementById('fileFront')?.click()}>
                            <i className="bi bi-upload me-1"></i>{t('upload')}
                         </button>
                       </div>
+                      <div className="text-muted mt-1" style={{ fontSize: '10px' }}>Si la caméra ne marche pas, cliquez sur "Téléverser"</div>
                     </div>
 
                     {/* Face Arrière */}
@@ -534,10 +535,11 @@ export default function SignupPage() {
                           <i className="bi bi-camera me-1"></i>{t('camera')}
                         </button>
                         <input type="file" id="fileBack" hidden accept="image/*" onChange={(e) => e.target.files && setCinBack(e.target.files[0])} />
-                        <button type="button" className="btn btn-outline-secondary" onClick={() => document.getElementById('fileBack')?.click()}>
+                        <button type="button" className="btn btn-outline-primary" onClick={() => document.getElementById('fileBack')?.click()}>
                            <i className="bi bi-upload me-1"></i>{t('upload')}
                         </button>
                       </div>
+                      <div className="text-muted mt-1" style={{ fontSize: '10px' }}>Si la caméra ne marche pas, cliquez sur "Téléverser"</div>
                     </div>
                   </div>
 
@@ -735,7 +737,9 @@ export default function SignupPage() {
                     onUserMedia={() => console.log("Camera access granted")}
                     onUserMediaError={(err) => {
                       console.error("Camera access error:", err);
-                      alert("Erreur d'accès à la caméra: " + err);
+                      // Suggest manual upload if permission denied
+                      alert("Permission refusée ou erreur caméra. Veuillez utiliser l'option 'Téléverser' pour envoyer une photo de votre galerie.");
+                      setShowCamera(null);
                     }}
                     className="img-fluid rounded"
                   />
