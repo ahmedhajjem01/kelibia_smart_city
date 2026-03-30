@@ -41,6 +41,8 @@ class CustomUser(AbstractUser):
     address = models.TextField(verbose_name="Adresse")
     governorate = models.CharField(max_length=50, choices=GOVERNORATE_CHOICES, verbose_name="Gouvernorat", default='Nabeul')
     city = models.CharField(max_length=100, verbose_name="Ville", default='Kelibia')
+    first_name_ar = models.CharField(max_length=150, blank=True, verbose_name="Prénom (Arabe)")
+    last_name_ar = models.CharField(max_length=150, blank=True, verbose_name="Nom (Arabe)")
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
     is_verified = models.BooleanField(default=False, verbose_name="Est vérifié")
     cin_front_image = models.ImageField(upload_to='cin_images/', null=True, blank=True, verbose_name="CIN Face Avant")

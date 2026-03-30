@@ -25,6 +25,8 @@ const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 type UserInfo = {
   first_name: string
   last_name: string
+  first_name_ar?: string
+  last_name_ar?: string
   email: string
   is_verified: boolean
   phone?: string
@@ -128,13 +130,13 @@ export default function DashboardPage() {
           <Link to="/mes-reclamations" 
                 className="btn w-100 mb-2 py-2 fw-bold text-white shadow-sm"
                 style={{ backgroundColor: 'var(--primary-navy)', borderRadius: '8px', fontSize: '0.85rem' }}>
-            <i className="fas fa-list-check me-2"></i>Voir mes réclamations
+            <i className="fas fa-list-check me-2"></i>{t('view_my_reclamations')}
           </Link>
 
           <Link to="/nouvelle-reclamation" 
                 className="btn w-100 py-2 fw-bold bg-white border border-primary shadow-sm"
                 style={{ color: 'var(--primary-navy)', borderRadius: '8px', fontSize: '0.85rem' }}>
-            <i className="fas fa-plus-circle me-2 text-primary"></i>Nouveau signalement
+            <i className="fas fa-plus-circle me-2 text-primary"></i>{t('new_signalement')}
           </Link>
         </>
       }

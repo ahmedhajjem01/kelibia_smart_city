@@ -43,6 +43,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     const s = document.createElement('style')
@@ -157,20 +158,43 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="lp-field">
+          <div className="lp-field" style={{ position: 'relative' }}>
             <label className="lp-label" htmlFor="password">{t('password_label')}</label>
-            <input
-              id="password"
-              type="password"
-              className="lp-input"
-              placeholder="••••••••"
-              required
-              value={password}
-              onChange={ev => setPassword(ev.target.value)}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                className="lp-input"
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={ev => setPassword(ev.target.value)}
+                style={{ paddingRight: '46px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#6b7280',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '4px'
+                }}
+              >
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, marginTop: -4 }}>
             <input
               type="checkbox"
               id="rememberMe"
@@ -178,7 +202,7 @@ export default function LoginPage() {
               onChange={ev => setRememberMe(ev.target.checked)}
               style={{ accentColor: '#2563eb', cursor: 'pointer' }}
             />
-            <label htmlFor="rememberMe" style={{ fontSize: '.8rem', color: '#6b7280', cursor: 'pointer' }}>
+            <label htmlFor="rememberMe" style={{ fontSize: '.8rem', color: '#6b7280', cursor: 'pointer', userSelect: 'none' }}>
               {t('remember_me')}
             </label>
           </div>

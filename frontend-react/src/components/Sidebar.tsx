@@ -17,7 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
   return (
     <div className="sidebar d-none d-md-block">
-      <div className="sidebar-section-title">NAVIGATION</div>
+      <div className="sidebar-section-title">{t('nav_title')}</div>
 
       <NavLink to="/dashboard" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
         <i className="fas fa-tachometer-alt"></i>
@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       </NavLink>
       <a className="sidebar-item" href="#mapCard" onClick={scrollToMap}>
         <i className="fas fa-map-marked-alt"></i>
-        <span>Carte SIG</span>
+        <span>{t('gis_map')}</span>
       </a>
       <NavLink to="/mes-reclamations" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
         <i className="fas fa-bullhorn"></i>
@@ -49,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       </NavLink>
 
       <div className="sidebar-divider"></div>
-      <div className="sidebar-section-title">COMPTE</div>
+      <div className="sidebar-section-title">{t('account_title')}</div>
 
       <NavLink to="/profile" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
         <i className="fas fa-user-circle"></i>

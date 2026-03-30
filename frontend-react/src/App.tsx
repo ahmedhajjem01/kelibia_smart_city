@@ -14,6 +14,7 @@ import MunicipaliteNaissancesPage from './pages/MunicipaliteNaissancesPage'
 import DeclarationNaissancePage from './pages/DeclarationNaissancePage'
 import DeclarationDecesPage from './pages/DeclarationDecesPage'
 import MesExtraitsPage from './pages/MesExtraitsPage'
+import MesNaissancesPage from './pages/MesNaissancesPage'
 import MesDecesPage from './pages/MesDecesPage'
 import MesMariagesPage from './pages/MesMariagesPage'
 import DemandeResidencePage from './pages/DemandeResidencePage'
@@ -63,6 +64,10 @@ export default function App() {
           <Route
             path="/mes-extraits"
             element={<MesExtraitsPage />}
+          />
+          <Route
+            path="/mes-naissances"
+            element={<MesNaissancesPage />}
           />
           <Route
             path="/mes-demandes"

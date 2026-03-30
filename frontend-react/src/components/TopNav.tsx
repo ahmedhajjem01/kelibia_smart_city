@@ -2,7 +2,7 @@ import React from 'react';
 import { useI18n } from '../i18n/LanguageProvider';
 
 interface TopNavProps {
-  user: { first_name: string; last_name: string } | null;
+  user: { first_name: string; last_name: string; first_name_ar?: string; last_name_ar?: string } | null;
   onLogout: () => void;
 }
 
@@ -28,7 +28,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
           <div className="navbar-logo"><i className="fas fa-city"></i></div>
           <div className="navbar-title">
             <span className="main-title">{lang === 'ar' ? 'بلدية قليبية' : 'Commune de Kélibia'}</span>
-            <span className="sub-title">{lang === 'ar' ? 'بوابة المواطن —' : 'Portail Citoyen —'} <span className="text-primary">Kelibia Smart City</span></span>
+            <span className="sub-title">{t('portal_citoyen')} — <span className="text-primary">Kelibia Smart City</span></span>
           </div>
         </a>
         <div className="navbar-actions">
@@ -46,9 +46,9 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
           </button>
           <div className="user-pill d-none d-sm-flex">
             <div className="avatar">
-              {user ? user.first_name[0].toUpperCase() : '?'}
+              {user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar[0] : user.first_name[0]).toUpperCase() : '?'}
             </div>
-            <span>{user ? `${user.first_name} ${user.last_name}` : 'Chargement...'}</span>
+            <span>{user ? (lang === 'ar' && user.first_name_ar ? `${user.first_name_ar} ${user.last_name_ar}` : `${user.first_name} ${user.last_name}`) : t('loading')}</span>
           </div>
           <button className="logout-btn" onClick={onLogout}>
             <i className="fas fa-sign-out-alt"></i>

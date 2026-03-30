@@ -283,6 +283,7 @@ export default function SignupPage() {
   const [address, setAddress] = useState('')
   const [password, setPassword] = useState('')
   const [rePassword, setRePassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   // CIN Images
   const [cinFront, setCinFront] = useState<File | null>(null)
@@ -594,29 +595,47 @@ export default function SignupPage() {
 
                   <h5 className="mb-3 text-muted border-bottom pb-2 mt-4">{t('security')}</h5>
                   <div className="row g-2 mb-3">
-                    <div className="col-md-6 form-floating">
+                    <div className="col-md-6 form-floating position-relative">
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         className="form-control"
                         id="password"
                         placeholder={t('password_label')}
                         required
                         value={password}
                         onChange={(ev) => setPassword(ev.target.value)}
+                        style={{ paddingRight: '45px' }}
                       />
                       <label htmlFor="password">{t('password_label')}</label>
+                      <button
+                        type="button"
+                        className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ zIndex: 10, paddingRight: '15px' }}
+                      >
+                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                      </button>
                     </div>
-                    <div className="col-md-6 form-floating">
+                    <div className="col-md-6 form-floating position-relative">
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         className="form-control"
                         id="re_password"
                         placeholder={t('confirm_password')}
                         required
                         value={rePassword}
                         onChange={(ev) => setRePassword(ev.target.value)}
+                        style={{ paddingRight: '45px' }}
                       />
                       <label htmlFor="re_password">{t('confirm_password')}</label>
+                      <button
+                        type="button"
+                        className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ zIndex: 10, paddingRight: '15px' }}
+                      >
+                        <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                      </button>
                     </div>
                   </div>
 

@@ -21,7 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   showHero = false,
   rightSidebar
 }) => {
-  const { lang } = useI18n();
+  const { t, lang } = useI18n();
 
   return (
     <div className={lang === 'ar' ? 'arabic-font' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
@@ -31,7 +31,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       <div className="breadcrumb-bar">
         <i className="fas fa-home me-2 text-primary"></i>
-        <a href="/dashboard"><span>Accueil</span></a>
+        <a href="/dashboard"><span>{t('home')}</span></a>
         {breadcrumbs.length > 0 ? (
           breadcrumbs.map((bc, idx) => (
             <React.Fragment key={idx}>
@@ -42,7 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         ) : (
           <>
             <span className="mx-2 text-muted">/</span>
-            <span>Portail Citoyen</span>
+            <span>{t('portal_citoyen')}</span>
           </>
         )}
       </div>
@@ -62,7 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       </div>
 
       <div className="page-footer">
-        © 2025 <span>Commune de Kélibia</span> — Portail Citoyen Kelibia Smart City &nbsp;|&nbsp; Tous droits réservés
+        {t('footer_text')}
       </div>
     </div>
   );

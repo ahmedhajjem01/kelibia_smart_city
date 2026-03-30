@@ -1,33 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { clearTokens, getAccessToken } from '../lib/authStorage'
+import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
-type Extrait = {
-  n_etat_civil: string | number
-  nom_complet_fr: string
-  nom_complet_ar: string
-  date_naissance: string
-  url_fr: string
-  url_ar: string
-}
-
-type MesExtraitsResponse = {
-  mon_extrait?: Extrait | null
-  conjoints?: Extrait[]
-  enfants?: Extrait[]
-}
-
 export default function MesExtraitsPage() {
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
-
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<MesExtraitsResponse | null>(null)
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -36,152 +18,123 @@ export default function MesExtraitsPage() {
       return
     }
 
-    setLoading(true)
-    setError(null)
-
-    ;(async () => {
-      try {
-        // Fetch User Info
-        const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (userRes.ok) {
-          const userData = await userRes.json()
-          setUser(userData)
-        }
-
-        const res = await fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok) {
-          const errorData = (await res.json().catch(() => null)) as
-            | { error?: string }
-            | null
-          throw new Error(errorData?.error || 'Impossible de trouver vos actes de naissance.')
-        }
-        const json = (await res.json()) as MesExtraitsResponse
-        setData(json)
-      } catch (e: any) {
-        console.error(e)
-        setError(e.message || "Erreur de connexion avec la base de données.")
-      } finally {
+    // Fetch User Info
+    fetch(resolveBackendUrl('/api/accounts/me/'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUser(data)
         setLoading(false)
-      }
-    })()
-  }, [navigate, lang])
+      })
+      .catch(() => setLoading(false))
+  }, [navigate])
 
-  function logout() {
-    clearTokens()
-    navigate('/login')
-  }
-
-  function card(extrait: Extrait) {
-    const nomComplet = lang === 'ar' ? extrait.nom_complet_ar : extrait.nom_complet_fr
-    return (
-      <div className="col-md-6 col-lg-4 mb-4" key={`${extrait.n_etat_civil}`}>
-        <div className="card shadow-sm h-100 border-primary" style={{ borderWidth: 2 }}>
-          <div className="card-body">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <i className="fas fa-file-contract fa-2x text-primary opacity-50" />
-              <span className="badge bg-primary rounded-pill">N° {extrait.n_etat_civil}</span>
-            </div>
-            <h5 className="card-title fw-bold">{nomComplet}</h5>
-            <p className="card-text text-muted mb-4">
-              <i className="fas fa-birthday-cake me-2" />
-              {extrait.date_naissance}
-            </p>
-            <div className="d-flex gap-2">
-              <a
-                href={resolveBackendUrl(extrait.url_fr)}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-outline-primary flex-fill"
-              >
-                <i className="fas fa-print me-1" /> FR
-              </a>
-              <a
-                href={resolveBackendUrl(extrait.url_ar)}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-primary flex-fill arabic-font"
-              >
-                <i className="fas fa-print me-1" /> بالعربية
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const categories = [
+    {
+      id: 'birth',
+      title: t('birth_extracts'),
+      icon: 'fa-baby',
+      color: '#4ade80', // green-400
+      link: '/mes-naissances',
+      desc: lang === 'ar' ? 'مضامين الولادة الخاصة بك وبأطفالك' : 'Vos extraits de naissance et ceux de vos enfants'
+    },
+    {
+      id: 'marriage',
+      title: t('marriage_extracts'),
+      icon: 'fa-ring',
+      color: '#fbbf24', // amber-400
+      link: '/mes-mariages',
+      desc: lang === 'ar' ? 'عقود الزواج المسجلة' : 'Vos actes de mariage enregistrés'
+    },
+    {
+      id: 'death',
+      title: t('death_extracts'),
+      icon: 'fa-dove',
+      color: '#64748b', // slate-500
+      link: '/mes-deces',
+      desc: lang === 'ar' ? 'مضامين الوفاة لأفراد العائلة' : 'Extraits de décès des membres de la famille'
+    },
+    {
+      id: 'residence',
+      title: t('residence_certs'),
+      icon: 'fa-home',
+      color: '#3b82f6', // blue-500
+      link: '/mes-residences',
+      desc: lang === 'ar' ? 'شهادات الإقامة المتحصل عليها' : 'Vos attestations de résidence validées'
+    }
+  ]
 
   return (
     <MainLayout
       user={user}
-      onLogout={logout}
-      breadcrumbs={[{ label: 'Mes Extraits de Naissance' }]}
+      onLogout={() => navigate('/login')}
+      breadcrumbs={[{ label: t('extraits_hub_title') }]}
     >
-      <div className="row mb-4">
-        <div className="col d-flex justify-content-between align-items-center">
-          <div>
-            <h2 className="fw-bold section-title">
-              <i className="fas fa-folder-open me-2" />
-              Mes Extraits de Naissance
-            </h2>
-            <p className="text-muted">Extraction numérique immédiate connectée au registre d'État Civil.</p>
-          </div>
-          <Link to="/services" className="btn btn-outline-secondary">
-            <i className="fas fa-arrow-left me-2" />
-            Retour aux services
-          </Link>
+      <div className={`py-4 ${lang === 'ar' ? 'text-end' : ''}`}>
+        <div className="mb-5">
+          <h1 className="fw-bold section-title mb-2">
+            <i className="fas fa-folder-open me-2 text-primary"></i>
+            {t('extraits_hub_title')}
+          </h1>
+          <p className="text-muted fs-5">{t('extraits_hub_desc')}</p>
         </div>
+
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status"></div>
+          </div>
+        ) : (
+          <div className="row g-4">
+            {categories.map((cat) => (
+              <div className="col-md-6 col-lg-3" key={cat.id}>
+                <Link 
+                  to={cat.link} 
+                  className="card h-100 border-0 shadow-sm hub-card text-decoration-none transition-all"
+                  style={{ 
+                    borderRadius: '20px', 
+                    overflow: 'hidden',
+                    transition: 'transform 0.2s ease, shadow 0.2s ease'
+                  }}
+                >
+                  <div className="card-body p-4 d-flex flex-column align-items-center text-center">
+                    <div 
+                      className="icon-container mb-4 d-flex align-items-center justify-content-center"
+                      style={{ 
+                        width: '80px', 
+                        height: '80px', 
+                        backgroundColor: `${cat.color}15`, 
+                        borderRadius: '24px',
+                        color: cat.color
+                      }}
+                    >
+                      <i className={`fas ${cat.icon} fa-2x`}></i>
+                    </div>
+                    <h4 className="fw-bold text-dark mb-2">{cat.title}</h4>
+                    <p className="text-muted small mb-3">{cat.desc}</p>
+                    <div className="mt-auto pt-2">
+                      <span className="btn btn-sm btn-light rounded-pill px-3 fw-bold text-primary">
+                        {lang === 'ar' ? 'دخول' : 'Accéder'} <i className={`fas fa-chevron-${lang === 'ar' ? 'left' : 'right'} ms-1 small`}></i>
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <style>{`
+          .hub-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+          }
+          .hub-card .btn-light {
+            background-color: #f8fafc;
+            border-color: #f1f5f9;
+          }
+        `}</style>
       </div>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2 text-muted">Vérification de votre identité et recherche des actes en cours...</p>
-        </div>
-      ) : error ? (
-        <div className="alert alert-danger">{error}</div>
-      ) : (
-        <div>
-          <h4 className="mb-3 border-bottom pb-2">Mon Extrait de Naissance</h4>
-          <div className="row mb-5">
-            {data?.mon_extrait ? (
-              card(data.mon_extrait)
-            ) : (
-              <div className="col-12">
-                <div className="alert alert-secondary">
-                  Aucun extrait de naissance correspondant à votre profil n'a été trouvé rattaché à votre compte.
-                </div>
-              </div>
-            )}
-          </div>
-
-          <h4 className="mb-3 border-bottom pb-2 mt-4">Extraits de mes enfants</h4>
-          <div className="row">
-            {data?.enfants && data.enfants.length > 0 ? (
-              data.enfants.map((enf) => card(enf))
-            ) : (
-              <div className="col-12">
-                <div className="alert alert-secondary text-muted">
-                  <i className="fas fa-info-circle me-2" />
-                  Aucun acte de naissance d'enfant n'est rattaché à votre CIN.
-                </div>
-              </div>
-            )}
-          </div>
-
-          {data?.conjoints && data.conjoints.length > 0 ? (
-            <div className="mt-4">
-              <h4 className="mb-3 border-bottom pb-2">Extrait de mon conjoint</h4>
-              <div className="row" id="conjointsList">
-                {data.conjoints.map((c) => card(c))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-      )}
     </MainLayout>
   )
 }

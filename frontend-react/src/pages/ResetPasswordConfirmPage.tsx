@@ -18,6 +18,7 @@ export default function ResetPasswordConfirmPage() {
 
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<MessageState | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const submitLabel = useMemo(() => {
     return loading ? 'Traitement...' : 'Réinitialiser'
@@ -120,30 +121,48 @@ export default function ResetPasswordConfirmPage() {
                     </>
                   ) : null}
 
-                  <div className="form-floating mb-3">
+                  <div className="form-floating mb-3 position-relative">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       className="form-control"
                       id="new_password"
                       placeholder="Nouveau mot de passe"
                       required
                       value={newPassword}
                       onChange={(ev) => setNewPassword(ev.target.value)}
+                      style={{ paddingRight: '45px' }}
                     />
                     <label htmlFor="new_password">Nouveau mot de passe</label>
+                    <button
+                      type="button"
+                      className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ zIndex: 10, paddingRight: '15px' }}
+                    >
+                      <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
                   </div>
 
-                  <div className="form-floating mb-3">
+                  <div className="form-floating mb-3 position-relative">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       className="form-control"
                       id="re_new_password"
                       placeholder="Confirmer"
                       required
                       value={reNewPassword}
                       onChange={(ev) => setReNewPassword(ev.target.value)}
+                      style={{ paddingRight: '45px' }}
                     />
                     <label htmlFor="re_new_password">Confirmer</label>
+                    <button
+                      type="button"
+                      className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ zIndex: 10, paddingRight: '15px' }}
+                    >
+                      <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
                   </div>
 
                   <button
