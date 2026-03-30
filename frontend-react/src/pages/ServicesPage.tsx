@@ -106,9 +106,17 @@ export default function ServicesPage() {
 
     const svcName = lang === 'ar' ? svc.name_ar : svc.name_fr
     const svcDesc = lang === 'ar' ? svc.description_ar : svc.description_fr
-    const timeText =
-      svc.processing_time ||
-      (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
+    let timeText = svc.processing_time || (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
+    if (svc.processing_time) {
+      if (/[\u0600-\u06FF]/.test(svc.processing_time)) {
+        if (lang === 'ar') {
+          const match = svc.processing_time.match(/\(([\u0600-\u06FF\s]+.*?)\)$/)
+          if (match) timeText = match[1]
+        } else {
+          timeText = svc.processing_time.replace(/\([\u0600-\u06FF\s]+.*?\)$/g, '').trim()
+        }
+      }
+    }
 
     const reqs = svc.requirements.map((r) => ({ ar: r.name_ar, fr: r.name_fr }))
 
