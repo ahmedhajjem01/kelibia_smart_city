@@ -37,6 +37,8 @@ dj-database-url==2.3.0
 whitenoise==6.9.0
 qrcode==7.4.2
 
-# ML / NLP — local dev only (too large for Vercel serverless ~200MB)
-# Install manually: pip install scikit-learn nltk joblib numpy
-# The classifier auto-falls back to rule-based when these are not installed
+# ML / NLP — classifier (81MB total, within Vercel 250MB limit)
+scikit-learn
+nltk
+joblib
+numpy
