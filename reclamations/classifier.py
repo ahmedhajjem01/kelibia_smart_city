@@ -11,6 +11,7 @@ The models are loaded ONCE at startup (lazy singleton).
 If saved models don't exist, auto-training is triggered.
 """
 
+import os
 import re
 import logging
 import unicodedata
@@ -174,17 +175,43 @@ def train(force: bool = False) -> dict:
 
 # ─── Lazy loader ─────────────────────────────────────────────────────────────
 def _load_models():
-    """Load saved models from disk; auto-train if they are missing."""
+    """Load models from disk if available, otherwise train in memory (Vercel)."""
     global _category_model, _priority_model
-    import joblib
+    if _category_model is not None and _priority_model is not None:
+        return _category_model, _priority_model
+
     import os
-    if _category_model is None or _priority_model is None:
-        if not os.path.exists(_CAT_MODEL) or not os.path.exists(_PRIO_MODEL):
-            logger.warning("ML models not found — running auto-training...")
-            train()
+    if os.path.exists(_CAT_MODEL) and os.path.exists(_PRIO_MODEL):
+        import joblib
         _category_model = joblib.load(_CAT_MODEL)
         _priority_model = joblib.load(_PRIO_MODEL)
+        logger.info("ML models loaded from disk.")
+    else:
+        # Disk models not found (e.g. Vercel read-only fs) — train in memory
+        logger.warning("ML models not on disk — training in memory...")
+        _train_in_memory()
+
     return _category_model, _priority_model
+
+
+def _train_in_memory():
+    """Train models and keep them in memory only (no disk write needed)."""
+    global _category_model, _priority_model
+    from .training_data import TRAINING_DATA
+
+    texts      = [_normalize(t) for t, _, _ in TRAINING_DATA]
+    categories = [c for _, c, _ in TRAINING_DATA]
+    priorities = [p for _, _, p in TRAINING_DATA]
+
+    cat_pipe = _build_pipeline()
+    cat_pipe.fit(texts, categories)
+    _category_model = cat_pipe
+
+    prio_pipe = _build_pipeline()
+    prio_pipe.fit(texts, priorities)
+    _priority_model = prio_pipe
+
+    logger.info("ML models trained in memory on %d samples.", len(texts))
 
 
 # ─── Public API ──────────────────────────────────────────────────────────────
