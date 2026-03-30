@@ -376,10 +376,17 @@ export default function AgentDashboardPage() {
     setMlLoading(true)
     try {
       const res = await fetch('/api/reclamations/ml_stats/', { headers: { Authorization: `Bearer ${access}` } })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        console.error('[ml_stats] HTTP', res.status, text.slice(0, 300))
+        showToast(`Erreur ${res.status} — Stats IA indisponibles.`, 'error')
+        return
+      }
       setMlStats(await res.json())
-    } catch { showToast('Erreur chargement stats ML.', 'error') }
-    finally { setMlLoading(false) }
+    } catch (e) {
+      console.error('[ml_stats] network error', e)
+      showToast('Erreur réseau — Stats IA indisponibles.', 'error')
+    } finally { setMlLoading(false) }
   }
 
   async function saveReclassify() {

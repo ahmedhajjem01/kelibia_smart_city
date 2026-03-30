@@ -147,91 +147,92 @@ class ReclamationViewSet(viewsets.ModelViewSet):
           3. top_features — top 8 discriminative words per category
         Computed live on real DB data using the trained models.
         """
-        from .classifier import _load_models, _normalize, SERVICE_MAP
-        from .training_data import TRAINING_DATA
-        from sklearn.metrics import confusion_matrix, classification_report
-        import numpy as np
-
-        cat_model, prio_model = _load_models()
-
-        # ── Build eval dataset from training data ────────────────────────────
-        texts      = [_normalize(t) for t, _, _ in TRAINING_DATA]
-        categories = [c for _, c, _ in TRAINING_DATA]
-        priorities = [p for _, _, p in TRAINING_DATA]
-
-        cat_labels  = sorted(set(categories))
-        prio_labels = ['faible', 'normale', 'urgente']
-
-        cat_pred  = cat_model.predict(texts).tolist()
-        prio_pred = prio_model.predict(texts).tolist()
-
-        # ── 1. Confusion matrices ────────────────────────────────────────────
-        cm_cat  = confusion_matrix(categories, cat_pred,  labels=cat_labels).tolist()
-        cm_prio = confusion_matrix(priorities, prio_pred, labels=prio_labels).tolist()
-
-        # ── 2. Classification reports ────────────────────────────────────────
-        from sklearn.metrics import precision_recall_fscore_support
-        p_cat, r_cat, f_cat, s_cat = precision_recall_fscore_support(
-            categories, cat_pred, labels=cat_labels, zero_division=0)
-        p_prio, r_prio, f_prio, s_prio = precision_recall_fscore_support(
-            priorities, prio_pred, labels=prio_labels, zero_division=0)
-
-        cat_report = [
-            {
-                "label":     lbl,
-                "precision": round(float(p_cat[i]), 3),
-                "recall":    round(float(r_cat[i]), 3),
-                "f1":        round(float(f_cat[i]), 3),
-                "support":   int(s_cat[i]),
-            }
-            for i, lbl in enumerate(cat_labels)
-        ]
-        prio_report = [
-            {
-                "label":     lbl,
-                "precision": round(float(p_prio[i]), 3),
-                "recall":    round(float(r_prio[i]), 3),
-                "f1":        round(float(f_prio[i]), 3),
-                "support":   int(s_prio[i]),
-            }
-            for i, lbl in enumerate(prio_labels)
-        ]
-
-        # ── 3. Top features per category ─────────────────────────────────────
-        top_features = {}
+        import traceback
         try:
-            tfidf    = cat_model.named_steps['tfidf']
-            clf      = cat_model.named_steps['clf']
-            base_clf = clf.calibrated_classifiers_[0].estimator
-            feature_names = tfidf.get_feature_names_out()
-            for i, cls in enumerate(base_clf.classes_):
-                coef = base_clf.coef_[i]
-                top_idx = np.argsort(coef)[::-1][:8]
-                top_features[cls] = [
-                    {"word": feature_names[j], "score": round(float(coef[j]), 3)}
-                    for j in top_idx
-                ]
-        except Exception:
+            from .classifier import _load_models, _normalize
+            from .training_data import TRAINING_DATA
+            from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
+            import numpy as np
+        except ImportError as e:
+            return Response({"error": f"ML packages not available: {e}"}, status=503)
+
+        try:
+            cat_model, prio_model = _load_models()
+        except Exception as e:
+            return Response({"error": f"Model loading failed: {e}\n{traceback.format_exc()}"}, status=500)
+
+        try:
+            # ── Build eval dataset ───────────────────────────────────────────
+            texts      = [_normalize(t) for t, _, _ in TRAINING_DATA]
+            categories = [c for _, c, _ in TRAINING_DATA]
+            priorities = [p for _, _, p in TRAINING_DATA]
+
+            cat_labels  = sorted(set(categories))
+            prio_labels = ['faible', 'normale', 'urgente']
+
+            cat_pred  = cat_model.predict(texts).tolist()
+            prio_pred = prio_model.predict(texts).tolist()
+
+            # ── 1. Confusion matrices ────────────────────────────────────────
+            cm_cat  = confusion_matrix(categories, cat_pred,  labels=cat_labels).tolist()
+            cm_prio = confusion_matrix(priorities, prio_pred, labels=prio_labels).tolist()
+
+            # ── 2. Classification reports ────────────────────────────────────
+            p_cat, r_cat, f_cat, s_cat = precision_recall_fscore_support(
+                categories, cat_pred, labels=cat_labels, zero_division=0)
+            p_prio, r_prio, f_prio, s_prio = precision_recall_fscore_support(
+                priorities, prio_pred, labels=prio_labels, zero_division=0)
+
+            cat_report = [
+                {"label": lbl, "precision": round(float(p_cat[i]), 3),
+                 "recall": round(float(r_cat[i]), 3), "f1": round(float(f_cat[i]), 3),
+                 "support": int(s_cat[i])}
+                for i, lbl in enumerate(cat_labels)
+            ]
+            prio_report = [
+                {"label": lbl, "precision": round(float(p_prio[i]), 3),
+                 "recall": round(float(r_prio[i]), 3), "f1": round(float(f_prio[i]), 3),
+                 "support": int(s_prio[i])}
+                for i, lbl in enumerate(prio_labels)
+            ]
+
+            # ── 3. Top features per category ─────────────────────────────────
             top_features = {}
+            try:
+                tfidf    = cat_model.named_steps['tfidf']
+                clf      = cat_model.named_steps['clf']
+                base_clf = clf.calibrated_classifiers_[0].estimator
+                feature_names = tfidf.get_feature_names_out()
+                for i, cls in enumerate(base_clf.classes_):
+                    coef = base_clf.coef_[i]
+                    top_idx = np.argsort(coef)[::-1][:8]
+                    top_features[cls] = [
+                        {"word": feature_names[j], "score": round(float(coef[j]), 3)}
+                        for j in top_idx
+                    ]
+            except Exception:
+                top_features = {}
 
-        # ── 4. Overall accuracy from DB stats ────────────────────────────────
-        correct_cat  = sum(1 for a, b in zip(categories, cat_pred)  if a == b)
-        correct_prio = sum(1 for a, b in zip(priorities, prio_pred) if a == b)
-        n = len(texts)
+            # ── 4. Overall accuracy ──────────────────────────────────────────
+            correct_cat  = sum(1 for a, b in zip(categories, cat_pred)  if a == b)
+            correct_prio = sum(1 for a, b in zip(priorities, prio_pred) if a == b)
+            n = len(texts)
 
-        return Response({
-            "n_samples": n,
-            "category": {
-                "labels":         cat_labels,
-                "accuracy":       round(correct_cat / n, 3),
-                "confusion_matrix": cm_cat,
-                "report":         cat_report,
-                "top_features":   top_features,
-            },
-            "priority": {
-                "labels":           prio_labels,
-                "accuracy":         round(correct_prio / n, 3),
-                "confusion_matrix": cm_prio,
-                "report":           prio_report,
-            },
-        })
+            return Response({
+                "n_samples": n,
+                "category": {
+                    "labels":           cat_labels,
+                    "accuracy":         round(correct_cat / n, 3),
+                    "confusion_matrix": cm_cat,
+                    "report":           cat_report,
+                    "top_features":     top_features,
+                },
+                "priority": {
+                    "labels":           prio_labels,
+                    "accuracy":         round(correct_prio / n, 3),
+                    "confusion_matrix": cm_prio,
+                    "report":           prio_report,
+                },
+            })
+        except Exception as e:
+            return Response({"error": f"Stats computation failed: {e}\n{traceback.format_exc()}"}, status=500)

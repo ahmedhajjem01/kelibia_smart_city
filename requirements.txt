@@ -38,7 +38,7 @@ whitenoise==6.9.0
 qrcode==7.4.2
 
 # ML / NLP — classifier (81MB total, within Vercel 250MB limit)
-scikit-learn
-nltk
-joblib
-numpy
+scikit-learn==1.8.0
+nltk==3.9.4
+joblib==1.5.3
+numpy==2.4.4
