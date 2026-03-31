@@ -376,8 +376,9 @@ export default function SignupPage() {
       formData.append('governorate', governorate)
       formData.append('city', city)
       
-      // Generation auto de l'username
-      formData.append('username', firstName.toLowerCase().trim() + cin)
+      // Generation auto de l'username (safe: sans espaces)
+      const safeUsername = (firstName.toLowerCase().trim().split(' ').join('_') + cin).substring(0, 150)
+      formData.append('username', safeUsername)
       formData.append('password', password)
       formData.append('re_password', rePassword)
       formData.append('cin', cin)
@@ -494,7 +495,15 @@ export default function SignupPage() {
 
                   <div className="row g-2 mb-3">
                     <div className="col-md-6 form-floating">
-                      <input type="date" className="form-control" id="dob" required value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
+                      <input 
+                        type="date" 
+                        className="form-control" 
+                        id="dob" 
+                        required 
+                        value={dateOfBirth} 
+                        onChange={e => setDateOfBirth(e.target.value)} 
+                        max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                      />
                       <label htmlFor="dob">{t('date_of_birth')}</label>
                     </div>
                     <div className="col-md-6 form-floating">

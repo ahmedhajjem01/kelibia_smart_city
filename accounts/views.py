@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,20 +11,37 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from djoser.serializers import ActivationSerializer
 from .serializers import CustomUserSerializer, MyTokenObtainPairSerializer
+from datetime import date
+import base64
+import logging
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 class RegisterView(APIView):
     def post(self, request):
         try:
-            data = request.data
+            payload = request.data
             files = request.FILES
-            password = data.get('password')
+            password = payload.get('password')
             
-            required_fields = ['username', 'password', 'email', 'first_name', 'last_name', 'cin', 'phone', 'governorate', 'city', 'address']
-            missing = [f for f in required_fields if not data.get(f)]
+            required_fields = ['username', 'password', 'email', 'first_name', 'last_name', 'cin', 'phone', 'governorate', 'city', 'address', 'date_of_birth']
+            missing = [f for f in required_fields if not payload.get(f)]
             if missing:
                 return Response({"error": f"Champs manquants: {', '.join(missing)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Age validation (18+)
+            dob_str = payload.get('date_of_birth')
+            dob_obj = None
+            if dob_str:
+                try:
+                    dob_obj = date.fromisoformat(dob_str)
+                    today = date.today()
+                    age = today.year - dob_obj.year - ((today.month, today.day) < (dob_obj.month, dob_obj.day))
+                    if age < 18:
+                        return Response({"error": "Vous devez avoir au moins 18 ans pour créer un compte ."}, status=status.HTTP_400_BAD_REQUEST)
+                except ValueError:
+                    return Response({"error": "Format de date de naissance invalide. Utilisez AAAA-MM-JJ."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Strong Password Validation
             try:
@@ -32,28 +50,27 @@ class RegisterView(APIView):
                 return Response({"error": f"Mot de passe trop faible: {', '.join(e.messages) if hasattr(e, 'messages') else str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.create_user(
-                username=data['username'],
-                email=data['email'],
+                username=payload['username'],
+                email=payload['email'],
                 password=password,
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                cin=data['cin'],
-                phone=data['phone'],
-                address=data['address'],
-                governorate=data['governorate'],
-                city=data['city'],
+                first_name=payload['first_name'],
+                last_name=payload['last_name'],
+                cin=payload['cin'],
+                phone=payload['phone'],
+                address=payload['address'],
+                governorate=payload['governorate'],
+                city=payload['city'],
                 is_active=True,
                 is_verified=False,
-                date_of_birth=data.get('date_of_birth') or None,
-                place_of_birth=data.get('place_of_birth', ''),
-                is_married=data.get('is_married') == 'true',
-                spouse_cin=data.get('spouse_cin', ''),
-                spouse_first_name=data.get('spouse_first_name', ''),
-                spouse_last_name=data.get('spouse_last_name', '')
+                date_of_birth=dob_obj,
+                place_of_birth=payload.get('place_of_birth', ''),
+                is_married=payload.get('is_married') == 'true',
+                spouse_cin=payload.get('spouse_cin', ''),
+                spouse_first_name=payload.get('spouse_first_name', ''),
+                spouse_last_name=payload.get('spouse_last_name', '')
             )
             
             # Handle CIN images as Base64 strings for Vercel compatibility
-            import base64
             if 'cin_front_image' in files:
                 f = files['cin_front_image']
                 user.cin_front_utf = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
@@ -81,9 +98,13 @@ class RegisterView(APIView):
             
             # Detailed fallback for debugging
             return Response({"error": f"Conflit de données: {err_msg}"}, status=status.HTTP_400_BAD_REQUEST)
+        except ValidationError as e:
+            # Handle Django validation errors (like invalid username characters)
+            return Response({"error": f"Erreur de validation: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             import traceback
             error_details = traceback.format_exc()
+            logger.error(f"Registration Error: {str(e)}\n{error_details}")
             return Response({"error": f"Erreur Interne: {str(e)}", "details": error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
