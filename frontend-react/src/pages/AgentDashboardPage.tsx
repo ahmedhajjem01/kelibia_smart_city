@@ -180,7 +180,14 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'orders' | 'forum'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'orders' | 'forum' | 'evenements'>('dashboard')
+  const [allEvenements, setAllEvenements] = useState<any[]>([])
+  const [loadingEvenements, setLoadingEvenements] = useState(false)
+  const [evStatusFilter, setEvStatusFilter] = useState('')
+  const [evTypeFilter, setEvTypeFilter] = useState('')
+  const [evSearch, setEvSearch] = useState('')
+  const [evDetail, setEvDetail] = useState<any | null>(null)
+  const [evSaving, setEvSaving] = useState(false)
   const [usersMode, setUsersMode] = useState<'unverified' | 'all'>('unverified')
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
@@ -264,6 +271,41 @@ export default function AgentDashboardPage() {
       if (res.ok) setAllOrders(await res.json())
     } catch (e) { console.error(e) }
     finally { setLoadingOrders(false) }
+  }
+
+  async function fetchEvenements() {
+    setLoadingEvenements(true)
+    try {
+      const res = await fetch('/api/evenements/demande/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) {
+        const data = await res.json()
+        setAllEvenements(Array.isArray(data) ? data : (data.results || []))
+      }
+    } catch (e) { console.error(e) }
+    finally { setLoadingEvenements(false) }
+  }
+
+  async function handleEvStatus(id: number, newStatus: string, commentaire: string) {
+    setEvSaving(true)
+    try {
+      const fd = new FormData()
+      fd.append('status', newStatus)
+      if (commentaire) fd.append('commentaire_agent', commentaire)
+      const res = await fetch(`/api/evenements/demande/${id}/update-status/`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${access}` },
+        body: fd,
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setAllEvenements(prev => prev.map(ev => ev.id === id ? updated : ev))
+        setEvDetail(null)
+        showToast('Statut mis à jour avec succès.', 'success')
+      } else {
+        showToast('Erreur lors de la mise à jour.', 'error')
+      }
+    } catch { showToast('Erreur réseau.', 'error') }
+    finally { setEvSaving(false) }
   }
 
   async function fetchManagedUsers(mode: 'unverified' | 'all') {
@@ -522,6 +564,12 @@ export default function AgentDashboardPage() {
               </a>
               <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
                 <i className="fas fa-comments"></i> Modération Forum
+              </a>
+              <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
+                <i className="fas fa-calendar-alt"></i> Événements
+                {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
+                  <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
+                )}
               </a>
             </>
           )}
@@ -861,7 +909,7 @@ export default function AgentDashboardPage() {
                   )}
                </div>
             </div>
-          ) : (
+          ) : activeTab === 'forum' ? (
             <div className="ag-card animate__animated animate__fadeIn">
                <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
                   <span className="fw-bold"><i className="fas fa-comments me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? 'Espace Superviseur' : 'Modération du Forum & Actualités'}</span>
@@ -873,7 +921,258 @@ export default function AgentDashboardPage() {
                   <button className="btn btn-primary mt-3" onClick={() => navigate('/forum')}><i className="fas fa-external-link-alt me-2"></i>Aller au Forum</button>
                </div>
             </div>
-          )}
+          ) : activeTab === 'evenements' ? (
+            /* ── ÉVÉNEMENTS TAB ──────────────────────────────────────── */
+            <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)' }}>
+                <span><i className="fas fa-calendar-alt me-2"></i>Gestion des demandes d'événements</span>
+                <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchEvenements}>
+                  <i className="fas fa-sync-alt me-1"></i>Actualiser
+                </button>
+              </div>
+
+              {/* Stats strip */}
+              {!loadingEvenements && allEvenements.length > 0 && (() => {
+                const ev_pending  = allEvenements.filter((e: any) => e.status === 'pending').length
+                const ev_inprog   = allEvenements.filter((e: any) => e.status === 'in_progress').length
+                const ev_approved = allEvenements.filter((e: any) => e.status === 'approved').length
+                const ev_rejected = allEvenements.filter((e: any) => e.status === 'rejected').length
+                const ev_conflict = allEvenements.filter((e: any) => e.has_conflict).length
+                return (
+                  <div className="d-flex flex-wrap gap-2 p-3 border-bottom" style={{ background: '#f8f9fa' }}>
+                    {[
+                      { lbl: 'Total',      val: allEvenements.length, color: '#1565c0', bg: '#e3f2fd' },
+                      { lbl: 'En attente', val: ev_pending,  color: '#e65100', bg: '#fff3e0' },
+                      { lbl: 'En cours',   val: ev_inprog,   color: '#0288d1', bg: '#e1f5fe' },
+                      { lbl: 'Autorisés',  val: ev_approved, color: '#2e7d32', bg: '#e8f5e9' },
+                      { lbl: 'Rejetés',    val: ev_rejected, color: '#b71c1c', bg: '#ffebee' },
+                      { lbl: '⚠️ Conflits', val: ev_conflict, color: '#f57f17', bg: '#fff8e1' },
+                    ].map(s => (
+                      <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
+                        style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
+                        <span className="fw-bold" style={{ color: s.color, fontSize: '1.1rem' }}>{s.val}</span>
+                        <span style={{ color: s.color, fontSize: '.78rem' }}>{s.lbl}</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+
+              {/* Filters */}
+              <div className="ag-filter-bar gap-2">
+                <div className="ag-search-wrap">
+                  <i className="fas fa-search"></i>
+                  <input className="ag-search-input" placeholder="Rechercher..." value={evSearch} onChange={e => setEvSearch(e.target.value)} />
+                </div>
+                <select className="ag-filter-select" value={evStatusFilter} onChange={e => setEvStatusFilter(e.target.value)}>
+                  <option value="">Tous statuts</option>
+                  <option value="pending">En attente</option>
+                  <option value="in_progress">En cours</option>
+                  <option value="approved">Autorisé</option>
+                  <option value="rejected">Rejeté</option>
+                </select>
+                <select className="ag-filter-select" value={evTypeFilter} onChange={e => setEvTypeFilter(e.target.value)}>
+                  <option value="">Tous types</option>
+                  <option value="fete_familiale">Fête familiale</option>
+                  <option value="concert">Concert</option>
+                  <option value="marche">Marché</option>
+                  <option value="association">Association</option>
+                  <option value="sportif">Sportif</option>
+                  <option value="culturel">Culturel</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </div>
+
+              {loadingEvenements ? (
+                <div className="ag-spinner-wrap"><div className="spinner-border spinner-border-sm me-2"></div>Chargement...</div>
+              ) : (() => {
+                const filtered = allEvenements.filter((ev: any) => {
+                  if (evStatusFilter && ev.status !== evStatusFilter) return false
+                  if (evTypeFilter && ev.type_evenement !== evTypeFilter) return false
+                  if (evSearch) {
+                    const q = evSearch.toLowerCase()
+                    return ev.titre_evenement?.toLowerCase().includes(q) ||
+                           ev.nom_organisateur?.toLowerCase().includes(q) ||
+                           ev.lieu_details?.toLowerCase().includes(q)
+                  }
+                  return true
+                })
+                if (filtered.length === 0) return (
+                  <div className="ag-empty"><i className="fas fa-calendar-times d-block"></i>Aucune demande d'événement.</div>
+                )
+                return (
+                  <div className="table-responsive">
+                    <table className="ag-table">
+                      <thead><tr>
+                        <th>Événement</th><th>Type</th><th>Lieu</th><th>Date</th><th>Organisateur</th><th>Statut</th><th>Conflit</th><th>Actions</th>
+                      </tr></thead>
+                      <tbody>
+                        {filtered.map((ev: any) => {
+                          const sc: Record<string, string> = {
+                            pending:     'status-pending', in_progress: 'status-in_progress',
+                            approved:    'status-resolved', rejected: 'status-rejected',
+                          }
+                          return (
+                            <tr key={ev.id}>
+                              <td className="fw-bold" style={{ maxWidth: 180 }}>
+                                <div className="text-truncate">{ev.titre_evenement}</div>
+                              </td>
+                              <td><span className="cat-badge cat-other">{ev.type_evenement_display}</span></td>
+                              <td style={{ fontSize: '.8rem', color: '#555', maxWidth: 140 }}>
+                                <div className="text-truncate" title={ev.lieu_details}>{ev.lieu_details}</div>
+                              </td>
+                              <td style={{ fontSize: '.78rem', whiteSpace: 'nowrap' }}>
+                                {ev.date_debut} → {ev.date_fin}<br />
+                                <span className="text-muted">{ev.heure_debut?.slice(0,5)} — {ev.heure_fin?.slice(0,5)}</span>
+                              </td>
+                              <td style={{ fontSize: '.8rem' }}>{ev.nom_organisateur}</td>
+                              <td><span className={`status-badge ${sc[ev.status] || 'bg-secondary'}`}>{ev.status_display}</span></td>
+                              <td>
+                                {ev.has_conflict ? (
+                                  <span className="badge rounded-pill px-2" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>
+                                    <i className="fas fa-exclamation-triangle me-1"></i>
+                                    {ev.conflict_with_title ? `≈ ${ev.conflict_with_title.slice(0, 20)}` : 'Conflit'}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted" style={{ fontSize: '.75rem' }}>—</span>
+                                )}
+                              </td>
+                              <td>
+                                <button className="ag-action-btn" onClick={() => { setEvDetail(ev) }} title="Voir / Traiter">
+                                  <i className="fas fa-eye"></i> Traiter
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              })()}
+
+            </div>
+          ) : null}
+
+          {/* ── Événement detail modal */}
+          {activeTab === 'evenements' && evDetail && (() => {
+            return (
+              <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 620, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+                  <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)', borderRadius: '16px 16px 0 0' }}>
+                    <span className="title"><i className="fas fa-calendar-alt me-2"></i>{evDetail.titre_evenement}</span>
+                    <button className="ag-close-btn" onClick={() => setEvDetail(null)}><i className="fas fa-times"></i></button>
+                  </div>
+                  <div className="p-4">
+                    <div className="row g-3 mb-3">
+                      <div className="col-6">
+                        <div className="det-label">Type</div>
+                        <div className="det-value">{evDetail.type_evenement_display}</div>
+                      </div>
+                      <div className="col-6">
+                        <div className="det-label">Organisateur</div>
+                        <div className="det-value">{evDetail.nom_organisateur} — {evDetail.telephone_organisateur}</div>
+                      </div>
+                      <div className="col-6">
+                        <div className="det-label">Lieu</div>
+                        <div className="det-value">{evDetail.lieu_type_display} — {evDetail.lieu_details}</div>
+                      </div>
+                      <div className="col-6">
+                        <div className="det-label">Dates & Horaires</div>
+                        <div className="det-value">{evDetail.date_debut} → {evDetail.date_fin}</div>
+                        <div className="det-value" style={{ fontSize: '.83rem', color: '#777' }}>{evDetail.heure_debut?.slice(0,5)} — {evDetail.heure_fin?.slice(0,5)}</div>
+                      </div>
+                      <div className="col-6">
+                        <div className="det-label">Participants</div>
+                        <div className="det-value">{evDetail.nombre_participants}</div>
+                      </div>
+                      <div className="col-6">
+                        <div className="det-label">CIN organisateur</div>
+                        <div className="det-value">{evDetail.cin_organisateur}</div>
+                      </div>
+                      <div className="col-12">
+                        <div className="det-label">Description</div>
+                        <div className="det-value" style={{ lineHeight: 1.7, fontSize: '.88rem' }}>{evDetail.description}</div>
+                      </div>
+                      {evDetail.has_conflict && (
+                        <div className="col-12">
+                          <div className="p-3 rounded-3 d-flex gap-2 align-items-start" style={{ background: '#fff8e1', border: '1px solid #ffe082', fontSize: '.85rem', color: '#e65100' }}>
+                            <i className="fas fa-exclamation-triangle mt-1"></i>
+                            <div>
+                              <strong>Conflit détecté</strong> — un autre événement est prévu au même lieu pendant la même période.
+                              {evDetail.conflict_with_title && <span> Événement concurrent : <em>« {evDetail.conflict_with_title} »</em></span>}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Documents */}
+                    {[
+                      { key: 'cin_recto', label: 'CIN Recto' },
+                      { key: 'cin_verso', label: 'CIN Verso' },
+                      { key: 'programme_evenement', label: 'Programme' },
+                      { key: 'plan_lieu', label: 'Plan du lieu' },
+                      { key: 'attestation_assurance', label: 'Assurance' },
+                      { key: 'plan_securite', label: 'Plan sécurité' },
+                      { key: 'attestation_association', label: 'Attestation asso.' },
+                    ].some(doc => evDetail[doc.key]) && (
+                      <div className="mb-3">
+                        <div className="det-label mb-2">Documents joints</div>
+                        <div className="d-flex flex-wrap gap-2">
+                          {[
+                            { key: 'cin_recto', label: 'CIN Recto' },
+                            { key: 'cin_verso', label: 'CIN Verso' },
+                            { key: 'programme_evenement', label: 'Programme' },
+                            { key: 'plan_lieu', label: 'Plan du lieu' },
+                            { key: 'attestation_assurance', label: 'Assurance' },
+                            { key: 'plan_securite', label: 'Plan sécurité' },
+                            { key: 'attestation_association', label: 'Attestation asso.' },
+                          ].filter(doc => evDetail[doc.key]).map(doc => (
+                            <a key={doc.key} href={resolveBackendUrl(evDetail[doc.key])} target="_blank" rel="noopener noreferrer"
+                              className="btn btn-sm btn-outline-primary rounded-pill">
+                              <i className="fas fa-file me-1"></i>{doc.label}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <hr />
+                    {/* Agent action */}
+                    <div className="mb-3">
+                      <label className="det-label">Décision <span className="text-danger">*</span></label>
+                      <select className="form-select mt-1" id="ev-detail-status" defaultValue={evDetail.status}>
+                        <option value="pending">En attente</option>
+                        <option value="in_progress">En cours de traitement</option>
+                        <option value="approved">Autoriser ✅</option>
+                        <option value="rejected">Rejeter ❌</option>
+                      </select>
+                    </div>
+                    <div className="mb-3">
+                      <label className="det-label">Commentaire pour le citoyen</label>
+                      <textarea className="form-control mt-1" rows={3} id="ev-detail-comment"
+                        defaultValue={evDetail.commentaire_agent}
+                        placeholder="Motif de la décision, informations complémentaires..." />
+                    </div>
+
+                    <div className="d-flex gap-2 justify-content-end mt-3">
+                      <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setEvDetail(null)}>Annuler</button>
+                      <button className="btn btn-primary rounded-pill px-4 fw-bold" disabled={evSaving}
+                        onClick={() => {
+                          const sel = document.getElementById('ev-detail-status') as HTMLSelectElement
+                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                          handleEvStatus(evDetail.id, sel?.value || evDetail.status, txt?.value || '')
+                        }}>
+                        {evSaving ? <><span className="spinner-border spinner-border-sm me-2"></span>Enregistrement...</> : <><i className="fas fa-save me-2"></i>Enregistrer</>}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
 
         </div>
         <div style={{ width: 240, minWidth: 240, padding: '24px 16px 24px 0', flexShrink: 0 }}>

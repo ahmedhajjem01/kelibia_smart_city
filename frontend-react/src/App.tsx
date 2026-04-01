@@ -32,6 +32,9 @@ import ForumPage from './pages/ForumPage'
 import ForumTopicPage from './pages/ForumTopicPage'
 import MunicipaliteLivretPage from './pages/MunicipaliteLivretPage'
 import PaymentSimulationPage from './pages/PaymentSimulationPage'
+import DemandeEvenementPage from './pages/DemandeEvenementPage'
+import MesEvenementsPage from './pages/MesEvenementsPage'
+import EvenementsPublicsPage from './pages/EvenementsPublicsPage'
 
 
 
@@ -135,9 +138,12 @@ export default function App() {
           <Route path="/municipalite-livret" element={<MunicipaliteLivretPage />} />
           <Route path="/paiement" element={<PaymentSimulationPage />} />
           <Route path="/forum" element={<ForumPage />} />
-
-
           <Route path="/forum/:id" element={<ForumTopicPage />} />
+
+          {/* Social & Événements */}
+          <Route path="/demande-evenement" element={<DemandeEvenementPage />} />
+          <Route path="/mes-evenements" element={<MesEvenementsPage />} />
+          <Route path="/evenements" element={<EvenementsPublicsPage />} />
 
           {/* Backward-compatible aliases with old .html URLs */}
           <Route path="/agent_dashboard.html" element={<AgentDashboardPage />} />

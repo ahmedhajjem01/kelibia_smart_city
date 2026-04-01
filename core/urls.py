@@ -29,6 +29,7 @@ urlpatterns = [
     path('extrait-deces/', include('extrait_deces.urls')),
     path('api/signalement/', include('signalement.urls')),
     path('api/residence/', include('attestation_residence.urls')),
+    path('api/evenements/', include('social_evenements.urls')),
     path('api/forum/', include('forum.urls')),
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),
