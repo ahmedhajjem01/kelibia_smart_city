@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const getToken = () => localStorage.getItem('access') || sessionStorage.getItem('access') || ''
+const getToken = () => localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken') || ''
 
 type Tab = 'dashboard' | 'users' | 'services' | 'orders'
 
@@ -49,19 +49,25 @@ export default function SupervisorAdminPage() {
 
   const fetchUsers = () => {
     setLoading(true)
-    api('/api/accounts/verify-citizens/?mode=all').then(r => r.json()).then(setUsers).catch(() => {}).finally(() => setLoading(false))
+    api('/api/accounts/verify-citizens/?mode=all').then(r => r.json()).then(res => {
+      if (Array.isArray(res)) setUsers(res)
+    }).catch(() => {}).finally(() => setLoading(false))
   }
 
   const fetchServices = () =>
-    api('/api/services/categories/').then(r => r.json()).then((cats: any[]) => {
-      setCategories(cats)
-      const flat: any[] = []
-      cats.forEach(c => (c.services || []).forEach((s: any) => flat.push({ ...s, category_name: c.name_fr, category_id: c.id })))
-      setServices(flat)
+    api('/api/services/categories/').then(r => r.json()).then(cats => {
+      if (Array.isArray(cats)) {
+        setCategories(cats)
+        const flat: any[] = []
+        cats.forEach(c => (c.services || []).forEach((s: any) => flat.push({ ...s, category_name: c.name_fr, category_id: c.id })))
+        setServices(flat)
+      }
     }).catch(() => {})
 
   const fetchOrders = () =>
-    api('/api/supervisor/manage-orders/').then(r => r.json()).then(setOrders).catch(() => {})
+    api('/api/supervisor/manage-orders/').then(r => r.json()).then(res => {
+      if (Array.isArray(res)) setOrders(res)
+    }).catch(() => {})
 
   // ── user actions ─────────────────────────────────────────
   const userAction = async (id: number, action: string) => {
