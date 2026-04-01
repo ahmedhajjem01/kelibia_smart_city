@@ -108,9 +108,7 @@ export default function LoginPage() {
       }
 
       // Role-based redirection
-      if (data.is_staff || data.is_superuser || data.user_type === 'supervisor') {
-        navigate('/supervisor-admin')
-      } else if (data.user_type === 'agent') {
+      if (data.is_staff || data.is_superuser || data.user_type === 'supervisor' || data.user_type === 'agent') {
         navigate('/agent-dashboard')
       } else {
         navigate('/dashboard')
