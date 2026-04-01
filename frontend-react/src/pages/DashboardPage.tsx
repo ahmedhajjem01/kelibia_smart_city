@@ -231,41 +231,22 @@ export default function DashboardPage() {
                 <div className="small fw-bold">{t('my_reclamations')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-4 border-end border-bottom">
+            <div className="col-6 col-md-4 border-end">
               <Link to="/mes-demandes" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-tasks fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('my_requests')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-4 border-end border-bottom">
+            <div className="col-6 col-md-4 border-end">
               <Link to="/services" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-file-invoice fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('admin_services')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-4 border-bottom">
+            <div className="col-6 col-md-4">
               <Link to="/news" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-newspaper fa-2x text-primary mb-2"></i>
                 <div className="small fw-bold">{t('news_title')}</div>
-              </Link>
-            </div>
-            {/* Social & Événements row */}
-            <div className="col-6 col-md-4 border-end">
-              <Link to="/demande-evenement" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
-                <i className="fas fa-calendar-plus fa-2x mb-2" style={{ color: '#6f42c1' }}></i>
-                <div className="small fw-bold">{lang === 'ar' ? 'طلب تنظيم تظاهرة' : 'Organiser un événement'}</div>
-              </Link>
-            </div>
-            <div className="col-6 col-md-4 border-end">
-              <Link to="/mes-evenements" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
-                <i className="fas fa-calendar-check fa-2x mb-2" style={{ color: '#6f42c1' }}></i>
-                <div className="small fw-bold">{lang === 'ar' ? 'طلباتي للتظاهرات' : 'Mes demandes événements'}</div>
-              </Link>
-            </div>
-            <div className="col-6 col-md-4">
-              <Link to="/evenements" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
-                <i className="fas fa-calendar-star fa-2x mb-2" style={{ color: '#6f42c1' }}></i>
-                <div className="small fw-bold">{lang === 'ar' ? 'التظاهرات العمومية' : 'Événements publics'}</div>
               </Link>
             </div>
           </div>
@@ -343,47 +324,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ÉVÉNEMENTS PUBLICS CARD */}
-      <div className="content-card mb-4" style={{ borderLeft: '5px solid #6f42c1' }}>
-        <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
-          <span>
-            <i className="fas fa-calendar-alt icon" style={{ color: '#c4a1ff' }}></i>
-            <span>{lang === 'ar' ? 'التظاهرات العمومية' : 'Social & Événements'}</span>
-          </span>
-        </div>
-        <div className="card-body-custom p-3">
-          <p className="text-muted small mb-3">
-            {lang === 'ar'
-              ? 'اطلع على التظاهرات المرخصة أو قدّم طلبًا لتنظيم حدث عام بقليبية.'
-              : 'Consultez les événements autorisés ou soumettez une demande pour organiser un événement public à Kélibia.'}
-          </p>
-          <div className="d-flex flex-wrap gap-2">
-            <Link to="/evenements"
-              className="btn btn-sm rounded-pill px-3 fw-bold"
-              style={{ background: '#6f42c1', color: '#fff', border: 'none' }}>
-              <i className="fas fa-calendar-star me-2"></i>
-              {lang === 'ar' ? 'التظاهرات المرخصة' : 'Voir les événements'}
-            </Link>
-            <Link to="/demande-evenement"
-              className="btn btn-sm rounded-pill px-3 fw-bold"
-              style={{ border: '1px solid #6f42c1', color: '#6f42c1', background: 'transparent' }}>
-              <i className="fas fa-plus me-2"></i>
-              {lang === 'ar' ? 'طلب ترخيص' : 'Demander une autorisation'}
-            </Link>
-            <Link to="/mes-evenements"
-              className="btn btn-sm rounded-pill px-3"
-              style={{ border: '1px solid #dee2e6', color: '#555', background: 'transparent' }}>
-              <i className="fas fa-list me-2"></i>
-              {lang === 'ar' ? 'طلباتي' : 'Mes demandes'}
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* NEWS MINI CARDS */}
       <div className="content-card">
-        <div className="card-header-custom">
+        <div className="card-header-custom d-flex justify-content-between align-items-center">
           <span><i className="fas fa-newspaper icon"></i><span>{t('news_title')}</span></span>
+          <Link to="/evenements" className="btn btn-sm rounded-pill px-3 fw-bold"
+            style={{ background: '#6f42c1', color: '#fff', border: 'none', fontSize: '.75rem' }}>
+            <i className="fas fa-calendar-star me-1"></i>
+            {lang === 'ar' ? 'التظاهرات العمومية' : 'Événements publics'}
+          </Link>
         </div>
         <div className="card-body-custom">
           <div className="news-mini">

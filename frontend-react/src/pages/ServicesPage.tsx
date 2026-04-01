@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -49,6 +49,8 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true)
   const [errorText, setErrorText] = useState<string | null>(null)
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  // Track which category accordion is open (by id, null = all closed)
+  const [openCatId, setOpenCatId] = useState<number | null>(null)
 
   const [modalState, setModalState] = useState<{
     title: string
@@ -183,6 +185,17 @@ export default function ServicesPage() {
           label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
           target: '/demande-livret-famille',
         }
+      } else if (
+        nameLower.includes('fête') || nameLower.includes('fete') || nameLower.includes('événement') ||
+        nameLower.includes('evenement') || nameLower.includes('concert') || nameLower.includes('association') ||
+        nameLower.includes('manifestation') || nameLower.includes('rassemblement') ||
+        nameAr.includes('حفل') || nameAr.includes('تظاهرة') || nameAr.includes('مهرجان') || nameAr.includes('تجمع')
+      ) {
+        requestButton = {
+          kind: 'declare_birth',
+          label: lang === 'ar' ? 'طلب ترخيص' : 'Demander une autorisation',
+          target: '/demande-evenement',
+        }
       } else {
       requestButton = {
         kind: 'disabled',
@@ -240,64 +253,105 @@ export default function ServicesPage() {
             {lang === 'ar' ? 'لا توجد خدمات متاحة حالياً.' : 'Aucun service disponible pour le moment.'}
           </p>
         ) : (
-          allCategories
-            .filter((cat) => !cat.name_fr.toLowerCase().includes('problèmes') && !cat.name_fr.toLowerCase().includes('signalements'))
-            .map((cat) => {
-              const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
-            return (
-              <div key={cat.id} className="category-section mb-5">
-                <div className="category-header">
-                  <h4 className="fw-bold">
-                    <i className={`fas ${cat.icon || 'fa-folder-open'} me-2`} />
-                    {catName}
-                  </h4>
-                </div>
-                <div className="row g-4">
-                  {cat.services
-                    .filter((s) => {
-                      const nameFr = s.name_fr.toLowerCase()
-                      const nameAr = s.name_ar
-                      return (
-                        !nameFr.includes('extrait') &&
-                        !nameAr.includes('مضمون') &&
-                        !nameFr.includes('résidence') &&
-                        !nameAr.includes('مسكن')
-                      )
-                    })
-                    .map((service) => {
-                      const svcName = lang === 'ar' ? service.name_ar : service.name_fr
-                      const svcDesc = lang === 'ar' ? service.description_ar : service.description_fr
-                      return (
-                        <div key={service.id} className="col-md-4">
-                          <div
-                            className="card h-100 service-card border-0 shadow-sm"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => showModalById(cat.id, service.id)}
-                          >
-                            <div className="card-body">
-                              <h6 className="card-title fw-bold">{svcName}</h6>
-                              <p
-                                className="card-text small text-muted text-truncate"
-                                style={{ maxHeight: '3rem' }}
-                              >
-                                {svcDesc}
-                              </p>
-                              <div className="d-flex justify-content-between align-items-center mt-3">
-                                <span className="badge bg-light text-primary border" style={{ fontSize: '0.7rem' }}>
-                                  {service.requirements.length} documents
-                                </span>
-                                <i className="fas fa-chevron-right text-primary opacity-50" />
-                              </div>
-                            </div>
+          <div className="d-flex flex-column gap-2 mb-4">
+            {allCategories
+              .filter((cat) => !cat.name_fr.toLowerCase().includes('problèmes') && !cat.name_fr.toLowerCase().includes('signalements'))
+              .map((cat) => {
+                const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
+                const isOpen = openCatId === cat.id
+                const visibleServices = cat.services.filter((s) => {
+                  const nameFr = s.name_fr.toLowerCase()
+                  const nameAr = s.name_ar
+                  return (
+                    !nameFr.includes('extrait') &&
+                    !nameAr.includes('مضمون') &&
+                    !nameFr.includes('résidence') &&
+                    !nameAr.includes('مسكن')
+                  )
+                })
+                return (
+                  <div key={cat.id} className="border rounded-4 overflow-hidden shadow-sm"
+                    style={{ transition: 'all .2s' }}>
+                    {/* ── Accordion header (clickable) ── */}
+                    <button
+                      className="w-100 d-flex align-items-center justify-content-between px-4 py-3 border-0 text-start"
+                      style={{
+                        background: isOpen ? 'linear-gradient(135deg,#1a3a5c 0%,#1565c0 100%)' : '#fff',
+                        color: isOpen ? '#fff' : '#1a1a2e',
+                        cursor: 'pointer',
+                        transition: 'all .25s',
+                      }}
+                      onClick={() => setOpenCatId(isOpen ? null : cat.id)}
+                    >
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                          style={{
+                            width: 40, height: 40,
+                            background: isOpen ? 'rgba(255,255,255,.2)' : '#e3f2fd',
+                            color: isOpen ? '#fff' : '#1565c0',
+                            fontSize: '1.1rem',
+                          }}>
+                          <i className={`fas ${cat.icon || 'fa-folder-open'}`} />
+                        </div>
+                        <div>
+                          <div className="fw-bold" style={{ fontSize: '1rem' }}>{catName}</div>
+                          <div style={{ fontSize: '.78rem', opacity: .75 }}>
+                            {visibleServices.length} {lang === 'ar' ? 'خدمة' : 'service(s)'}
                           </div>
                         </div>
-                      )
-                    })}
-                </div>
-              </div>
-            )
-          })
+                      </div>
+                      <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'}`}
+                        style={{ fontSize: '.85rem', opacity: .7 }} />
+                    </button>
+
+                    {/* ── Accordion body (services grid) ── */}
+                    {isOpen && (
+                      <div className="p-4" style={{ background: '#f8faff', borderTop: '1px solid #e3f2fd' }}>
+                        {visibleServices.length === 0 ? (
+                          <p className="text-muted small mb-0">
+                            {lang === 'ar' ? 'لا توجد خدمات متاحة.' : 'Aucun service disponible.'}
+                          </p>
+                        ) : (
+                          <div className="row g-3">
+                            {visibleServices.map((service) => {
+                              const svcName = lang === 'ar' ? service.name_ar : service.name_fr
+                              const svcDesc = lang === 'ar' ? service.description_ar : service.description_fr
+                              return (
+                                <div key={service.id} className="col-md-4">
+                                  <div
+                                    className="card h-100 service-card border-0 shadow-sm"
+                                    role="button"
+                                    tabIndex={0}
+                                    style={{ cursor: 'pointer', borderRadius: '12px', transition: 'transform .15s' }}
+                                    onClick={() => showModalById(cat.id, service.id)}
+                                    onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-3px)')}
+                                    onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
+                                  >
+                                    <div className="card-body">
+                                      <h6 className="card-title fw-bold" style={{ fontSize: '.9rem' }}>{svcName}</h6>
+                                      <p className="card-text small text-muted" style={{ maxHeight: '3rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                        {svcDesc}
+                                      </p>
+                                      <div className="d-flex justify-content-between align-items-center mt-3">
+                                        <span className="badge bg-light text-primary border" style={{ fontSize: '0.7rem' }}>
+                                          {service.requirements.length} documents
+                                        </span>
+                                        <i className="fas fa-chevron-right text-primary opacity-50" />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            }
+          </div>
         )}
 
         {/* MUNICIPAL PAYMENTS SIMULATION (FOR PFE) */}
