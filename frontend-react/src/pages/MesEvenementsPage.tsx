@@ -10,6 +10,7 @@ type Demande = {
   titre_evenement: string
   type_evenement: string
   type_evenement_display: string
+  type_evenement_libre: string | null
   lieu_type_display: string
   lieu_details: string
   date_debut: string
@@ -17,7 +18,7 @@ type Demande = {
   heure_debut: string
   heure_fin: string
   nombre_participants: number
-  status: 'pending' | 'in_progress' | 'approved' | 'rejected'
+  status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'changes_requested'
   status_display: string
   commentaire_agent: string
   autorisation_signee: string | null
@@ -27,10 +28,11 @@ type Demande = {
 }
 
 const STATUS_CONFIG: Record<string, { cls: string; icon: string }> = {
-  pending:     { cls: 'bg-warning text-dark', icon: 'fa-hourglass-half' },
-  in_progress: { cls: 'bg-info text-white',   icon: 'fa-spinner' },
-  approved:    { cls: 'bg-success text-white', icon: 'fa-check-circle' },
-  rejected:    { cls: 'bg-danger text-white',  icon: 'fa-times-circle' },
+  pending:           { cls: 'bg-warning text-dark',  icon: 'fa-hourglass-half' },
+  in_progress:       { cls: 'bg-info text-white',    icon: 'fa-spinner' },
+  approved:          { cls: 'bg-success text-white', icon: 'fa-check-circle' },
+  rejected:          { cls: 'bg-danger text-white',  icon: 'fa-times-circle' },
+  changes_requested: { cls: 'bg-warning text-dark',  icon: 'fa-edit' },
 }
 
 const TYPE_ICON: Record<string, string> = {
@@ -140,7 +142,13 @@ export default function MesEvenementsPage() {
                           </span>
                         </div>
                         <div className="d-flex gap-3 flex-wrap" style={{ fontSize: '.82rem', color: '#777' }}>
-                          <span><i className="fas fa-tag me-1 text-primary opacity-75"></i>{d.type_evenement_display}</span>
+                          <span>
+                            <i className="fas fa-tag me-1 text-primary opacity-75"></i>
+                            {d.type_evenement_display}
+                            {d.type_evenement === 'autre' && d.type_evenement_libre && (
+                              <span className="ms-1 text-dark">— {d.type_evenement_libre}</span>
+                            )}
+                          </span>
                           <span><i className="fas fa-map-marker-alt me-1 text-danger opacity-75"></i>{d.lieu_details}</span>
                           <span><i className="fas fa-calendar me-1 text-success opacity-75"></i>{fmt(d.date_debut)} → {fmt(d.date_fin)}</span>
                           <span><i className="fas fa-users me-1 text-info opacity-75"></i>{d.nombre_participants} participants</span>
@@ -165,6 +173,23 @@ export default function MesEvenementsPage() {
                             <div className="text-muted small text-uppercase fw-bold mb-1">Date de soumission</div>
                             <div>{fmt(d.created_at)}</div>
                           </div>
+                          {/* Changes requested alert */}
+                          {d.status === 'changes_requested' && (
+                            <div className="col-12">
+                              <div className="p-3 rounded-3 d-flex gap-2 align-items-start"
+                                style={{ background: '#fff8e1', border: '2px solid #f9a825', fontSize: '.88rem' }}>
+                                <i className="fas fa-edit mt-1" style={{ color: '#f57f17' }}></i>
+                                <div>
+                                  <strong style={{ color: '#e65100' }}>L'agent vous demande des modifications</strong>
+                                  <p className="mb-0 mt-1 text-muted small">
+                                    Veuillez consulter le commentaire ci-dessous et soumettre une nouvelle demande avec les corrections demandées.
+                                    <br />يطلب منكم العون إجراء تعديلات. يرجى الاطلاع على التعليق أدناه وإعادة تقديم الطلب.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           {d.commentaire_agent && (
                             <div className="col-12">
                               <div className="text-muted small text-uppercase fw-bold mb-1">Commentaire de l'agent</div>

@@ -5,21 +5,27 @@ from django.db.models import Q
 
 class DemandeEvenement(models.Model):
     STATUS_CHOICES = [
-        ('pending',     'En attente'),
-        ('in_progress', 'En cours de traitement'),
-        ('approved',    'Autorisée'),
-        ('rejected',    'Rejetée'),
+        ('pending',            'En attente'),
+        ('in_progress',        'En cours de traitement'),
+        ('approved',           'Autorisée'),
+        ('rejected',           'Rejetée'),
+        ('changes_requested',  'Modifications demandées'),
     ]
 
     TYPE_EVENEMENT_CHOICES = [
-        ('fete_familiale',  'Fête familiale / حفل عائلي'),
-        ('concert',         'Concert / حفلة موسيقية'),
-        ('marche',          'Marché / سوق'),
-        ('association',     'Activité associative / نشاط جمعوي'),
-        ('sportif',         'Événement sportif / حدث رياضي'),
-        ('culturel',        'Événement culturel / حدث ثقافي'),
-        ('commercial',      'Événement commercial / حدث تجاري'),
-        ('autre',           'Autre / أخرى'),
+        ('fete_familiale',   'Fête familiale / حفل عائلي'),
+        ('mariage',          'Cérémonie de mariage / حفل زفاف'),
+        ('remise_diplomes',  'Remise de diplômes / حفل التخرج'),
+        ('concert',          'Concert / حفلة موسيقية'),
+        ('marche',           'Marché / سوق'),
+        ('association',      'Activité associative / نشاط جمعوي'),
+        ('sportif',          'Événement sportif / حدث رياضي'),
+        ('culturel',         'Événement culturel / حدث ثقافي'),
+        ('commercial',       'Événement commercial / حدث تجاري'),
+        ('religieux',        'Événement religieux / تظاهرة دينية'),
+        ('politique',        'Réunion / Meeting politique / تجمع سياسي'),
+        ('charite',          'Événement caritatif / نشاط خيري'),
+        ('autre',            'Autre (préciser) / أخرى (تحديد)'),
     ]
 
     LIEU_CHOICES = [
@@ -41,6 +47,7 @@ class DemandeEvenement(models.Model):
     # --- Événement ---
     titre_evenement = models.CharField(max_length=200, verbose_name="Intitulé de l'événement")
     type_evenement = models.CharField(max_length=30, choices=TYPE_EVENEMENT_CHOICES, default='autre', verbose_name="Type d'événement")
+    type_evenement_libre = models.CharField(max_length=150, blank=True, null=True, verbose_name="Type d'événement (précision libre)")
     description = models.TextField(verbose_name="Description de l'événement")
     nombre_participants = models.PositiveIntegerField(verbose_name="Nombre estimé de participants")
 

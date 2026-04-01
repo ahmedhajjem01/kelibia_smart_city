@@ -14,7 +14,7 @@ class DemandeEvenementSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'citizen', 'citizen_name',
             # Event info
-            'titre_evenement', 'type_evenement', 'type_evenement_display',
+            'titre_evenement', 'type_evenement', 'type_evenement_display', 'type_evenement_libre',
             'description', 'nombre_participants',
             # Location
             'lieu_type', 'lieu_type_display', 'lieu_details', 'latitude', 'longitude',
@@ -59,7 +59,7 @@ class DemandeEvenementPublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeEvenement
         fields = [
-            'id', 'titre_evenement', 'type_evenement', 'type_evenement_display',
+            'id', 'titre_evenement', 'type_evenement', 'type_evenement_display', 'type_evenement_libre',
             'description', 'nombre_participants',
             'lieu_type', 'lieu_type_display', 'lieu_details', 'latitude', 'longitude',
             'date_debut', 'date_fin', 'heure_debut', 'heure_fin',

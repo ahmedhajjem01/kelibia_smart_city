@@ -1140,32 +1140,91 @@ export default function AgentDashboardPage() {
                     )}
 
                     <hr />
-                    {/* Agent action */}
+                    {/* Agent action — 3-button workflow */}
                     <div className="mb-3">
-                      <label className="det-label">Décision <span className="text-danger">*</span></label>
-                      <select className="form-select mt-1" id="ev-detail-status" defaultValue={evDetail.status}>
-                        <option value="pending">En attente</option>
-                        <option value="in_progress">En cours de traitement</option>
-                        <option value="approved">Autoriser ✅</option>
-                        <option value="rejected">Rejeter ❌</option>
-                      </select>
-                    </div>
-                    <div className="mb-3">
-                      <label className="det-label">Commentaire pour le citoyen</label>
+                      <label className="det-label mb-2">Commentaire pour le citoyen</label>
                       <textarea className="form-control mt-1" rows={3} id="ev-detail-comment"
                         defaultValue={evDetail.commentaire_agent}
-                        placeholder="Motif de la décision, informations complémentaires..." />
+                        placeholder="Motif de la décision, informations complémentaires, modifications demandées..." />
                     </div>
 
-                    <div className="d-flex gap-2 justify-content-end mt-3">
-                      <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setEvDetail(null)}>Annuler</button>
-                      <button className="btn btn-primary rounded-pill px-4 fw-bold" disabled={evSaving}
+                    {/* Current status pill */}
+                    <div className="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                      <span className="text-muted small">Statut actuel :</span>
+                      {(() => {
+                        const cfg: Record<string, { cls: string; icon: string }> = {
+                          pending:            { cls: 'bg-warning text-dark',  icon: 'fa-hourglass-half' },
+                          in_progress:        { cls: 'bg-info text-white',    icon: 'fa-spinner' },
+                          approved:           { cls: 'bg-success text-white', icon: 'fa-check-circle' },
+                          rejected:           { cls: 'bg-danger text-white',  icon: 'fa-times-circle' },
+                          changes_requested:  { cls: 'bg-warning text-dark',  icon: 'fa-edit' },
+                        }
+                        const c = cfg[evDetail.status] || { cls: 'bg-secondary text-white', icon: 'fa-question' }
+                        return (
+                          <span className={`badge rounded-pill px-3 py-2 ${c.cls}`} style={{ fontSize: '.8rem' }}>
+                            <i className={`fas ${c.icon} me-1`}></i>{evDetail.status_display}
+                          </span>
+                        )
+                      })()}
+                    </div>
+
+                    {/* 3-button decision row */}
+                    <div className="d-flex gap-2 flex-wrap mt-2">
+                      <button className="btn btn-success rounded-pill px-4 fw-bold flex-fill" disabled={evSaving}
                         onClick={() => {
-                          const sel = document.getElementById('ev-detail-status') as HTMLSelectElement
                           const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
-                          handleEvStatus(evDetail.id, sel?.value || evDetail.status, txt?.value || '')
-                        }}>
-                        {evSaving ? <><span className="spinner-border spinner-border-sm me-2"></span>Enregistrement...</> : <><i className="fas fa-save me-2"></i>Enregistrer</>}
+                          handleEvStatus(evDetail.id, 'approved', txt?.value || '')
+                        }}
+                        title="Autoriser cet événement">
+                        {evSaving
+                          ? <span className="spinner-border spinner-border-sm"></span>
+                          : <><i className="fas fa-check-circle me-2"></i>Approuver</>
+                        }
+                      </button>
+
+                      <button className="btn btn-warning rounded-pill px-4 fw-bold flex-fill text-dark" disabled={evSaving}
+                        onClick={() => {
+                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                          if (!txt?.value?.trim()) {
+                            txt?.focus()
+                            txt?.setCustomValidity('Veuillez indiquer les modifications demandées.')
+                            txt?.reportValidity()
+                            return
+                          }
+                          handleEvStatus(evDetail.id, 'changes_requested', txt.value)
+                        }}
+                        title="Demander des modifications au citoyen">
+                        {evSaving
+                          ? <span className="spinner-border spinner-border-sm"></span>
+                          : <><i className="fas fa-edit me-2"></i>Modifications</>
+                        }
+                      </button>
+
+                      <button className="btn btn-danger rounded-pill px-4 fw-bold flex-fill" disabled={evSaving}
+                        onClick={() => {
+                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                          handleEvStatus(evDetail.id, 'rejected', txt?.value || '')
+                        }}
+                        title="Rejeter cette demande">
+                        {evSaving
+                          ? <span className="spinner-border spinner-border-sm"></span>
+                          : <><i className="fas fa-times-circle me-2"></i>Rejeter</>
+                        }
+                      </button>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                      <button className="btn btn-outline-secondary rounded-pill px-4"
+                        onClick={() => {
+                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                          handleEvStatus(evDetail.id, 'in_progress', txt?.value || '')
+                        }}
+                        disabled={evSaving}
+                        title="Marquer comme en cours d'examen">
+                        <i className="fas fa-spinner me-2"></i>Mettre en traitement
+                      </button>
+                      <button className="btn btn-link text-muted text-decoration-none" onClick={() => setEvDetail(null)}>
+                        Fermer
                       </button>
                     </div>
                   </div>

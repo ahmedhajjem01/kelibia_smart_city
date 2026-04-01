@@ -83,7 +83,8 @@ export default function DemandeEvenementPage() {
 
   const [form, setForm] = useState({
     titre_evenement: '',
-    type_evenement: 'autre',
+    type_evenement: 'fete_familiale',
+    type_evenement_libre: '',
     description: '',
     nombre_participants: '',
     lieu_type: 'espace_public',
@@ -203,14 +204,19 @@ export default function DemandeEvenementPage() {
   )
 
   const TYPE_OPTIONS = [
-    { value: 'fete_familiale', label: 'Fête familiale / حفل عائلي' },
-    { value: 'concert',        label: 'Concert / حفلة موسيقية' },
-    { value: 'marche',         label: 'Marché / سوق' },
-    { value: 'association',    label: 'Activité associative / نشاط جمعوي' },
-    { value: 'sportif',        label: 'Événement sportif / حدث رياضي' },
-    { value: 'culturel',       label: 'Événement culturel / حدث ثقافي' },
-    { value: 'commercial',     label: 'Événement commercial / حدث تجاري' },
-    { value: 'autre',          label: 'Autre / أخرى' },
+    { value: 'fete_familiale',  label: '🎂 Fête familiale / حفل عائلي' },
+    { value: 'mariage',         label: '💍 Cérémonie de mariage / حفل زفاف' },
+    { value: 'remise_diplomes', label: '🎓 Remise de diplômes / حفل التخرج' },
+    { value: 'concert',         label: '🎵 Concert / حفلة موسيقية' },
+    { value: 'marche',          label: '🛍️ Marché / سوق' },
+    { value: 'association',     label: '🤝 Activité associative / نشاط جمعوي' },
+    { value: 'sportif',         label: '⚽ Événement sportif / حدث رياضي' },
+    { value: 'culturel',        label: '🎭 Événement culturel / حدث ثقافي' },
+    { value: 'commercial',      label: '💼 Événement commercial / حدث تجاري' },
+    { value: 'religieux',       label: '🕌 Événement religieux / تظاهرة دينية' },
+    { value: 'politique',       label: '🏛️ Réunion / Meeting politique / تجمع سياسي' },
+    { value: 'charite',         label: '❤️ Événement caritatif / نشاط خيري' },
+    { value: 'autre',           label: '📋 Autre (préciser) / أخرى (تحديد)' },
   ]
 
   const LIEU_OPTIONS = [
@@ -277,13 +283,32 @@ export default function DemandeEvenementPage() {
                             placeholder="Ex: Fête de fin d'année scolaire / حفل نهاية السنة الدراسية" required />
                         </div>
 
-                        <div className="col-md-6">
+                        <div className={form.type_evenement === 'autre' ? 'col-md-6' : 'col-md-6'}>
                           <label className={labelClass}>Type d'événement <span className="text-danger">*</span></label>
                           <select className={inputClass} style={inputStyle}
                             value={form.type_evenement} onChange={e => handleField('type_evenement', e.target.value)} required>
                             {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                           </select>
                         </div>
+
+                        {/* Free-text field shown only when "autre" is selected */}
+                        {form.type_evenement === 'autre' && (
+                          <div className="col-12">
+                            <label className={labelClass}>
+                              Précisez le type d'événement <span className="text-danger">*</span>
+                              <span className="ms-2 text-muted fw-normal" style={{ direction: 'rtl' }}>حدد نوع التظاهرة</span>
+                            </label>
+                            <input type="text" className={inputClass} style={inputStyle}
+                              value={form.type_evenement_libre}
+                              onChange={e => handleField('type_evenement_libre', e.target.value)}
+                              placeholder="Ex: Tournoi de pétanque, Foire artisanale, Exposition de peinture..."
+                              required />
+                            <div className="text-muted small mt-1">
+                              <i className="fas fa-info-circle me-1"></i>
+                              Cette précision aidera la mairie à traiter votre demande plus rapidement.
+                            </div>
+                          </div>
+                        )}
 
                         <div className="col-md-6">
                           <label className={labelClass}>Nombre de participants estimé <span className="text-danger">*</span></label>
