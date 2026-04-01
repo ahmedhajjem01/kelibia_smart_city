@@ -21,30 +21,75 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
-        from .classifier import classify
+        from .classifier import classify, detect_duplicate
         title       = self.request.data.get('title', '')
         description = self.request.data.get('description', '')
         category    = self.request.data.get('category', 'other')
-        result      = classify(title, description, category)
+
+        # Parse GPS coords (may be None if citizen didn't share location)
+        try:
+            latitude  = float(self.request.data.get('latitude'))
+        except (TypeError, ValueError):
+            latitude  = None
+        try:
+            longitude = float(self.request.data.get('longitude'))
+        except (TypeError, ValueError):
+            longitude = None
+
+        # ── ML classification ────────────────────────────────────────────────
+        result = classify(title, description, category)
+
+        # ── Duplicate detection (texte + GPS) ────────────────────────────────
+        dup_result   = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
+        is_duplicate = dup_result['is_duplicate']
+        duplicate_of = None
+        if is_duplicate and dup_result['duplicate_of']:
+            try:
+                duplicate_of = Reclamation.objects.get(pk=dup_result['duplicate_of'])
+            except Reclamation.DoesNotExist:
+                duplicate_of = None
+
         serializer.save(
             citizen=self.request.user,
             priority=result['priority'],
             service_responsable=result['service_responsable'],
             category=result['category'],
+            is_duplicate=is_duplicate,
+            duplicate_of=duplicate_of,
+            similarity_score=dup_result['final_score'],
         )
 
     def create(self, request, *args, **kwargs):
-        from .classifier import classify
+        from .classifier import classify, detect_duplicate
         title       = request.data.get('title', '')
         description = request.data.get('description', '')
         category    = request.data.get('category', 'other')
-        ml_result   = classify(title, description, category)
-        response    = super().create(request, *args, **kwargs)
+
+        try:
+            latitude  = float(request.data.get('latitude'))
+        except (TypeError, ValueError):
+            latitude  = None
+        try:
+            longitude = float(request.data.get('longitude'))
+        except (TypeError, ValueError):
+            longitude = None
+
+        ml_result  = classify(title, description, category)
+        dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
+
+        response = super().create(request, *args, **kwargs)
         response.data['ml_classification'] = {
             'category':            ml_result['category'],
             'priority':            ml_result['priority'],
             'service_responsable': ml_result['service_responsable'],
             'confidence':          ml_result.get('confidence', {}),
+        }
+        response.data['duplicate_detection'] = {
+            'is_duplicate':     dup_result['is_duplicate'],
+            'duplicate_of':     dup_result['duplicate_of'],
+            'similarity_score': dup_result['similarity_score'],
+            'geo_score':        dup_result['geo_score'],
+            'final_score':      dup_result['final_score'],
         }
         return response
 

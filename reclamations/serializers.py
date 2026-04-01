@@ -11,9 +11,11 @@ class ReclamationSerializer(serializers.ModelSerializer):
     Inclut un champ 'confidence' calculé à la volée par le modèle ML
     (recalculé sur title+description à chaque sérialisation).
     """
-    citizen_name = serializers.SerializerMethodField()
-    agent_name   = serializers.SerializerMethodField()
-    confidence   = serializers.SerializerMethodField()
+    citizen_name      = serializers.SerializerMethodField()
+    agent_name        = serializers.SerializerMethodField()
+    confidence        = serializers.SerializerMethodField()
+    duplicate_of_id   = serializers.SerializerMethodField()
+    duplicate_of_title = serializers.SerializerMethodField()
 
     def get_citizen_name(self, obj):
         name = obj.citizen.get_full_name().strip() if obj.citizen else ''
@@ -24,6 +26,12 @@ class ReclamationSerializer(serializers.ModelSerializer):
             return None
         name = obj.agent.get_full_name().strip()
         return name if name else obj.agent.email
+
+    def get_duplicate_of_id(self, obj):
+        return obj.duplicate_of.id if obj.duplicate_of else None
+
+    def get_duplicate_of_title(self, obj):
+        return obj.duplicate_of.title if obj.duplicate_of else None
 
     def get_confidence(self, obj):
         """
@@ -43,11 +51,13 @@ class ReclamationSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'citizen', 'citizen_name', 'agent', 'agent_name',
             'title', 'description', 'category', 'status',
-            'priority', 'service_responsable', 'is_duplicate',
+            'priority', 'service_responsable',
+            'is_duplicate', 'duplicate_of_id', 'duplicate_of_title', 'similarity_score',
             'image',
             'latitude', 'longitude',
             'created_at', 'updated_at',
             'confidence',
         ]
         read_only_fields = ['citizen', 'status', 'agent', 'created_at', 'updated_at',
-                            'priority', 'service_responsable', 'is_duplicate']
+                            'priority', 'service_responsable',
+                            'is_duplicate', 'similarity_score']

@@ -21,16 +21,24 @@ L.Marker.prototype.options.icon = DefaultIcon
 
 const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 
-function LocationMarker({ position, setPosition }: { position: [number, number] | null, setPosition: (pos: [number, number]) => void }) {
+function LocationMarker({ position, onMapClick }: { position: [number, number] | null, onMapClick: (pos: [number, number]) => void }) {
   useMapEvents({
     click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng])
+      onMapClick([e.latlng.lat, e.latlng.lng])
     },
   })
 
   return position === null ? null : (
     <Marker position={position} />
   )
+}
+
+// GPS accuracy badge colors
+const gpsStatusConfig = {
+  none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',   text: 'Aucune localisation sélectionnée' },
+  manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',          text: 'Position choisie sur la carte' },
+  gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',   text: 'Position GPS détectée' },
+  loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: 'Récupération de votre position...' },
 }
 
 export default function ReclamationFormPage() {
@@ -47,7 +55,11 @@ export default function ReclamationFormPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('other')
   const [image, setImage] = useState<File | null>(null)
-  const [position, setPosition] = useState<[number, number] | null>(KELIBIA_CENTER)
+
+  // position = null means "not chosen yet" — we no longer default to city center
+  const [position, setPosition] = useState<[number, number] | null>(null)
+  // 'none' | 'manual' | 'gps' | 'loading'
+  const [gpsStatus, setGpsStatus] = useState<'none' | 'manual' | 'gps' | 'loading'>('none')
 
   const categories = [
     { id: 'lighting', label: t('category_lighting') },
@@ -57,12 +69,38 @@ export default function ReclamationFormPage() {
     { id: 'other', label: t('category_other') },
   ]
 
+  // Called when citizen clicks on the map manually
+  const handleMapClick = (pos: [number, number]) => {
+    setPosition(pos)
+    setGpsStatus('manual')
+  }
+
   const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        setPosition([pos.coords.latitude, pos.coords.longitude])
-      })
+    if (!navigator.geolocation) {
+      setError("La géolocalisation n'est pas supportée par votre navigateur.")
+      return
     }
+    setGpsStatus('loading')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPosition([pos.coords.latitude, pos.coords.longitude])
+        setGpsStatus('gps')
+      },
+      (err) => {
+        setGpsStatus('none')
+        if (err.code === err.PERMISSION_DENIED) {
+          setError("Accès à la localisation refusé. Veuillez autoriser l'accès dans les paramètres de votre navigateur.")
+        } else {
+          setError("Impossible de récupérer votre position. Veuillez réessayer ou placer le marqueur manuellement.")
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  const clearLocation = () => {
+    setPosition(null)
+    setGpsStatus('none')
   }
 
   useEffect(() => {
@@ -202,23 +240,60 @@ export default function ReclamationFormPage() {
                   </div>
 
                   <div className="mb-4">
+                    {/* Header row */}
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                        <label className="form-label fw-bold small text-uppercase text-muted mb-0">{t('reclamation_location')}</label>
-                        <button type="button" onClick={getCurrentLocation} className="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            <i className="fas fa-location-arrow me-2"></i> {t('use_my_location')}
+                      <label className="form-label fw-bold small text-uppercase text-muted mb-0">
+                        {t('reclamation_location')}
+                        <span className="text-muted fw-normal ms-1" style={{ fontSize: '0.75rem' }}>(optionnel mais recommandé)</span>
+                      </label>
+                      <div className="d-flex gap-2">
+                        {position && (
+                          <button type="button" onClick={clearLocation}
+                            className="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                            title="Supprimer la localisation">
+                            <i className="fas fa-times me-1"></i> Effacer
+                          </button>
+                        )}
+                        <button type="button" onClick={getCurrentLocation}
+                          className="btn btn-sm btn-outline-primary rounded-pill px-3"
+                          disabled={gpsStatus === 'loading'}>
+                          <i className={`fas ${gpsStatus === 'loading' ? 'fa-circle-notch fa-spin' : 'fa-location-arrow'} me-2`}></i>
+                          {gpsStatus === 'loading' ? 'Localisation...' : t('use_my_location')}
                         </button>
+                      </div>
                     </div>
+
+                    {/* GPS status badge */}
+                    {(() => {
+                      const cfg = gpsStatusConfig[gpsStatus]
+                      return (
+                        <div className="d-flex align-items-center gap-2 mb-2 px-3 py-2 rounded-3"
+                          style={{ background: cfg.bg, border: `1px solid ${cfg.color}30` }}>
+                          <i className={`fas ${cfg.icon}`} style={{ color: cfg.color, fontSize: '0.9rem' }}></i>
+                          <span style={{ color: cfg.color, fontSize: '0.85rem', fontWeight: 500 }}>{cfg.text}</span>
+                          {position && (
+                            <span className="ms-auto text-muted" style={{ fontSize: '0.75rem' }}>
+                              {position[0].toFixed(5)}, {position[1].toFixed(5)}
+                            </span>
+                          )}
+                        </div>
+                      )
+                    })()}
+
+                    {/* Map */}
                     <div className="rounded-4 overflow-hidden shadow-sm border" style={{ height: '300px' }}>
-                        <MapContainer center={KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
-                            <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            />
-                            <LocationMarker position={position} setPosition={setPosition} />
-                        </MapContainer>
+                      <MapContainer center={position ?? KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        <LocationMarker position={position} onMapClick={handleMapClick} />
+                      </MapContainer>
                     </div>
+
                     <small className="text-muted mt-2 d-block">
-                        <i className="fas fa-info-circle me-1"></i> {t('pick_location')}
+                      <i className="fas fa-info-circle me-1"></i>
+                      Cliquez sur la carte pour placer le marqueur, ou utilisez le bouton GPS pour détecter automatiquement votre position.
                     </small>
                   </div>
 

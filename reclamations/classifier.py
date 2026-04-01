@@ -281,3 +281,163 @@ def classify(title: str, description: str, category: str = "other") -> dict:
             "priority": round(prio_conf, 3),
         },
     }
+
+
+# ─── Duplicate detection ──────────────────────────────────────────────────────
+
+def _geo_score(lat1, lon1, lat2, lon2) -> float:
+    """
+    Calcule un score géographique (0.0–1.0) basé sur la distance en mètres
+    entre deux coordonnées GPS via la formule de Haversine.
+
+    Seuils :
+      < 100m  → 1.0  (même endroit)
+      < 300m  → 0.7  (quartier immédiat)
+      < 500m  → 0.4  (zone proche)
+      >= 500m → 0.0  (trop loin, pas de bonus géo)
+    """
+    if None in (lat1, lon1, lat2, lon2):
+        return 0.0  # pas de GPS → pas de bonus géo
+
+    import math
+    R = 6_371_000  # rayon de la Terre en mètres
+
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    d_phi      = math.radians(lat2 - lat1)
+    d_lam      = math.radians(lon2 - lon1)
+
+    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lam / 2) ** 2
+    distance_m = R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    if distance_m < 100:
+        return 1.0
+    elif distance_m < 300:
+        return 0.7
+    elif distance_m < 500:
+        return 0.4
+    else:
+        return 0.0
+
+
+def detect_duplicate(title: str, description: str,
+                     latitude: float = None, longitude: float = None,
+                     exclude_id: int = None,
+                     threshold: float = 0.65) -> dict:
+    """
+    Détecte si une réclamation est similaire à une réclamation existante en DB.
+
+    Stratégie hybride (texte + géolocalisation) :
+      1. Récupère les réclamations existantes (non-rejetées) depuis la DB.
+      2. Calcule la similarité cosinus TF-IDF sur titre + description.
+      3. Calcule un score géographique basé sur la distance GPS (Haversine).
+      4. Score final = 0.6 × score_texte + 0.4 × score_geo
+         (si pas de GPS disponible → score final = score_texte uniquement)
+      5. Si le score final dépasse le seuil (défaut 0.65), c'est un doublon.
+
+    Exemples :
+      - Texte identique + même lieu      → score ~1.0  → doublon ✅
+      - Texte différent + même lieu      → score ~0.4  → pas doublon ❌
+      - Texte similaire + lieu proche    → score ~0.75 → doublon ✅
+      - Texte similaire + lieu lointain  → score ~0.45 → pas doublon ❌
+
+    Parameters
+    ----------
+    title       : titre de la nouvelle réclamation
+    description : description de la nouvelle réclamation
+    latitude    : latitude GPS de la nouvelle réclamation (optionnel)
+    longitude   : longitude GPS de la nouvelle réclamation (optionnel)
+    exclude_id  : id à exclure (utile si on re-teste une réclamation existante)
+    threshold   : seuil du score final (0.0–1.0), défaut 0.65
+
+    Returns
+    -------
+    dict(is_duplicate, duplicate_of, similarity_score, geo_score, final_score)
+    """
+    try:
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.metrics.pairwise import cosine_similarity
+        import numpy as np
+        from reclamations.models import Reclamation
+
+        # ── 1. Fetch existing reclamations from DB ───────────────────────────
+        qs = Reclamation.objects.exclude(status='rejected')
+        if exclude_id:
+            qs = qs.exclude(id=exclude_id)
+
+        existing = list(qs.values('id', 'title', 'description', 'latitude', 'longitude'))
+
+        if not existing:
+            return {
+                "is_duplicate": False, "duplicate_of": None,
+                "similarity_score": 0.0, "geo_score": 0.0, "final_score": 0.0,
+            }
+
+        # ── 2. TF-IDF text similarity ────────────────────────────────────────
+        new_text       = _normalize(title + " " + description)
+        existing_texts = [_normalize(r['title'] + " " + r['description']) for r in existing]
+        existing_ids   = [r['id'] for r in existing]
+
+        corpus = existing_texts + [new_text]
+
+        vectorizer = TfidfVectorizer(
+            analyzer="word",
+            ngram_range=(1, 2),
+            min_df=1,
+            sublinear_tf=True,
+            strip_accents="unicode",
+        )
+        tfidf_matrix = vectorizer.fit_transform(corpus)
+
+        new_vec      = tfidf_matrix[-1]
+        existing_mat = tfidf_matrix[:-1]
+        text_scores  = cosine_similarity(new_vec, existing_mat)[0]  # shape (n,)
+
+        # ── 3. Geo scores for each existing reclamation ──────────────────────
+        geo_scores = np.array([
+            _geo_score(latitude, longitude, r['latitude'], r['longitude'])
+            for r in existing
+        ])
+
+        # ── 4. Combined score ────────────────────────────────────────────────
+        has_gps = latitude is not None and longitude is not None
+        if has_gps:
+            # Weighted combination: 60% text + 40% geo
+            final_scores = 0.6 * text_scores + 0.4 * geo_scores
+        else:
+            # No GPS provided → fall back to text only (raise threshold slightly)
+            final_scores = text_scores
+
+        # ── 5. Find best match ───────────────────────────────────────────────
+        best_idx    = int(np.argmax(final_scores))
+        best_final  = float(final_scores[best_idx])
+        best_text   = float(text_scores[best_idx])
+        best_geo    = float(geo_scores[best_idx])
+
+        if best_final >= threshold:
+            logger.info(
+                "[DUPLICATE] '%s' → id=%d (text=%.3f geo=%.3f final=%.3f)",
+                title[:50], existing_ids[best_idx], best_text, best_geo, best_final,
+            )
+            return {
+                "is_duplicate":     True,
+                "duplicate_of":     existing_ids[best_idx],
+                "similarity_score": round(best_text,  3),
+                "geo_score":        round(best_geo,   3),
+                "final_score":      round(best_final, 3),
+            }
+
+        return {
+            "is_duplicate":     False,
+            "duplicate_of":     None,
+            "similarity_score": round(best_text,  3),
+            "geo_score":        round(best_geo,   3),
+            "final_score":      round(best_final, 3),
+        }
+
+    except Exception as exc:
+        logger.error("[DUPLICATE] Detection failed: %s", exc)
+        # Fail silently — never block the creation of a reclamation
+        return {
+            "is_duplicate": False, "duplicate_of": None,
+            "similarity_score": 0.0, "geo_score": 0.0, "final_score": 0.0,
+        }

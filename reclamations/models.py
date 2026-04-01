@@ -53,6 +53,15 @@ class Reclamation(models.Model):
     priority    = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='normale', verbose_name="Priorité")
     service_responsable = models.CharField(max_length=100, blank=True, verbose_name="Service Responsable")
     is_duplicate = models.BooleanField(default=False, verbose_name="Doublon détecté")
+    duplicate_of = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='duplicates',
+        verbose_name="Doublon de",
+    )
+    similarity_score = models.FloatField(null=True, blank=True, verbose_name="Score de similarité")
     image       = models.ImageField(upload_to='reclamations/', null=True, blank=True, verbose_name="Image / Preuve")
     latitude    = models.FloatField(null=True, blank=True, verbose_name="Latitude")
     longitude   = models.FloatField(null=True, blank=True, verbose_name="Longitude")
