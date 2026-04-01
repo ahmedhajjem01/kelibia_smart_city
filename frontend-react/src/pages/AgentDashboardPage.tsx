@@ -1114,7 +1114,8 @@ export default function AgentDashboardPage() {
               </div>
            </div>
         </div>
-       {/* MODAL: ADD USER (AGENT/SUPERVISOR) */}
+      )}
+      {/* MODAL: ADD USER (AGENT/SUPERVISOR) */}
        {showAddUserModal && (
          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
            <div className="bg-white rounded-3 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '450px' }}>
