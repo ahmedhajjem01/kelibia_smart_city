@@ -109,11 +109,7 @@ export default function LoginPage() {
 
       // Role-based redirection
       if (data.is_staff || data.is_superuser || data.user_type === 'supervisor') {
-        if (email === 'admin@kelibiasmartcity.tn' || data.user_type === 'supervisor') {
-          window.location.href = '/admin/'
-        } else {
-          navigate('/agent-dashboard')
-        }
+        navigate('/supervisor-admin')
       } else if (data.user_type === 'agent') {
         navigate('/agent-dashboard')
       } else {

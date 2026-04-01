@@ -86,3 +86,70 @@ def get_supervisor_services_summary(request):
     except: pass
 
     return Response(summary)
+
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def manage_supervisor_orders(request, order_type=None, order_id=None):
+    """
+    Unified view to List, Update status or Delete any administrative request/order.
+    """
+    if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+        return Response({"error": "Accès refusé"}, status=403)
+
+    models_map = {
+        'residence': DemandeResidence,
+        'livret': DemandeLivretFamille,
+        'naissance': DeclarationNaissance,
+        'mariage': ExtraitMariage, # Note: Extrait vs Declaration varies, but here we cover the main ones
+        'deces': ExtraitDeces
+    }
+
+    if request.method == 'GET':
+        resp = []
+        for key, model in models_map.items():
+            objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user').order_by('-created_at')
+            for o in objs:
+                citizen = getattr(o, 'citizen', getattr(o, 'user', None))
+                resp.append({
+                    "id": o.id,
+                    "type": key,
+                    "type_label": model._meta.verbose_name,
+                    "citizen_name": f"{citizen.first_name} {citizen.last_name}" if citizen else "Inconnu",
+                    "status": getattr(o, 'status', 'approved' if getattr(o, 'is_paid', False) else 'pending'),
+                    "is_paid": getattr(o, 'is_paid', False),
+                    "created_at": o.created_at,
+                })
+        # Sort all by date
+        resp.sort(key=lambda x: x['created_at'], reverse=True)
+        return Response(resp)
+
+    if request.method == 'POST': # Update Status
+        data = request.data
+        t = data.get('type')
+        oid = data.get('order_id')
+        nst = data.get('status')
+        if not t or not oid or not nst:
+            return Response({"error": "Missing params"}, status=400)
+        
+        m = models_map.get(t)
+        if not m: return Response({"error": "Invalid type"}, status=400)
+        
+        try:
+            o = m.objects.get(id=oid)
+            if hasattr(o, 'status'):
+                o.status = nst
+                o.save()
+                return Response({"message": "Statut mis à jour !"})
+            return Response({"error": "No status field!"}, status=400)
+        except: return Response({"error": "Not found"}, status=404)
+
+    if request.method == 'DELETE':
+        t = request.query_params.get('type')
+        oid = request.query_params.get('id')
+        if not t or not oid: return Response({"error": "Missing params"}, status=400)
+        m = models_map.get(t)
+        if not m: return Response({"error": "Invalid type"}, status=400)
+        try:
+            m.objects.get(id=oid).delete()
+            return Response({"message": "Supprimé !"})
+        except: return Response({"error": "Not found"}, status=404)

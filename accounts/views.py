@@ -253,10 +253,57 @@ class UserVerificationView(APIView):
                     "message": f"Statut du compte mis à jour (Actif: {target_user.is_active}).",
                     "is_active": target_user.is_active
                 })
+            elif action == 'delete':
+                target_user.delete()
+                return Response({"message": "Utilisateur supprimé avec succès."})
+            elif action == 'promote_to_agent':
+                target_user.user_type = 'agent'
+                target_user.is_staff = True
+                target_user.save()
+                return Response({"message": "L'utilisateur a été promu au rang d'Agent."})
+            elif action == 'promote_to_supervisor':
+                target_user.user_type = 'supervisor'
+                target_user.is_staff = True
+                target_user.is_superuser = True
+                target_user.save()
+                return Response({"message": "L'utilisateur a été promu au rang de Superviseur."})
             else:
                 return Response({"error": "Action non reconnue."}, status=400)
         except User.DoesNotExist:
             return Response({"error": "Utilisateur introuvable."}, status=404)
+
+class AdminUserCreateView(APIView):
+    """
+    Supervisor endpoint to create agents or other supervisors directly.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+            return Response({"error": "Accès refusé."}, status=403)
+        
+        data = request.data
+        try:
+            user = User.objects.create_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'],
+                first_name=data.get('first_name', ''),
+                last_name=data.get('last_name', ''),
+                cin=data.get('cin', f"SYS{User.objects.count()}"),
+                phone=data.get('phone', f"0000{User.objects.count()}"),
+                user_type=data.get('user_type', 'agent'),
+                is_staff=True,
+                is_verified=True,
+                is_active=True
+            )
+            if user.user_type == 'supervisor':
+                user.is_superuser = True
+                user.save()
+            
+            return Response({"message": f"Nouvel utilisateur '{user.username}' créé avec succès."}, status=201)
+        except Exception as e:
+            return Response({"error": f"Erreur lors de la création: {str(e)}"}, status=400)
 
 def admin_logout(request):
 

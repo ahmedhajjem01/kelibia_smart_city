@@ -8,6 +8,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordConfirmPage from './pages/ResetPasswordConfirmPage'
 import DashboardPage from './pages/DashboardPage'
 import AgentDashboardPage from './pages/AgentDashboardPage'
+import SupervisorAdminPage from './pages/SupervisorAdminPage'
 import AgentStatsPage from './pages/AgentStatsPage'
 import ServicesPage from './pages/ServicesPage'
 import MunicipaliteNaissancesPage from './pages/MunicipaliteNaissancesPage'
@@ -57,6 +58,10 @@ export default function App() {
           <Route
             path="/agent-dashboard"
             element={<AgentDashboardPage />}
+          />
+          <Route
+            path="/supervisor-admin"
+            element={<SupervisorAdminPage />}
           />
           <Route
             path="/agent-stats"

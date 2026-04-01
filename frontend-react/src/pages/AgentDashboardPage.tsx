@@ -180,13 +180,20 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'orders' | 'forum'>('dashboard')
   const [usersMode, setUsersMode] = useState<'unverified' | 'all'>('unverified')
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [servicesSummary, setServicesSummary] = useState<any>(null)
+  const [allCategories, setAllCategories] = useState<any[]>([])
+  const [allServices, setAllServices] = useState<any[]>([])
+  const [loadingServicesTab, setLoadingServicesTab] = useState(false)
+  const [showAddUserModal, setShowAddUserModal] = useState(false)
+  const [showAddServiceModal, setShowAddServiceModal] = useState(false)
+  const [allOrders, setAllOrders] = useState<any[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(false)
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
@@ -219,6 +226,8 @@ export default function AgentDashboardPage() {
       if (u.user_type === 'supervisor' || u.is_staff || u.is_superuser) {
         fetchManagedUsers(usersMode)
         fetchServicesSummary()
+        fetchCategoriesAndServices()
+        fetchOrders()
       }
     } catch { setUser(null) }
   }
@@ -230,6 +239,33 @@ export default function AgentDashboardPage() {
     } catch (e) { console.error(e) }
   }
 
+  async function fetchCategoriesAndServices() {
+    setLoadingServicesTab(true)
+    try {
+      const res = await fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) {
+        const cats = await res.json()
+        setAllCategories(cats)
+        // Flatten services for easy listing
+        const svcs: any[] = []
+        cats.forEach((c: any) => {
+          (c.services || []).forEach((s: any) => svcs.push({ ...s, category_name: c.name_fr, category_id: c.id }))
+        })
+        setAllServices(svcs)
+      }
+    } catch (e) { console.error(e) }
+    finally { setLoadingServicesTab(false) }
+  }
+
+  async function fetchOrders() {
+    setLoadingOrders(true)
+    try {
+      const res = await fetch('/api/supervisor/manage-orders/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setAllOrders(await res.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingOrders(false) }
+  }
+
   async function fetchManagedUsers(mode: 'unverified' | 'all') {
     setLoadingUsers(true)
     try {
@@ -239,7 +275,7 @@ export default function AgentDashboardPage() {
     finally { setLoadingUsers(false) }
   }
 
-  async function handleToggleUserStatus(userId: number, action: 'verify' | 'toggle_active') {
+  async function handleToggleUserStatus(userId: number, action: 'verify' | 'toggle_active' | 'delete' | 'promote_to_agent' | 'promote_to_supervisor') {
     try {
       const res = await fetch('/api/accounts/verify-citizens/', {
         method: 'POST',
@@ -481,6 +517,9 @@ export default function AgentDashboardPage() {
               <a className={`ag-nav-item${activeTab === 'services' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('services') }}>
                 <i className="fas fa-file-invoice"></i> Services Municipaux
               </a>
+              <a className={`ag-nav-item${activeTab === 'orders' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('orders'); fetchOrders() }}>
+                <i className="fas fa-shopping-cart"></i> Gestion Commandes
+              </a>
               <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
                 <i className="fas fa-comments"></i> Modération Forum
               </a>
@@ -612,6 +651,7 @@ export default function AgentDashboardPage() {
                   <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>EN ATTENTE</button>
                   <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>TOUS</button>
                 </div>
+                <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>AJOUTER AGENT</button>
               </div>
               <div className="ag-card-body p-0">
                 {loadingUsers ? (
@@ -663,8 +703,15 @@ export default function AgentDashboardPage() {
                                 <button className={`btn btn-sm ${u.is_active ? 'btn-outline-danger' : 'btn-danger'}`} title={u.is_active ? 'Bloquer' : 'Débloquer'} onClick={() => handleToggleUserStatus(u.id, 'toggle_active')}>
                                   <i className={`fas ${u.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
                                 </button>
+                                {u.user_type === 'citizen' && (
+                                  <button className="btn btn-sm btn-outline-info" title="Promouvoir Agent" onClick={(e) => { e.stopPropagation(); handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
+                                )}
+                                {user?.is_superuser && u.user_type !== 'supervisor' && (
+                                  <button className="btn btn-sm btn-outline-warning" title="Promouvoir Superviseur" onClick={(e) => { e.stopPropagation(); handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
+                                )}
+                                <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={(e) => { e.stopPropagation(); if(window.confirm('Supprimer cet utilisateur ?')) handleToggleUserStatus(u.id, 'delete') }}><i className="fas fa-trash"></i></button>
                                 {(u.cin_front || u.cin_back) && (
-                                  <a href={resolveBackendUrl(u.cin_front || u.cin_back)} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary" title="Voir CIN"><i className="fas fa-id-card"></i></a>
+                                  <a href={resolveBackendUrl(u.cin_front || u.cin_back)} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary" title="Voir CIN" onClick={e => e.stopPropagation()}><i className="fas fa-id-card"></i></a>
                                 )}
                               </div>
                             </td>
@@ -678,36 +725,140 @@ export default function AgentDashboardPage() {
             </div>
           ) : activeTab === 'services' ? (
             <div className="ag-card animate__animated animate__fadeIn">
-               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a237e,#283593)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
-                  <span className="fw-bold"><i className="fas fa-file-invoice me-2"></i>Centre des Services Municipaux</span>
+               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a237e,#283593)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span className="fw-bold"><i className="fas fa-file-invoice me-2"></i>Gestion des Services Municipaux</span>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-sm btn-light" style={{ fontSize: '11px', fontWeight: 600 }} onClick={() => setShowAddServiceModal(true)}><i className="fas fa-plus me-1"></i>AJOUTER SERVICE</button>
+                    <button className="btn btn-sm btn-outline-light" style={{ fontSize: '11px', fontWeight: 600 }} onClick={fetchCategoriesAndServices}><i className="fas fa-sync-alt"></i></button>
+                  </div>
                </div>
-               <div className="p-5 text-center">
-                  <i className="fas fa-file-invoice fa-3x mb-3 text-muted"></i>
-                  <h5 className="fw-bold">Gestion des Demandes de Services</h5>
-                  <p className="text-muted">Suivi en temps réel des demandes citoyennes nécessitant une validation.</p>
-                  <div className="row g-3 mt-4">
-                     <div className="col-md-4">
-                        <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #1a237e' }}>
-                           <div className="text-muted small fw-bold">RÉSIDENCE</div>
-                           <div className="h2 mt-2 mb-0 text-primary">{servicesSummary?.attestation_residence || 0}</div>
-                           <div className="small text-muted">Demandes en attente</div>
+               <div className="ag-card-body p-0">
+                  {loadingServicesTab ? (
+                    <div className="text-center p-5"><div className="spinner-border text-primary"></div></div>
+                  ) : allServices.length === 0 ? (
+                    <div className="text-center p-5 text-muted"><i className="fas fa-file-invoice fa-3x mb-3 opacity-25"></i><p>Aucun service configuré.</p></div>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="ag-table">
+                        <thead>
+                          <tr>
+                            <th>Service</th>
+                            <th>Catégorie</th>
+                            <th>Délai</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {allServices.map(s => (
+                            <tr key={s.id}>
+                              <td>
+                                <div className="fw-bold text-dark">{s.name_fr}</div>
+                                <div className="text-muted" style={{ fontSize: '11px' }}>{s.name_ar}</div>
+                              </td>
+                              <td><span className="badge bg-light text-dark border">{s.category_name}</span></td>
+                              <td style={{ fontSize: '12px' }}>{s.processing_time || '—'}</td>
+                              <td>
+                                <div className="d-flex gap-2">
+                                  <button className="btn btn-sm btn-outline-primary" title="Modifier" onClick={() => { /* setEditingService(s); setShowAddServiceModal(true) */ showToast('Fonctionnalité en cours de déploiement', 'info') }}><i className="fas fa-edit"></i></button>
+                                  <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={() => { if(window.confirm('Supprimer ce service ?')) showToast('Action restreinte par sécurité', 'error') }}><i className="fas fa-trash"></i></button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  
+                  {/* Summary Section below table */}
+                  <div className="ag-divider"></div>
+                  <div className="p-4 bg-light border-top">
+                     <h6 className="fw-bold mb-3"><i className="fas fa-chart-line me-2"></i>Résumé des Demandes Actives</h6>
+                     <div className="row g-3">
+                        <div className="col-md-4">
+                           <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #1a237e' }}>
+                              <div className="text-muted small fw-bold">RÉSIDENCE</div>
+                              <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.attestation_residence || 0} en attente</div>
+                           </div>
                         </div>
-                     </div>
-                     <div className="col-md-4">
-                        <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #0d47a1' }}>
-                           <div className="text-muted small fw-bold">NAISSANCE</div>
-                           <div className="h2 mt-2 mb-0 text-primary">{servicesSummary?.declaration_naissance || 0}</div>
-                           <div className="small text-muted">Déclarations à valider</div>
+                        <div className="col-md-4">
+                           <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #0d47a1' }}>
+                              <div className="text-muted small fw-bold">NAISSANCE</div>
+                              <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.declaration_naissance || 0} en attente</div>
+                           </div>
                         </div>
-                     </div>
-                     <div className="col-md-4">
-                        <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #01579b' }}>
-                           <div className="text-muted small fw-bold">LIIVRET FAMILLE</div>
-                           <div className="h2 mt-2 mb-0 text-primary">{servicesSummary?.livret_famille || 0}</div>
-                           <div className="small text-muted">Demandes à traiter</div>
+                        <div className="col-md-4">
+                           <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #01579b' }}>
+                              <div className="text-muted small fw-bold">LIVRET FAMILLE</div>
+                              <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.livret_famille || 0} en attente</div>
+                           </div>
                         </div>
                      </div>
                   </div>
+               </div>
+            </div>
+          ) : activeTab === 'orders' ? (
+            <div className="ag-card animate__animated animate__fadeIn">
+               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4527a0,#673ab7)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span className="fw-bold"><i className="fas fa-shopping-cart me-2"></i>Gestion des Commandes / Demandes</span>
+                  <button className="btn btn-sm btn-outline-light" onClick={fetchOrders}><i className="fas fa-sync-alt"></i></button>
+               </div>
+               <div className="ag-card-body p-0">
+                  {loadingOrders ? <div className="text-center p-5"><div className="spinner-border"></div></div> : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="ag-table">
+                        <thead>
+                          <tr>
+                             <th>Demande</th>
+                             <th>Citoyen</th>
+                             <th>Statut</th>
+                             <th>Date</th>
+                             <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                           {allOrders.map(o => (
+                             <tr key={`${o.type}-${o.id}`}>
+                               <td>
+                                 <div className="fw-bold">{o.type_label}</div>
+                                 <div className="small text-muted">{o.type} #{o.id}</div>
+                                 {o.is_paid ? <span className="badge bg-success p-1" style={{ fontSize: '9px' }}>PAYÉ</span> : <span className="badge bg-secondary p-1" style={{ fontSize: '9px' }}>NON PAYÉ</span>}
+                               </td>
+                               <td style={{ fontSize: '13px' }}>{o.citizen_name}</td>
+                               <td>
+                                 <select className="ag-status-select" value={o.status} onChange={async (e) => {
+                                   const ns = e.target.value;
+                                   const res = await fetch('/api/supervisor/manage-orders/', {
+                                     method: 'POST',
+                                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+                                     body: JSON.stringify({ type: o.type, order_id: o.id, status: ns })
+                                   });
+                                   if (res.ok) { showToast('Statut mis à jour !'); fetchOrders() }
+                                 }}>
+                                   <option value="pending">En attente</option>
+                                   <option value="in_progress">En cours</option>
+                                   <option value="approved">Approuvée</option>
+                                   <option value="rejected">Rejetée</option>
+                                 </select>
+                               </td>
+                               <td style={{ fontSize: '12px' }}>{formatDate(o.created_at)}</td>
+                               <td>
+                                 <button className="btn btn-sm btn-outline-danger" onClick={async () => {
+                                   if (window.confirm('Supprimer cette demande ?')) {
+                                     const res = await fetch(`/api/supervisor/manage-orders/?type=${o.type}&id=${o.id}`, {
+                                       method: 'DELETE',
+                                       headers: { Authorization: `Bearer ${access}` }
+                                     });
+                                     if (res.ok) { showToast('Demande supprimée'); fetchOrders() }
+                                   }
+                                 }}><i className="fas fa-trash"></i></button>
+                               </td>
+                             </tr>
+                           ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                </div>
             </div>
           ) : (
@@ -963,7 +1114,83 @@ export default function AgentDashboardPage() {
               </div>
            </div>
         </div>
-      )}
+       {/* MODAL: ADD USER (AGENT/SUPERVISOR) */}
+       {showAddUserModal && (
+         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+           <div className="bg-white rounded-3 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '450px' }}>
+             <div className="p-3 bg-dark text-white d-flex justify-content-between align-items-center">
+               <h6 className="mb-0 fw-bold"><i className="fas fa-user-plus me-2"></i>Ajouter un Collaborateur</h6>
+               <button className="btn-close btn-close-white" onClick={() => setShowAddUserModal(false)}></button>
+             </div>
+             <form className="p-4" onSubmit={async (e) => {
+               e.preventDefault();
+               const fd = new FormData(e.currentTarget);
+               const data = Object.fromEntries(fd.entries());
+               try {
+                 const res = await fetch('/api/accounts/admin-create/', {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+                   body: JSON.stringify(data)
+                 });
+                 if (res.ok) { showToast('Utilisateur créé !'); setShowAddUserModal(false); fetchManagedUsers('all') }
+                 else { const err = await res.json(); showToast(err.error || 'Erreur', 'error') }
+               } catch { showToast('Erreur réseau', 'error') }
+             }}>
+               <div className="mb-3"><label className="form-label small fw-bold">Nom d'utilisateur</label><input className="form-control" name="username" required placeholder="ex: agent_kcl" /></div>
+               <div className="mb-3"><label className="form-label small fw-bold">Email</label><input className="form-control" name="email" type="email" required placeholder="agent@kelibia.tn" /></div>
+               <div className="mb-3"><label className="form-label small fw-bold">Mot de passe</label><input className="form-control" name="password" type="password" required placeholder="••••••••" /></div>
+               <div className="mb-3">
+                 <label className="form-label small fw-bold">Type de compte</label>
+                 <select className="form-select" name="user_type" defaultValue="agent">
+                   <option value="agent">Agent Municipal</option>
+                   <option value="supervisor">Superviseur (Superuser)</option>
+                 </select>
+               </div>
+               <div className="d-grid"><button className="btn btn-dark" type="submit">Créer le compte</button></div>
+             </form>
+           </div>
+         </div>
+       )}
+
+       {/* MODAL: ADD SERVICE */}
+       {showAddServiceModal && (
+         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+           <div className="bg-white rounded-3 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '500px' }}>
+             <div className="p-3 bg-primary text-white d-flex justify-content-between align-items-center">
+               <h6 className="mb-0 fw-bold"><i className="fas fa-plus-circle me-2"></i>Nouveau Service Municipal</h6>
+               <button className="btn-close btn-close-white" onClick={() => setShowAddServiceModal(false)}></button>
+             </div>
+             <form className="p-4" style={{ maxHeight: '80vh', overflowY: 'auto' }} onSubmit={async (e) => {
+               e.preventDefault();
+               const fd = new FormData(e.currentTarget);
+               const data: any = Object.fromEntries(fd.entries());
+               try {
+                 const res = await fetch('/api/services/list/', { 
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+                   body: JSON.stringify(data)
+                 });
+                 if (res.ok) { showToast('Service ajouté !'); setShowAddServiceModal(false); fetchCategoriesAndServices() }
+                 else { showToast('Erreur lors de l\'ajout', 'error') }
+               } catch { showToast('Erreur réseau', 'error') }
+             }}>
+               <div className="mb-3">
+                 <label className="form-label small fw-bold">Catégorie</label>
+                 <select className="form-select" name="category" required>
+                    {allCategories.map(c => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
+                 </select>
+               </div>
+               <div className="row g-2 mb-3">
+                 <div className="col-6"><label className="form-label small fw-bold">Nom (FR)</label><input className="form-control" name="name_fr" required /></div>
+                 <div className="col-6"><label className="form-label small fw-bold">Nom (AR)</label><input className="form-control" name="name_ar" required /></div>
+               </div>
+               <div className="mb-3"><label className="form-label small fw-bold">Délai de traitement</label><input className="form-control" name="processing_time" placeholder="ex: 24h - 48h" /></div>
+               <div className="mb-3"><label className="form-label small fw-bold">Description (FR)</label><textarea className="form-control" name="description_fr" rows={2}></textarea></div>
+               <div className="d-grid mt-4"><button className="btn btn-primary" type="submit">Enregistrer le Service</button></div>
+             </form>
+           </div>
+         </div>
+       )}
     </div>
   )
 }

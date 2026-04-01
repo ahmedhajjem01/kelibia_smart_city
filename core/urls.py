@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView, UserVerificationView
+from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView, UserVerificationView, AdminUserCreateView
 from rest_framework_simplejwt.views import TokenRefreshView
-from core.views import login_redirect, confirm_payment, get_supervisor_services_summary
+from core.views import login_redirect, confirm_payment, get_supervisor_services_summary, manage_supervisor_orders
 
 urlpatterns = [
     path('admin/logout/', admin_logout, name='admin_logout'),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/payments/confirm/', confirm_payment, name='confirm_payment'),
     path('api/accounts/cards/', SavedCardView.as_view(), name='saved_cards'),
     path('api/accounts/verify-citizens/', UserVerificationView.as_view(), name='verify_citizens'),
+    path('api/accounts/admin-create/', AdminUserCreateView.as_view(), name='admin_create_user'),
 
 
 
@@ -33,6 +34,8 @@ urlpatterns = [
     path('dashboard/', include('signalement.urls')),
     path('login/', login_redirect, name='login'),
     path('api/supervisor/services-summary/', get_supervisor_services_summary, name='supervisor_services_summary'),
+    path('api/supervisor/manage-orders/', manage_supervisor_orders, name='manage_supervisor_orders'),
+    path('api/supervisor/manage-orders/<str:order_type>/<int:order_id>/', manage_supervisor_orders, name='manage_supervisor_order_detail'),
 ]
 
 if settings.DEBUG:
