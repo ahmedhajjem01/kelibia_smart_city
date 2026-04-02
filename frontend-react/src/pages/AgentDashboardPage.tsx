@@ -190,7 +190,6 @@ export default function AgentDashboardPage() {
   const [evSaving, setEvSaving] = useState(false)
   const [usersMode, setUsersMode] = useState<'unverified' | 'agents' | 'all'>('unverified')
   const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
-  const [enlargedImage, setEnlargedImage] = useState<string | null>(null)
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -255,7 +254,6 @@ export default function AgentDashboardPage() {
         fetchManagedUsers(usersMode)
         fetchServicesSummary()
         fetchCategoriesAndServices()
-        fetchOrders()
       }
     } catch { setUser(null) }
   }
@@ -864,7 +862,7 @@ export default function AgentDashboardPage() {
                                 )}
                                 <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={(e) => { e.stopPropagation(); if(window.confirm('Supprimer cet utilisateur ?')) handleToggleUserStatus(u.id, 'delete') }}><i className="fas fa-trash"></i></button>
                                 {(u.cin_front || u.cin_back) && (
-                                  <button type="button" className="btn btn-sm btn-outline-primary" title="Voir CIN" onClick={e => { e.stopPropagation(); setEnlargedImage(u.cin_front || u.cin_back) }}><i className="fas fa-id-card"></i></button>
+                                  <button type="button" className="btn btn-sm btn-outline-primary" title="Voir CIN" onClick={() => setSelectedUser(u)}><i className="fas fa-id-card"></i></button>
                                 )}
                               </div>
                             </td>
@@ -952,70 +950,6 @@ export default function AgentDashboardPage() {
                         </div>
                      </div>
                   </div>
-               </div>
-            </div>
-          ) : activeTab === 'orders' ? (
-            <div className="ag-card animate__animated animate__fadeIn">
-               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4527a0,#673ab7)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="fw-bold"><i className="fas fa-shopping-cart me-2"></i>Gestion des Commandes / Demandes</span>
-                  <button className="btn btn-sm btn-outline-light" onClick={fetchOrders}><i className="fas fa-sync-alt"></i></button>
-               </div>
-               <div className="ag-card-body p-0">
-                  {loadingOrders ? <div className="text-center p-5"><div className="spinner-border"></div></div> : (
-                    <div style={{ overflowX: 'auto' }}>
-                      <table className="ag-table">
-                        <thead>
-                          <tr>
-                             <th>Demande</th>
-                             <th>Citoyen</th>
-                             <th>Statut</th>
-                             <th>Date</th>
-                             <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                           {allOrders.map(o => (
-                             <tr key={`${o.type}-${o.id}`}>
-                               <td>
-                                 <div className="fw-bold">{o.type_label}</div>
-                                 <div className="small text-muted">{o.type} #{o.id}</div>
-                                 {o.is_paid ? <span className="badge bg-success p-1" style={{ fontSize: '9px' }}>PAYÉ</span> : <span className="badge bg-secondary p-1" style={{ fontSize: '9px' }}>NON PAYÉ</span>}
-                               </td>
-                               <td style={{ fontSize: '13px' }}>{o.citizen_name}</td>
-                               <td>
-                                 <select className="ag-status-select" value={o.status} onChange={async (e) => {
-                                   const ns = e.target.value;
-                                   const res = await fetch('/api/supervisor/manage-orders/', {
-                                     method: 'POST',
-                                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
-                                     body: JSON.stringify({ type: o.type, order_id: o.id, status: ns })
-                                   });
-                                   if (res.ok) { showToast('Statut mis à jour !'); fetchOrders() }
-                                 }}>
-                                   <option value="pending">En attente</option>
-                                   <option value="in_progress">En cours</option>
-                                   <option value="approved">Approuvée</option>
-                                   <option value="rejected">Rejetée</option>
-                                 </select>
-                               </td>
-                               <td style={{ fontSize: '12px' }}>{formatDate(o.created_at)}</td>
-                               <td>
-                                 <button className="btn btn-sm btn-outline-danger" onClick={async () => {
-                                   if (window.confirm('Supprimer cette demande ?')) {
-                                     const res = await fetch(`/api/supervisor/manage-orders/?type=${o.type}&id=${o.id}`, {
-                                       method: 'DELETE',
-                                       headers: { Authorization: `Bearer ${access}` }
-                                     });
-                                     if (res.ok) { showToast('Demande supprimée'); fetchOrders() }
-                                   }
-                                 }}><i className="fas fa-trash"></i></button>
-                               </td>
-                             </tr>
-                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
                </div>
             </div>
           ) : activeTab === 'demandes' ? (
