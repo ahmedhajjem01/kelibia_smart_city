@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
 
 interface TopNavProps {
-  user: { first_name: string; last_name: string; first_name_ar?: string; last_name_ar?: string } | null;
+  user: { first_name: string; last_name: string; first_name_ar?: string; last_name_ar?: string; user_type?: string; is_staff?: boolean; is_superuser?: boolean } | null;
   onLogout: () => void;
 }
 
 const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
   const { t, setLang, lang } = useI18n();
+
+  const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
 
   return (
     <>
@@ -25,11 +27,11 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
 
       {/* MAIN NAVBAR */}
       <nav className="main-navbar">
-        <Link className="navbar-brand-area" to="/dashboard">
+        <Link className="navbar-brand-area" to={isAgentOrAdmin ? "/agent-dashboard" : "/dashboard"}>
           <div className="navbar-logo"><i className="fas fa-city"></i></div>
           <div className="navbar-title">
             <span className="main-title">{lang === 'ar' ? 'بلدية قليبية' : 'Commune de Kélibia'}</span>
-            <span className="sub-title">{t('portal_citoyen')} — <span className="text-primary">Kelibia Smart City</span></span>
+            <span className="sub-title">{isAgentOrAdmin ? 'Espace Agent' : t('portal_citoyen')} — <span className="text-primary">Kelibia Smart City</span></span>
           </div>
         </Link>
         <div className="navbar-actions">

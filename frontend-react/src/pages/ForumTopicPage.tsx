@@ -66,7 +66,7 @@ export default function ForumTopicPage() {
 
   async function fetchMe() {
     const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
-    if (res.ok) setCurrentUser(await res.json())
+    if (res.ok) setCurrentUser((await res.json()) as { user_type?: string; is_staff?: boolean; is_superuser?: boolean })
   }
 
   async function submitReply() {
@@ -102,7 +102,7 @@ export default function ForumTopicPage() {
     fetchTopic()
   }
 
-  const isAgent = currentUser?.user_type === 'agent' || currentUser?.is_staff
+  const isAgentOrAdmin = currentUser?.user_type === 'agent' || currentUser?.user_type === 'supervisor' || currentUser?.is_staff || currentUser?.is_superuser
 
   if (loading) return (
     <div className='d-flex align-items-center justify-content-center' style={{ minHeight: '100vh' }}>
@@ -121,7 +121,7 @@ export default function ForumTopicPage() {
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div className="container">
-          <Link className="navbar-brand fw-bold" to="/dashboard">
+          <Link className="navbar-brand fw-bold" to={isAgentOrAdmin ? "/agent-dashboard" : "/dashboard"}>
             <i className="fas fa-city me-2"></i>Kelibia Smart City
           </Link>
           <div className="d-flex align-items-center gap-2">
@@ -144,7 +144,7 @@ export default function ForumTopicPage() {
 
         {/* BREADCRUMB */}
         <nav className="mb-3" style={{ fontSize: '.82rem' }}>
-          <Link to="/dashboard" style={{ color: '#1565c0' }}>Accueil</Link>
+          <Link to={isAgentOrAdmin ? "/agent-dashboard" : "/dashboard"} style={{ color: '#1565c0' }}>{isAgentOrAdmin ? "Accueil Agent" : "Accueil"}</Link>
           <span className="mx-2 text-muted">/</span>
           <Link to="/forum" style={{ color: '#1565c0' }}>Forum</Link>
           <span className="mx-2 text-muted">/</span>
@@ -189,7 +189,7 @@ export default function ForumTopicPage() {
                   <i className="fas fa-comment me-1"></i>{topic.replies_count} réponse(s)
                 </span>
               </div>
-              {isAgent && (
+              {isAgentOrAdmin && (
                 <div className="d-flex gap-2">
                   <button onClick={togglePin} className={`btn btn-sm ${topic.is_pinned ? 'btn-warning' : 'btn-outline-warning'}`}>
                     <i className="fas fa-thumbtack me-1"></i>{topic.is_pinned ? 'Désépingler' : 'Épingler'}

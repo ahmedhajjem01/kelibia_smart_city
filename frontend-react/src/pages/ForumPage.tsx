@@ -18,6 +18,9 @@ type UserInfo = {
   last_name: string
   email: string
   is_verified: boolean
+  user_type?: string
+  is_staff?: boolean
+  is_superuser?: boolean
 }
 
 type SortKey = 'recent' | 'votes' | 'replies'

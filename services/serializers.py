@@ -7,12 +7,30 @@ class RequirementSerializer(serializers.ModelSerializer):
         fields = ['id', 'name_fr', 'name_ar', 'is_mandatory']
 
 class ServiceSerializer(serializers.ModelSerializer):
-    requirements = RequirementSerializer(many=True, read_only=True)
-    availability = serializers.SerializerMethodField()
+    requirements = RequirementSerializer(many=True, required=False)
+    availability = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Service
-        fields = ['id', 'name_fr', 'name_ar', 'description_fr', 'description_ar', 'processing_time', 'form_pdf_ar', 'form_pdf_fr', 'requirements', 'availability']
+        fields = ['id', 'category', 'name_fr', 'name_ar', 'description_fr', 'description_ar', 'processing_time', 'form_pdf_ar', 'form_pdf_fr', 'requirements', 'availability']
+
+    def create(self, validated_data):
+        requirements_data = validated_data.pop('requirements', [])
+        service = Service.objects.create(**validated_data)
+        for req_data in requirements_data:
+            Requirement.objects.create(service=service, **req_data)
+        return service
+
+    def update(self, instance, validated_data):
+        requirements_data = validated_data.pop('requirements', None)
+        instance = super().update(instance, validated_data)
+        
+        if requirements_data is not None:
+            # Clear old requirements and create new ones
+            instance.requirements.all().delete()
+            for req_data in requirements_data:
+                Requirement.objects.create(service=instance, **req_data)
+        return instance
 
     def get_availability(self, obj):
         request = self.context.get('request')

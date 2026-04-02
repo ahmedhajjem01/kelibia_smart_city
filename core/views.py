@@ -110,14 +110,45 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
             objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user').order_by('-created_at')
             for o in objs:
                 citizen = getattr(o, 'citizen', getattr(o, 'user', None))
+                # Build extra details depending on type
+                details = {}
+                if key == 'residence':
+                    details = {
+                        "adresse": getattr(o, 'adresse_demandee', ''),
+                        "motif": getattr(o, 'motif_demande', ''),
+                        "telephone": getattr(o, 'telephone', ''),
+                        "profession": getattr(o, 'profession', ''),
+                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
+                    }
+                elif key == 'livret':
+                    details = {
+                        "nom_chef": getattr(o, 'nom_chef_famille', ''),
+                        "prenom_chef": getattr(o, 'prenom_chef_famille', ''),
+                        "motif": getattr(o, 'motif_demande', ''),
+                        "etat_livret": getattr(o, 'etat_livret', ''),
+                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
+                    }
+                elif key == 'naissance':
+                    details = {
+                        "prenom_fr": getattr(o, 'prenom_fr', ''),
+                        "nom_fr": getattr(o, 'nom_fr', ''),
+                        "date_naissance": str(getattr(o, 'date_naissance', '')),
+                        "lieu_naissance_fr": getattr(o, 'lieu_naissance_fr', ''),
+                        "sexe": getattr(o, 'sexe', ''),
+                        "commentaire": getattr(o, 'commentaire', ''),
+                    }
+
                 resp.append({
                     "id": o.id,
                     "type": key,
                     "type_label": model._meta.verbose_name,
-                    "citizen_name": f"{citizen.first_name} {citizen.last_name}" if citizen else "Inconnu",
+                    "citizen_name": f"{citizen.first_name} {citizen.last_name}".strip() if citizen else "Inconnu",
+                    "citizen_email": citizen.email if citizen else "",
                     "status": getattr(o, 'status', 'approved' if getattr(o, 'is_paid', False) else 'pending'),
                     "is_paid": getattr(o, 'is_paid', False),
                     "created_at": o.created_at,
+                    "updated_at": getattr(o, 'updated_at', o.created_at),
+                    **details,
                 })
         # Sort all by date
         resp.sort(key=lambda x: x['created_at'], reverse=True)

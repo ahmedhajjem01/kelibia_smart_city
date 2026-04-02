@@ -5,7 +5,7 @@ import { useI18n } from '../i18n/LanguageProvider'
 
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
-  if (path.startsWith('http')) return path
+  if (path.startsWith('http') || path.startsWith('data:')) return path
   // If we are on localhost, use localhost:8000
   // In production, we assume media is served from the same base as /api/
   const base = window.location.hostname === 'localhost' ? 'http://localhost:8000' : ''
@@ -180,7 +180,7 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'orders' | 'forum' | 'evenements'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'stats' | 'demandes'>('dashboard')
   const [allEvenements, setAllEvenements] = useState<any[]>([])
   const [loadingEvenements, setLoadingEvenements] = useState(false)
   const [evStatusFilter, setEvStatusFilter] = useState('')
@@ -190,6 +190,7 @@ export default function AgentDashboardPage() {
   const [evSaving, setEvSaving] = useState(false)
   const [usersMode, setUsersMode] = useState<'unverified' | 'agents' | 'all'>('unverified')
   const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null)
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -200,8 +201,27 @@ export default function AgentDashboardPage() {
   const [loadingServicesTab, setLoadingServicesTab] = useState(false)
   const [showAddUserModal, setShowAddUserModal] = useState(false)
   const [showAddServiceModal, setShowAddServiceModal] = useState(false)
-  const [allOrders, setAllOrders] = useState<any[]>([])
-  const [loadingOrders, setLoadingOrders] = useState(false)
+  const [editingService, setEditingService] = useState<any | null>(null)
+  const [editServiceSaving, setEditServiceSaving] = useState(false)
+  
+  // Service editing extras
+  const [serviceReqs, setServiceReqs] = useState<any[]>([])
+  const [servicePdfAr, setServicePdfAr] = useState<File | null>(null)
+  const [servicePdfFr, setServicePdfFr] = useState<File | null>(null)
+
+  // ── Demandes Citoyens tab ──
+  const [allDemandes, setAllDemandes] = useState<any[]>([])
+  const [loadingDemandes, setLoadingDemandes] = useState(false)
+  const [demandeDetail, setDemandeDetail] = useState<any | null>(null)
+  const [demandeNewStatus, setDemandeNewStatus] = useState('')
+  const [demandeSaving, setDemandeSaving] = useState(false)
+  const [demandeSearchQ, setDemandeSearchQ] = useState('')
+  const [demandeTypeFilter, setDemandeTypeFilter] = useState('')
+  const [demandeStatusFilter, setDemandeStatusFilter] = useState('')
+
+  const [mlStats, setMlStats] = useState<any | null>(null)
+  const [mlLoading, setMlLoading] = useState(false)
+  const [mlError, setMlError] = useState<string | null>(null)
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
@@ -265,13 +285,57 @@ export default function AgentDashboardPage() {
     finally { setLoadingServicesTab(false) }
   }
 
-  async function fetchOrders() {
-    setLoadingOrders(true)
+  async function fetchMlStats() {
+    setMlLoading(true); setMlError(null)
+    try {
+      const res = await fetch('/api/reclamations/ml_stats/', { headers: { Authorization: `Bearer ${access}` } })
+      if (!res.ok) { setMlError(`Erreur ${res.status} — Stats IA indisponibles.`); return }
+      setMlStats(await res.json())
+    } catch { setMlError('Erreur réseau — Stats IA indisponibles.') }
+    finally { setMlLoading(false) }
+  }
+
+  async function deleteService(serviceId: number) {
+    if (!window.confirm('Supprimer définitivement ce service ?')) return
+    try {
+      const res = await fetch(`/api/services/list/${serviceId}/`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      if (res.ok) {
+        showToast('Service supprimé !')
+        setAllServices(prev => prev.filter(s => s.id !== serviceId))
+      } else {
+        showToast('Impossible de supprimer ce service (peut-être lié à des demandes).', 'error')
+      }
+    } catch { showToast('Erreur réseau.', 'error') }
+  }
+
+
+  async function fetchDemandes() {
+    setLoadingDemandes(true)
     try {
       const res = await fetch('/api/supervisor/manage-orders/', { headers: { Authorization: `Bearer ${access}` } })
-      if (res.ok) setAllOrders(await res.json())
+      if (res.ok) setAllDemandes(await res.json())
     } catch (e) { console.error(e) }
-    finally { setLoadingOrders(false) }
+    finally { setLoadingDemandes(false) }
+  }
+
+  async function saveDemandStatus(order: any, newStatus: string) {
+    setDemandeSaving(true)
+    try {
+      const res = await fetch('/api/supervisor/manage-orders/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ type: order.type, order_id: order.id, status: newStatus })
+      })
+      if (res.ok) {
+        setAllDemandes(prev => prev.map(d => d.type === order.type && d.id === order.id ? { ...d, status: newStatus } : d))
+        if (demandeDetail?.id === order.id && demandeDetail?.type === order.type) setDemandeDetail((p: any) => ({ ...p, status: newStatus }))
+        showToast('Statut mis à jour !')
+      } else { showToast('Erreur lors de la mise à jour.', 'error') }
+    } catch { showToast('Erreur réseau.', 'error') }
+    finally { setDemandeSaving(false) }
   }
 
   async function fetchEvenements() {
@@ -562,7 +626,7 @@ export default function AgentDashboardPage() {
               <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
             )}
           </a>
-          <a className="ag-nav-item" href="/agent-stats">
+          <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
             <i className="fas fa-robot"></i> Statistiques IA
           </a>
 
@@ -578,8 +642,9 @@ export default function AgentDashboardPage() {
               <a className={`ag-nav-item${activeTab === 'services' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('services') }}>
                 <i className="fas fa-file-invoice"></i> Services Municipaux
               </a>
-              <a className={`ag-nav-item${activeTab === 'orders' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('orders'); fetchOrders() }}>
-                <i className="fas fa-shopping-cart"></i> Gestion Commandes
+              <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
+                <i className="fas fa-folder-open"></i> Demandes Citoyens
+                {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
               </a>
               <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
                 <i className="fas fa-comments"></i> Modération Forum
@@ -767,10 +832,10 @@ export default function AgentDashboardPage() {
                                   <i className={`fas ${u.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
                                 </button>
                                 {u.user_type === 'citizen' && (
-                                  <button className="btn btn-sm btn-outline-info" title="Promouvoir Agent" onClick={(e) => { e.stopPropagation(); handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
+                                  <button className="btn btn-sm btn-outline-info" title="Promouvoir Agent" onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privilèges de modération.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
                                 )}
                                 {user?.is_superuser && u.user_type !== 'supervisor' && (
-                                  <button className="btn btn-sm btn-outline-warning" title="Promouvoir Superviseur" onClick={(e) => { e.stopPropagation(); handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
+                                  <button className="btn btn-sm btn-outline-warning" title="Promouvoir Superviseur" onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Superviseur ? Il aura des accès administratifs complets.`)) handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
                                 )}
                                 {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
                                   <button className="btn btn-sm btn-outline-secondary" title="Rétrograder en Citoyen"
@@ -799,7 +864,7 @@ export default function AgentDashboardPage() {
                                 )}
                                 <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={(e) => { e.stopPropagation(); if(window.confirm('Supprimer cet utilisateur ?')) handleToggleUserStatus(u.id, 'delete') }}><i className="fas fa-trash"></i></button>
                                 {(u.cin_front || u.cin_back) && (
-                                  <a href={resolveBackendUrl(u.cin_front || u.cin_back)} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary" title="Voir CIN" onClick={e => e.stopPropagation()}><i className="fas fa-id-card"></i></a>
+                                  <button type="button" className="btn btn-sm btn-outline-primary" title="Voir CIN" onClick={e => { e.stopPropagation(); setEnlargedImage(u.cin_front || u.cin_back) }}><i className="fas fa-id-card"></i></button>
                                 )}
                               </div>
                             </td>
@@ -847,8 +912,12 @@ export default function AgentDashboardPage() {
                               <td style={{ fontSize: '12px' }}>{s.processing_time || '—'}</td>
                               <td>
                                 <div className="d-flex gap-2">
-                                  <button className="btn btn-sm btn-outline-primary" title="Modifier" onClick={() => { /* setEditingService(s); setShowAddServiceModal(true) */ showToast('Fonctionnalité en cours de déploiement', 'info') }}><i className="fas fa-edit"></i></button>
-                                  <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={() => { if(window.confirm('Supprimer ce service ?')) showToast('Action restreinte par sécurité', 'error') }}><i className="fas fa-trash"></i></button>
+                                  <button className="btn btn-sm btn-outline-primary" title="Modifier" onClick={() => { 
+                                     setEditingService(s); 
+                                     setServiceReqs(s.requirements || []);
+                                     setShowAddServiceModal(true); 
+                                  }}><i className="fas fa-edit"></i></button>
+                                  <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={() => deleteService(s.id)}><i className="fas fa-trash"></i></button>
                                 </div>
                               </td>
                             </tr>
@@ -949,7 +1018,248 @@ export default function AgentDashboardPage() {
                   )}
                </div>
             </div>
+          ) : activeTab === 'demandes' ? (
+            /* ── DEMANDES CITOYENS TAB ─────────────────────────────────── */
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#004968,#006d94)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="fw-bold"><i className="fas fa-folder-open me-2"></i>Demandes Administratives des Citoyens</span>
+                <button className="btn btn-sm btn-outline-light" onClick={fetchDemandes}><i className="fas fa-sync-alt"></i></button>
+              </div>
+
+              {/* Stats strip */}
+              {!loadingDemandes && allDemandes.length > 0 && (() => {
+                const typeCounts: Record<string, number> = {}
+                const statusCounts: Record<string, number> = { pending: 0, in_progress: 0, approved: 0, rejected: 0 }
+                allDemandes.forEach((d: any) => {
+                  typeCounts[d.type] = (typeCounts[d.type] || 0) + 1
+                  if (statusCounts[d.status] !== undefined) statusCounts[d.status]++
+                })
+                return (
+                  <div style={{ background: '#f8f9fa', borderBottom: '1px solid #e8e8e8', padding: '12px 16px' }}>
+                    <div className="d-flex flex-wrap gap-2 mb-2">
+                      {[
+                        { lbl: 'Total',       val: allDemandes.length,        color: '#006d94', bg: '#e1f3fb' },
+                        { lbl: 'En attente',  val: statusCounts.pending,       color: '#e65100', bg: '#fff3e0' },
+                        { lbl: 'En cours',    val: statusCounts.in_progress,  color: '#1565c0', bg: '#e3f2fd' },
+                        { lbl: 'Approuvées', val: statusCounts.approved,      color: '#2e7d32', bg: '#e8f5e9' },
+                        { lbl: 'Rejetées',   val: statusCounts.rejected,      color: '#b71c1c', bg: '#ffebee' },
+                      ].map(s => (
+                        <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
+                          style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
+                          <span className="fw-bold" style={{ color: s.color, fontSize: '1.1rem' }}>{s.val}</span>
+                          <span style={{ color: s.color, fontSize: '.78rem' }}>{s.lbl}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="d-flex flex-wrap gap-2">
+                      {Object.entries(typeCounts).map(([type, count]) => {
+                        const typeLabels: Record<string, string> = { residence: '🏠 Résidence', livret: '📘 Livret Famille', naissance: '👶 Naissance', mariage: '💍 Mariage', deces: '⚰️ Décès' }
+                        return <span key={type} style={{ background: '#e8eaf6', color: '#283593', border: '1px solid #c5cae9', borderRadius: 12, padding: '2px 10px', fontSize: '.75rem', fontWeight: 600 }}>{typeLabels[type] || type} ({count})</span>
+                      })}
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Filters */}
+              <div className="ag-filter-bar">
+                <div className="ag-search-wrap">
+                  <i className="fas fa-search"></i>
+                  <input className="ag-search-input" placeholder="Rechercher citoyen..." value={demandeSearchQ} onChange={e => setDemandeSearchQ(e.target.value)} style={{ width: 220 }} />
+                </div>
+                <select className="ag-filter-select" value={demandeTypeFilter} onChange={e => setDemandeTypeFilter(e.target.value)}>
+                  <option value="">Tous les types</option>
+                  <option value="residence">🏠 Attestation de Résidence</option>
+                  <option value="livret">📘 Livret de Famille</option>
+                  <option value="naissance">👶 Déclaration de Naissance</option>
+                  <option value="mariage">💍 Extrait de Mariage</option>
+                  <option value="deces">⚰️ Extrait de Décès</option>
+                </select>
+                <select className="ag-filter-select" value={demandeStatusFilter} onChange={e => setDemandeStatusFilter(e.target.value)}>
+                  <option value="">Tous les statuts</option>
+                  <option value="pending">⏳ En attente</option>
+                  <option value="in_progress">🔄 En cours</option>
+                  <option value="approved">✅ Approuvée</option>
+                  <option value="rejected">❌ Rejetée</option>
+                </select>
+                {(demandeSearchQ || demandeTypeFilter || demandeStatusFilter) && (
+                  <button className="ag-filter-btn" onClick={() => { setDemandeSearchQ(''); setDemandeTypeFilter(''); setDemandeStatusFilter('') }}>
+                    <i className="fas fa-times"></i> Réinitialiser
+                  </button>
+                )}
+              </div>
+
+              {loadingDemandes ? (
+                <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#006d94' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>Chargement...</div></div>
+              ) : (() => {
+                const q = demandeSearchQ.toLowerCase()
+                const typeLabelsMap: Record<string, string> = { residence: '🏠 Résidence', livret: '📘 Livret Famille', naissance: '👶 Naissance', mariage: '💍 Mariage', deces: '⚰️ Décès' }
+                const filtered = allDemandes.filter((d: any) => {
+                  if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
+                  if (demandeStatusFilter && d.status !== demandeStatusFilter) return false
+                  if (q && !d.citizen_name?.toLowerCase().includes(q) && !d.citizen_email?.toLowerCase().includes(q) && !d.type_label?.toLowerCase().includes(q)) return false
+                  return true
+                })
+                if (filtered.length === 0) return (
+                  <div className="ag-empty"><i className="fas fa-folder-open d-block"></i><p>Aucune demande trouvée.</p></div>
+                )
+                return (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="ag-table">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Type de Demande</th>
+                          <th>Citoyen</th>
+                          <th>Détails</th>
+                          <th>Statut</th>
+                          <th>Paiement</th>
+                          <th>Date</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((d: any) => {
+                          const stMap: Record<string, { cls: string; icon: string; label: string }> = {
+                            pending:     { cls: 'status-pending',     icon: 'fa-clock',        label: 'En attente' },
+                            in_progress: { cls: 'status-in_progress', icon: 'fa-spinner',      label: 'En cours' },
+                            approved:    { cls: 'status-resolved',    icon: 'fa-check-circle', label: 'Approuvée' },
+                            validated:   { cls: 'status-resolved',    icon: 'fa-check-circle', label: 'Validée' },
+                            rejected:    { cls: 'status-rejected',    icon: 'fa-times-circle', label: 'Rejetée' },
+                          }
+                          const st = stMap[d.status] || { cls: 'status-pending', icon: 'fa-question', label: d.status }
+                          // Build a short summary of key fields
+                          let summary = ''
+                          if (d.type === 'residence') summary = d.adresse ? `📍 ${String(d.adresse).slice(0, 40)}` : ''
+                          else if (d.type === 'livret') summary = d.nom_chef ? `👤 ${d.nom_chef} ${d.prenom_chef}` : ''
+                          else if (d.type === 'naissance') summary = d.prenom_fr ? `👶 ${d.prenom_fr} ${d.nom_fr}` : ''
+                          return (
+                            <tr key={`${d.type}-${d.id}`}>
+                              <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{d.id}</td>
+                              <td>
+                                <span style={{ display: 'inline-block', padding: '3px 9px', borderRadius: 20, fontSize: '.75rem', fontWeight: 600, background: '#e8eaf6', color: '#283593' }}>
+                                  {typeLabelsMap[d.type] || d.type}
+                                </span>
+                                <div style={{ fontSize: '.68rem', color: '#aaa', marginTop: 2 }}>{d.type_label}</div>
+                              </td>
+                              <td>
+                                <div style={{ fontWeight: 600, color: '#1a1a2e' }}>{d.citizen_name}</div>
+                                <div style={{ fontSize: '.72rem', color: '#888' }}>{d.citizen_email}</div>
+                              </td>
+                              <td style={{ fontSize: '.8rem', color: '#555', maxWidth: 160 }}>
+                                <span className="text-truncate d-block" title={summary}>{summary || '—'}</span>
+                              </td>
+                              <td>
+                                <span className={`status-badge ${st.cls}`}><i className={`fas ${st.icon} me-1`}></i>{st.label}</span>
+                              </td>
+                              <td>
+                                {d.is_paid
+                                  ? <span className="badge" style={{ background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', fontSize: '.7rem' }}>💳 Payé</span>
+                                  : <span className="badge" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>⏳ Non payé</span>}
+                              </td>
+                              <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(d.created_at)}</td>
+                              <td>
+                                <button className="ag-action-btn" onClick={() => { setDemandeDetail(d); setDemandeNewStatus(d.status) }} title="Voir / Traiter">
+                                  <i className="fas fa-eye"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              })()}
+
+              {/* ── Detail Modal */}
+              {demandeDetail && (() => {
+                const typeLabelsMap: Record<string, string> = { residence: '🏠 Attestation de Résidence', livret: '📘 Livret de Famille', naissance: '👶 Déclaration de Naissance', mariage: '💍 Extrait de Mariage', deces: '⚰️ Extrait de Décès' }
+                return (
+                  <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 9100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+                      <div style={{ background: 'linear-gradient(90deg,#004968,#006d94)', borderRadius: '16px 16px 0 0', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}><i className="fas fa-folder-open me-2"></i>{typeLabelsMap[demandeDetail.type] || demandeDetail.type}</span>
+                        <button onClick={() => setDemandeDetail(null)} style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff', width: 30, height: 30, borderRadius: '50%', cursor: 'pointer', fontSize: '.9rem' }}>✕</button>
+                      </div>
+                      <div style={{ padding: '20px 24px' }}>
+                        {/* Citizen info */}
+                        <div style={{ background: '#f0f7ff', borderRadius: 10, padding: '14px 16px', marginBottom: 18, border: '1px solid #bbdefb' }}>
+                          <div style={{ fontSize: '.72rem', color: '#1565c0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>Citoyen</div>
+                          <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a2e' }}>{demandeDetail.citizen_name}</div>
+                          <div style={{ fontSize: '.82rem', color: '#555', marginTop: 2 }}>{demandeDetail.citizen_email}</div>
+                          {demandeDetail.telephone && <div style={{ fontSize: '.82rem', color: '#555', marginTop: 2 }}><i className="fas fa-phone me-1"></i>{demandeDetail.telephone}</div>}
+                        </div>
+
+                        {/* Type-specific details */}
+                        <div className="row g-3 mb-3">
+                          {demandeDetail.type === 'residence' && (<>
+                            <div className="col-12"><div className="det-label">Adresse demandée</div><div className="det-value">{demandeDetail.adresse || '—'}</div></div>
+                            {demandeDetail.motif && <div className="col-12"><div className="det-label">Motif</div><div className="det-value">{demandeDetail.motif}</div></div>}
+                            {demandeDetail.profession && <div className="col-6"><div className="det-label">Profession</div><div className="det-value">{demandeDetail.profession}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'livret' && (<>
+                            <div className="col-6"><div className="det-label">Chef de famille</div><div className="det-value">{demandeDetail.nom_chef} {demandeDetail.prenom_chef}</div></div>
+                            {demandeDetail.motif && <div className="col-6"><div className="det-label">Motif</div><div className="det-value">{demandeDetail.motif}</div></div>}
+                            {demandeDetail.etat_livret && <div className="col-6"><div className="det-label">État du livret</div><div className="det-value">{demandeDetail.etat_livret}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'naissance' && (<>
+                            <div className="col-6"><div className="det-label">Nouveau-né</div><div className="det-value">{demandeDetail.prenom_fr} {demandeDetail.nom_fr}</div></div>
+                            <div className="col-6"><div className="det-label">Date de naissance</div><div className="det-value">{demandeDetail.date_naissance}</div></div>
+                            {demandeDetail.lieu_naissance_fr && <div className="col-6"><div className="det-label">Lieu de naissance</div><div className="det-value">{demandeDetail.lieu_naissance_fr}</div></div>}
+                            {demandeDetail.sexe && <div className="col-6"><div className="det-label">Sexe</div><div className="det-value">{demandeDetail.sexe}</div></div>}
+                          </>)}
+
+                          <div className="col-6"><div className="det-label">Paiement</div><div className="det-value">{demandeDetail.is_paid ? '✅ Payé' : '⏳ Non payé'}</div></div>
+                          <div className="col-6"><div className="det-label">Date de la demande</div><div className="det-value">{formatDate(demandeDetail.created_at)}</div></div>
+                        </div>
+
+                        {/* Comment preview */}
+                        {demandeDetail.commentaire_agent && (
+                          <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: '10px 14px', marginBottom: 18 }}>
+                            <div className="det-label">Commentaire agent précédent</div>
+                            <div style={{ fontSize: '.85rem', color: '#444' }}>{demandeDetail.commentaire_agent}</div>
+                          </div>
+                        )}
+
+                        <hr />
+                        {/* Status update */}
+                        <div className="mb-3">
+                          <label className="det-label mb-2">Changer le statut de la demande</label>
+                          <div className="d-flex gap-2 flex-wrap">
+                            {[
+                              { val: 'pending',     label: '⏳ En attente',  cls: 'btn-outline-warning' },
+                              { val: 'in_progress', label: '🔄 En cours',    cls: 'btn-outline-primary' },
+                              { val: 'approved',    label: '✅ Approuver',   cls: 'btn-outline-success' },
+                              { val: 'rejected',    label: '❌ Rejeter',     cls: 'btn-outline-danger' },
+                            ].map(opt => (
+                              <button key={opt.val}
+                                className={`btn btn-sm ${opt.cls} ${demandeNewStatus === opt.val ? 'active' : ''}`}
+                                style={{ fontWeight: 600, fontSize: '.8rem', ...(demandeNewStatus === opt.val ? { opacity: 1 } : { opacity: .7 }) }}
+                                onClick={() => setDemandeNewStatus(opt.val)}>
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="d-flex gap-2 justify-content-end">
+                          <button className="btn btn-secondary btn-sm" onClick={() => setDemandeDetail(null)}>Fermer</button>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={demandeSaving || demandeNewStatus === demandeDetail.status}
+                            onClick={() => saveDemandStatus(demandeDetail, demandeNewStatus)}>
+                            {demandeSaving ? <><i className="fas fa-spinner fa-spin me-1"></i>En cours...</> : <><i className="fas fa-save me-1"></i>Enregistrer le statut</>}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
           ) : activeTab === 'forum' ? (
+
             <div className="ag-card animate__animated animate__fadeIn">
                <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
                   <span className="fw-bold"><i className="fas fa-comments me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? 'Espace Superviseur' : 'Modération du Forum & Actualités'}</span>
@@ -1092,6 +1402,214 @@ export default function AgentDashboardPage() {
                 )
               })()}
 
+            </div>
+          ) : activeTab === 'stats' ? (
+            /* ── STATISTIQUES IA TAB ──────────────────────────────────────── */
+            <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#1a237e,#283593)' }}>
+                <span><i className="fas fa-brain me-2"></i>Statistiques IA — Classificateur NLP TF-IDF + LinearSVC</span>
+                <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchMlStats}>
+                  <i className="fas fa-sync-alt me-1"></i>Recalculer
+                </button>
+              </div>
+              <div style={{ padding: '24px 22px' }}>
+                {mlLoading && (
+                  <div style={{ textAlign: 'center', padding: '60px 20px', color: '#1a237e' }}>
+                    <div className="spinner-border" style={{ width: '2.5rem', height: '2.5rem' }} role="status"></div>
+                    <p className="mt-3" style={{ fontSize: '.9rem', color: '#555' }}>Calcul des statistiques IA en cours…</p>
+                    <p style={{ fontSize: '.77rem', color: '#aaa' }}>Première ouverture : entraînement du modèle en mémoire (~5s)</p>
+                  </div>
+                )}
+                {!mlLoading && mlError && (
+                  <div style={{ background: '#ffebee', border: '1px solid #ef9a9a', borderRadius: 10, padding: 24, textAlign: 'center' }}>
+                    <i className="fas fa-exclamation-triangle" style={{ color: '#b71c1c', fontSize: '2rem', display: 'block', marginBottom: 12 }}></i>
+                    <p style={{ color: '#b71c1c', fontWeight: 600, marginBottom: 12 }}>{mlError}</p>
+                    <button onClick={fetchMlStats} style={{ background: '#1a237e', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 20px', cursor: 'pointer', fontSize: '.85rem' }}>
+                      <i className="fas fa-redo me-1"></i>Réessayer
+                    </button>
+                  </div>
+                )}
+                {!mlLoading && !mlStats && !mlError && (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#aaa' }}>
+                    <i className="fas fa-robot" style={{ fontSize: '3rem', opacity: .3, display: 'block', marginBottom: 12 }}></i>
+                    <p>Cliquez sur <strong>Recalculer</strong> pour charger les statistiques du modèle IA.</p>
+                  </div>
+                )}
+                {!mlLoading && mlStats && (() => {
+                  const CAT_LABELS: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
+                  const PRI_LABELS: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
+                  const LMAP_CAT: Record<string,string> = { lighting:'💡', trash:'🗑️', roads:'🛣️', noise:'🔊', other:'📌' }
+                  const LMAP_PRI: Record<string,string> = { urgente:'🔴', normale:'🔵', faible:'🟣' }
+                  return (
+                    <>
+                      {/* Accuracy summary cards */}
+                      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 28 }}>
+                        {[
+                          { label: 'Précision — Catégorie', value: Math.round(mlStats.category.accuracy * 100) + '%', bg: '#e8f5e9', color: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', sub: `${mlStats.n_samples} exemples` },
+                          { label: 'Précision — Priorité',  value: Math.round(mlStats.priority.accuracy * 100) + '%',  bg: '#e3f2fd', color: mlStats.priority.accuracy >= 0.85  ? '#1565c0' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
+                          { label: 'Échantillons',           value: mlStats.n_samples,                                    bg: '#f3e5f5', color: '#6a1b9a',                                               sub: 'Données annotées' },
+                        ].map((c, i) => (
+                          <div key={i} style={{ flex: 1, minWidth: 180, borderRadius: 12, padding: '20px 22px', textAlign: 'center', background: c.bg }}>
+                            <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>{c.label}</div>
+                            <div style={{ display: 'inline-block', padding: '4px 14px', borderRadius: 14, fontWeight: 700, fontSize: '1.6rem', background: c.color, color: '#fff' }}>{c.value}</div>
+                            <div style={{ fontSize: '.73rem', color: '#888', marginTop: 6 }}>{c.sub}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* TABLE 1 — Category Classification Report */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-table"></i>Tableau 1 — Rapport de classification (Catégorie)
+                      </div>
+                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>
+                        <b>Précision</b> = sur tout ce que le modèle a prédit "voirie", combien était vraiment voirie &nbsp;|&nbsp;
+                        <b>Rappel</b> = sur toutes les vraies "voirie", combien le modèle a trouvé &nbsp;|&nbsp;
+                        <b>F1</b> = moyenne harmonique &nbsp;|&nbsp; <b>Support</b> = nb exemples de test
+                      </p>
+                      <div className="ag-card" style={{ marginBottom: 22 }}>
+                        <div style={{ overflowX: 'auto', padding: '4px 0' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
+                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Catégorie</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Précision</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Rappel</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>F1-Score</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Support</th></tr></thead>
+                            <tbody>
+                              {mlStats.category.report.map((row: any) => {
+                                const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
+                                return (
+                                  <tr key={row.label} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}><strong>{CAT_LABELS[row.label] || row.label}</strong></td>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}>{Math.round(row.precision * 100)}%</td>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}>{Math.round(row.recall * 100)}%</td>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1 * 100)}%</span></td>
+                                    <td style={{ padding: '8px 12px', color: '#888' }}>{row.support}</td>
+                                  </tr>
+                                )
+                              })}
+                              <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
+                                <td style={{ padding: '8px 12px' }}>Moyenne</td>
+                                <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.precision, 0) / mlStats.category.report.length * 100)}%</td>
+                                <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.category.report.length * 100)}%</td>
+                                <td style={{ padding: '8px 12px', color: '#1565c0' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.category.report.length * 100)}%</td>
+                                <td style={{ padding: '8px 12px', color: '#888' }}>{mlStats.n_samples}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* TABLE 2 — Confusion Matrix Category */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-th"></i>Tableau 2 — Matrice de confusion (Catégorie)
+                      </div>
+                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>
+                        Lignes = catégorie <b>réelle</b>, Colonnes = catégorie <b>prédite</b>. <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>Cases vertes</span> = correctes. <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>Cases rouges</span> = erreurs.
+                      </p>
+                      <div className="ag-card" style={{ marginBottom: 22 }}>
+                        <div style={{ overflowX: 'auto', padding: '4px 0' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
+                            <thead><tr style={{ background: '#f5f5f5' }}>
+                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
+                              {mlStats.category.labels.map((l: string) => <th key={l} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', borderBottom: '2px solid #e0e0e0', fontWeight: 700, color: '#333' }}>{LMAP_CAT[l] || l}</th>)}
+                            </tr></thead>
+                            <tbody>
+                              {mlStats.category.confusion_matrix.map((row: number[], i: number) => (
+                                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                  <td style={{ padding: '8px 12px', color: '#444' }}><strong style={{ fontSize: '.8rem' }}>{CAT_LABELS[mlStats.category.labels[i]] || mlStats.category.labels[i]}</strong></td>
+                                  {row.map((val, j) => (
+                                    <td key={j} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', background: i === j ? '#e8f5e9' : val > 0 ? '#fce4ec' : '', color: i === j ? '#1b5e20' : val > 0 ? '#b71c1c' : '', fontWeight: i === j ? 700 : 400 }}>{val}</td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* TABLE 3 — Top NLP features */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-star"></i>Tableau 3 — Mots les plus importants par catégorie (NLP)
+                      </div>
+                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>Les mots à plus fort poids dans la décision TF-IDF + SVM. Plus le score est élevé, plus le mot est discriminatif.</p>
+                      <div className="ag-card" style={{ marginBottom: 22 }}>
+                        <div style={{ overflowX: 'auto', padding: '4px 0' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
+                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Catégorie</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Mots-clés discriminatifs (NLP)</th></tr></thead>
+                            <tbody>
+                              {Object.entries(mlStats.category.top_features).map(([cat, words]: [string, any]) => (
+                                <tr key={cat} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                  <td style={{ padding: '8px 12px', color: '#444' }}><strong>{CAT_LABELS[cat] || cat}</strong></td>
+                                  <td style={{ padding: '8px 12px', color: '#444' }}>{words.map((w: any, i: number) => <span key={i} style={{ display: 'inline-block', padding: '3px 8px', background: '#e3f2fd', borderRadius: 8, fontSize: '.76rem', color: '#1565c0', margin: 2 }} title={`Score: ${w.score}`}>{w.word}</span>)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* TABLE 4 — Priority Classification Report */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-flag"></i>Tableau 4 — Rapport de classification (Priorité)
+                      </div>
+                      <div className="ag-card" style={{ marginBottom: 22 }}>
+                        <div style={{ overflowX: 'auto', padding: '4px 0' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
+                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Priorité</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Précision</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Rappel</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>F1-Score</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Support</th></tr></thead>
+                            <tbody>
+                              {mlStats.priority.report.map((row: any) => {
+                                const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
+                                return (
+                                  <tr key={row.label} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}><strong>{PRI_LABELS[row.label] || row.label}</strong></td>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}>{Math.round(row.precision * 100)}%</td>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}>{Math.round(row.recall * 100)}%</td>
+                                    <td style={{ padding: '8px 12px', color: '#444' }}><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1 * 100)}%</span></td>
+                                    <td style={{ padding: '8px 12px', color: '#888' }}>{row.support}</td>
+                                  </tr>
+                                )
+                              })}
+                              <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
+                                <td style={{ padding: '8px 12px' }}>Moyenne</td>
+                                <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.precision, 0) / mlStats.priority.report.length * 100)}%</td>
+                                <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.priority.report.length * 100)}%</td>
+                                <td style={{ padding: '8px 12px', color: '#1565c0' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.priority.report.length * 100)}%</td>
+                                <td style={{ padding: '8px 12px', color: '#888' }}>{mlStats.n_samples}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* TABLE 4b — Confusion Matrix Priority */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-th"></i>Tableau 4b — Matrice de confusion (Priorité)
+                      </div>
+                      <div className="ag-card" style={{ marginBottom: 22 }}>
+                        <div style={{ overflowX: 'auto', padding: '4px 0' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
+                            <thead><tr style={{ background: '#f5f5f5' }}>
+                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
+                              {mlStats.priority.labels.map((l: string) => <th key={l} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', borderBottom: '2px solid #e0e0e0', fontWeight: 700, color: '#333' }}>{LMAP_PRI[l] || l}</th>)}
+                            </tr></thead>
+                            <tbody>
+                              {mlStats.priority.confusion_matrix.map((row: number[], i: number) => (
+                                <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                  <td style={{ padding: '8px 12px', color: '#444' }}><strong style={{ fontSize: '.8rem' }}>{PRI_LABELS[mlStats.priority.labels[i]] || mlStats.priority.labels[i]}</strong></td>
+                                  {row.map((val, j) => (
+                                    <td key={j} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', background: i === j ? '#e8f5e9' : val > 0 ? '#fce4ec' : '', color: i === j ? '#1b5e20' : val > 0 ? '#b71c1c' : '', fontWeight: i === j ? 700 : 400 }}>{val}</td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: 'center', padding: '10px 0 8px', color: '#aaa', fontSize: '.76rem' }}>
+                        <i className="fas fa-info-circle me-1"></i>
+                        Modèle entraîné en mémoire au démarrage · TF-IDF (n-grammes 1–2) + LinearSVC · {mlStats.n_samples} exemples
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
             </div>
           ) : null}
 
@@ -1586,38 +2104,148 @@ export default function AgentDashboardPage() {
        {/* MODAL: ADD SERVICE */}
        {showAddServiceModal && (
          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-           <div className="bg-white rounded-3 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '500px' }}>
-             <div className="p-3 bg-primary text-white d-flex justify-content-between align-items-center">
-               <h6 className="mb-0 fw-bold"><i className="fas fa-plus-circle me-2"></i>Nouveau Service Municipal</h6>
-               <button className="btn-close btn-close-white" onClick={() => setShowAddServiceModal(false)}></button>
+           <div className="bg-white rounded-3 shadow-lg overflow-hidden animate__animated animate__zoomIn" style={{ width: '100%', maxWidth: '650px', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}>
+             <div className="p-3 text-white d-flex justify-content-between align-items-center" style={{ background: editingService ? 'linear-gradient(90deg,#003366,#004080)' : 'linear-gradient(90deg,#1e3c72,#2a5298)' }}>
+               <h6 className="mb-0 fw-bold"><i className={`fas ${editingService ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>{editingService ? `Modifier : ${editingService.name_fr}` : 'Nouveau Service Municipal'}</h6>
+               <button className="btn-close btn-close-white" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); setServicePdfAr(null); setServicePdfFr(null); }}></button>
              </div>
-             <form className="p-4" style={{ maxHeight: '80vh', overflowY: 'auto' }} onSubmit={async (e) => {
+             <form className="p-4 overflow-auto" style={{ flex: 1 }} onSubmit={async (e) => {
                e.preventDefault();
-               const fd = new FormData(e.currentTarget);
-               const data: any = Object.fromEntries(fd.entries());
+               setEditServiceSaving(true)
+               const formData = new FormData(e.currentTarget);
+               
+               // The backend expects requirements as a nested list. 
+               // Depending on the backend setup, we might need a single JSON field or multiple.
+               // Let's assume we can send a JSON string for the requirements if parsed correctly or just use traditional POST.
+               // Actually, for multipart/form-data, DRF nested serializers can be tricky. 
+               // We'll append each field manually to be safe.
+
                try {
-                 const res = await fetch('/api/services/list/', { 
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
-                   body: JSON.stringify(data)
+                 const url = editingService ? `/api/services/list/${editingService.id}/` : '/api/services/list/';
+                 const method = editingService ? 'PATCH' : 'POST';
+                 
+                 // If we have requirements, we need to handle them. 
+                 // Since we're using Multipart, we can't easily nest. 
+                 // We will send the requirements as a JSON string and the backend will need to handles it.
+                 // Actually, a better way for files + nested is to send everything as nested but DRF requires JSON for that.
+                 // We will use the common pattern: send files if any, and other data.
+                 
+                 // Create a clean FormData for submission
+                 const finalFd = new FormData();
+                 finalFd.append('category', formData.get('category') as string);
+                 finalFd.append('name_fr', formData.get('name_fr') as string);
+                 finalFd.append('name_ar', formData.get('name_ar') as string);
+                 finalFd.append('processing_time', formData.get('processing_time') as string);
+                 finalFd.append('description_fr', formData.get('description_fr') as string);
+                 finalFd.append('description_ar', formData.get('description_ar') as string);
+                 
+                 if (servicePdfAr) finalFd.append('form_pdf_ar', servicePdfAr);
+                 if (servicePdfFr) finalFd.append('form_pdf_fr', servicePdfFr);
+                 
+                 // Send requirements as structured data if needed. 
+                 // But await, our backend update() expects requirements as a list.
+                 // DRF can parse requirements[0]name_fr etc.
+                 serviceReqs.forEach((req, idx) => {
+                    finalFd.append(`requirements[${idx}]name_fr`, req.name_fr);
+                    finalFd.append(`requirements[${idx}]name_ar`, req.name_ar);
+                    finalFd.append(`requirements[${idx}]is_mandatory`, String(req.is_mandatory));
                  });
-                 if (res.ok) { showToast('Service ajouté !'); setShowAddServiceModal(false); fetchCategoriesAndServices() }
-                 else { showToast('Erreur lors de l\'ajout', 'error') }
-               } catch { showToast('Erreur réseau', 'error') }
+
+                 const res = await fetch(url, { 
+                   method,
+                   headers: { Authorization: `Bearer ${access}` },
+                   body: finalFd
+                 });
+                 if (res.ok) { 
+                   showToast(editingService ? 'Service mis à jour !' : 'Service ajouté !');
+                   setShowAddServiceModal(false); 
+                   setEditingService(null);
+                   setServiceReqs([]);
+                   setServicePdfAr(null);
+                   setServicePdfFr(null);
+                   fetchCategoriesAndServices();
+                 } else { 
+                   const err = await res.json().catch(() => ({}));
+                   showToast(Object.values(err).flat().join(', ') || 'Erreur lors de l\'enregistrement', 'error');
+                 }
+               } catch { showToast('Erreur réseau', 'error'); }
+               finally { setEditServiceSaving(false); }
              }}>
-               <div className="mb-3">
-                 <label className="form-label small fw-bold">Catégorie</label>
-                 <select className="form-select" name="category" required>
-                    {allCategories.map(c => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
-                 </select>
+               <div className="row g-3">
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold">Catégorie</label>
+                   <select className="form-select" name="category" required defaultValue={editingService?.category_id || ''}>
+                      <option value="">-- Choisir une catégorie --</option>
+                      {allCategories.map(c => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
+                   </select>
+                 </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold">Délai de traitement</label>
+                   <input className="form-control" name="processing_time" placeholder="ex: 2 jours à 1 semaine" defaultValue={editingService?.processing_time || ''} />
+                 </div>
+                 
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold">Nom du service (FR)</label>
+                   <input className="form-control" name="name_fr" required defaultValue={editingService?.name_fr || ''} />
+                 </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold" dir="rtl">اسم الخدمة (عربي)</label>
+                   <input className="form-control" name="name_ar" dir="rtl" required defaultValue={editingService?.name_ar || ''} />
+                 </div>
+
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold">Description (FR)</label>
+                   <textarea className="form-control" name="description_fr" rows={2} defaultValue={editingService?.description_fr || ''}></textarea>
+                 </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold" dir="rtl">وصف الخدمة (عربي)</label>
+                   <textarea className="form-control" name="description_ar" rows={2} dir="rtl" defaultValue={editingService?.description_ar || ''}></textarea>
+                 </div>
+
+                 {/* Requirements Section */}
+                 <div className="col-12 mt-3">
+                    <div className="d-flex justify-content-between align-items-center bg-light p-2 border rounded">
+                       <span className="fw-bold small text-primary"><i className="fas fa-file-alt me-2"></i>Documents Requis (Papers)</span>
+                       <button type="button" className="btn btn-sm btn-primary" onClick={() => setServiceReqs([...serviceReqs, { name_fr: '', name_ar: '', is_mandatory: true }])}>
+                          <i className="fas fa-plus me-1"></i> Ajouter
+                       </button>
+                    </div>
+                    <div className="mt-2 border rounded p-2 bg-white" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                       {serviceReqs.length === 0 ? <div className="text-center text-muted small py-3">Aucun document configuré</div> : 
+                          serviceReqs.map((req, idx) => (
+                             <div key={idx} className="p-2 border-bottom d-flex gap-2 align-items-center">
+                                <input className="form-control form-control-sm" placeholder="Nom FR" value={req.name_fr} onChange={e => { const n = [...serviceReqs]; n[idx].name_fr = e.target.value; setServiceReqs(n); }} />
+                                <input className="form-control form-control-sm" dir="rtl" placeholder="اسم بالعربي" value={req.name_ar} onChange={e => { const n = [...serviceReqs]; n[idx].name_ar = e.target.value; setServiceReqs(n); }} />
+                                <div className="form-check form-switch flex-shrink-0">
+                                   <input className="form-check-input" type="checkbox" checked={req.is_mandatory} onChange={e => { const n = [...serviceReqs]; n[idx].is_mandatory = e.target.checked; setServiceReqs(n); }} />
+                                </div>
+                                <button type="button" className="btn btn-sm btn-outline-danger border-0" onClick={() => { const n = serviceReqs.filter((_, i) => i !== idx); setServiceReqs(n); }}><i className="fas fa-times"></i></button>
+                             </div>
+                          ))
+                       }
+                    </div>
+                 </div>
+
+                 {/* PDF Forms Section */}
+                 <div className="col-md-6 mt-3">
+                    <label className="form-label small fw-bold"><i className="fas fa-file-pdf me-1"></i>Formulaire PDF (FR)</label>
+                    <input type="file" className="form-control form-control-sm" accept=".pdf" onChange={e => setServicePdfFr(e.target.files?.[0] || null)} />
+                    {editingService?.form_pdf_fr && <div className="mt-1 small"><a href={editingService.form_pdf_fr} target="_blank" rel="noreferrer" className="text-success text-decoration-none"><i className="fas fa-check-circle me-1"></i>Fichier actuel existant</a></div>}
+                 </div>
+                 <div className="col-md-6 mt-3">
+                    <label className="form-label small fw-bold"><i className="fas fa-file-pdf me-1"></i>Formulaire PDF (AR)</label>
+                    <input type="file" className="form-control form-control-sm" accept=".pdf" dir="rtl" onChange={e => setServicePdfAr(e.target.files?.[0] || null)} />
+                    {editingService?.form_pdf_ar && <div className="mt-1 small text-end"><a href={editingService.form_pdf_ar} target="_blank" rel="noreferrer" className="text-success text-decoration-none"><i className="fas fa-check-circle me-1"></i>الملف الحالي موجود</a></div>}
+                 </div>
                </div>
-               <div className="row g-2 mb-3">
-                 <div className="col-6"><label className="form-label small fw-bold">Nom (FR)</label><input className="form-control" name="name_fr" required /></div>
-                 <div className="col-6"><label className="form-label small fw-bold">Nom (AR)</label><input className="form-control" name="name_ar" required /></div>
+
+               <div className="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                 <button className="btn btn-light px-4 fw-bold" type="button" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); }}>Annuler</button>
+                 <button className="btn btn-primary px-4 fw-bold shadow" type="submit" disabled={editServiceSaving}>
+                   {editServiceSaving ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="fas fa-save me-2"></i>}
+                   {editingService ? 'Mettre à jour' : 'Enregistrer le Service'}
+                 </button>
                </div>
-               <div className="mb-3"><label className="form-label small fw-bold">Délai de traitement</label><input className="form-control" name="processing_time" placeholder="ex: 24h - 48h" /></div>
-               <div className="mb-3"><label className="form-label small fw-bold">Description (FR)</label><textarea className="form-control" name="description_fr" rows={2}></textarea></div>
-               <div className="d-grid mt-4"><button className="btn btn-primary" type="submit">Enregistrer le Service</button></div>
              </form>
            </div>
          </div>
