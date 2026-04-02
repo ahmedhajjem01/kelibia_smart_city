@@ -189,7 +189,8 @@ export default function AgentDashboardPage() {
   const [evDetail, setEvDetail] = useState<any | null>(null)
   const [evSaving, setEvSaving] = useState(false)
   const [usersMode, setUsersMode] = useState<'unverified' | 'agents' | 'all'>('unverified')
-  const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
+   const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
+   const [enlargedImage, setEnlargedImage] = useState<string | null>(null)
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -416,10 +417,28 @@ export default function AgentDashboardPage() {
 
   function applyFilters() {
     const s = search.toLowerCase()
-    setFilteredRecs(allRecs.filter(r => {
+    const isSupervisor = user?.is_superuser || user?.is_staff || user?.user_type === 'supervisor'
+
+    let filtered = allRecs.filter(r => {
       const ms = !s || r.title.toLowerCase().includes(s) || (r.citizen_name || '').toLowerCase().includes(s) || (r.description || '').toLowerCase().includes(s)
-      return ms && (!filterStatus || r.status === filterStatus) && (!filterCategory || r.category === filterCategory) && (!filterPriority || r.priority === filterPriority) && (!urgentOnly || r.priority === 'urgente')
-    }))
+      const matchesBaseFilters = ms && (!filterStatus || r.status === filterStatus) && (!filterCategory || r.category === filterCategory) && (!filterPriority || r.priority === filterPriority) && (!urgentOnly || r.priority === 'urgente')
+      
+      // If user is just an agent (not supervisor), and filterStatus is not set to 'resolved', 
+      // maybe we want to hide resolved ones? 
+      // The user said "au la effacer pour lagent". Let's hide resolved ones from the "default" view for agents.
+      if (!isSupervisor && !filterStatus && r.status === 'resolved') return false
+
+      return matchesBaseFilters
+    })
+
+    // Sort: resolved items always go to the very end
+    filtered.sort((a, b) => {
+      if (a.status === 'resolved' && b.status !== 'resolved') return 1
+      if (a.status !== 'resolved' && b.status === 'resolved') return -1
+      return b.id - a.id // newest first for the rest
+    })
+
+    setFilteredRecs(filtered)
     setCurrentPage(1)
   }
 
@@ -540,9 +559,29 @@ export default function AgentDashboardPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
         body: JSON.stringify({ status: newStatus }),
       })
-      if (res.ok) { setAllRecs(p => p.map(r => r.id === id ? { ...r, status: newStatus } : r)); showToast(`Statut mis à jour → ${STATUS[newStatus]?.label || newStatus}`); cb(true) }
+      if (res.ok) { 
+        setAllRecs(p => p.map(r => r.id === id ? { ...r, status: newStatus } : r)); 
+        showToast(`Statut mis à jour → ${STATUS[newStatus]?.label || newStatus}`); 
+        cb(true) 
+      }
       else { showToast('Erreur lors de la mise à jour.', 'error'); cb(false) }
     } catch { showToast('Erreur réseau.', 'error'); cb(false) }
+  }
+
+  async function deleteReclamation(id: number) {
+    if (!window.confirm('Voulez-vous supprimer définitivement ce signalement ?')) return
+    try {
+      const res = await fetch(`/api/reclamations/${id}/`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      if (res.ok) {
+        showToast('Signalement supprimé !')
+        setAllRecs(prev => prev.filter(r => r.id !== id))
+      } else {
+        showToast('Action non autorisée ou erreur technique.', 'error')
+      }
+    } catch { showToast('Erreur réseau.', 'error') }
   }
 
   async function saveDetailStatus() {
@@ -765,7 +804,14 @@ export default function AgentDashboardPage() {
                               <td><span className="service-badge" title={svc}>{svc}</span></td>
                               <td><QSSelect rec={r} onUpdate={quickUpdateStatus} /></td>
                               <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(r.created_at)}</td>
-                              <td><button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button></td>
+                              <td>
+                                <div className="d-flex gap-1">
+                                  <button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button>
+                                  {(user?.is_superuser || user?.is_staff || user?.user_type === 'supervisor') && (
+                                    <button className="ag-action-btn text-danger" onClick={() => deleteReclamation(r.id)} title="Supprimer définitivement"><i className="fas fa-trash"></i></button>
+                                  )}
+                                </div>
+                              </td>
                             </tr>
                           )
                         })}
@@ -1951,9 +1997,9 @@ export default function AgentDashboardPage() {
                                 <label className="small text-muted mb-1">FACE AVANT (RECTO)</label>
                                 <div className="ag-cin-preview mb-3">
                                    {selectedUser.cin_front ? (
-                                      <a href={selectedUser.cin_front} target="_blank" rel="noreferrer">
+                                      <div onClick={() => setEnlargedImage(selectedUser.cin_front)} style={{ cursor: 'zoom-in' }}>
                                          <img src={selectedUser.cin_front} className="rounded shadow-sm scale-on-hover" style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Front CIN" />
-                                      </a>
+                                      </div>
                                    ) : (
                                       <div className="p-5 text-center bg-light text-muted small rounded">Non fournie</div>
                                    )}
@@ -2011,6 +2057,17 @@ export default function AgentDashboardPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* MODAL: IMAGE ZOOM VIEWER */}
+      {enlargedImage && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.9)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          onClick={() => setEnlargedImage(null)}>
+          <button style={{ position: 'absolute', top: 20, right: 20, background: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', zIndex: 5001 }}>
+            <i className="fas fa-times text-dark"></i>
+          </button>
+          <img src={enlargedImage} style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 8, boxShadow: '0 0 30px rgba(0,0,0,.5)', objectFit: 'contain' }} alt="Zoomed" />
         </div>
       )}
 
