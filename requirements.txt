@@ -43,3 +43,5 @@ scikit-learn==1.8.0
 nltk==3.9.4
 joblib==1.5.3
 numpy==2.4.4
+googletrans==4.0.0-rc1
+httpx==0.13.3
