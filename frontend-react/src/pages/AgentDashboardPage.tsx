@@ -224,6 +224,9 @@ export default function AgentDashboardPage() {
   const [loadingTopics, setLoadingTopics] = useState(false)
   const [forumStats, setForumStats] = useState<any | null>(null)
   const [forumSearch, setForumSearch] = useState('')
+  const [forumTopicSelected, setForumTopicSelected] = useState<any | null>(null)
+  const [forumReplyText, setForumReplyText] = useState('')
+  const [postingForumReply, setPostingForumReply] = useState(false)
 
   const [mlStats, setMlStats] = useState<any | null>(null)
   const [mlLoading, setMlLoading] = useState(false)
@@ -378,10 +381,72 @@ export default function AgentDashboardPage() {
       })
       if (res.ok) {
         showToast(isDelete ? 'Sujet supprimé !' : 'Action réussie !')
-        if (isDelete) setAllTopics(prev => prev.filter(t => t.id !== id))
-        else fetchTopics()
+        if (isDelete) {
+          setAllTopics(prev => prev.filter(t => t.id !== id))
+          if (forumTopicSelected?.id === id) setForumTopicSelected(null)
+        } else fetchTopics()
       }
     } catch { showToast('Erreur lors de l\'action.', 'error') }
+  }
+
+  async function fetchTopicDetail(id: number) {
+    try {
+      const res = await fetch(`/api/forum/topics/${id}/`, { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setForumTopicSelected(await res.json())
+    } catch { showToast('Erreur lors du chargement.', 'error') }
+  }
+
+  async function postForumReply() {
+    if (!forumTopicSelected || !forumReplyText.trim()) return
+    setPostingForumReply(true)
+    try {
+      const res = await fetch(`/api/forum/topics/${forumTopicSelected.id}/reply/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ content: forumReplyText })
+      })
+      if (res.ok) {
+        const nr = await res.json()
+        setForumTopicSelected((p: any) => ({ ...p, replies: [...(p.replies || []), nr] }))
+        setForumReplyText('')
+        showToast('Réponse envoyée !')
+        setAllTopics(prev => prev.map(t => t.id === forumTopicSelected.id ? { ...t, replies_count: (t.replies_count || 0) + 1 } : t))
+      }
+    } catch { showToast('Erreur lors de l\'envoi.', 'error') }
+    finally { setPostingForumReply(false) }
+  }
+
+  async function toggleForumTopicVote(id: number) {
+    try {
+      const res = await fetch(`/api/forum/topics/${id}/vote/`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (forumTopicSelected?.id === id) {
+          setForumTopicSelected((p: any) => ({ ...p, votes_count: data.votes_count, has_voted: data.voted }))
+        }
+      }
+    } catch { }
+  }
+
+  async function toggleForumReplyVote(id: number) {
+    try {
+      const res = await fetch(`/api/forum/replies/${id}/vote/`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (forumTopicSelected) {
+          const updatedReplies = forumTopicSelected.replies.map((r: any) => 
+            r.id === id ? { ...r, votes_count: data.votes_count, has_voted: data.voted } : r
+          )
+          setForumTopicSelected({ ...forumTopicSelected, replies: updatedReplies })
+        }
+      }
+    } catch { }
   }
 
   async function handleEvStatus(id: number, newStatus: string, commentaire: string) {
@@ -1379,6 +1444,9 @@ export default function AgentDashboardPage() {
                             </td>
                             <td>
                               <div className="d-flex gap-1">
+                                <button className="btn btn-sm btn-outline-primary" onClick={() => fetchTopicDetail(t.id)} title="Répondre / Chat">
+                                  <i className="fas fa-comment-dots"></i>
+                                </button>
                                 <button className={`btn btn-sm ${t.is_pinned ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => handleTopicAction(t.id, 'pin')} title="Épingler">
                                   <i className="fas fa-thumbtack"></i>
                                 </button>
@@ -2201,6 +2269,141 @@ export default function AgentDashboardPage() {
         </div>
       )}
 
+      {/* ── FORUM TOPIC DETAIL / CHAT MODAL ── */}
+      {forumTopicSelected && (() => {
+        const t = forumTopicSelected
+        const authName = (u: any) => u ? (`${u.first_name} ${u.last_name}`.trim() || u.email) : 'Chargement...'
+        const isOfficial = (u: any) => u?.user_type === 'agent' || u?.user_type === 'supervisor' || u?.is_staff || u?.is_superuser
+
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+            onClick={e => e.target === e.currentTarget && setForumTopicSelected(null)}>
+            <div className="animate__animated animate__fadeInUp" style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 720, height: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 70px rgba(0,0,0,.35)', overflow: 'hidden' }}>
+              
+              {/* Header */}
+              <div className="p-4 text-white d-flex align-items-center justify-content-between" style={{ background: 'linear-gradient(135deg,#311b92,#5e35b1)', flexShrink: 0 }}>
+                <div className="d-flex align-items-center gap-3">
+                  <div style={{ width: 48, height: 48, background: 'rgba(255,255,255,.2)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                    <i className="fas fa-comments"></i>
+                  </div>
+                  <div>
+                    <h5 className="mb-0 fw-bold">{t.title}</h5>
+                    <div className="small opacity-75">{t.replies?.length || 0} intervention(s) · {t.views} vues</div>
+                  </div>
+                </div>
+                <button className="bg-transparent border-0 text-white opacity-50" onClick={() => setForumTopicSelected(null)} style={{ transition: 'all .2s', cursor: 'pointer', fontSize: '1.5rem' }}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+
+              {/* Chat Body */}
+              <div className="flex-fill p-4 overflow-auto bg-light" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                
+                {/* Original Post */}
+                <div className="d-flex gap-3">
+                  <div className="flex-shrink-0" style={{ width: 44, height: 44, background: '#ede7f6', borderRadius: '50%', color: '#311b92', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.2rem', border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
+                    {initials(authName(t.author))}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                     <div className="p-3 bg-white shadow-sm" style={{ borderRadius: '0 18px 18px 18px', borderLeft: '4px solid #311b92' }}>
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                           <span className="fw-bold" style={{ color: '#311b92', fontSize: '.9rem' }}>{authName(t.author)} <span className="ms-1 badge bg-secondary bg-opacity-10 text-secondary" style={{ fontSize: '9px' }}>AUTEUR</span></span>
+                           <span className="text-muted small">{formatDate(t.created_at)}</span>
+                        </div>
+                        <div style={{ fontSize: '.95rem', color: '#333', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{t.content}</div>
+                        <div className="mt-3 d-flex align-items-center gap-3 border-top pt-2">
+                           <button className={`btn btn-sm p-0 border-0 ${t.has_voted ? 'text-danger' : 'text-muted'}`} onClick={() => toggleForumTopicVote(t.id)}>
+                              <i className={`${t.has_voted ? 'fas' : 'far'} fa-heart me-1`}></i> {t.votes_count} <span className="small">Réactions</span>
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Replies separator */}
+                <div className="d-flex align-items-center gap-3">
+                   <div style={{ flex: 1, height: 1, background: '#dee2e6' }}></div>
+                   <div className="small fw-bold text-muted text-uppercase" style={{ letterSpacing: 1 }}>Réponses</div>
+                   <div style={{ flex: 1, height: 1, background: '#dee2e6' }}></div>
+                </div>
+
+                {/* Replies mapping */}
+                {(t.replies || []).length === 0 ? (
+                  <div className="text-center py-5">
+                    <div className="opacity-25" style={{ fontSize: '3rem' }}><i className="fas fa-comment-slash"></i></div>
+                    <div className="text-muted mt-2 small">Aucune réponse pour le moment sur ce sujet.</div>
+                  </div>
+                ) : t.replies.map((r: any) => {
+                  const agent = isOfficial(r.author)
+                  return (
+                    <div key={r.id} className={`d-flex gap-3 ${agent ? 'flex-row-reverse' : ''}`}>
+                      <div className="flex-shrink-0" style={{ width: 40, height: 40, background: agent ? '#4527a0' : '#cfd8dc', borderRadius: '50%', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '.9rem', border: '2px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
+                        {initials(authName(r.author))}
+                      </div>
+                      <div style={{ flex: 1, maxWidth: '85%' }}>
+                        <div className={`p-3 shadow-sm ${agent ? 'bg-indigo-light text-end' : 'bg-white'}`} style={{ 
+                          borderRadius: agent ? '18px 0 18px 18px' : '0 18px 18px 18px',
+                          background: agent ? '#f5f7ff' : '#fff',
+                          borderLeft: agent ? 'none' : '3px solid #dee2e6',
+                          borderRight: agent ? '3px solid #311b92' : 'none',
+                        }}>
+                           <div className={`d-flex justify-content-between align-items-center mb-1 ${agent ? 'flex-row-reverse' : ''}`}>
+                              <span className="fw-bold" style={{ fontSize: '.85rem', color: agent ? '#311b92' : '#555' }}>
+                                {authName(r.author)} {agent && <span className="badge bg-primary ms-1" style={{ fontSize: '9px' }}>OFFICIEL</span>}
+                              </span>
+                              <span className="text-muted" style={{ fontSize: '10px' }}>{formatDate(r.created_at)}</span>
+                           </div>
+                           <div style={{ fontSize: '.9rem', color: '#444', lineHeight: 1.5 }}>{r.content}</div>
+                           <div className={`mt-2 d-flex align-items-center ${agent ? 'justify-content-end' : ''}`}>
+                              <button className={`btn btn-sm p-0 border-0 ${r.has_voted ? 'text-danger' : 'text-muted'}`} style={{ fontSize: '11px' }} onClick={() => toggleForumReplyVote(r.id)}>
+                                 <i className={`${r.has_voted ? 'fas' : 'far'} fa-heart me-1`}></i> {r.votes_count || 0}
+                              </button>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Footer / Input */}
+              <div className="p-4 bg-white border-top shadow-sm" style={{ flexShrink: 0 }}>
+                 <div className="d-flex align-items-center gap-3">
+                    <div style={{ flex: 1, position: 'relative' }}>
+                       <textarea 
+                        className="form-control border-0 bg-light rounded-4 px-4 py-3" 
+                        rows={1} 
+                        placeholder="Écrivez une réponse officielle..." 
+                        style={{ resize: 'none', fontSize: '.95rem', minHeight: '56px', maxHeight: '150px' }}
+                        value={forumReplyText}
+                        onChange={e => setForumReplyText(e.target.value)}
+                        onKeyDown={e => {
+                           if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault(); postForumReply();
+                           }
+                        }}
+                      />
+                    </div>
+                    <button 
+                      className={`btn btn-primary rounded-circle d-flex align-items-center justify-content-center ${!forumReplyText.trim() || postingForumReply ? 'disabled' : ''}`}
+                      style={{ width: 52, height: 52, fontSize: '1.2rem', transition: 'all .2s' }}
+                      onClick={postForumReply}
+                      disabled={!forumReplyText.trim() || postingForumReply}
+                    >
+                      {postingForumReply ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-paper-plane"></i>}
+                    </button>
+                 </div>
+                 <div className="text-muted mt-2 ms-2 small d-flex align-items-center gap-1">
+                    <i className="fas fa-info-circle"></i>
+                    <span>Votre réponse sera identifiée comme un commentaire <strong>officiel</strong> de la mairie.</span>
+                 </div>
+              </div>
+
+            </div>
+          </div>
+        )
+      })()}
+
       {/* MODAL: ADD USER (AGENT/SUPERVISOR) */}
        {showAddUserModal && (
          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -2265,14 +2468,43 @@ export default function AgentDashboardPage() {
                     onClick={() => {
                       const text = magicServiceText.trim(); if (!text) return;
                       
-                      const name = text.split(',')[0].replace(/Nom:\s*/i, '').trim();
-                      const delayMatch = text.match(/([0-9]+\s*(?:jours?|semaines?|mois?))/i);
+                      // 1. Détection du Nom (premier segment avant la virgule)
+                      const parts = text.split(',').map(p => p.trim());
+                      const name = parts[0].replace(/Nom:\s*/i, '').trim();
+                      
+                      // 2. Détection du Délai (recherche de chiffres suivis d'unités de temps)
+                      const delayMatch = text.match(/([0-9]+\s*(?:jours?|semaines?|mois?|heures?|h|hr))/i);
                       const delay = delayMatch ? delayMatch[1] : '';
-                      const foundCat = allCategories.find(c => text.toLowerCase().includes(c.name_fr.toLowerCase()));
+                      
+                      // 3. Détection de la Catégorie par mots-clés
+                      const catKeywords: Record<string, string[]> = {
+                        'Urbanisme': ['construction', 'batir', 'bâtir', 'permis', 'plan', 'terrain', 'propriétaire', 'proprietaire', 'titre bleu', 'étage', 'logement'],
+                        'Etat Civil': ['naissance', 'mariage', 'décès', 'deces', 'extrait', 'cin', 'famille', 'divorce'],
+                        'Finance': ['taxe', 'impôt', 'fiscal', 'paiement', 'redevance'],
+                        'Environnement': ['déchet', 'jardin', 'nettoyage', 'arbre', 'hygiène', 'propreté'],
+                        'Affaires Sociales': ['aide', 'handicap', 'social', 'souk', 'commerce'],
+                      };
+                      
+                      let foundCat = allCategories.find(c => text.toLowerCase().includes(c.name_fr.toLowerCase()));
+                      if (!foundCat) {
+                        for (const [catName, kwds] of Object.entries(catKeywords)) {
+                          if (kwds.some(k => text.toLowerCase().includes(k))) {
+                            foundCat = allCategories.find(c => 
+                              c.name_fr.toLowerCase() === catName.toLowerCase() || 
+                              c.name_fr.toLowerCase().includes(catName.toLowerCase())
+                            );
+                            if (foundCat) break;
+                          }
+                        }
+                      }
                       const catId = foundCat ? foundCat.id.toString() : '';
                       
+                      // 4. Détection des Documents Requis
                       let reqs: any[] = [];
-                      const reqPart = (text.match(/(?:papiers?|documents?|reqs?):\s*(.+)$/i) || [])[1];
+                      // Recherche après des termes comme "documents", "papiers", " requis", "pièces"
+                      const reqMatch = text.match(/(?:papiers?|documents?|pièces?|requis?)(?:\s+requis)?\s*[:\-]?\s*(.+)$/i);
+                      const reqPart = reqMatch ? reqMatch[1] : '';
+                      
                       if (reqPart) {
                         reqs = reqPart.split(/,|et|;/).map(r => r.trim()).filter(Boolean)
                           .map(r => ({ name_fr: r, name_ar: r, is_mandatory: true }));
@@ -2280,11 +2512,17 @@ export default function AgentDashboardPage() {
 
                       const form = document.getElementById('service-form') as HTMLFormElement;
                       if (form) {
-                        (form.querySelector('[name=name_fr]') as HTMLInputElement).value = name;
-                        (form.querySelector('[name=name_ar]') as HTMLInputElement).value = name;
-                        (form.querySelector('[name=processing_time]') as HTMLInputElement).value = delay;
-                        if (catId) (form.querySelector('[name=category]') as HTMLSelectElement).value = catId;
+                        const nameFrInput = form.querySelector('[name=name_fr]') as HTMLInputElement;
+                        const nameArInput = form.querySelector('[name=name_ar]') as HTMLInputElement;
+                        const delayInput = form.querySelector('[name=processing_time]') as HTMLInputElement;
+                        const catSelect = form.querySelector('[name=category]') as HTMLSelectElement;
+
+                        if (nameFrInput) nameFrInput.value = name;
+                        if (nameArInput) nameArInput.value = name;
+                        if (delayInput) delayInput.value = delay;
+                        if (catId && catSelect) catSelect.value = catId;
                         if (reqs.length > 0) setServiceReqs(reqs);
+                        
                         showToast('Magic filling done! ✨');
                       }
                     }}>Remplir</button>
