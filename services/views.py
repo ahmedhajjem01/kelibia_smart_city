@@ -10,7 +10,7 @@ class IsSupervisorOrReadOnly(permissions.BasePermission):
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 import logging
 logger = logging.getLogger(__name__)
 
@@ -30,9 +30,9 @@ class ServiceViewSet(viewsets.ModelViewSet):
         if not text:
             return Response({'error': 'No text provided'}, status=400)
         try:
-            translator = Translator()
-            result = translator.translate(text, src='fr', dest='ar')
-            return Response({'translated': result.text})
+            translator = GoogleTranslator(source='fr', target='ar')
+            translated = translator.translate(text)
+            return Response({'translated': translated})
         except Exception as e:
             logger.error(f"Translation error: {e}")
             return Response({'error': str(e)}, status=500)
