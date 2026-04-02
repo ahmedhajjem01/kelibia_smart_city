@@ -135,11 +135,22 @@ class CustomActivationView(APIView):
 
 class UserProfileView(APIView):
     """
-    Returns the current user's profile information.
+    GET  — returns the current user's profile information.
+    PATCH — updates editable profile fields (no email, cin, or user_type changes).
     """
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
+
+    def patch(self, request):
+        allowed = ['first_name', 'last_name', 'phone', 'address', 'city', 'governorate', 'place_of_birth']
+        data = {k: v for k, v in request.data.items() if k in allowed and v is not None}
+        if not data:
+            return Response({"error": "Aucun champ modifiable fourni."}, status=status.HTTP_400_BAD_REQUEST)
+        for attr, value in data.items():
+            setattr(request.user, attr, value)
+        request.user.save(update_fields=list(data.keys()))
+        return Response(CustomUserSerializer(request.user).data)
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer

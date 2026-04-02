@@ -35,6 +35,7 @@ import PaymentSimulationPage from './pages/PaymentSimulationPage'
 import DemandeEvenementPage from './pages/DemandeEvenementPage'
 import MesEvenementsPage from './pages/MesEvenementsPage'
 import EvenementsPublicsPage from './pages/EvenementsPublicsPage'
+import ProfilePage from './pages/ProfilePage'
 
 
 
@@ -144,6 +145,9 @@ export default function App() {
           <Route path="/demande-evenement" element={<DemandeEvenementPage />} />
           <Route path="/mes-evenements" element={<MesEvenementsPage />} />
           <Route path="/evenements" element={<EvenementsPublicsPage />} />
+
+          {/* Profile */}
+          <Route path="/profile" element={<ProfilePage />} />
 
           {/* Backward-compatible aliases with old .html URLs */}
           <Route path="/agent_dashboard.html" element={<AgentDashboardPage />} />
