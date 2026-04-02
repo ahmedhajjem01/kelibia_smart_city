@@ -203,6 +203,7 @@ export default function AgentDashboardPage() {
   const [showAddServiceModal, setShowAddServiceModal] = useState(false)
   const [editingService, setEditingService] = useState<any | null>(null)
   const [editServiceSaving, setEditServiceSaving] = useState(false)
+  const [translatingField, setTranslatingField] = useState<string | null>(null)
   
   // Service editing extras
   const [serviceReqs, setServiceReqs] = useState<any[]>([])
@@ -218,6 +219,11 @@ export default function AgentDashboardPage() {
   const [demandeSearchQ, setDemandeSearchQ] = useState('')
   const [demandeTypeFilter, setDemandeTypeFilter] = useState('')
   const [demandeStatusFilter, setDemandeStatusFilter] = useState('')
+
+  const [allTopics, setAllTopics] = useState<any[]>([])
+  const [loadingTopics, setLoadingTopics] = useState(false)
+  const [forumStats, setForumStats] = useState<any | null>(null)
+  const [forumSearch, setForumSearch] = useState('')
 
   const [mlStats, setMlStats] = useState<any | null>(null)
   const [mlLoading, setMlLoading] = useState(false)
@@ -269,19 +275,35 @@ export default function AgentDashboardPage() {
   async function fetchCategoriesAndServices() {
     setLoadingServicesTab(true)
     try {
-      const res = await fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch('/api/services/list/', { headers: { Authorization: `Bearer ${access}` } })
       if (res.ok) {
-        const cats = await res.json()
-        setAllCategories(cats)
-        // Flatten services for easy listing
+        const data = await res.json()
+        const cats: any[] = []
         const svcs: any[] = []
-        cats.forEach((c: any) => {
-          (c.services || []).forEach((s: any) => svcs.push({ ...s, category_name: c.name_fr, category_id: c.id }))
+        data.forEach((c: any) => {
+          cats.push({ id: c.id, name_fr: c.name_fr, name_ar: c.name_ar })
+          c.services.forEach((s: any) => { svcs.push({ ...s, category_id: c.id, category_name: c.name_fr }) })
         })
-        setAllServices(svcs)
+        setAllCategories(cats); setAllServices(svcs)
       }
-    } catch (e) { console.error(e) }
+    } catch { showToast('Erreur chargement services', 'error') }
     finally { setLoadingServicesTab(false) }
+  }
+
+  async function handleAutoTranslate(text: string, callback: (translated: string) => void, fieldKey: string) {
+    if (!text?.trim()) return
+    setTranslatingField(fieldKey)
+    try {
+      const res = await fetch('/api/services/list/translate/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ text })
+      })
+      const data = await res.json()
+      if (res.ok && data.translated) callback(data.translated)
+      else if (data.error) showToast('Erreur traduction.', 'error')
+    } catch { showToast('Erreur réseau traduction.', 'error') }
+    finally { setTranslatingField(null) }
   }
 
   async function fetchMlStats() {
@@ -347,6 +369,35 @@ export default function AgentDashboardPage() {
       }
     } catch (e) { console.error(e) }
     finally { setLoadingEvenements(false) }
+  }
+
+  async function fetchTopics() {
+    setLoadingTopics(true)
+    try {
+      const res = await fetch('/api/forum/topics/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setAllTopics(await res.json())
+      
+      const sRes = await fetch('/api/forum/topics/stats/', { headers: { Authorization: `Bearer ${access}` } })
+      if (sRes.ok) setForumStats(await sRes.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingTopics(false) }
+  }
+
+  async function handleTopicAction(id: number, action: 'pin' | 'resolve' | 'delete') {
+    try {
+      const isDelete = action === 'delete'
+      if (isDelete && !window.confirm('Supprimer ce sujet définitivement ?')) return
+      
+      const res = await fetch(`/api/forum/topics/${id}/${isDelete ? '' : action + '/'}`, {
+        method: isDelete ? 'DELETE' : 'POST',
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      if (res.ok) {
+        showToast(isDelete ? 'Sujet supprimé !' : 'Action réussie !')
+        if (isDelete) setAllTopics(prev => prev.filter(t => t.id !== id))
+        else fetchTopics()
+      }
+    } catch { showToast('Erreur lors de l\'action.', 'error') }
   }
 
   async function handleEvStatus(id: number, newStatus: string, commentaire: string) {
@@ -544,7 +595,7 @@ export default function AgentDashboardPage() {
           ${!hc ? '<span style="font-size:10px;color:#aaa;">(approx.)</span>' : ''}
         </div></div>`)
     })
-  }, [allRecs])
+  }, [allRecs, activeTab])
 
   function showToast(msg: string, type = 'success') {
     const id = Date.now()
@@ -700,7 +751,7 @@ export default function AgentDashboardPage() {
                 <i className="fas fa-folder-open"></i> Demandes Citoyens
                 {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
               </a>
-              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
+              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics() }}>
                 <i className="fas fa-comments"></i> Modération Forum
               </a>
             </>
@@ -1256,17 +1307,112 @@ export default function AgentDashboardPage() {
               })()}
             </div>
           ) : activeTab === 'forum' ? (
-
+            /* ── FORUM MANAGEMENT TAB ─────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn">
-               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
-                  <span className="fw-bold"><i className="fas fa-comments me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? 'Espace Superviseur' : 'Modération du Forum & Actualités'}</span>
-               </div>
-               <div className="p-5 text-center">
-                  <i className="fas fa-shield-alt fa-3x mb-3 text-muted"></i>
-                  <h5 className="fw-bold">Espace Modération Superviseur</h5>
-                  <p className="text-muted">Gérez les sujets du forum, modérez les commentaires et gérez les actualités de la ville.</p>
-                  <button className="btn btn-primary mt-3" onClick={() => navigate('/forum')}><i className="fas fa-external-link-alt me-2"></i>Aller au Forum</button>
-               </div>
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)' }}>
+                <span><i className="fas fa-comments me-2"></i>Modération du Forum</span>
+                <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchTopics}>
+                  <i className="fas fa-sync-alt me-1"></i>Actualiser
+                </button>
+              </div>
+
+              {/* Forum Stats Strip */}
+              {!loadingTopics && forumStats && (
+                <div className="d-flex flex-wrap gap-2 p-3 border-bottom" style={{ background: '#f8f9fa' }}>
+                  {[
+                    { lbl: 'Sujets',       val: forumStats.total_topics,    color: '#311b92', bg: '#ede7f6' },
+                    { lbl: 'Réponses',     val: forumStats.total_replies,   color: '#006064', bg: '#e0f7fa' },
+                    { lbl: 'Membres Actifs', val: forumStats.active_members,  color: '#c62828', bg: '#ffebee' },
+                    { lbl: 'Épinglés',    val: forumStats.pinned_topics,    color: '#f57f17', bg: '#fff8e1' },
+                    { lbl: 'Résolus',      val: forumStats.resolved_topics,  color: '#2e7d32', bg: '#e8f5e9' },
+                  ].map(s => (
+                    <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
+                      style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
+                      <span className="fw-bold" style={{ color: s.color, fontSize: '1.1rem' }}>{s.val}</span>
+                      <span style={{ color: s.color, fontSize: '.78rem' }}>{s.lbl}</span>
+                    </div>
+                  ))}
+                  <button className="btn btn-primary btn-sm ms-auto rounded-pill px-3" onClick={() => navigate('/forum')}>
+                    <i className="fas fa-external-link-alt me-1"></i> Voir le Forum Live
+                  </button>
+                </div>
+              )}
+
+              {/* Filters */}
+              <div className="ag-filter-bar">
+                <div className="ag-search-wrap">
+                  <i className="fas fa-search"></i>
+                  <input className="ag-search-input" placeholder="Rechercher un sujet..." value={forumSearch} onChange={e => setForumSearch(e.target.value)} />
+                </div>
+              </div>
+
+              {loadingTopics ? (
+                <div className="ag-spinner-wrap"><div className="spinner-border text-primary"></div></div>
+              ) : (() => {
+                const filtered = allTopics.filter(t => 
+                  !forumSearch || t.title.toLowerCase().includes(forumSearch.toLowerCase()) || 
+                  t.author_name?.toLowerCase().includes(forumSearch.toLowerCase())
+                )
+                if (filtered.length === 0) return <div className="ag-empty">Aucun sujet trouvé.</div>
+                return (
+                  <div className="table-responsive">
+                    <table className="ag-table shadow-sm">
+                      <thead>
+                        <tr>
+                          <th>Sujet</th>
+                          <th>Auteur</th>
+                          <th>Stats</th>
+                          <th>État</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map(t => (
+                          <tr key={t.id}>
+                            <td style={{ maxWidth: 250 }}>
+                              <div className="fw-bold text-dark text-truncate" title={t.title}>{t.title}</div>
+                              <div className="small text-muted text-truncate">{t.content?.slice(0, 60)}...</div>
+                              <div className="mt-1">
+                                {t.tags?.map((tg: any) => (
+                                  <span key={tg.id} className="badge bg-light text-dark border me-1" style={{ fontSize: '10px' }}>{tg.name}</span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="small fw-bold text-primary">{t.author_name}</div>
+                              <div className="text-muted" style={{ fontSize: '10px' }}>{formatDate(t.created_at)}</div>
+                            </td>
+                            <td>
+                              <div className="small"><i className="fas fa-eye text-muted me-1"></i>{t.views}</div>
+                              <div className="small"><i className="fas fa-comment text-muted me-1"></i>{t.replies_count}</div>
+                            </td>
+                            <td>
+                              <div className="d-flex flex-column gap-1">
+                                {t.is_pinned && <span className="badge bg-warning text-dark" style={{ fontSize: '10px' }}><i className="fas fa-thumbtack me-1"></i>ÉPINGLÉ</span>}
+                                {t.is_resolved && <span className="badge bg-success" style={{ fontSize: '10px' }}><i className="fas fa-check me-1"></i>RÉSOLU</span>}
+                                {!t.is_pinned && !t.is_resolved && <span className="text-muted small">Normal</span>}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-1">
+                                <button className={`btn btn-sm ${t.is_pinned ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => handleTopicAction(t.id, 'pin')} title="Épingler">
+                                  <i className="fas fa-thumbtack"></i>
+                                </button>
+                                <button className={`btn btn-sm ${t.is_resolved ? 'btn-success' : 'btn-outline-success'}`} onClick={() => handleTopicAction(t.id, 'resolve')} title="Marquer Résolu">
+                                  <i className="fas fa-check"></i>
+                                </button>
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleTopicAction(t.id, 'delete')} title="Supprimer">
+                                  <i className="fas fa-trash"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              })()}
             </div>
           ) : activeTab === 'evenements' ? (
             /* ── ÉVÉNEMENTS TAB ──────────────────────────────────────── */
@@ -2122,23 +2268,10 @@ export default function AgentDashboardPage() {
                setEditServiceSaving(true)
                const formData = new FormData(e.currentTarget);
                
-               // The backend expects requirements as a nested list. 
-               // Depending on the backend setup, we might need a single JSON field or multiple.
-               // Let's assume we can send a JSON string for the requirements if parsed correctly or just use traditional POST.
-               // Actually, for multipart/form-data, DRF nested serializers can be tricky. 
-               // We'll append each field manually to be safe.
-
                try {
                  const url = editingService ? `/api/services/list/${editingService.id}/` : '/api/services/list/';
                  const method = editingService ? 'PATCH' : 'POST';
                  
-                 // If we have requirements, we need to handle them. 
-                 // Since we're using Multipart, we can't easily nest. 
-                 // We will send the requirements as a JSON string and the backend will need to handles it.
-                 // Actually, a better way for files + nested is to send everything as nested but DRF requires JSON for that.
-                 // We will use the common pattern: send files if any, and other data.
-                 
-                 // Create a clean FormData for submission
                  const finalFd = new FormData();
                  finalFd.append('category', formData.get('category') as string);
                  finalFd.append('name_fr', formData.get('name_fr') as string);
@@ -2150,9 +2283,6 @@ export default function AgentDashboardPage() {
                  if (servicePdfAr) finalFd.append('form_pdf_ar', servicePdfAr);
                  if (servicePdfFr) finalFd.append('form_pdf_fr', servicePdfFr);
                  
-                 // Send requirements as structured data if needed. 
-                 // But await, our backend update() expects requirements as a list.
-                 // DRF can parse requirements[0]name_fr etc.
                  serviceReqs.forEach((req, idx) => {
                     finalFd.append(`requirements[${idx}]name_fr`, req.name_fr);
                     finalFd.append(`requirements[${idx}]name_ar`, req.name_ar);
@@ -2192,23 +2322,47 @@ export default function AgentDashboardPage() {
                    <input className="form-control" name="processing_time" placeholder="ex: 2 jours à 1 semaine" defaultValue={editingService?.processing_time || ''} />
                  </div>
                  
-                 <div className="col-md-6">
-                   <label className="form-label small fw-bold">Nom du service (FR)</label>
-                   <input className="form-control" name="name_fr" required defaultValue={editingService?.name_fr || ''} />
-                 </div>
-                 <div className="col-md-6">
-                   <label className="form-label small fw-bold" dir="rtl">اسم الخدمة (عربي)</label>
-                   <input className="form-control" name="name_ar" dir="rtl" required defaultValue={editingService?.name_ar || ''} />
-                 </div>
+                 <div className="col-md-12">
+                    <div className="row g-2">
+                       <div className="col-md-6">
+                          <label className="form-label small fw-bold">Nom du service (FR)</label>
+                          <div className="input-group input-group-sm">
+                             <input className="form-control" name="name_fr" id="srv-name-fr" required defaultValue={editingService?.name_fr || ''} />
+                             <button type="button" className="btn btn-outline-primary" 
+                                onClick={() => {
+                                   const fr = (document.getElementById('srv-name-fr') as HTMLInputElement).value;
+                                   handleAutoTranslate(fr, (tr) => { (document.getElementById('srv-name-ar') as HTMLInputElement).value = tr; }, 'name');
+                                }} disabled={translatingField === 'name'}>
+                                {translatingField === 'name' ? <span className="spinner-border spinner-border-sm"></span> : <><i className="fas fa-magic me-1"></i> Traduire</>}
+                             </button>
+                          </div>
+                       </div>
+                       <div className="col-md-6">
+                          <label className="form-label small fw-bold" dir="rtl">اسم الخدمة (عربي)</label>
+                          <input className="form-control form-control-sm" name="name_ar" id="srv-name-ar" dir="rtl" required defaultValue={editingService?.name_ar || ''} />
+                       </div>
+                    </div>
+                  </div>
 
-                 <div className="col-md-6">
-                   <label className="form-label small fw-bold">Description (FR)</label>
-                   <textarea className="form-control" name="description_fr" rows={2} defaultValue={editingService?.description_fr || ''}></textarea>
-                 </div>
-                 <div className="col-md-6">
-                   <label className="form-label small fw-bold" dir="rtl">وصف الخدمة (عربي)</label>
-                   <textarea className="form-control" name="description_ar" rows={2} dir="rtl" defaultValue={editingService?.description_ar || ''}></textarea>
-                 </div>
+                  <div className="col-md-12">
+                     <div className="row g-2">
+                        <div className="col-md-6">
+                           <label className="form-label small fw-bold">Description (FR)</label>
+                           <textarea className="form-control" name="description_fr" id="srv-desc-fr" rows={2} style={{ fontSize: '13px' }} defaultValue={editingService?.description_fr || ''}></textarea>
+                           <button type="button" className="btn btn-link btn-sm p-0 text-decoration-none mt-1" 
+                              onClick={() => {
+                                 const fr = (document.getElementById('srv-desc-fr') as HTMLTextAreaElement).value;
+                                 handleAutoTranslate(fr, (tr) => { (document.getElementById('srv-desc-ar') as HTMLTextAreaElement).value = tr; }, 'desc');
+                              }} style={{ fontSize: '11px' }} disabled={translatingField === 'desc'}>
+                              {translatingField === 'desc' ? 'Traduction...' : '✨ Traduire la description en Arabe'}
+                           </button>
+                        </div>
+                        <div className="col-md-6">
+                           <label className="form-label small fw-bold" dir="rtl">وصف الخدمة (عربي)</label>
+                           <textarea className="form-control" name="description_ar" id="srv-desc-ar" rows={2} dir="rtl" style={{ fontSize: '13px' }} defaultValue={editingService?.description_ar || ''}></textarea>
+                        </div>
+                     </div>
+                  </div>
 
                  {/* Requirements Section */}
                  <div className="col-12 mt-3">
@@ -2223,6 +2377,10 @@ export default function AgentDashboardPage() {
                           serviceReqs.map((req, idx) => (
                              <div key={idx} className="p-2 border-bottom d-flex gap-2 align-items-center">
                                 <input className="form-control form-control-sm" placeholder="Nom FR" value={req.name_fr} onChange={e => { const n = [...serviceReqs]; n[idx].name_fr = e.target.value; setServiceReqs(n); }} />
+                                <button type="button" className="btn btn-sm btn-outline-secondary py-0 px-1" title="Traduire" 
+                                    onClick={() => handleAutoTranslate(req.name_fr, (tr) => { const n = [...serviceReqs]; n[idx].name_ar = tr; setServiceReqs(n); }, `req-${idx}`)}>
+                                    {translatingField === `req-${idx}` ? '...' : <i className="fas fa-magic" style={{ fontSize: '10px' }}></i>}
+                                 </button>
                                 <input className="form-control form-control-sm" dir="rtl" placeholder="اسم بالعربي" value={req.name_ar} onChange={e => { const n = [...serviceReqs]; n[idx].name_ar = e.target.value; setServiceReqs(n); }} />
                                 <div className="form-check form-switch flex-shrink-0">
                                    <input className="form-check-input" type="checkbox" checked={req.is_mandatory} onChange={e => { const n = [...serviceReqs]; n[idx].is_mandatory = e.target.checked; setServiceReqs(n); }} />
