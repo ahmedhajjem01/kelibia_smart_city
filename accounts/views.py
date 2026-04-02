@@ -213,11 +213,13 @@ class UserVerificationView(APIView):
         if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
             return Response({"error": "Accès refusé."}, status=403)
         
-        # Get mode: 'unverified' or 'all'
+        # Get mode: 'unverified', 'agents', or 'all'
         mode = request.query_params.get('mode', 'unverified')
-        
+
         if mode == 'unverified':
             users = User.objects.filter(is_verified=False, user_type='citizen').order_by('-date_joined')
+        elif mode == 'agents':
+            users = User.objects.filter(user_type__in=['agent', 'supervisor']).order_by('-date_joined')
         else:
             users = User.objects.all().order_by('-date_joined')
 
@@ -278,6 +280,24 @@ class UserVerificationView(APIView):
                 target_user.is_superuser = True
                 target_user.save()
                 return Response({"message": "L'utilisateur a été promu au rang de Superviseur."})
+            elif action == 'demote_to_citizen':
+                if not request.user.is_superuser:
+                    return Response({"error": "Seul un superutilisateur peut rétrograder un agent."}, status=403)
+                target_user.user_type = 'citizen'
+                target_user.is_staff = False
+                target_user.is_superuser = False
+                target_user.is_verified = False
+                target_user.save()
+                return Response({"message": "L'agent a été rétrogradé au rang de Citoyen."})
+            elif action == 'reset_password':
+                if not request.user.is_superuser:
+                    return Response({"error": "Seul un superutilisateur peut réinitialiser les mots de passe."}, status=403)
+                import secrets, string
+                alphabet = string.ascii_letters + string.digits + '!@#$'
+                new_password = ''.join(secrets.choice(alphabet) for _ in range(12))
+                target_user.set_password(new_password)
+                target_user.save()
+                return Response({"message": f"Mot de passe réinitialisé.", "new_password": new_password})
             else:
                 return Response({"error": "Action non reconnue."}, status=400)
         except User.DoesNotExist:

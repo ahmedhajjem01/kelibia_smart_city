@@ -188,7 +188,8 @@ export default function AgentDashboardPage() {
   const [evSearch, setEvSearch] = useState('')
   const [evDetail, setEvDetail] = useState<any | null>(null)
   const [evSaving, setEvSaving] = useState(false)
-  const [usersMode, setUsersMode] = useState<'unverified' | 'all'>('unverified')
+  const [usersMode, setUsersMode] = useState<'unverified' | 'agents' | 'all'>('unverified')
+  const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -308,7 +309,7 @@ export default function AgentDashboardPage() {
     finally { setEvSaving(false) }
   }
 
-  async function fetchManagedUsers(mode: 'unverified' | 'all') {
+  async function fetchManagedUsers(mode: 'unverified' | 'agents' | 'all') {
     setLoadingUsers(true)
     try {
       const res = await fetch(`/api/accounts/verify-citizens/?mode=${mode}`, { headers: { Authorization: `Bearer ${access}` } })
@@ -317,7 +318,7 @@ export default function AgentDashboardPage() {
     finally { setLoadingUsers(false) }
   }
 
-  async function handleToggleUserStatus(userId: number, action: 'verify' | 'toggle_active' | 'delete' | 'promote_to_agent' | 'promote_to_supervisor') {
+  async function handleToggleUserStatus(userId: number, action: 'verify' | 'toggle_active' | 'delete' | 'promote_to_agent' | 'promote_to_supervisor' | 'demote_to_citizen' | 'reset_password') {
     try {
       const res = await fetch('/api/accounts/verify-citizens/', {
         method: 'POST',
@@ -706,10 +707,11 @@ export default function AgentDashboardPage() {
             </>
           ) : activeTab === 'users' ? (
             <div className="ag-card animate__animated animate__fadeIn">
-              <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#004d40,#00695c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '50px', padding: '0 16px' }}>
+              <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#004d40,#00695c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
                 <span className="fw-bold"><i className="fas fa-users-cog me-2"></i>Administration des Comptes</span>
                 <div className="btn-group btn-group-sm bg-white bg-opacity-10 p-1 rounded">
                   <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>EN ATTENTE</button>
+                  <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? 'btn-warning' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>AGENTS</button>
                   <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>TOUS</button>
                 </div>
                 <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>AJOUTER AGENT</button>
@@ -769,6 +771,31 @@ export default function AgentDashboardPage() {
                                 )}
                                 {user?.is_superuser && u.user_type !== 'supervisor' && (
                                   <button className="btn btn-sm btn-outline-warning" title="Promouvoir Superviseur" onClick={(e) => { e.stopPropagation(); handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
+                                )}
+                                {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
+                                  <button className="btn btn-sm btn-outline-secondary" title="Rétrograder en Citoyen"
+                                    onClick={(e) => { e.stopPropagation(); if(window.confirm(`Rétrograder "${u.full_name}" en Citoyen ? Il perdra ses droits d'agent.`)) handleToggleUserStatus(u.id, 'demote_to_citizen') }}>
+                                    <i className="fas fa-user-minus"></i>
+                                  </button>
+                                )}
+                                {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
+                                  <button className="btn btn-sm btn-outline-info" title="Réinitialiser le mot de passe"
+                                    onClick={async (e) => {
+                                      e.stopPropagation()
+                                      if (!window.confirm(`Générer un nouveau mot de passe pour "${u.full_name}" ?`)) return
+                                      try {
+                                        const res = await fetch('/api/accounts/verify-citizens/', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+                                          body: JSON.stringify({ user_id: u.id, action: 'reset_password' })
+                                        })
+                                        const data = await res.json()
+                                        if (res.ok) setResetPwdResult({ name: u.full_name, password: data.new_password })
+                                        else showToast(data.error || 'Erreur', 'error')
+                                      } catch { showToast('Erreur réseau', 'error') }
+                                    }}>
+                                    <i className="fas fa-key"></i>
+                                  </button>
                                 )}
                                 <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={(e) => { e.stopPropagation(); if(window.confirm('Supprimer cet utilisateur ?')) handleToggleUserStatus(u.id, 'delete') }}><i className="fas fa-trash"></i></button>
                                 {(u.cin_front || u.cin_back) && (
@@ -1486,6 +1513,38 @@ export default function AgentDashboardPage() {
            </div>
         </div>
       )}
+      {/* MODAL: RESET PASSWORD RESULT */}
+      {resetPwdResult && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 4000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div className="bg-white rounded-4 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '420px' }}>
+            <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(90deg,#1a3a5c,#0d6efd)', color: '#fff' }}>
+              <h6 className="mb-0 fw-bold"><i className="fas fa-key me-2"></i>Mot de passe réinitialisé</h6>
+              <button className="btn-close btn-close-white" onClick={() => setResetPwdResult(null)}></button>
+            </div>
+            <div className="p-4 text-center">
+              <div className="mb-3 text-muted small">Nouveau mot de passe temporaire pour</div>
+              <div className="fw-bold mb-3" style={{ fontSize: '1rem', color: '#1a1a2e' }}>{resetPwdResult.name}</div>
+              <div className="d-flex align-items-center justify-content-center gap-2 mb-4">
+                <code className="px-4 py-2 rounded-3 fw-bold" style={{ background: '#f0f5ff', color: '#0d6efd', fontSize: '1.15rem', letterSpacing: 2, border: '2px dashed #0d6efd' }}>
+                  {resetPwdResult.password}
+                </code>
+                <button className="btn btn-sm btn-outline-primary rounded-pill" title="Copier"
+                  onClick={() => { navigator.clipboard.writeText(resetPwdResult!.password); showToast('Mot de passe copié !') }}>
+                  <i className="fas fa-copy"></i>
+                </button>
+              </div>
+              <div className="alert alert-warning rounded-3 d-flex gap-2 align-items-start text-start" style={{ fontSize: '.82rem' }}>
+                <i className="fas fa-exclamation-triangle mt-1 flex-shrink-0"></i>
+                <span>Communiquez ce mot de passe à l'agent de façon sécurisée. Il devra le changer dès sa prochaine connexion.</span>
+              </div>
+              <button className="btn btn-primary rounded-pill px-5 mt-2" onClick={() => setResetPwdResult(null)}>
+                <i className="fas fa-check me-2"></i>Compris
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL: ADD USER (AGENT/SUPERVISOR) */}
        {showAddUserModal && (
          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
