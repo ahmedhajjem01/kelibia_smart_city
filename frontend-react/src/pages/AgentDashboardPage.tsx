@@ -442,8 +442,15 @@ export default function AgentDashboardPage() {
   const { dupCount, dupGroups } = detectDuplicates()
 
   useEffect(() => {
-    if (!mapRef.current || leafletMap.current) return
+    if (activeTab !== 'dashboard' || !mapRef.current) return
     const L = (window as any).L; if (!L) return
+    
+    // If map already exists, just invalidate size (for visibility changes)
+    if (leafletMap.current) {
+      setTimeout(() => leafletMap.current?.invalidateSize(), 200)
+      return
+    }
+
     const m = L.map(mapRef.current).setView([36.8467, 11.1047], 13)
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(m)
     const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri', maxZoom: 19 })
@@ -475,10 +482,20 @@ export default function AgentDashboardPage() {
     }
     legend.addTo(m)
     leafletMap.current = m
-  }, [mapRef.current])
+
+    // Force small delay for resize
+    setTimeout(() => m.invalidateSize(), 100)
+
+    return () => {
+      if (leafletMap.current) {
+        leafletMap.current.remove()
+        leafletMap.current = null
+      }
+    }
+  }, [activeTab, mapRef])
 
   useEffect(() => {
-    const L = (window as any).L; if (!L || !markersLayer.current) return
+    const L = (window as any).L; if (!L || !leafletMap.current || !markersLayer.current) return
     markersLayer.current.clearLayers()
     const BLT = 36.8467, BLG = 11.1047
     allRecs.forEach(r => {
