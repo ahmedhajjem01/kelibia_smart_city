@@ -182,7 +182,7 @@ export default function AgentStatsPage() {
           <a className="ag-nav-item active" href="#"><i className="fas fa-brain"></i> Stats IA</a>
           <div className="ag-divider"></div>
           <div className="ag-sec-title">COMPTE</div>
-          <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
+          <a className="ag-nav-item" href="/profile"><i className="fas fa-user-circle"></i> Mon Profil</a>
           {(user?.user_type === 'supervisor' || user?.is_superuser) && (
             <a className="ag-nav-item" href="/admin/" style={{ color: '#ff6d00' }}>
               <i className="fas fa-cog"></i> <strong>Panel Django Admin</strong>

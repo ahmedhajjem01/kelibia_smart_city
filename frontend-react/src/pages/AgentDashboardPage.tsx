@@ -546,7 +546,7 @@ export default function AgentDashboardPage() {
       <div className="ag-body">
         <div className="ag-sidebar">
           <div className="ag-sec-title">NAVIGATION</div>
-          <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
+          <a className="ag-nav-item" href="/profile"><i className="fas fa-user-circle"></i> Mon Profil</a>
 
           {/* ── Visible to ALL agents ── */}
           <div className="ag-divider"></div>
