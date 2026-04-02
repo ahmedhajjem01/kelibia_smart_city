@@ -547,7 +547,25 @@ export default function AgentDashboardPage() {
         <div className="ag-sidebar">
           <div className="ag-sec-title">NAVIGATION</div>
           <a className="ag-nav-item" href="#"><i className="fas fa-user-circle"></i> Mon Profil</a>
-          
+
+          {/* ── Visible to ALL agents ── */}
+          <div className="ag-divider"></div>
+          <div className="ag-sec-title">ESPACE AGENT</div>
+          <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
+            <i className="fas fa-exclamation-circle"></i> Réclamations
+            {pending > 0 && <span className="ag-badge">{pending}</span>}
+          </a>
+          <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
+            <i className="fas fa-calendar-alt"></i> Événements
+            {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
+              <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
+            )}
+          </a>
+          <a className="ag-nav-item" href="/agent-stats">
+            <i className="fas fa-robot"></i> Statistiques IA
+          </a>
+
+          {/* ── Supervisor / Admin only ── */}
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
             <>
               <div className="ag-divider"></div>
@@ -565,15 +583,10 @@ export default function AgentDashboardPage() {
               <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum') }}>
                 <i className="fas fa-comments"></i> Modération Forum
               </a>
-              <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
-                <i className="fas fa-calendar-alt"></i> Événements
-                {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
-                  <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
-                )}
-              </a>
             </>
           )}
 
+          <div className="ag-divider"></div>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</a>
         </div>
         <div className="ag-main">
