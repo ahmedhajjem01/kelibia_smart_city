@@ -203,12 +203,12 @@ export default function AgentDashboardPage() {
   const [showAddServiceModal, setShowAddServiceModal] = useState(false)
   const [editingService, setEditingService] = useState<any | null>(null)
   const [editServiceSaving, setEditServiceSaving] = useState(false)
-  const [translatingField, setTranslatingField] = useState<string | null>(null)
   
   // Service editing extras
   const [serviceReqs, setServiceReqs] = useState<any[]>([])
   const [servicePdfAr, setServicePdfAr] = useState<File | null>(null)
   const [servicePdfFr, setServicePdfFr] = useState<File | null>(null)
+  const [magicServiceText, setMagicServiceText] = useState('')
 
   // ── Demandes Citoyens tab ──
   const [allDemandes, setAllDemandes] = useState<any[]>([])
@@ -275,35 +275,19 @@ export default function AgentDashboardPage() {
   async function fetchCategoriesAndServices() {
     setLoadingServicesTab(true)
     try {
-      const res = await fetch('/api/services/list/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } })
       if (res.ok) {
-        const data = await res.json()
-        const cats: any[] = []
+        const cats = await res.json()
+        setAllCategories(cats)
+        // Flatten services for easy listing
         const svcs: any[] = []
-        data.forEach((c: any) => {
-          cats.push({ id: c.id, name_fr: c.name_fr, name_ar: c.name_ar })
-          c.services.forEach((s: any) => { svcs.push({ ...s, category_id: c.id, category_name: c.name_fr }) })
+        cats.forEach((c: any) => {
+          (c.services || []).forEach((s: any) => svcs.push({ ...s, category_name: c.name_fr, category_id: c.id }))
         })
-        setAllCategories(cats); setAllServices(svcs)
+        setAllServices(svcs)
       }
-    } catch { showToast('Erreur chargement services', 'error') }
+    } catch (e) { console.error(e) }
     finally { setLoadingServicesTab(false) }
-  }
-
-  async function handleAutoTranslate(text: string, callback: (translated: string) => void, fieldKey: string) {
-    if (!text?.trim()) return
-    setTranslatingField(fieldKey)
-    try {
-      const res = await fetch('/api/services/list/translate/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
-        body: JSON.stringify({ text })
-      })
-      const data = await res.json()
-      if (res.ok && data.translated) callback(data.translated)
-      else if (data.error) showToast('Erreur traduction.', 'error')
-    } catch { showToast('Erreur réseau traduction.', 'error') }
-    finally { setTranslatingField(null) }
   }
 
   async function fetchMlStats() {
@@ -2226,34 +2210,34 @@ export default function AgentDashboardPage() {
                <button className="btn-close btn-close-white" onClick={() => setShowAddUserModal(false)}></button>
              </div>
              <form className="p-4" onSubmit={async (e) => {
-               e.preventDefault();
-               const fd = new FormData(e.currentTarget);
-               const data = Object.fromEntries(fd.entries());
-               try {
-                 const res = await fetch('/api/accounts/admin-create/', {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
-                   body: JSON.stringify(data)
-                 });
-                 if (res.ok) { showToast('Utilisateur créé !'); setShowAddUserModal(false); fetchManagedUsers('all') }
-                 else { const err = await res.json(); showToast(err.error || 'Erreur', 'error') }
-               } catch { showToast('Erreur réseau', 'error') }
-             }}>
-               <div className="mb-3"><label className="form-label small fw-bold">Nom d'utilisateur</label><input className="form-control" name="username" required placeholder="ex: agent_kcl" /></div>
-               <div className="mb-3"><label className="form-label small fw-bold">Email</label><input className="form-control" name="email" type="email" required placeholder="agent@kelibia.tn" /></div>
-               <div className="mb-3"><label className="form-label small fw-bold">Mot de passe</label><input className="form-control" name="password" type="password" required placeholder="••••••••" /></div>
-               <div className="mb-3">
-                 <label className="form-label small fw-bold">Type de compte</label>
-                 <select className="form-select" name="user_type" defaultValue="agent">
-                   <option value="agent">Agent Municipal</option>
-                   <option value="supervisor">Superviseur (Superuser)</option>
-                 </select>
-               </div>
-               <div className="d-grid"><button className="btn btn-dark" type="submit">Créer le compte</button></div>
-             </form>
-           </div>
-         </div>
-       )}
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const data = Object.fromEntries(fd.entries());
+                try {
+                  const res = await fetch('/api/accounts/admin-create/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+                    body: JSON.stringify(data)
+                  });
+                  if (res.ok) { showToast('Utilisateur créé !'); setShowAddUserModal(false); fetchManagedUsers('all') }
+                  else { const err = await res.json(); showToast(err.error || 'Erreur', 'error') }
+                } catch { showToast('Erreur réseau', 'error') }
+              }}>
+                <div className="mb-3"><label className="form-label small fw-bold">Nom d'utilisateur</label><input className="form-control" name="username" required placeholder="ex: agent_kcl" /></div>
+                <div className="mb-3"><label className="form-label small fw-bold">Email</label><input className="form-control" name="email" type="email" required placeholder="agent@kelibia.tn" /></div>
+                <div className="mb-3"><label className="form-label small fw-bold">Mot de passe</label><input className="form-control" name="password" type="password" required placeholder="••••••••" /></div>
+                <div className="mb-3">
+                  <label className="form-label small fw-bold">Type de compte</label>
+                  <select className="form-select" name="user_type" defaultValue="agent">
+                    <option value="agent">Agent Municipal</option>
+                    <option value="supervisor">Superviseur (Superuser)</option>
+                  </select>
+                </div>
+                <div className="d-grid"><button className="btn btn-dark" type="submit">Créer le compte</button></div>
+              </form>
+            </div>
+          </div>
+        )}
 
        {/* MODAL: ADD SERVICE */}
        {showAddServiceModal && (
@@ -2261,17 +2245,74 @@ export default function AgentDashboardPage() {
            <div className="bg-white rounded-3 shadow-lg overflow-hidden animate__animated animate__zoomIn" style={{ width: '100%', maxWidth: '650px', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}>
              <div className="p-3 text-white d-flex justify-content-between align-items-center" style={{ background: editingService ? 'linear-gradient(90deg,#003366,#004080)' : 'linear-gradient(90deg,#1e3c72,#2a5298)' }}>
                <h6 className="mb-0 fw-bold"><i className={`fas ${editingService ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>{editingService ? `Modifier : ${editingService.name_fr}` : 'Nouveau Service Municipal'}</h6>
-               <button className="btn-close btn-close-white" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); setServicePdfAr(null); setServicePdfFr(null); }}></button>
+               <button className="btn-close btn-close-white" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); setServicePdfAr(null); setServicePdfFr(null); setMagicServiceText(''); }}></button>
              </div>
-             <form className="p-4 overflow-auto" style={{ flex: 1 }} onSubmit={async (e) => {
+             
+             {/* Assistant de Saisie Rapide (Magic Input) */}
+             <div className="p-3 border-bottom" style={{ background: '#f0f4f8' }}>
+                <div className="d-flex gap-2 align-items-end">
+                   <div className="flex-fill">
+                      <label className="small fw-bold text-primary mb-1"><i className="fas fa-magic me-1"></i>Saisie Rapide (Optionnel)</label>
+                      <textarea 
+                        className="form-control form-control-sm" 
+                        rows={2} 
+                        placeholder="Ex: Demande de parking, 3 jours, catégorie Urbanisme, papiers: CIN, Photo, Certificat"
+                        value={magicServiceText}
+                        onChange={e => setMagicServiceText(e.target.value)}
+                      />
+                   </div>
+                   <button type="button" className="btn btn-primary btn-sm px-3 shadow-sm" style={{ height: '38px', fontWeight: 700 }}
+                    onClick={() => {
+                      const text = magicServiceText.trim(); if (!text) return;
+                      
+                      const name = text.split(',')[0].replace(/Nom:\s*/i, '').trim();
+                      const delayMatch = text.match(/([0-9]+\s*(?:jours?|semaines?|mois?))/i);
+                      const delay = delayMatch ? delayMatch[1] : '';
+                      const foundCat = allCategories.find(c => text.toLowerCase().includes(c.name_fr.toLowerCase()));
+                      const catId = foundCat ? foundCat.id.toString() : '';
+                      
+                      let reqs: any[] = [];
+                      const reqPart = (text.match(/(?:papiers?|documents?|reqs?):\s*(.+)$/i) || [])[1];
+                      if (reqPart) {
+                        reqs = reqPart.split(/,|et|;/).map(r => r.trim()).filter(Boolean)
+                          .map(r => ({ name_fr: r, name_ar: r, is_mandatory: true }));
+                      }
+
+                      const form = document.getElementById('service-form') as HTMLFormElement;
+                      if (form) {
+                        (form.querySelector('[name=name_fr]') as HTMLInputElement).value = name;
+                        (form.querySelector('[name=name_ar]') as HTMLInputElement).value = name;
+                        (form.querySelector('[name=processing_time]') as HTMLInputElement).value = delay;
+                        if (catId) (form.querySelector('[name=category]') as HTMLSelectElement).value = catId;
+                        if (reqs.length > 0) setServiceReqs(reqs);
+                        showToast('Magic filling done! ✨');
+                      }
+                    }}>Remplir</button>
+                </div>
+             </div>
+
+             <form id="service-form" className="p-4 overflow-auto" style={{ flex: 1 }} onSubmit={async (e) => {
                e.preventDefault();
                setEditServiceSaving(true)
                const formData = new FormData(e.currentTarget);
                
+               // The backend expects requirements as a nested list. 
+               // Depending on the backend setup, we might need a single JSON field or multiple.
+               // Let's assume we can send a JSON string for the requirements if parsed correctly or just use traditional POST.
+               // Actually, for multipart/form-data, DRF nested serializers can be tricky. 
+               // We'll append each field manually to be safe.
+
                try {
                  const url = editingService ? `/api/services/list/${editingService.id}/` : '/api/services/list/';
                  const method = editingService ? 'PATCH' : 'POST';
                  
+                 // If we have requirements, we need to handle them. 
+                 // Since we're using Multipart, we can't easily nest. 
+                 // We will send the requirements as a JSON string and the backend will need to handles it.
+                 // Actually, a better way for files + nested is to send everything as nested but DRF requires JSON for that.
+                 // We will use the common pattern: send files if any, and other data.
+                 
+                 // Create a clean FormData for submission
                  const finalFd = new FormData();
                  finalFd.append('category', formData.get('category') as string);
                  finalFd.append('name_fr', formData.get('name_fr') as string);
@@ -2283,6 +2324,9 @@ export default function AgentDashboardPage() {
                  if (servicePdfAr) finalFd.append('form_pdf_ar', servicePdfAr);
                  if (servicePdfFr) finalFd.append('form_pdf_fr', servicePdfFr);
                  
+                 // Send requirements as structured data if needed. 
+                 // But await, our backend update() expects requirements as a list.
+                 // DRF can parse requirements[0]name_fr etc.
                  serviceReqs.forEach((req, idx) => {
                     finalFd.append(`requirements[${idx}]name_fr`, req.name_fr);
                     finalFd.append(`requirements[${idx}]name_ar`, req.name_ar);
@@ -2322,47 +2366,23 @@ export default function AgentDashboardPage() {
                    <input className="form-control" name="processing_time" placeholder="ex: 2 jours à 1 semaine" defaultValue={editingService?.processing_time || ''} />
                  </div>
                  
-                 <div className="col-md-12">
-                    <div className="row g-2">
-                       <div className="col-md-6">
-                          <label className="form-label small fw-bold">Nom du service (FR)</label>
-                          <div className="input-group input-group-sm">
-                             <input className="form-control" name="name_fr" id="srv-name-fr" required defaultValue={editingService?.name_fr || ''} />
-                             <button type="button" className="btn btn-outline-primary" 
-                                onClick={() => {
-                                   const fr = (document.getElementById('srv-name-fr') as HTMLInputElement).value;
-                                   handleAutoTranslate(fr, (tr) => { (document.getElementById('srv-name-ar') as HTMLInputElement).value = tr; }, 'name');
-                                }} disabled={translatingField === 'name'}>
-                                {translatingField === 'name' ? <span className="spinner-border spinner-border-sm"></span> : <><i className="fas fa-magic me-1"></i> Traduire</>}
-                             </button>
-                          </div>
-                       </div>
-                       <div className="col-md-6">
-                          <label className="form-label small fw-bold" dir="rtl">اسم الخدمة (عربي)</label>
-                          <input className="form-control form-control-sm" name="name_ar" id="srv-name-ar" dir="rtl" required defaultValue={editingService?.name_ar || ''} />
-                       </div>
-                    </div>
-                  </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold">Nom du service (FR)</label>
+                   <input className="form-control" name="name_fr" required defaultValue={editingService?.name_fr || ''} />
+                 </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold" dir="rtl">اسم الخدمة (عربي)</label>
+                   <input className="form-control" name="name_ar" dir="rtl" required defaultValue={editingService?.name_ar || ''} />
+                 </div>
 
-                  <div className="col-md-12">
-                     <div className="row g-2">
-                        <div className="col-md-6">
-                           <label className="form-label small fw-bold">Description (FR)</label>
-                           <textarea className="form-control" name="description_fr" id="srv-desc-fr" rows={2} style={{ fontSize: '13px' }} defaultValue={editingService?.description_fr || ''}></textarea>
-                           <button type="button" className="btn btn-link btn-sm p-0 text-decoration-none mt-1" 
-                              onClick={() => {
-                                 const fr = (document.getElementById('srv-desc-fr') as HTMLTextAreaElement).value;
-                                 handleAutoTranslate(fr, (tr) => { (document.getElementById('srv-desc-ar') as HTMLTextAreaElement).value = tr; }, 'desc');
-                              }} style={{ fontSize: '11px' }} disabled={translatingField === 'desc'}>
-                              {translatingField === 'desc' ? 'Traduction...' : '✨ Traduire la description en Arabe'}
-                           </button>
-                        </div>
-                        <div className="col-md-6">
-                           <label className="form-label small fw-bold" dir="rtl">وصف الخدمة (عربي)</label>
-                           <textarea className="form-control" name="description_ar" id="srv-desc-ar" rows={2} dir="rtl" style={{ fontSize: '13px' }} defaultValue={editingService?.description_ar || ''}></textarea>
-                        </div>
-                     </div>
-                  </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold">Description (FR)</label>
+                   <textarea className="form-control" name="description_fr" rows={2} defaultValue={editingService?.description_fr || ''}></textarea>
+                 </div>
+                 <div className="col-md-6">
+                   <label className="form-label small fw-bold" dir="rtl">وصف الخدمة (عربي)</label>
+                   <textarea className="form-control" name="description_ar" rows={2} dir="rtl" defaultValue={editingService?.description_ar || ''}></textarea>
+                 </div>
 
                  {/* Requirements Section */}
                  <div className="col-12 mt-3">
@@ -2377,10 +2397,6 @@ export default function AgentDashboardPage() {
                           serviceReqs.map((req, idx) => (
                              <div key={idx} className="p-2 border-bottom d-flex gap-2 align-items-center">
                                 <input className="form-control form-control-sm" placeholder="Nom FR" value={req.name_fr} onChange={e => { const n = [...serviceReqs]; n[idx].name_fr = e.target.value; setServiceReqs(n); }} />
-                                <button type="button" className="btn btn-sm btn-outline-secondary py-0 px-1" title="Traduire" 
-                                    onClick={() => handleAutoTranslate(req.name_fr, (tr) => { const n = [...serviceReqs]; n[idx].name_ar = tr; setServiceReqs(n); }, `req-${idx}`)}>
-                                    {translatingField === `req-${idx}` ? '...' : <i className="fas fa-magic" style={{ fontSize: '10px' }}></i>}
-                                 </button>
                                 <input className="form-control form-control-sm" dir="rtl" placeholder="اسم بالعربي" value={req.name_ar} onChange={e => { const n = [...serviceReqs]; n[idx].name_ar = e.target.value; setServiceReqs(n); }} />
                                 <div className="form-check form-switch flex-shrink-0">
                                    <input className="form-check-input" type="checkbox" checked={req.is_mandatory} onChange={e => { const n = [...serviceReqs]; n[idx].is_mandatory = e.target.checked; setServiceReqs(n); }} />
