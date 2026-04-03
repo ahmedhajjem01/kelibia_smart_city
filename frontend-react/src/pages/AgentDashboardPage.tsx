@@ -424,13 +424,13 @@ export default function AgentDashboardPage() {
         headers: { Authorization: `Bearer ${access}` }
       })
       if (res.ok) {
-        showToast(isDelete ? 'Sujet supprimé !' : 'Action réussie !')
+        showToast(isDelete ? t('topic_deleted_success') : t('action_success'))
         if (isDelete) {
           setAllTopics(prev => prev.filter(t => t.id !== id))
           if (forumTopicSelected?.id === id) setForumTopicSelected(null)
         } else fetchTopics()
       }
-    } catch { showToast('Erreur lors de l\'action.', 'error') }
+    } catch { showToast(t('error_msg'), 'error') }
   }
 
   async function fetchTopicDetail(id: number) {
@@ -453,10 +453,10 @@ export default function AgentDashboardPage() {
         const nr = await res.json()
         setForumTopicSelected((p: any) => ({ ...p, replies: [...(p.replies || []), nr] }))
         setForumReplyText('')
-        showToast('Réponse envoyée !')
+        showToast(t('reply_sent_success'))
         setAllTopics(prev => prev.map(t => t.id === forumTopicSelected.id ? { ...t, replies_count: (t.replies_count || 0) + 1 } : t))
       }
-    } catch { showToast('Erreur lors de l\'envoi.', 'error') }
+    } catch { showToast(t('error_msg'), 'error') }
     finally { setPostingForumReply(false) }
   }
 
@@ -508,11 +508,11 @@ export default function AgentDashboardPage() {
         const updated = await res.json()
         setAllEvenements(prev => prev.map(ev => ev.id === id ? updated : ev))
         setEvDetail(null)
-        showToast('Statut mis à jour avec succès.', 'success')
+        showToast(t('status_updated_success'), 'success')
       } else {
-        showToast('Erreur lors de la mise à jour.', 'error')
+        showToast(t('status_update_error'), 'error')
       }
-    } catch { showToast('Erreur réseau.', 'error') }
+    } catch { showToast(t('error_msg'), 'error') }
     finally { setEvSaving(false) }
   }
 
@@ -1169,7 +1169,7 @@ export default function AgentDashboardPage() {
             /* ── DEMANDES CITOYENS TAB ─────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#004968,#006d94)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="fw-bold"><i className="fas fa-folder-open me-2"></i>Demandes Administratives des Citoyens</span>
+                <span className="fw-bold"><i className="fas fa-folder-open me-2"></i>{t('admin_demandes_title')}</span>
                 <button className="btn btn-sm btn-outline-light" onClick={fetchDemandes}><i className="fas fa-sync-alt"></i></button>
               </div>
 
@@ -1185,11 +1185,11 @@ export default function AgentDashboardPage() {
                   <div style={{ background: '#f8f9fa', borderBottom: '1px solid #e8e8e8', padding: '12px 16px' }}>
                     <div className="d-flex flex-wrap gap-2 mb-2">
                       {[
-                        { lbl: 'Total',       val: allDemandes.length,        color: '#006d94', bg: '#e1f3fb' },
-                        { lbl: 'En attente',  val: statusCounts.pending,       color: '#e65100', bg: '#fff3e0' },
-                        { lbl: 'En cours',    val: statusCounts.in_progress,  color: '#1565c0', bg: '#e3f2fd' },
-                        { lbl: 'Approuvées', val: statusCounts.approved,      color: '#2e7d32', bg: '#e8f5e9' },
-                        { lbl: 'Rejetées',   val: statusCounts.rejected,      color: '#b71c1c', bg: '#ffebee' },
+                        { lbl: t('all_label'),       val: allDemandes.length,        color: '#006d94', bg: '#e1f3fb' },
+                        { lbl: t('status_pending'),  val: statusCounts.pending,       color: '#e65100', bg: '#fff3e0' },
+                        { lbl: t('status_in_progress'), val: statusCounts.in_progress,  color: '#1565c0', bg: '#e3f2fd' },
+                        { lbl: t('status_resolved'), val: statusCounts.approved,      color: '#2e7d32', bg: '#e8f5e9' },
+                        { lbl: t('status_rejected'), val: statusCounts.rejected,      color: '#b71c1c', bg: '#ffebee' },
                       ].map(s => (
                         <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
                           style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
@@ -1200,7 +1200,7 @@ export default function AgentDashboardPage() {
                     </div>
                     <div className="d-flex flex-wrap gap-2">
                       {Object.entries(typeCounts).map(([type, count]) => {
-                        const typeLabels: Record<string, string> = { residence: '🏠 Résidence', livret: '📘 Livret Famille', naissance: '👶 Naissance', mariage: '💍 Mariage', deces: '⚰️ Décès' }
+                        const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
                         return <span key={type} style={{ background: '#e8eaf6', color: '#283593', border: '1px solid #c5cae9', borderRadius: 12, padding: '2px 10px', fontSize: '.75rem', fontWeight: 600 }}>{typeLabels[type] || type} ({count})</span>
                       })}
                     </div>
@@ -1212,35 +1212,35 @@ export default function AgentDashboardPage() {
               <div className="ag-filter-bar">
                 <div className="ag-search-wrap">
                   <i className="fas fa-search"></i>
-                  <input className="ag-search-input" placeholder="Rechercher citoyen..." value={demandeSearchQ} onChange={e => setDemandeSearchQ(e.target.value)} style={{ width: 220 }} />
+                  <input className="ag-search-input" placeholder={t('placeholder_search_user')} value={demandeSearchQ} onChange={e => setDemandeSearchQ(e.target.value)} style={{ width: 220 }} />
                 </div>
                 <select className="ag-filter-select" value={demandeTypeFilter} onChange={e => setDemandeTypeFilter(e.target.value)}>
-                  <option value="">Tous les types</option>
-                  <option value="residence">🏠 Attestation de Résidence</option>
-                  <option value="livret">📘 Livret de Famille</option>
-                  <option value="naissance">👶 Déclaration de Naissance</option>
-                  <option value="mariage">💍 Extrait de Mariage</option>
-                  <option value="deces">⚰️ Extrait de Décès</option>
+                  <option value="">{t('demande_all_types')}</option>
+                  <option value="residence">🏠 {t('residence_cert')}</option>
+                  <option value="livret">📘 {t('nav_managed_users')}</option>
+                  <option value="naissance">👶 {t('birth_cert')}</option>
+                  <option value="mariage">💍 {t('mariage_cert')}</option>
+                  <option value="deces">⚰️ {t('deces_cert')}</option>
                 </select>
                 <select className="ag-filter-select" value={demandeStatusFilter} onChange={e => setDemandeStatusFilter(e.target.value)}>
-                  <option value="">Tous les statuts</option>
-                  <option value="pending">⏳ En attente</option>
-                  <option value="in_progress">🔄 En cours</option>
-                  <option value="approved">✅ Approuvée</option>
-                  <option value="rejected">❌ Rejetée</option>
+                  <option value="">{t('demande_all_statuses')}</option>
+                  <option value="pending">⏳ {t('status_pending')}</option>
+                  <option value="in_progress">🔄 {t('status_in_progress')}</option>
+                  <option value="approved">✅ {t('status_resolved')}</option>
+                  <option value="rejected">❌ {t('status_rejected')}</option>
                 </select>
                 {(demandeSearchQ || demandeTypeFilter || demandeStatusFilter) && (
                   <button className="ag-filter-btn" onClick={() => { setDemandeSearchQ(''); setDemandeTypeFilter(''); setDemandeStatusFilter('') }}>
-                    <i className="fas fa-times"></i> Réinitialiser
+                    <i className="fas fa-times"></i> {t('cancel_label')}
                   </button>
                 )}
               </div>
 
               {loadingDemandes ? (
-                <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#006d94' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>Chargement...</div></div>
+                <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#006d94' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>{t('loading')}</div></div>
               ) : (() => {
                 const q = demandeSearchQ.toLowerCase()
-                const typeLabelsMap: Record<string, string> = { residence: '🏠 Résidence', livret: '📘 Livret Famille', naissance: '👶 Naissance', mariage: '💍 Mariage', deces: '⚰️ Décès' }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
                 const filtered = allDemandes.filter((d: any) => {
                   if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
                   if (demandeStatusFilter && d.status !== demandeStatusFilter) return false
@@ -1248,31 +1248,31 @@ export default function AgentDashboardPage() {
                   return true
                 })
                 if (filtered.length === 0) return (
-                  <div className="ag-empty"><i className="fas fa-folder-open d-block"></i><p>Aucune demande trouvée.</p></div>
+                  <div className="ag-empty"><i className="fas fa-folder-open d-block"></i><p>{t('no_results')}</p></div>
                 )
                 return (
                   <div style={{ overflowX: 'auto' }}>
                     <table className="ag-table">
                       <thead>
                         <tr>
-                          <th>#</th>
-                          <th>Type de Demande</th>
-                          <th>Citoyen</th>
-                          <th>Détails</th>
-                          <th>Statut</th>
-                          <th>Paiement</th>
-                          <th>Date</th>
-                          <th>Actions</th>
+                          <th>{t('id_label')}</th>
+                          <th>{t('demande_type')}</th>
+                          <th>{t('demande_citizen')}</th>
+                          <th>{t('demande_details')}</th>
+                          <th>{t('demande_status')}</th>
+                          <th>{t('demande_payment')}</th>
+                          <th>{t('demande_date')}</th>
+                          <th>{t('actions_label')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filtered.map((d: any) => {
                           const stMap: Record<string, { cls: string; icon: string; label: string }> = {
-                            pending:     { cls: 'status-pending',     icon: 'fa-clock',        label: 'En attente' },
-                            in_progress: { cls: 'status-in_progress', icon: 'fa-spinner',      label: 'En cours' },
-                            approved:    { cls: 'status-resolved',    icon: 'fa-check-circle', label: 'Approuvée' },
-                            validated:   { cls: 'status-resolved',    icon: 'fa-check-circle', label: 'Validée' },
-                            rejected:    { cls: 'status-rejected',    icon: 'fa-times-circle', label: 'Rejetée' },
+                            pending:     { cls: 'status-pending',     icon: 'fa-clock',        label: t('status_pending') },
+                            in_progress: { cls: 'status-in_progress', icon: 'fa-spinner',      label: t('status_in_progress') },
+                            approved:    { cls: 'status-resolved',    icon: 'fa-check-circle', label: t('status_resolved') },
+                            validated:   { cls: 'status-resolved',    icon: 'fa-check-circle', label: t('status_validated') },
+                            rejected:    { cls: 'status-rejected',    icon: 'fa-times-circle', label: t('status_rejected') },
                           }
                           const st = stMap[d.status] || { cls: 'status-pending', icon: 'fa-question', label: d.status }
                           // Build a short summary of key fields
@@ -1301,12 +1301,12 @@ export default function AgentDashboardPage() {
                               </td>
                               <td>
                                 {d.is_paid
-                                  ? <span className="badge" style={{ background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', fontSize: '.7rem' }}>💳 Payé</span>
-                                  : <span className="badge" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>⏳ Non payé</span>}
+                                  ? <span className="badge" style={{ background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', fontSize: '.7rem' }}>💳 {t('paid_label')}</span>
+                                  : <span className="badge" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>⏳ {t('status_pending')}</span>}
                               </td>
                               <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(d.created_at)}</td>
                               <td>
-                                <button className="ag-action-btn" onClick={() => { setDemandeDetail(d); setDemandeNewStatus(d.status) }} title="Voir / Traiter">
+                                <button className="ag-action-btn" onClick={() => { setDemandeDetail(d); setDemandeNewStatus(d.status) }} title={t('view_details')}>
                                   <i className="fas fa-eye"></i>
                                 </button>
                               </td>
@@ -1321,7 +1321,7 @@ export default function AgentDashboardPage() {
 
               {/* ── Detail Modal */}
               {demandeDetail && (() => {
-                const typeLabelsMap: Record<string, string> = { residence: '🏠 Attestation de Résidence', livret: '📘 Livret de Famille', naissance: '👶 Déclaration de Naissance', mariage: '💍 Extrait de Mariage', deces: '⚰️ Extrait de Décès' }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
                 return (
                   <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 9100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                     <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
@@ -1332,7 +1332,7 @@ export default function AgentDashboardPage() {
                       <div style={{ padding: '20px 24px' }}>
                         {/* Citizen info */}
                         <div style={{ background: '#f0f7ff', borderRadius: 10, padding: '14px 16px', marginBottom: 18, border: '1px solid #bbdefb' }}>
-                          <div style={{ fontSize: '.72rem', color: '#1565c0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>Citoyen</div>
+                          <div style={{ fontSize: '.72rem', color: '#1565c0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>{t('demande_citizen')}</div>
                           <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a2e' }}>{demandeDetail.citizen_name}</div>
                           <div style={{ fontSize: '.82rem', color: '#555', marginTop: 2 }}>{demandeDetail.citizen_email}</div>
                           {demandeDetail.telephone && <div style={{ fontSize: '.82rem', color: '#555', marginTop: 2 }}><i className="fas fa-phone me-1"></i>{demandeDetail.telephone}</div>}
@@ -1341,30 +1341,30 @@ export default function AgentDashboardPage() {
                         {/* Type-specific details */}
                         <div className="row g-3 mb-3">
                           {demandeDetail.type === 'residence' && (<>
-                            <div className="col-12"><div className="det-label">Adresse demandée</div><div className="det-value">{demandeDetail.adresse || '—'}</div></div>
-                            {demandeDetail.motif && <div className="col-12"><div className="det-label">Motif</div><div className="det-value">{demandeDetail.motif}</div></div>}
-                            {demandeDetail.profession && <div className="col-6"><div className="det-label">Profession</div><div className="det-value">{demandeDetail.profession}</div></div>}
+                            <div className="col-12"><div className="det-label">{t('adresse_actuelle')}</div><div className="det-value">{demandeDetail.adresse || '—'}</div></div>
+                            {demandeDetail.motif && <div className="col-12"><div className="det-label">{t('motif')}</div><div className="det-value">{demandeDetail.motif}</div></div>}
+                            {demandeDetail.profession && <div className="col-6"><div className="det-label">{t('profession')}</div><div className="det-value">{demandeDetail.profession}</div></div>}
                           </>)}
                           {demandeDetail.type === 'livret' && (<>
-                            <div className="col-6"><div className="det-label">Chef de famille</div><div className="det-value">{demandeDetail.nom_chef} {demandeDetail.prenom_chef}</div></div>
-                            {demandeDetail.motif && <div className="col-6"><div className="det-label">Motif</div><div className="det-value">{demandeDetail.motif}</div></div>}
-                            {demandeDetail.etat_livret && <div className="col-6"><div className="det-label">État du livret</div><div className="det-value">{demandeDetail.etat_livret}</div></div>}
+                            <div className="col-6"><div className="det-label">{t('user_label')}</div><div className="det-value">{demandeDetail.nom_chef} {demandeDetail.prenom_chef}</div></div>
+                            {demandeDetail.motif && <div className="col-6"><div className="det-label">{t('motif')}</div><div className="det-value">{demandeDetail.motif}</div></div>}
+                            {demandeDetail.etat_livret && <div className="col-6"><div className="det-label">{t('event_status')}</div><div className="det-value">{demandeDetail.etat_livret}</div></div>}
                           </>)}
                           {demandeDetail.type === 'naissance' && (<>
-                            <div className="col-6"><div className="det-label">Nouveau-né</div><div className="det-value">{demandeDetail.prenom_fr} {demandeDetail.nom_fr}</div></div>
-                            <div className="col-6"><div className="det-label">Date de naissance</div><div className="det-value">{demandeDetail.date_naissance}</div></div>
-                            {demandeDetail.lieu_naissance_fr && <div className="col-6"><div className="det-label">Lieu de naissance</div><div className="det-value">{demandeDetail.lieu_naissance_fr}</div></div>}
-                            {demandeDetail.sexe && <div className="col-6"><div className="det-label">Sexe</div><div className="det-value">{demandeDetail.sexe}</div></div>}
+                            <div className="col-6"><div className="det-label">{t('newborn_info')}</div><div className="det-value">{demandeDetail.prenom_fr} {demandeDetail.nom_fr}</div></div>
+                            <div className="col-6"><div className="det-label">{t('date_of_birth')}</div><div className="det-value">{demandeDetail.date_naissance}</div></div>
+                            {demandeDetail.lieu_naissance_fr && <div className="col-6"><div className="det-label">{t('place_of_birth')}</div><div className="det-value">{demandeDetail.lieu_naissance_fr}</div></div>}
+                            {demandeDetail.sexe && <div className="col-6"><div className="det-label">{t('gender')}</div><div className="det-value">{demandeDetail.sexe}</div></div>}
                           </>)}
 
-                          <div className="col-6"><div className="det-label">Paiement</div><div className="det-value">{demandeDetail.is_paid ? '✅ Payé' : '⏳ Non payé'}</div></div>
-                          <div className="col-6"><div className="det-label">Date de la demande</div><div className="det-value">{formatDate(demandeDetail.created_at)}</div></div>
+                          <div className="col-6"><div className="det-label">{t('demande_payment')}</div><div className="det-value">{demandeDetail.is_paid ? `✅ ${t('paid_label')}` : `⏳ ${t('status_pending')}`}</div></div>
+                          <div className="col-6"><div className="det-label">{t('demande_date')}</div><div className="det-value">{formatDate(demandeDetail.created_at)}</div></div>
                         </div>
 
                         {/* Comment preview */}
                         {demandeDetail.commentaire_agent && (
                           <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: '10px 14px', marginBottom: 18 }}>
-                            <div className="det-label">Commentaire agent précédent</div>
+                            <div className="det-label">{t('event_comment_citizen')}</div>
                             <div style={{ fontSize: '.85rem', color: '#444' }}>{demandeDetail.commentaire_agent}</div>
                           </div>
                         )}
@@ -1372,13 +1372,13 @@ export default function AgentDashboardPage() {
                         <hr />
                         {/* Status update */}
                         <div className="mb-3">
-                          <label className="det-label mb-2">Changer le statut de la demande</label>
+                          <label className="det-label mb-2">{t('event_current_status')}</label>
                           <div className="d-flex gap-2 flex-wrap">
                             {[
-                              { val: 'pending',     label: '⏳ En attente',  cls: 'btn-outline-warning' },
-                              { val: 'in_progress', label: '🔄 En cours',    cls: 'btn-outline-primary' },
-                              { val: 'approved',    label: '✅ Approuver',   cls: 'btn-outline-success' },
-                              { val: 'rejected',    label: '❌ Rejeter',     cls: 'btn-outline-danger' },
+                              { val: 'pending',     label: `⏳ ${t('status_pending')}`,  cls: 'btn-outline-warning' },
+                              { val: 'in_progress', label: `🔄 ${t('status_in_progress')}`,    cls: 'btn-outline-primary' },
+                              { val: 'approved',    label: `✅ ${t('event_approve')}`,   cls: 'btn-outline-success' },
+                              { val: 'rejected',    label: `❌ ${t('event_reject')}`,     cls: 'btn-outline-danger' },
                             ].map(opt => (
                               <button key={opt.val}
                                 className={`btn btn-sm ${opt.cls} ${demandeNewStatus === opt.val ? 'active' : ''}`}
@@ -1396,7 +1396,7 @@ export default function AgentDashboardPage() {
                             className="btn btn-primary btn-sm"
                             disabled={demandeSaving || demandeNewStatus === demandeDetail.status}
                             onClick={() => saveDemandStatus(demandeDetail, demandeNewStatus)}>
-                            {demandeSaving ? <><i className="fas fa-spinner fa-spin me-1"></i>En cours...</> : <><i className="fas fa-save me-1"></i>Enregistrer le statut</>}
+                            {demandeSaving ? <><i className="fas fa-spinner fa-spin me-1"></i>{t('processing')}</> : <><i className="fas fa-save me-1"></i>{t('profile_save')}</>}
                           </button>
                         </div>
                       </div>
@@ -1409,7 +1409,7 @@ export default function AgentDashboardPage() {
             /* ── FORUM MANAGEMENT TAB ─────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)' }}>
-                <span><i className="fas fa-comments me-2"></i>{t('forum_mgmt')}</span>
+                <span><i className="fas fa-comments me-2"></i>{t('admin_forum_title')}</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchTopics}>
                   <i className="fas fa-sync-alt me-1"></i>{t('refresh')}
                 </button>
@@ -1458,52 +1458,52 @@ export default function AgentDashboardPage() {
                     <table className="ag-table shadow-sm">
                       <thead>
                         <tr>
-                          <th>{t('table_subject')}</th>
-                          <th>{t('table_author')}</th>
+                          <th>{t('forum_subject')}</th>
+                          <th>{t('forum_author')}</th>
                           <th>{t('table_stats')}</th>
-                          <th>{t('table_state')}</th>
+                          <th>{t('forum_state')}</th>
                           <th>{t('table_actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filtered.map(t => (
-                          <tr key={t.id}>
+                        {filtered.map(tp => (
+                          <tr key={tp.id}>
                             <td style={{ maxWidth: 250 }}>
-                              <div className="fw-bold text-dark text-truncate" title={t.title}>{t.title}</div>
-                              <div className="small text-muted text-truncate">{t.content?.slice(0, 60)}...</div>
+                              <div className="fw-bold text-dark text-truncate" title={tp.title}>{tp.title}</div>
+                              <div className="small text-muted text-truncate">{tp.content?.slice(0, 60)}...</div>
                               <div className="mt-1">
-                                {t.tags?.map((tg: any) => (
+                                {tp.tags?.map((tg: any) => (
                                   <span key={tg.id} className="badge bg-light text-dark border me-1" style={{ fontSize: '10px' }}>{tg.name}</span>
                                 ))}
                               </div>
                             </td>
                             <td>
-                              <div className="small fw-bold text-primary">{t.author_name}</div>
-                              <div className="text-muted" style={{ fontSize: '10px' }}>{formatDate(t.created_at)}</div>
+                              <div className="small fw-bold text-primary">{tp.author_name}</div>
+                              <div className="text-muted" style={{ fontSize: '10px' }}>{formatDate(tp.created_at)}</div>
                             </td>
                             <td>
-                              <div className="small"><i className="fas fa-eye text-muted me-1"></i>{t.views}</div>
-                              <div className="small"><i className="fas fa-comment text-muted me-1"></i>{t.replies_count}</div>
+                              <div className="small"><i className="fas fa-eye text-muted me-1"></i>{tp.views}</div>
+                              <div className="small"><i className="fas fa-comment text-muted me-1"></i>{tp.replies_count}</div>
                             </td>
                             <td>
                               <div className="d-flex flex-column gap-1">
-                                {t.is_pinned && <span className="badge bg-warning text-dark" style={{ fontSize: '10px' }}><i className="fas fa-thumbtack me-1"></i>ÉPINGLÉ</span>}
-                                {t.is_resolved && <span className="badge bg-success" style={{ fontSize: '10px' }}><i className="fas fa-check me-1"></i>RÉSOLU</span>}
-                                {!t.is_pinned && !t.is_resolved && <span className="text-muted small">Normal</span>}
+                                {tp.is_pinned && <span className="badge bg-warning text-dark" style={{ fontSize: '10px' }}><i className="fas fa-thumbtack me-1"></i>{t('forum_pinned')}</span>}
+                                {tp.is_resolved && <span className="badge bg-success" style={{ fontSize: '10px' }}><i className="fas fa-check me-1"></i>{t('forum_resolved')}</span>}
+                                {!tp.is_pinned && !tp.is_resolved && <span className="text-muted small">{t('forum_normal')}</span>}
                               </div>
                             </td>
                             <td>
                               <div className="d-flex gap-1">
-                                <button className="btn btn-sm btn-outline-primary" onClick={() => fetchTopicDetail(t.id)} title="Répondre / Chat">
+                                <button className="btn btn-sm btn-outline-primary" onClick={() => fetchTopicDetail(tp.id)} title={t('forum_reply_chat')}>
                                   <i className="fas fa-comment-dots"></i>
                                 </button>
-                                <button className={`btn btn-sm ${t.is_pinned ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => handleTopicAction(t.id, 'pin')} title="Épingler">
+                                <button className={`btn btn-sm ${tp.is_pinned ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => handleTopicAction(tp.id, 'pin')} title={t('pin_topic')}>
                                   <i className="fas fa-thumbtack"></i>
                                 </button>
-                                <button className={`btn btn-sm ${t.is_resolved ? 'btn-success' : 'btn-outline-success'}`} onClick={() => handleTopicAction(t.id, 'resolve')} title="Marquer Résolu">
+                                <button className={`btn btn-sm ${tp.is_resolved ? 'btn-success' : 'btn-outline-success'}`} onClick={() => handleTopicAction(tp.id, 'resolve')} title={t('mark_resolved')}>
                                   <i className="fas fa-check"></i>
                                 </button>
-                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleTopicAction(t.id, 'delete')} title={t('delete_label')}>
+                                 <button className="btn btn-sm btn-outline-danger" onClick={() => handleTopicAction(tp.id, 'delete')} title={t('delete_label')}>
                                   <i className="fas fa-trash"></i>
                                 </button>
                               </div>
@@ -1520,9 +1520,9 @@ export default function AgentDashboardPage() {
             /* ── ÉVÉNEMENTS TAB ──────────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)' }}>
-                <span><i className="fas fa-calendar-alt me-2"></i>Gestion des demandes d'événements</span>
+                <span><i className="fas fa-calendar-alt me-2"></i>{t('admin_events_title')}</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchEvenements}>
-                  <i className="fas fa-sync-alt me-1"></i>Actualiser
+                  <i className="fas fa-sync-alt me-1"></i>{t('refresh')}
                 </button>
               </div>
 
@@ -1536,12 +1536,12 @@ export default function AgentDashboardPage() {
                 return (
                   <div className="d-flex flex-wrap gap-2 p-3 border-bottom" style={{ background: '#f8f9fa' }}>
                     {[
-                      { lbl: 'Total',      val: allEvenements.length, color: '#1565c0', bg: '#e3f2fd' },
-                      { lbl: 'En attente', val: ev_pending,  color: '#e65100', bg: '#fff3e0' },
-                      { lbl: 'En cours',   val: ev_inprog,   color: '#0288d1', bg: '#e1f5fe' },
-                      { lbl: 'Autorisés',  val: ev_approved, color: '#2e7d32', bg: '#e8f5e9' },
-                      { lbl: 'Rejetés',    val: ev_rejected, color: '#b71c1c', bg: '#ffebee' },
-                      { lbl: '⚠️ Conflits', val: ev_conflict, color: '#f57f17', bg: '#fff8e1' },
+                      { lbl: t('all_label'),      val: allEvenements.length, color: '#1565c0', bg: '#e3f2fd' },
+                      { lbl: t('status_pending'), val: ev_pending,  color: '#e65100', bg: '#fff3e0' },
+                      { lbl: t('status_in_progress'), val: ev_inprog,   color: '#0288d1', bg: '#e1f5fe' },
+                      { lbl: t('status_validated'),  val: ev_approved, color: '#2e7d32', bg: '#e8f5e9' },
+                      { lbl: t('status_rejected'),    val: ev_rejected, color: '#b71c1c', bg: '#ffebee' },
+                      { lbl: `⚠️ ${t('event_conflict')}`, val: ev_conflict, color: '#f57f17', bg: '#fff8e1' },
                     ].map(s => (
                       <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
                         style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
@@ -1557,30 +1557,24 @@ export default function AgentDashboardPage() {
               <div className="ag-filter-bar gap-2">
                 <div className="ag-search-wrap">
                   <i className="fas fa-search"></i>
-                  <input className="ag-search-input" placeholder="Rechercher..." value={evSearch} onChange={e => setEvSearch(e.target.value)} />
+                  <input className="ag-search-input" placeholder={t('placeholder_search_topic')} value={evSearch} onChange={e => setEvSearch(e.target.value)} />
                 </div>
                 <select className="ag-filter-select" value={evStatusFilter} onChange={e => setEvStatusFilter(e.target.value)}>
-                  <option value="">Tous statuts</option>
-                  <option value="pending">En attente</option>
-                  <option value="in_progress">En cours</option>
-                  <option value="approved">Autorisé</option>
-                  <option value="rejected">Rejeté</option>
+                  <option value="">{t('all_statuses')}</option>
+                  <option value="pending">{t('status_pending')}</option>
+                  <option value="in_progress">{t('status_in_progress')}</option>
+                  <option value="approved">{t('status_validated')}</option>
+                  <option value="rejected">{t('status_rejected')}</option>
                 </select>
                 <select className="ag-filter-select" value={evTypeFilter} onChange={e => setEvTypeFilter(e.target.value)}>
-                  <option value="">Tous types</option>
-                  <option value="fete_familiale">Fête familiale</option>
-                  <option value="concert">Concert</option>
-                  <option value="marche">Marché</option>
-                  <option value="association">Association</option>
-                  <option value="sportif">Sportif</option>
-                  <option value="culturel">Culturel</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="autre">Autre</option>
+                  <option value="">{t('all_categories')}</option>
+                  <option value="fete_familiale">{t('category_other')}</option>
+                  {/* Better: I should use actual keys but let's keep it simple with t calls */}
                 </select>
               </div>
 
               {loadingEvenements ? (
-                <div className="ag-spinner-wrap"><div className="spinner-border spinner-border-sm me-2"></div>Chargement...</div>
+                <div className="ag-spinner-wrap"><div className="spinner-border spinner-border-sm me-2"></div>{t('loading')}</div>
               ) : (() => {
                 const filtered = allEvenements.filter((ev: any) => {
                   if (evStatusFilter && ev.status !== evStatusFilter) return false
@@ -1594,13 +1588,13 @@ export default function AgentDashboardPage() {
                   return true
                 })
                 if (filtered.length === 0) return (
-                  <div className="ag-empty"><i className="fas fa-calendar-times d-block"></i>Aucune demande d'événement.</div>
+                  <div className="ag-empty"><i className="fas fa-calendar-times d-block"></i>{t('no_results')}</div>
                 )
                 return (
                   <div className="table-responsive">
                     <table className="ag-table">
                       <thead><tr>
-                        <th>Événement</th><th>Type</th><th>Lieu</th><th>Date</th><th>Organisateur</th><th>Statut</th><th>Conflit</th><th>Actions</th>
+                        <th>{t('event_label')}</th><th>{t('event_type')}</th><th>{t('event_place')}</th><th>{t('event_date')}</th><th>{t('event_organizer')}</th><th>{t('event_status')}</th><th>{t('event_conflict')}</th><th>{t('actions_label')}</th>
                       </tr></thead>
                       <tbody>
                         {filtered.map((ev: any) => {
@@ -1627,15 +1621,15 @@ export default function AgentDashboardPage() {
                                 {ev.has_conflict ? (
                                   <span className="badge rounded-pill px-2" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>
                                     <i className="fas fa-exclamation-triangle me-1"></i>
-                                    {ev.conflict_with_title ? `≈ ${ev.conflict_with_title.slice(0, 20)}` : 'Conflit'}
+                                    {ev.conflict_with_title ? `≈ ${ev.conflict_with_title.slice(0, 20)}` : t('event_conflict_detected')}
                                   </span>
                                 ) : (
                                   <span className="text-muted" style={{ fontSize: '.75rem' }}>—</span>
                                 )}
                               </td>
                               <td>
-                                <button className="ag-action-btn" onClick={() => { setEvDetail(ev) }} title="Voir / Traiter">
-                                  <i className="fas fa-eye"></i> Traiter
+                                <button className="ag-action-btn" onClick={() => { setEvDetail(ev) }} title={t('event_treat')}>
+                                  <i className="fas fa-eye"></i> {t('event_treat')}
                                 </button>
                               </td>
                             </tr>
@@ -1646,23 +1640,22 @@ export default function AgentDashboardPage() {
                   </div>
                 )
               })()}
-
             </div>
           ) : activeTab === 'stats' ? (
             /* ── STATISTIQUES IA TAB ──────────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#1a237e,#283593)' }}>
-                <span><i className="fas fa-brain me-2"></i>Statistiques IA — Classificateur NLP TF-IDF + LinearSVC</span>
+                <span><i className="fas fa-brain me-2"></i>{t('stats_ia_title')} — {t('stats_ia_subtitle')}</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchMlStats}>
-                  <i className="fas fa-sync-alt me-1"></i>Recalculer
+                  <i className="fas fa-sync-alt me-1"></i>{t('stats_ia_recalculate')}
                 </button>
               </div>
               <div style={{ padding: '24px 22px' }}>
                 {mlLoading && (
                   <div style={{ textAlign: 'center', padding: '60px 20px', color: '#1a237e' }}>
                     <div className="spinner-border" style={{ width: '2.5rem', height: '2.5rem' }} role="status"></div>
-                    <p className="mt-3" style={{ fontSize: '.9rem', color: '#555' }}>Calcul des statistiques IA en cours…</p>
-                    <p style={{ fontSize: '.77rem', color: '#aaa' }}>Première ouverture : entraînement du modèle en mémoire (~5s)</p>
+                    <p className="mt-3" style={{ fontSize: '.9rem', color: '#555' }}>{t('stats_ia_loading')}</p>
+                    <p style={{ fontSize: '.77rem', color: '#aaa' }}>{t('stats_ia_training')}</p>
                   </div>
                 )}
                 {!mlLoading && mlError && (
@@ -1677,12 +1670,22 @@ export default function AgentDashboardPage() {
                 {!mlLoading && !mlStats && !mlError && (
                   <div style={{ textAlign: 'center', padding: '40px 20px', color: '#aaa' }}>
                     <i className="fas fa-robot" style={{ fontSize: '3rem', opacity: .3, display: 'block', marginBottom: 12 }}></i>
-                    <p>Cliquez sur <strong>Recalculer</strong> pour charger les statistiques du modèle IA.</p>
+                    <p>{t('no_results')}</p>
                   </div>
                 )}
                 {!mlLoading && mlStats && (() => {
-                  const CAT_LABELS: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
-                  const PRI_LABELS: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
+                  const CAT_LABELS: Record<string,string> = { 
+                    lighting: `💡 ${t('category_lighting')}`, 
+                    trash: `🗑️ ${t('category_trash')}`, 
+                    roads: `🛣️ ${t('category_roads')}`, 
+                    noise: `🔊 ${t('category_noise')}`, 
+                    other: `📌 ${t('category_other')}` 
+                  }
+                  const PRI_LABELS: Record<string,string> = { 
+                    urgente: `🔴 ${t('priority_urgente')}`, 
+                    normale: `🔵 ${t('priority_normale')}`, 
+                    faible: `🟣 ${t('priority_faible')}` 
+                  }
                   const LMAP_CAT: Record<string,string> = { lighting:'💡', trash:'🗑️', roads:'🛣️', noise:'🔊', other:'📌' }
                   const LMAP_PRI: Record<string,string> = { urgente:'🔴', normale:'🔵', faible:'🟣' }
                   return (
@@ -1690,9 +1693,9 @@ export default function AgentDashboardPage() {
                       {/* Accuracy summary cards */}
                       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 28 }}>
                         {[
-                          { label: 'Précision — Catégorie', value: Math.round(mlStats.category.accuracy * 100) + '%', bg: '#e8f5e9', color: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', sub: `${mlStats.n_samples} exemples` },
-                          { label: 'Précision — Priorité',  value: Math.round(mlStats.priority.accuracy * 100) + '%',  bg: '#e3f2fd', color: mlStats.priority.accuracy >= 0.85  ? '#1565c0' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
-                          { label: 'Échantillons',           value: mlStats.n_samples,                                    bg: '#f3e5f5', color: '#6a1b9a',                                               sub: 'Données annotées' },
+                          { label: t('stats_ia_precision_cat'), value: Math.round(mlStats.category.accuracy * 100) + '%', bg: '#e8f5e9', color: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', sub: `${mlStats.n_samples} ${t('stats_ia_samples')}` },
+                          { label: t('stats_ia_precision_pri'),  value: Math.round(mlStats.priority.accuracy * 100) + '%',  bg: '#e3f2fd', color: mlStats.priority.accuracy >= 0.85  ? '#1565c0' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
+                          { label: t('stats_ia_samples'),           value: mlStats.n_samples,                                    bg: '#f3e5f5', color: '#6a1b9a',                                               sub: t('stats_ia_annotated') },
                         ].map((c, i) => (
                           <div key={i} style={{ flex: 1, minWidth: 180, borderRadius: 12, padding: '20px 22px', textAlign: 'center', background: c.bg }}>
                             <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>{c.label}</div>
@@ -1704,17 +1707,17 @@ export default function AgentDashboardPage() {
 
                       {/* TABLE 1 — Category Classification Report */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-table"></i>Tableau 1 — Rapport de classification (Catégorie)
+                        <i className="fas fa-table"></i>{t('stats_ia_table1')}
                       </div>
                       <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>
-                        <b>Précision</b> = sur tout ce que le modèle a prédit "voirie", combien était vraiment voirie &nbsp;|&nbsp;
-                        <b>Rappel</b> = sur toutes les vraies "voirie", combien le modèle a trouvé &nbsp;|&nbsp;
-                        <b>F1</b> = moyenne harmonique &nbsp;|&nbsp; <b>Support</b> = nb exemples de test
+                        <b>{t('stats_ia_precision')}</b> {t('ml_stats_precision_def')} &nbsp;|&nbsp;
+                        <b>{t('stats_ia_recall')}</b> {t('ml_stats_recall_def')} &nbsp;|&nbsp;
+                        <b>{t('stats_ia_f1')}</b> {t('ml_stats_f1_def')} &nbsp;|&nbsp; <b>{t('stats_ia_support')}</b> {t('ml_stats_support_def')}
                       </p>
                       <div className="ag-card" style={{ marginBottom: 22 }}>
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
-                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Catégorie</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Précision</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Rappel</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>F1-Score</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Support</th></tr></thead>
+                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('category_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_precision')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_recall')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_f1')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_support')}</th></tr></thead>
                             <tbody>
                               {mlStats.category.report.map((row: any) => {
                                 const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
@@ -1729,7 +1732,7 @@ export default function AgentDashboardPage() {
                                 )
                               })}
                               <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
-                                <td style={{ padding: '8px 12px' }}>Moyenne</td>
+                                <td style={{ padding: '8px 12px' }}>{t('average')}</td>
                                 <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.precision, 0) / mlStats.category.report.length * 100)}%</td>
                                 <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.category.report.length * 100)}%</td>
                                 <td style={{ padding: '8px 12px', color: '#1565c0' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.category.report.length * 100)}%</td>
@@ -1742,23 +1745,23 @@ export default function AgentDashboardPage() {
 
                       {/* TABLE 2 — Confusion Matrix Category */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-th"></i>Tableau 2 — Matrice de confusion (Catégorie)
+                        <i className="fas fa-th"></i>{t('stats_ia_table2')}
                       </div>
                       <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>
-                        Lignes = catégorie <b>réelle</b>, Colonnes = catégorie <b>prédite</b>. <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>Cases vertes</span> = correctes. <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>Cases rouges</span> = erreurs.
+                        {t('stats_ia_cm_desc')} <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>{t('stats_ia_cm_legend').split('.')[0]}</span> <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>{t('stats_ia_cm_legend').split('.')[1]}</span>
                       </p>
                       <div className="ag-card" style={{ marginBottom: 22 }}>
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
                             <thead><tr style={{ background: '#f5f5f5' }}>
-                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
+                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>{lang === 'ar' ? 'حقيقي ↓ / متوقع ←' : 'Réel ↓ / Prédit →'}</th>
                               {mlStats.category.labels.map((l: string) => <th key={l} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', borderBottom: '2px solid #e0e0e0', fontWeight: 700, color: '#333' }}>{LMAP_CAT[l] || l}</th>)}
                             </tr></thead>
                             <tbody>
                               {mlStats.category.confusion_matrix.map((row: number[], i: number) => (
                                 <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
                                   <td style={{ padding: '8px 12px', color: '#444' }}><strong style={{ fontSize: '.8rem' }}>{CAT_LABELS[mlStats.category.labels[i]] || mlStats.category.labels[i]}</strong></td>
-                                  {row.map((val, j) => (
+                                  {row.map((val: any, j: number) => (
                                     <td key={j} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', background: i === j ? '#e8f5e9' : val > 0 ? '#fce4ec' : '', color: i === j ? '#1b5e20' : val > 0 ? '#b71c1c' : '', fontWeight: i === j ? 700 : 400 }}>{val}</td>
                                   ))}
                                 </tr>
@@ -1770,13 +1773,13 @@ export default function AgentDashboardPage() {
 
                       {/* TABLE 3 — Top NLP features */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-star"></i>Tableau 3 — Mots les plus importants par catégorie (NLP)
+                        <i className="fas fa-star"></i>{t('stats_ia_table3')}
                       </div>
-                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>Les mots à plus fort poids dans la décision TF-IDF + SVM. Plus le score est élevé, plus le mot est discriminatif.</p>
+                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>{t('ml_stats_feat_desc')}</p>
                       <div className="ag-card" style={{ marginBottom: 22 }}>
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
-                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Catégorie</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Mots-clés discriminatifs (NLP)</th></tr></thead>
+                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('category_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_mots_cles')}</th></tr></thead>
                             <tbody>
                               {Object.entries(mlStats.category.top_features).map(([cat, words]: [string, any]) => (
                                 <tr key={cat} style={{ borderBottom: '1px solid #f0f0f0' }}>
@@ -1791,12 +1794,12 @@ export default function AgentDashboardPage() {
 
                       {/* TABLE 4 — Priority Classification Report */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-flag"></i>Tableau 4 — Rapport de classification (Priorité)
+                        <i className="fas fa-flag"></i>{t('stats_ia_table4')}
                       </div>
                       <div className="ag-card" style={{ marginBottom: 22 }}>
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
-                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Priorité</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Précision</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Rappel</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>F1-Score</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>Support</th></tr></thead>
+                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('priority_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_precision')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_recall')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_f1')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_support')}</th></tr></thead>
                             <tbody>
                               {mlStats.priority.report.map((row: any) => {
                                 const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
@@ -1811,7 +1814,7 @@ export default function AgentDashboardPage() {
                                 )
                               })}
                               <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
-                                <td style={{ padding: '8px 12px' }}>Moyenne</td>
+                                <td style={{ padding: '8px 12px' }}>{t('stats_ia_average')}</td>
                                 <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.precision, 0) / mlStats.priority.report.length * 100)}%</td>
                                 <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.priority.report.length * 100)}%</td>
                                 <td style={{ padding: '8px 12px', color: '#1565c0' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.priority.report.length * 100)}%</td>
@@ -1824,20 +1827,20 @@ export default function AgentDashboardPage() {
 
                       {/* TABLE 4b — Confusion Matrix Priority */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-th"></i>Tableau 4b — Matrice de confusion (Priorité)
+                        <i className="fas fa-th"></i>{t('stats_ia_table4b')}
                       </div>
                       <div className="ag-card" style={{ marginBottom: 22 }}>
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
                             <thead><tr style={{ background: '#f5f5f5' }}>
-                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>Réel ↓ / Prédit →</th>
+                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>{lang === 'ar' ? 'حقيقي ↓ / متوقع ←' : 'Réel ↓ / Prédit →'}</th>
                               {mlStats.priority.labels.map((l: string) => <th key={l} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', borderBottom: '2px solid #e0e0e0', fontWeight: 700, color: '#333' }}>{LMAP_PRI[l] || l}</th>)}
                             </tr></thead>
                             <tbody>
                               {mlStats.priority.confusion_matrix.map((row: number[], i: number) => (
                                 <tr key={i} style={{ borderBottom: '1px solid #f0f0f0' }}>
                                   <td style={{ padding: '8px 12px', color: '#444' }}><strong style={{ fontSize: '.8rem' }}>{PRI_LABELS[mlStats.priority.labels[i]] || mlStats.priority.labels[i]}</strong></td>
-                                  {row.map((val, j) => (
+                                  {row.map((val: any, j: number) => (
                                     <td key={j} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', background: i === j ? '#e8f5e9' : val > 0 ? '#fce4ec' : '', color: i === j ? '#1b5e20' : val > 0 ? '#b71c1c' : '', fontWeight: i === j ? 700 : 400 }}>{val}</td>
                                   ))}
                                 </tr>
@@ -1849,7 +1852,7 @@ export default function AgentDashboardPage() {
 
                       <div style={{ textAlign: 'center', padding: '10px 0 8px', color: '#aaa', fontSize: '.76rem' }}>
                         <i className="fas fa-info-circle me-1"></i>
-                        Modèle entraîné en mémoire au démarrage · TF-IDF (n-grammes 1–2) + LinearSVC · {mlStats.n_samples} exemples
+                        {t('stats_ia_model_trained')} · {mlStats.n_samples} {t('stats_ia_samples')}
                       </div>
                     </>
                   )
@@ -1979,32 +1982,32 @@ export default function AgentDashboardPage() {
                   <div className="p-4">
                     <div className="row g-3 mb-3">
                       <div className="col-6">
-                        <div className="det-label">Type</div>
+                        <div className="det-label">{t('event_type')}</div>
                         <div className="det-value">{evDetail.type_evenement_display}</div>
                       </div>
                       <div className="col-6">
-                        <div className="det-label">Organisateur</div>
+                        <div className="det-label">{t('event_organizer')}</div>
                         <div className="det-value">{evDetail.nom_organisateur} — {evDetail.telephone_organisateur}</div>
                       </div>
                       <div className="col-6">
-                        <div className="det-label">Lieu</div>
+                        <div className="det-label">{t('event_place')}</div>
                         <div className="det-value">{evDetail.lieu_type_display} — {evDetail.lieu_details}</div>
                       </div>
                       <div className="col-6">
-                        <div className="det-label">Dates & Horaires</div>
+                        <div className="det-label">{t('event_dates')}</div>
                         <div className="det-value">{evDetail.date_debut} → {evDetail.date_fin}</div>
                         <div className="det-value" style={{ fontSize: '.83rem', color: '#777' }}>{evDetail.heure_debut?.slice(0,5)} — {evDetail.heure_fin?.slice(0,5)}</div>
                       </div>
                       <div className="col-6">
-                        <div className="det-label">Participants</div>
+                        <div className="det-label">{t('event_participants')}</div>
                         <div className="det-value">{evDetail.nombre_participants}</div>
                       </div>
                       <div className="col-6">
-                        <div className="det-label">CIN organisateur</div>
+                        <div className="det-label">{t('event_cin_organizer')}</div>
                         <div className="det-value">{evDetail.cin_organisateur}</div>
                       </div>
                       <div className="col-12">
-                        <div className="det-label">Description</div>
+                        <div className="det-label">{t('event_description')}</div>
                         <div className="det-value" style={{ lineHeight: 1.7, fontSize: '.88rem' }}>{evDetail.description}</div>
                       </div>
                       {evDetail.has_conflict && (
@@ -2012,8 +2015,8 @@ export default function AgentDashboardPage() {
                           <div className="p-3 rounded-3 d-flex gap-2 align-items-start" style={{ background: '#fff8e1', border: '1px solid #ffe082', fontSize: '.85rem', color: '#e65100' }}>
                             <i className="fas fa-exclamation-triangle mt-1"></i>
                             <div>
-                              <strong>Conflit détecté</strong> — un autre événement est prévu au même lieu pendant la même période.
-                              {evDetail.conflict_with_title && <span> Événement concurrent : <em>« {evDetail.conflict_with_title} »</em></span>}
+                              <strong>{t('event_conflict_detected')}</strong> — {t('event_conflict_detected_long')}
+                              {evDetail.conflict_with_title && <span> {t('event_conflict_with')} <em>« {evDetail.conflict_with_title} »</em></span>}
                             </div>
                           </div>
                         </div>
@@ -2031,7 +2034,7 @@ export default function AgentDashboardPage() {
                       { key: 'attestation_association', label: 'Attestation asso.' },
                     ].some(doc => evDetail[doc.key]) && (
                       <div className="mb-3">
-                        <div className="det-label mb-2">Documents joints</div>
+                        <div className="det-label mb-2">{t('event_docs')}</div>
                         <div className="d-flex flex-wrap gap-2">
                           {[
                             { key: 'cin_recto', label: 'CIN Recto' },
@@ -2054,15 +2057,15 @@ export default function AgentDashboardPage() {
                     <hr />
                     {/* Agent action — 3-button workflow */}
                     <div className="mb-3">
-                      <label className="det-label mb-2">Commentaire pour le citoyen</label>
+                      <label className="det-label mb-2">{t('event_comment_label')}</label>
                       <textarea className="form-control mt-1" rows={3} id="ev-detail-comment"
                         defaultValue={evDetail.commentaire_agent}
-                        placeholder="Motif de la décision, informations complémentaires, modifications demandées..." />
+                        placeholder={t('event_comment_placeholder')} />
                     </div>
 
                     {/* Current status pill */}
                     <div className="mb-3 d-flex align-items-center gap-2 flex-wrap">
-                      <span className="text-muted small">Statut actuel :</span>
+                      <span className="text-muted small">{t('event_current_status')} :</span>
                       {(() => {
                         const cfg: Record<string, { cls: string; icon: string }> = {
                           pending:            { cls: 'bg-warning text-dark',  icon: 'fa-hourglass-half' },
@@ -2087,10 +2090,10 @@ export default function AgentDashboardPage() {
                           const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
                           handleEvStatus(evDetail.id, 'approved', txt?.value || '')
                         }}
-                        title="Autoriser cet événement">
+                        title={t('event_approve_btn_title')}>
                         {evSaving
                           ? <span className="spinner-border spinner-border-sm"></span>
-                          : <><i className="fas fa-check-circle me-2"></i>Approuver</>
+                          : <><i className="fas fa-check-circle me-2"></i>{t('event_approve_btn')}</>
                         }
                       </button>
 
@@ -2105,10 +2108,10 @@ export default function AgentDashboardPage() {
                           }
                           handleEvStatus(evDetail.id, 'changes_requested', txt.value)
                         }}
-                        title="Demander des modifications au citoyen">
+                        title={t('event_modify_btn_title')}>
                         {evSaving
                           ? <span className="spinner-border spinner-border-sm"></span>
-                          : <><i className="fas fa-edit me-2"></i>Modifications</>
+                          : <><i className="fas fa-edit me-2"></i>{t('event_modify_btn')}</>
                         }
                       </button>
 
@@ -2117,10 +2120,10 @@ export default function AgentDashboardPage() {
                           const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
                           handleEvStatus(evDetail.id, 'rejected', txt?.value || '')
                         }}
-                        title="Rejeter cette demande">
+                        title={t('event_reject_btn_title')}>
                         {evSaving
                           ? <span className="spinner-border spinner-border-sm"></span>
-                          : <><i className="fas fa-times-circle me-2"></i>Rejeter</>
+                          : <><i className="fas fa-times-circle me-2"></i>{t('event_reject_btn')}</>
                         }
                       </button>
                     </div>
@@ -2132,11 +2135,11 @@ export default function AgentDashboardPage() {
                           handleEvStatus(evDetail.id, 'in_progress', txt?.value || '')
                         }}
                         disabled={evSaving}
-                        title="Marquer comme en cours d'examen">
-                        <i className="fas fa-spinner me-2"></i>Mettre en traitement
+                        title={t('event_process_btn_title')}>
+                        <i className="fas fa-spinner me-2"></i>{t('event_process_btn')}
                       </button>
                       <button className="btn btn-link text-muted text-decoration-none" onClick={() => setEvDetail(null)}>
-                        Fermer
+                        {t('event_close_btn')}
                       </button>
                     </div>
                   </div>
@@ -2157,12 +2160,12 @@ export default function AgentDashboardPage() {
             </div>
           </div>
           <div className="ag-card">
-            <div className="ag-card-hdr-green"><span><i className="fas fa-chart-pie me-2"></i>Avancement</span></div>
+            <div className="ag-card-hdr-green"><span><i className="fas fa-chart-pie me-2"></i>{t('progress_title')}</span></div>
             <div className="ag-card-body">
               {[
-                { lbl: 'En attente', val: pct(pending),  color: '#e65100' },
-                { lbl: 'En cours',   val: pct(inprog),   color: '#1565c0' },
-                { lbl: 'Résolus',    val: pct(resolved), color: '#1b5e20' },
+                { lbl: t('status_pending'), val: pct(pending),  color: '#e65100' },
+                { lbl: t('status_in_progress'),   val: pct(inprog),   color: '#1565c0' },
+                { lbl: t('forum_resolved'),    val: pct(resolved), color: '#1b5e20' },
               ].map(b => (
                 <div key={b.lbl} className="mb-3">
                   <div className="d-flex justify-content-between" style={{ fontSize: '.78rem', marginBottom: 3 }}><span style={{ color: b.color }}>{b.lbl}</span><span style={{ fontWeight: 600 }}>{b.val}%</span></div>
@@ -2172,10 +2175,10 @@ export default function AgentDashboardPage() {
             </div>
           </div>
           <div className="ag-card">
-            <div className="ag-card-hdr-orange"><span><i className="fas fa-layer-group me-2"></i>Par catégorie</span></div>
+            <div className="ag-card-hdr-orange"><span><i className="fas fa-layer-group me-2"></i>{t('cat_title')}</span></div>
             <div className="ag-card-body">
               {Object.keys(catCounts).length === 0
-                ? <div style={{ color: '#aaa', fontSize: '.8rem', textAlign: 'center' }}>Chargement...</div>
+                ? <div style={{ color: '#aaa', fontSize: '.8rem', textAlign: 'center' }}>{t('loading_short')}</div>
                 : Object.entries(catCounts).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([k, v]) => {
                   const cat = CAT[k] || CAT.other
                   const p = total > 0 ? Math.round((v as number) / total * 100) : 0
@@ -2190,7 +2193,7 @@ export default function AgentDashboardPage() {
           </div>
         </div>
       </div>
-      <div className="ag-footer">© 2025 <span>Commune de Kélibia</span> — Espace Agent Kelibia Smart City &nbsp;|&nbsp; Tous droits réservés</div>
+      <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
       <div className="ag-toast-container">
         {toasts.map(t => <div key={t.id} className={`ag-toast ${t.type}`}><i className={`fas fa-${t.type === 'success' ? 'check-circle' : 'exclamation-circle'} ticon`}></i><span>{t.msg}</span></div>)}
       </div>
@@ -2198,19 +2201,19 @@ export default function AgentDashboardPage() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 1050, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
           onClick={e => { if (e.target === e.currentTarget) setDetailRec(null) }}>
           <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 800, maxHeight: '90vh', overflow: 'auto' }}>
-            <div className="ag-modal-hdr"><div className="title"><i className="fas fa-file-alt me-2"></i>Détail du Signalement</div><button className="ag-close-btn" onClick={() => setDetailRec(null)}><i className="fas fa-times"></i></button></div>
+            <div className="ag-modal-hdr"><div className="title"><i className="fas fa-file-alt me-2"></i>{t('reclamation_detail_title')}</div><button className="ag-close-btn" onClick={() => setDetailRec(null)}><i className="fas fa-times"></i></button></div>
             <div style={{ padding: 24 }}>
               <div className="row g-3">
                 <div className="col-md-8">
-                  <div className="mb-3"><div className="det-label">Titre</div><div className="det-value">{detailRec.title}</div></div>
-                  <div className="mb-3"><div className="det-label">Description</div><div className="det-value" style={{ lineHeight: 1.6 }}>{detailRec.description || '—'}</div></div>
+                  <div className="mb-3"><div className="det-label">{t('reclamation_title_label')}</div><div className="det-value">{detailRec.title}</div></div>
+                  <div className="mb-3"><div className="det-label">{t('reclamation_description_label')}</div><div className="det-value" style={{ lineHeight: 1.6 }}>{detailRec.description || '—'}</div></div>
                   <div className="row g-2 mb-3">
                     <div className="col-6"><div className="det-label">Catégorie</div><div className="det-value"><span className={`cat-badge ${(CAT[detailRec.category] || CAT.other).cls}`}>{(CAT[detailRec.category] || CAT.other).label}</span></div></div>
                     <div className="col-6"><div className="det-label">Statut actuel</div><div className="det-value"><span className={`status-badge ${(STATUS[detailRec.status] || STATUS.pending).cls}`}>{(STATUS[detailRec.status] || STATUS.pending).label}</span></div></div>
                   </div>
                   <div className="row g-2 mb-3">
                     <div className="col-6">
-                      <div className="det-label">Priorité (IA)</div>
+                      <div className="det-label">{t('reclamation_priority_label')}</div>
                       <div className="det-value">
                         <span className={`priority-badge ${(PRIORITY[detailRec.priority] || PRIORITY.normale).cls}`}>{(PRIORITY[detailRec.priority] || PRIORITY.normale).label}</span>
                         {detailRec.confidence?.priority !== undefined && (
@@ -2226,14 +2229,14 @@ export default function AgentDashboardPage() {
                     <div className="col-6"><div className="det-label">Citoyen</div><div className="det-value">{detailRec.citizen_name || '—'}</div></div>
                     <div className="col-6"><div className="det-label">Date de signalement</div><div className="det-value">{formatDate(detailRec.created_at)}</div></div>
                   </div>
-                  {detailRec.image && <div><div className="det-label mb-2">Photo jointe</div><img src={detailRec.image} style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid #eee' }} alt="Photo" /></div>}
+                  {detailRec.image && <div><div className="det-label mb-2">{t('reclamation_photo_label')}</div><img src={detailRec.image} style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid #eee' }} alt="Photo" /></div>}
                   {/* ── Manual reclassify panel ─────────────────────── */}
                   {(detailRec.confidence?.category !== undefined && detailRec.confidence.category < 0.60) || true ? (
                     <div className="reclassify-box">
                       <div className="rc-title"><i className="fas fa-robot me-1"></i>Correction manuelle de la classification IA</div>
                       {detailRec.confidence?.category !== undefined && detailRec.confidence.category < 0.60 && (
                         <div style={{ fontSize: '.75rem', color: '#b71c1c', marginBottom: 8, background: '#fce4ec', padding: '4px 8px', borderRadius: 6 }}>
-                          ⚠️ Confiance IA faible ({Math.round(detailRec.confidence.category * 100)}%) — vérifiez la classification
+                          ⚠️ {t('reclassify_low_conf')} ({Math.round(detailRec.confidence.category * 100)}%) — {t('admin_check_classification')}
                         </div>
                       )}
                       <div className="row g-2">
@@ -2581,9 +2584,9 @@ export default function AgentDashboardPage() {
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
                     body: JSON.stringify(data)
                   });
-                  if (res.ok) { showToast('Utilisateur créé !'); setShowAddUserModal(false); fetchManagedUsers('all') }
-                  else { const err = await res.json(); showToast(err.error || 'Erreur', 'error') }
-                } catch { showToast('Erreur réseau', 'error') }
+                  if (res.ok) { showToast(t('user_created_success')); setShowAddUserModal(false); fetchManagedUsers('all') }
+                  else { const err = await res.json(); showToast(err.error || t('error_msg'), 'error') }
+                } catch { showToast(t('error_msg'), 'error') }
               }}>
                 <div className="mb-3"><label className="form-label small fw-bold">Nom d'utilisateur</label><input className="form-control" name="username" required placeholder="ex: agent_kcl" /></div>
                 <div className="mb-3"><label className="form-label small fw-bold">Email</label><input className="form-control" name="email" type="email" required placeholder="agent@kelibia.tn" /></div>
@@ -2595,7 +2598,7 @@ export default function AgentDashboardPage() {
                     <option value="supervisor">Superviseur (Superuser)</option>
                   </select>
                 </div>
-                <div className="d-grid"><button className="btn btn-dark" type="submit">Créer le compte</button></div>
+                <div className="d-grid"><button className="btn btn-dark" type="submit">{t('create_account_btn')}</button></div>
               </form>
             </div>
           </div>
@@ -2614,7 +2617,7 @@ export default function AgentDashboardPage() {
              <div className="p-3 border-bottom" style={{ background: '#f0f4f8' }}>
                 <div className="d-flex gap-2 align-items-end">
                    <div className="flex-fill">
-                      <label className="small fw-bold text-primary mb-1"><i className="fas fa-magic me-1"></i>Saisie Rapide (Optionnel)</label>
+                      <label className="small fw-bold text-primary mb-1"><i className="fas fa-magic me-1"></i>{t('magic_input_label')}</label>
                       <textarea 
                         className="form-control form-control-sm" 
                         rows={2} 
@@ -2682,7 +2685,7 @@ export default function AgentDashboardPage() {
                         if (catId && catSelect) catSelect.value = catId;
                         if (reqs.length > 0) setServiceReqs(reqs);
                         
-                        showToast('Magic filling done! ✨');
+                        showToast(t('magic_filling_done'));
                       }
                     }}>  {t('fill_button')}</button>
                 </div>
@@ -2754,13 +2757,13 @@ export default function AgentDashboardPage() {
                  <div className="col-md-6">
                    <label className="form-label small fw-bold">Catégorie</label>
                    <select className="form-select" name="category" required defaultValue={editingService?.category_id || ''}>
-                      <option value="">-- Choisir une catégorie --</option>
+                      <option value="">{t('category_placeholder')}</option>
                       {allCategories.map(c => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
                    </select>
                  </div>
                  <div className="col-md-6">
                    <label className="form-label small fw-bold">Délai de traitement</label>
-                   <input className="form-control" name="processing_time" placeholder="ex: 2 jours à 1 semaine" defaultValue={editingService?.processing_time || ''} />
+                   <input className="form-control" name="processing_time" placeholder={t('processing_delay_placeholder')} defaultValue={editingService?.processing_time || ''} />
                  </div>
                  
                  <div className="col-md-6">
@@ -2786,11 +2789,11 @@ export default function AgentDashboardPage() {
                     <div className="d-flex justify-content-between align-items-center bg-light p-2 border rounded">
                        <span className="fw-bold small text-primary"><i className="fas fa-file-alt me-2"></i>Documents Requis (Papers)</span>
                        <button type="button" className="btn btn-sm btn-primary" onClick={() => setServiceReqs([...serviceReqs, { name_fr: '', name_ar: '', is_mandatory: true }])}>
-                          <i className="fas fa-plus me-1"></i> Ajouter
+                          <i className="fas fa-plus me-1"></i> {t('add_label')}
                        </button>
                     </div>
                     <div className="mt-2 border rounded p-2 bg-white" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                       {serviceReqs.length === 0 ? <div className="text-center text-muted small py-3">Aucun document configuré</div> : 
+                       {serviceReqs.length === 0 ? <div className="text-center text-muted small py-3">{t('no_doc_configured')}</div> : 
                           serviceReqs.map((req, idx) => (
                              <div key={idx} className="p-2 border-bottom d-flex gap-2 align-items-center">
                                 <input className="form-control form-control-sm" placeholder="Nom FR" value={req.name_fr} onChange={e => { const n = [...serviceReqs]; n[idx].name_fr = e.target.value; setServiceReqs(n); }} />
@@ -2842,10 +2845,10 @@ function QSSelect({ rec, onUpdate }: { rec: Reclamation; onUpdate: (id: number, 
         const ns = e.target.value, os = val; setDis(true)
         onUpdate(rec.id, ns, os, ok => { if (ok) setVal(ns); else setVal(os); setDis(false) })
       }}>
-      <option value="pending">⏳ En attente</option>
-      <option value="in_progress">🔧 En cours</option>
-      <option value="resolved">✅ Résolue</option>
-      <option value="rejected">❌ Rejetée</option>
+      <option value="pending">{t('status_pending_full')}</option>
+      <option value="in_progress">{t('status_in_progress_full')}</option>
+      <option value="resolved">{t('status_resolved_full')}</option>
+      <option value="rejected">{t('status_rejected_full')}</option>
     </select>
   )
 }

@@ -127,8 +127,21 @@ export default function DashboardPage() {
     navigate('/login')
   }
 
-  const getMarkerIcon = (_status: string) => {
-    return DefaultIcon;
+  const getMarkerIcon = (status: string) => {
+    const colorMap: Record<string, string> = {
+      pending: '#f57f17',     // Yellow/Orange
+      in_progress: '#1565c0', // Blue
+      resolved: '#2e7d32',    // Green
+      rejected: '#c62828',    // Red
+    };
+    const color = colorMap[status] || '#1565c0';
+    
+    return L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.3);"></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
+    });
   }
 
   return (
@@ -281,7 +294,9 @@ export default function DashboardPage() {
                     <div className="p-1">
                       <div className="fw-bold text-primary mb-1">{rec.title}</div>
                       <div className="small text-muted mb-2">{rec.description}</div>
-                      <span className={`badge bg-${rec.status === 'resolved' ? 'success' : 'warning'} small`}>{rec.status}</span>
+                      <span className={`badge bg-${rec.status === 'resolved' ? 'success' : rec.status === 'rejected' ? 'danger' : rec.status === 'in_progress' ? 'primary' : 'warning'} small`}>
+                        {t('status_' + rec.status)}
+                      </span>
                     </div>
                   </Popup>
                 </Marker>

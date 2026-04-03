@@ -357,7 +357,6 @@ export default function SignupPage() {
 
     if (password !== rePassword) {
       setMessageType('danger')
-      setMessage('Les mots de passe ne correspondent pas.')
       setMessage(t('password_mismatch'))
       return
     }
@@ -411,7 +410,7 @@ export default function SignupPage() {
         | null
 
       if (!res.ok) {
-        const errDetails = data?.error || `Erreur Serveur (Code: ${res.status}). Vérifiez vos fichiers ou la taille des photos.`
+        const errDetails = data?.error || `${t('error_msg')} (Code: ${res.status}). ${t('server_error_check_files')}`
         throw new Error(errDetails)
       }
 
@@ -420,7 +419,7 @@ export default function SignupPage() {
       setTimeout(() => navigate('/login'), 300)
     } catch (err) {
       setMessageType('danger')
-      setMessage(err instanceof Error ? err.message : 'Erreur lors de l’inscription.')
+      setMessage(err instanceof Error ? err.message : t('signup_error'))
     } finally {
       setLoading(false)
     }
@@ -559,7 +558,7 @@ export default function SignupPage() {
                            <i className="bi bi-upload me-1"></i>{t('upload')}
                         </button>
                       </div>
-                      <div className="text-muted mt-1" style={{ fontSize: '10px' }}>Si la caméra ne marche pas, cliquez sur "Téléverser"</div>
+                      <div className="text-muted mt-1" style={{ fontSize: '10px' }}>{t('upload_fallback_msg')}</div>
                     </div>
 
                     {/* Face Arrière */}
@@ -581,7 +580,7 @@ export default function SignupPage() {
                            <i className="bi bi-upload me-1"></i>{t('upload')}
                         </button>
                       </div>
-                      <div className="text-muted mt-1" style={{ fontSize: '10px' }}>Si la caméra ne marche pas, cliquez sur "Téléverser"</div>
+                      <div className="text-muted mt-1" style={{ fontSize: '10px' }}>{t('upload_fallback_msg')}</div>
                     </div>
                   </div>
 
@@ -779,8 +778,7 @@ export default function SignupPage() {
                     onUserMedia={() => console.log("Camera access granted")}
                     onUserMediaError={(err) => {
                       console.error("Camera access error:", err);
-                      // Suggest manual upload if permission denied
-                      alert("Permission refusée ou erreur caméra. Veuillez utiliser l'option 'Téléverser' pour envoyer une photo de votre galerie.");
+                      alert(t('camera_error_alert'));
                       setShowCamera(null);
                     }}
                     className="img-fluid rounded"

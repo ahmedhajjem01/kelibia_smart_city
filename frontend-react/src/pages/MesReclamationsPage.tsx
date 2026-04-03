@@ -24,6 +24,7 @@ export default function MesReclamationsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [selectedRec, setSelectedRec] = useState<Reclamation | null>(null)
 
   useEffect(() => {
     fetchReclamations()
@@ -86,10 +87,7 @@ export default function MesReclamationsPage() {
   return (
     <MainLayout
       user={user}
-      onLogout={() => {
-        // Simple logout
-        navigate('/login')
-      }}
+      onLogout={() => { navigate('/login') }}
       breadcrumbs={[{ label: t('my_reclamations') }]}
     >
       <div className="d-flex justify-content-between align-items-center mb-5">
@@ -98,9 +96,9 @@ export default function MesReclamationsPage() {
             <i className="fas fa-bullhorn text-danger me-3"></i>
             {t('my_reclamations')}
           </h2>
-          <p className="text-muted small">Suivi en temps réel de vos signalements citoyens.</p>
+          <p className="text-muted small">{t('reclamations_subtitle')}</p>
         </div>
-        <Link to="/nouvelle-reclamation" className="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm hover-lift">
+        <Link to="/nouvelle-reclamation" className="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm">
           <i className="fas fa-plus me-2"></i> {t('new_reclamation')}
         </Link>
       </div>
@@ -120,9 +118,9 @@ export default function MesReclamationsPage() {
             <i className="fas fa-folder-open fa-4x"></i>
           </div>
           <h4 className="fw-bold text-muted">{t('no_declarations')}</h4>
-          <p className="text-muted">Vous n'avez pas encore soumis de réclamation.</p>
+          <p className="text-muted">{t('no_reclamations_msg')}</p>
           <Link to="/nouvelle-reclamation" className="btn btn-outline-danger rounded-pill px-4 mt-2">
-            Soumettre ma première plainte
+            {t('submit_first_reclamation')}
           </Link>
         </div>
       ) : (
@@ -150,8 +148,11 @@ export default function MesReclamationsPage() {
                   </div>
                 </div>
                 <div className="card-footer bg-light border-0 p-3 text-center">
-                  <button className="btn btn-link btn-sm text-danger text-decoration-none fw-bold">
-                    Détails & Suivi <i className="fas fa-chevron-right ms-1"></i>
+                  <button 
+                    className="btn btn-link btn-sm text-danger text-decoration-none fw-bold"
+                    onClick={() => setSelectedRec(rec)}
+                  >
+                    {t('details_and_tracking')} <i className="fas fa-chevron-right ms-1"></i>
                   </button>
                 </div>
               </div>
@@ -160,9 +161,53 @@ export default function MesReclamationsPage() {
         </div>
       )}
 
+      {/* Detail Modal */}
+      {selectedRec && (
+         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+           <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                 <div className="modal-header bg-danger text-white border-0 py-3">
+                    <h5 className="modal-title fw-bold">
+                       <i className="fas fa-file-alt me-2"></i>
+                       {selectedRec.title}
+                    </h5>
+                    <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedRec(null)}></button>
+                 </div>
+                 <div className="modal-body p-4">
+                    <div className="mb-4">
+                       <label className="text-uppercase text-muted small fw-bold mb-1 d-block">{t('description_label')}</label>
+                       <p className="mb-0">{selectedRec.description}</p>
+                    </div>
+                    <div className="row g-3">
+                       <div className="col-6">
+                          <label className="text-uppercase text-muted small fw-bold mb-1 d-block">{t('status_label')}</label>
+                          {getStatusBadge(selectedRec.status)}
+                       </div>
+                       <div className="col-6">
+                          <label className="text-uppercase text-muted small fw-bold mb-1 d-block">{t('priority_label')}</label>
+                          {getPriorityBadge(selectedRec.priority)}
+                       </div>
+                       <div className="col-6">
+                          <label className="text-uppercase text-muted small fw-bold mb-1 d-block">{t('category_label')}</label>
+                          <span className="small">{t(`category_${selectedRec.category}`)}</span>
+                       </div>
+                       <div className="col-6">
+                          <label className="text-uppercase text-muted small fw-bold mb-1 d-block">{t('demande_date')}</label>
+                          <span className="small">{new Date(selectedRec.created_at).toLocaleString()}</span>
+                       </div>
+                    </div>
+                 </div>
+                 <div className="modal-footer bg-light border-0">
+                    <button type="button" className="btn btn-secondary rounded-pill px-4" onClick={() => setSelectedRec(null)}>{t('event_close_btn')}</button>
+                 </div>
+              </div>
+           </div>
+         </div>
+      )}
+
       <style>{`
         .hover-lift { transition: all 0.2s ease; }
-        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1); }
         .text-truncate-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;

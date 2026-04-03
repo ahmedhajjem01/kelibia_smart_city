@@ -87,11 +87,11 @@ export default function LoginPage() {
       }
 
       if (!res.ok) {
-        throw new Error(data?.detail || raw || 'Erreur de connexion.')
+        throw new Error(data?.detail || raw || t('error_msg'))
       }
 
       if (!data?.access || !data?.refresh) {
-        throw new Error(data?.detail || 'Réponse invalide du serveur.')
+        throw new Error(data?.detail || t('retrieval_error'))
       }
 
       storeTokens({
@@ -114,7 +114,7 @@ export default function LoginPage() {
         navigate('/dashboard')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur de connexion.')
+      setError(err instanceof Error ? err.message : t('error_msg'))
     } finally {
       setLoading(false)
     }

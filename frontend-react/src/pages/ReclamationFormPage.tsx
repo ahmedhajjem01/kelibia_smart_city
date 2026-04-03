@@ -34,16 +34,17 @@ function LocationMarker({ position, onMapClick }: { position: [number, number] |
 }
 
 // GPS accuracy badge colors
-const gpsStatusConfig = {
-  none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',   text: 'Aucune localisation sélectionnée' },
-  manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',          text: 'Position choisie sur la carte' },
-  gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',   text: 'Position GPS détectée' },
-  loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: 'Récupération de votre position...' },
-}
-
 export default function ReclamationFormPage() {
   const { t } = useI18n()
   const navigate = useNavigate()
+
+  // GPS accuracy badge configuration
+  const gpsStatusConfig = {
+    none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',   text: t('gps_no_selection') },
+    manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',          text: t('gps_manual_pos') },
+    gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',   text: t('gps_detected') },
+    loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: t('gps_fetching') },
+  }
 
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
@@ -77,7 +78,7 @@ export default function ReclamationFormPage() {
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setError("La géolocalisation n'est pas supportée par votre navigateur.")
+      setError(t('gps_not_supported'))
       return
     }
     setGpsStatus('loading')
@@ -89,9 +90,9 @@ export default function ReclamationFormPage() {
       (err) => {
         setGpsStatus('none')
         if (err.code === err.PERMISSION_DENIED) {
-          setError("Accès à la localisation refusé. Veuillez autoriser l'accès dans les paramètres de votre navigateur.")
+          setError(t('gps_access_denied'))
         } else {
-          setError("Impossible de récupérer votre position. Veuillez réessayer ou placer le marqueur manuellement.")
+          setError(t('gps_error_retry'))
         }
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -181,7 +182,7 @@ export default function ReclamationFormPage() {
                     <i className="fas fa-check-circle fa-5x"></i>
                   </div>
                   <h2 className="fw-bold mb-3">{t('reclamation_success')}</h2>
-                  <p className="text-muted">L'IA municipale analyse votre demande...</p>
+                  <p className="text-muted">{t('ai_analyzing_msg')}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
@@ -250,15 +251,15 @@ export default function ReclamationFormPage() {
                         {position && (
                           <button type="button" onClick={clearLocation}
                             className="btn btn-sm btn-outline-secondary rounded-pill px-3"
-                            title="Supprimer la localisation">
-                            <i className="fas fa-times me-1"></i> Effacer
+                            title={t('clear_btn')}>
+                            <i className="fas fa-times me-1"></i> {t('clear_btn')}
                           </button>
                         )}
                         <button type="button" onClick={getCurrentLocation}
                           className="btn btn-sm btn-outline-primary rounded-pill px-3"
                           disabled={gpsStatus === 'loading'}>
                           <i className={`fas ${gpsStatus === 'loading' ? 'fa-circle-notch fa-spin' : 'fa-location-arrow'} me-2`}></i>
-                          {gpsStatus === 'loading' ? 'Localisation...' : t('use_my_location')}
+                          {gpsStatus === 'loading' ? t('loading') : t('use_my_location')}
                         </button>
                       </div>
                     </div>
@@ -293,7 +294,7 @@ export default function ReclamationFormPage() {
 
                     <small className="text-muted mt-2 d-block">
                       <i className="fas fa-info-circle me-1"></i>
-                      Cliquez sur la carte pour placer le marqueur, ou utilisez le bouton GPS pour détecter automatiquement votre position.
+                      {t('map_instruction')}
                     </small>
                   </div>
 

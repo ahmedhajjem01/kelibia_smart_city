@@ -11,14 +11,14 @@ django.setup()
 
 from accounts.models import CustomUser
 
-def demote_to_agent(email):
+def demote_to_agent_strict(email):
     try:
         user = CustomUser.objects.get(email=email)
-        user.is_staff = True
+        user.is_staff = False
         user.is_superuser = False
         user.user_type = 'agent'
         user.save()
-        print(f"Successfully demoted {email} to Agent (removed Superuser rights).")
+        print(f"Successfully demoted {email} to Agent (removed Superuser AND Staff rights).")
     except CustomUser.DoesNotExist:
         # Let's list all users to see if there's a typo
         all_emails = [u.email for u in CustomUser.objects.all()]
@@ -26,4 +26,4 @@ def demote_to_agent(email):
         print(f"Available users: {all_emails}")
 
 if __name__ == "__main__":
-    demote_to_agent('agent1@kelibiasmartcity.tn')
+    demote_to_agent_strict('agent1@kelibiasmartcity.tn')
