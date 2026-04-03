@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -15,6 +15,7 @@ const resolveBackendUrl = (path: string) => {
 type UserInfo = {
   first_name: string; last_name: string; email: string
   user_type?: string; is_staff?: boolean; is_superuser?: boolean; city?: string
+  cin?: string; phone?: string; address?: string; governorate?: string; place_of_birth?: string
 }
 type Reclamation = {
   id: number; title: string; description: string; created_at: string
@@ -435,7 +436,7 @@ export default function AgentDashboardPage() {
     try {
       const res = await fetch(`/api/forum/topics/${id}/`, { headers: { Authorization: `Bearer ${access}` } })
       if (res.ok) setForumTopicSelected(await res.json())
-    } catch { showToast('{t('reclamations_error')}', 'error') }
+    } catch { showToast(t('reclamations_error'), 'error') }
   }
 
   async function postForumReply() {
