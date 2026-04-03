@@ -36,6 +36,8 @@ import DemandeEvenementPage from './pages/DemandeEvenementPage'
 import MesEvenementsPage from './pages/MesEvenementsPage'
 import EvenementsPublicsPage from './pages/EvenementsPublicsPage'
 import ProfilePage from './pages/ProfilePage'
+import DemandeConstructionPage from './pages/DemandeConstructionPage'
+import MesConstructionsPage from './pages/MesConstructionsPage'
 
 
 
@@ -144,6 +146,8 @@ export default function App() {
           {/* Social & Événements */}
           <Route path="/demande-evenement" element={<DemandeEvenementPage />} />
           <Route path="/mes-evenements" element={<MesEvenementsPage />} />
+          <Route path="/demande-construction" element={<DemandeConstructionPage />} />
+          <Route path="/mes-constructions" element={<MesConstructionsPage />} />
           <Route path="/evenements" element={<EvenementsPublicsPage />} />
 
           {/* Profile */}
