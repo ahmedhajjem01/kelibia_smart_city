@@ -36,8 +36,9 @@ const PAGE_SIZE = 10
 
 function getRoleLabel(u: UserInfo | null, t: any) {
   if (!u) return t('loading')
+  if (u.user_type === 'agent') return t('agent_municipal')
   if (u.is_superuser || u.is_staff || u.user_type === 'supervisor' || u.user_type === 'Superviseur') return t('supervisor')
-  return t('agent_municipal')
+  return t('citizen')
 }
 
 const CSS = `
