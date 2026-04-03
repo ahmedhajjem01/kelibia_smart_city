@@ -28,10 +28,10 @@ function initials(name: string) {
   return name.trim().split(/\s+/).map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
 }
 
-function getRoleLabel(u: UserInfo | null) {
-  if (!u) return 'Chargement...'
-  if (u.is_superuser || u.user_type === 'supervisor') return 'Superviseur'
-  return 'Agent Municipal'
+function getRoleLabel(u: UserInfo | null, t: any) {
+  if (!u) return t('loading')
+  if (u.is_superuser || u.user_type === 'supervisor') return t('supervisor')
+  return t('agent_municipal')
 }
 
 const CSS = `
@@ -90,7 +90,7 @@ const CSS = `
 `
 
 export default function AgentStatsPage() {
-  const { lang, setLang } = useI18n()
+  const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
   const access = getAccessToken()
   const [user, setUser] = useState<UserInfo | null>(null)
@@ -133,76 +133,76 @@ export default function AgentStatsPage() {
     finally { setMlLoading(false) }
   }
 
-  const fullName = user ? `${user.first_name} ${user.last_name}`.trim() || user.email : 'Chargement...'
+  const fullName = user ? `${user.first_name} ${user.last_name}`.trim() || user.email : t('loading')
   const inits = initials(fullName)
 
   return (
     <div className="agent-page">
       <div className="ag-topbar">
-        <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
+        <div><i className="fas fa-map-marker-alt me-1"></i> {t('commune_full_name')}</div>
         <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 295 XXX</a><a href="#"><i className="fas fa-envelope me-1"></i>contact@kelibia.tn</a></div>
       </div>
       <nav className="ag-navbar">
         <a className="ag-brand" href="#">
           <div className="ag-logo"><i className="fas fa-city"></i></div>
-          <div className="ag-title"><span className="main">بلدية قليبية — Commune de Kélibia</span><span className="sub">Espace Agent — Kelibia Smart City</span></div>
+          <div className="ag-title"><span className="main">{t('municipal_title_full')}</span><span className="sub">{t('agent_space_title')}</span></div>
         </a>
         <div className="ag-actions">
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
           <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
           <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</button>
+          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</button>
         </div>
       </nav>
       <div className="ag-hero">
         <div>
-          <div className="greeting"><i className="fas fa-brain me-2"></i>Statistiques IA — Classificateur NLP</div>
-          <div className="sub">Performance du modèle TF-IDF + LinearSVC pour la classification des signalements.</div>
+          <div className="greeting"><i className="fas fa-brain me-2"></i>{t('ml_stats_title')}</div>
+          <div className="sub">{t('ml_stats_desc')}</div>
         </div>
         <div className="d-flex align-items-center gap-2">
-          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user)}</span>
+          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user, t)}</span>
           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
         </div>
       </div>
       <div className="ag-breadcrumb">
-        <a href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}><i className="fas fa-home me-1"></i>Accueil</a>
+        <a href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}><i className="fas fa-home me-1"></i>{t('home')}</a>
         <span className="mx-2 text-muted">/</span>
-        <a href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}>Espace Agent</a>
+        <a href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}>{t('agent_space')}</a>
         <span className="mx-2 text-muted">/</span>
-        <span>Statistiques IA</span>
+        <span>{t('ml_stats_side')}</span>
       </div>
 
       <div className="ag-body">
         <div className="ag-sidebar">
-          <div className="ag-sec-title">NAVIGATION</div>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}><i className="fas fa-tachometer-alt"></i> Tableau de bord</a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-reclamations') }}><i className="fas fa-bullhorn"></i> Signalements</a>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}><i className="fas fa-map-marked-alt"></i> Carte SIG</a>
-          <a className="ag-nav-item" href="#"><i className="fas fa-newspaper"></i> Actualités</a>
-          <a className="ag-nav-item active" href="#"><i className="fas fa-brain"></i> Stats IA</a>
+          <div className="ag-sec-title">{t('navigation')}</div>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}><i className="fas fa-tachometer-alt"></i> {t('dashboard')}</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-reclamations') }}><i className="fas fa-bullhorn"></i> {t('reclamations')}</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); navigate('/agent-dashboard') }}><i className="fas fa-map-marked-alt"></i> {t('sig_map')}</a>
+          <a className="ag-nav-item" href="#"><i className="fas fa-newspaper"></i> {t('news')}</a>
+          <a className="ag-nav-item active" href="#"><i className="fas fa-brain"></i> {t('ml_stats_side')}</a>
           <div className="ag-divider"></div>
-          <div className="ag-sec-title">COMPTE</div>
-          <a className="ag-nav-item" href="/profile"><i className="fas fa-user-circle"></i> Mon Profil</a>
+          <div className="ag-sec-title">{t('account')}</div>
+          <a className="ag-nav-item" href="/profile"><i className="fas fa-user-circle"></i> {t('my_profile')}</a>
           {(user?.user_type === 'supervisor' || user?.is_superuser) && (
             <a className="ag-nav-item" href="/admin/" style={{ color: '#ff6d00' }}>
               <i className="fas fa-cog"></i> <strong>Panel Django Admin</strong>
             </a>
           )}
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</a>
         </div>
 
         <div className="ag-main">
           <div style={{ marginBottom: 20 }}>
             <button className="back-btn" onClick={() => navigate('/agent-dashboard')}>
-              <i className="fas fa-arrow-left"></i> Retour au tableau de bord
+              <i className="fas fa-arrow-left"></i> {t('back_to_dashboard')}
             </button>
           </div>
 
           {mlLoading && (
             <div className="ag-spinner-wrap">
               <div className="spinner-border" style={{ color: '#1a237e', width: '2.5rem', height: '2.5rem' }} role="status"></div>
-              <p className="mt-3" style={{ fontSize: '.9rem', color: '#555' }}>Calcul des statistiques IA en cours…</p>
-              <p style={{ fontSize: '.77rem', color: '#aaa' }}>Première ouverture : entraînement du modèle en mémoire (~5s)</p>
+              <p className="mt-3" style={{ fontSize: '.9rem', color: '#555' }}>{t('ml_stats_loading')}</p>
+              <p style={{ fontSize: '.77rem', color: '#aaa' }}>{t('ml_stats_training_msg')}</p>
             </div>
           )}
 
@@ -211,7 +211,7 @@ export default function AgentStatsPage() {
               <i className="fas fa-exclamation-triangle" style={{ color: '#b71c1c', fontSize: '2rem', display: 'block', marginBottom: 12 }}></i>
               <p style={{ color: '#b71c1c', fontWeight: 600, marginBottom: 12 }}>{mlError}</p>
               <button onClick={fetchMlStats} style={{ background: '#1a237e', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 20px', cursor: 'pointer', fontSize: '.85rem' }}>
-                <i className="fas fa-redo me-1"></i> Réessayer
+                <i className="fas fa-redo me-1"></i> {t('retry')}
               </button>
             </div>
           )}
@@ -221,43 +221,43 @@ export default function AgentStatsPage() {
               {/* ── Accuracy summary cards */}
               <div className="ml-acc-bar">
                 <div className="ml-acc-card" style={{ background: '#e8f5e9' }}>
-                  <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>Précision — Classification Catégorie</div>
+                  <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>{t('ml_stats_category_acc')}</div>
                   <div className="ml-acc-pill" style={{ background: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', color: '#fff' }}>
                     {Math.round(mlStats.category.accuracy * 100)}%
                   </div>
-                  <div style={{ fontSize: '.73rem', color: '#888', marginTop: 6 }}>{mlStats.n_samples} exemples d'entraînement</div>
+                  <div style={{ fontSize: '.73rem', color: '#888', marginTop: 6 }}>{mlStats.n_samples} {t('ml_stats_samples')}</div>
                 </div>
                 <div className="ml-acc-card" style={{ background: '#e3f2fd' }}>
-                  <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>Précision — Classification Priorité</div>
+                  <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>{t('ml_stats_priority_acc')}</div>
                   <div className="ml-acc-pill" style={{ background: mlStats.priority.accuracy >= 0.85 ? '#1565c0' : '#f57f17', color: '#fff' }}>
                     {Math.round(mlStats.priority.accuracy * 100)}%
                   </div>
                   <div style={{ fontSize: '.73rem', color: '#888', marginTop: 6 }}>TF-IDF + LinearSVC (NLP)</div>
                 </div>
                 <div className="ml-acc-card" style={{ background: '#f3e5f5' }}>
-                  <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>Échantillons d'entraînement</div>
+                  <div style={{ fontSize: '.82rem', color: '#555', marginBottom: 6 }}>{t('ml_stats_samples')}</div>
                   <div className="ml-acc-pill" style={{ background: '#6a1b9a', color: '#fff' }}>
                     {mlStats.n_samples}
                   </div>
-                  <div style={{ fontSize: '.73rem', color: '#888', marginTop: 6 }}>Données annotées manuellement</div>
+                  <div style={{ fontSize: '.73rem', color: '#888', marginTop: 6 }}>{t('ml_stats_annotated_data')}</div>
                 </div>
               </div>
 
               {/* ── TABLE 1: Classification Report — Category */}
-              <div className="section-title"><i className="fas fa-table"></i>Tableau 1 — Rapport de classification (Catégorie)</div>
+              <div className="section-title"><i className="fas fa-table"></i>{t('ml_stats_table1_title')}</div>
               <p className="section-desc">
-                <b>Précision</b> = sur tout ce que le modèle a prédit "voirie", combien était vraiment voirie &nbsp;|&nbsp;
-                <b>Rappel</b> = sur toutes les vraies "voirie", combien le modèle a trouvé &nbsp;|&nbsp;
-                <b>F1</b> = moyenne harmonique précision/rappel &nbsp;|&nbsp;
-                <b>Support</b> = nombre d'exemples de test
+                <b>{t('precision')}</b> {t('ml_stats_precision_def')} &nbsp;|&nbsp;
+                <b>{t('recall')}</b> {t('ml_stats_recall_def')} &nbsp;|&nbsp;
+                <b>F1</b> {t('ml_stats_f1_def')} &nbsp;|&nbsp;
+                <b>Support</b> {t('ml_stats_support_def')}
               </p>
               <div className="ag-card">
                 <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                   <table className="ml-table">
-                    <thead><tr><th>Catégorie</th><th>Précision</th><th>Rappel</th><th>F1-Score</th><th>Support</th></tr></thead>
+                    <thead><tr><th>{t('category')}</th><th>{t('precision')}</th><th>{t('recall')}</th><th>F1-Score</th><th>Support</th></tr></thead>
                     <tbody>
                       {mlStats.category.report.map(row => {
-                        const labels: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
+                        const labels: Record<string,string> = { lighting: `💡 ${t('lighting')}`, trash: `🗑️ ${t('trash')}`, roads: `🛣️ ${t('roads')}`, noise: `🔊 ${t('noise')}`, other: `📌 ${t('other')}` }
                         const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
                         return (
                           <tr key={row.label}>
@@ -282,11 +282,11 @@ export default function AgentStatsPage() {
               </div>
 
               {/* ── TABLE 2: Confusion Matrix — Category */}
-              <div className="section-title"><i className="fas fa-th"></i>Tableau 2 — Matrice de confusion (Catégorie)</div>
+              <div className="section-title"><i className="fas fa-th"></i>{t('ml_stats_table2_title')}</div>
               <p className="section-desc">
-                Lignes = catégorie <b>réelle</b>, Colonnes = catégorie <b>prédite</b>.
-                Cases <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>vertes</span> = prédictions correctes.
-                Cases <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>rouges</span> = erreurs du modèle.
+                {t('ml_stats_cm_desc')}
+                {t('cases')} <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>{t('ml_stats_correct_pred')}</span>.
+                {t('cases')} <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>{t('ml_stats_errors')}</span>.
               </p>
               <div className="ag-card">
                 <div style={{ overflowX: 'auto', padding: '4px 0' }}>
@@ -302,7 +302,7 @@ export default function AgentStatsPage() {
                     </thead>
                     <tbody>
                       {mlStats.category.confusion_matrix.map((row, i) => {
-                        const lmap: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
+                        const lmap: Record<string,string> = { lighting: `💡 ${t('lighting')}`, trash: `🗑️ ${t('trash')}`, roads: `🛣️ ${t('roads')}`, noise: `🔊 ${t('noise')}`, other: `📌 ${t('other')}` }
                         return (
                           <tr key={i}>
                             <td><strong style={{ fontSize: '.8rem' }}>{lmap[mlStats.category.labels[i]]||mlStats.category.labels[i]}</strong></td>
@@ -318,18 +318,17 @@ export default function AgentStatsPage() {
               </div>
 
               {/* ── TABLE 3: Top NLP features */}
-              <div className="section-title"><i className="fas fa-star"></i>Tableau 3 — Mots les plus importants par catégorie (NLP)</div>
+              <div className="section-title"><i className="fas fa-star"></i>{t('ml_stats_table3_title')}</div>
               <p className="section-desc">
-                Les mots qui ont le plus de poids dans la décision du modèle TF-IDF + SVM.
-                Plus le score est élevé, plus le mot est discriminatif pour cette catégorie.
+                {t('nlp_features_desc')}
               </p>
               <div className="ag-card">
                 <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                   <table className="ml-table">
-                    <thead><tr><th>Catégorie</th><th>Mots-clés discriminatifs (NLP)</th></tr></thead>
+                    <thead><tr><th>{t('category')}</th><th>{t('ml_stats_feat_desc')}</th></tr></thead>
                     <tbody>
                       {Object.entries(mlStats.category.top_features).map(([cat, words]) => {
-                        const lmap: Record<string,string> = { lighting:'💡 Éclairage', trash:'🗑️ Déchets', roads:'🛣️ Voirie', noise:'🔊 Nuisances', other:'📌 Autre' }
+                        const lmap: Record<string,string> = { lighting: `💡 ${t('lighting')}`, trash: `🗑️ ${t('trash')}`, roads: `🛣️ ${t('roads')}`, noise: `🔊 ${t('noise')}`, other: `📌 ${t('other')}` }
                         return (
                           <tr key={cat}>
                             <td><strong>{lmap[cat]||cat}</strong></td>
@@ -345,17 +344,17 @@ export default function AgentStatsPage() {
               </div>
 
               {/* ── TABLE 4: Classification Report — Priority */}
-              <div className="section-title"><i className="fas fa-flag"></i>Tableau 4 — Rapport de classification (Priorité)</div>
+              <div className="section-title"><i className="fas fa-flag"></i>{t('ml_stats_table4_title')}</div>
               <p className="section-desc">
-                Précision/Rappel/F1 pour chaque niveau de priorité : <b>Urgente</b>, <b>Normale</b>, <b>Faible</b>.
+                {t('priority_report_desc')}
               </p>
               <div className="ag-card">
                 <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                   <table className="ml-table">
-                    <thead><tr><th>Priorité</th><th>Précision</th><th>Rappel</th><th>F1-Score</th><th>Support</th></tr></thead>
+                    <thead><tr><th>{t('priority')}</th><th>{t('precision')}</th><th>{t('recall')}</th><th>F1-Score</th><th>Support</th></tr></thead>
                     <tbody>
                       {mlStats.priority.report.map(row => {
-                        const labels: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
+                        const labels: Record<string,string> = { urgente: `🔴 ${t('urgent')}`, normale: `🔵 ${t('normal')}`, faible: `🟣 ${t('low')}` }
                         const f1Color = row.f1 >= 0.85 ? '#2e7d32' : row.f1 >= 0.65 ? '#f57f17' : '#c62828'
                         return (
                           <tr key={row.label}>
@@ -368,7 +367,7 @@ export default function AgentStatsPage() {
                         )
                       })}
                       <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
-                        <td>Moyenne</td>
+                        <td>{t('average')}</td>
                         <td>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.precision,0)/mlStats.priority.report.length*100)}%</td>
                         <td>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.recall,0)/mlStats.priority.report.length*100)}%</td>
                         <td style={{ color: '#1565c0' }}>{Math.round(mlStats.priority.report.reduce((s,r) => s+r.f1,0)/mlStats.priority.report.length*100)}%</td>
@@ -380,11 +379,11 @@ export default function AgentStatsPage() {
               </div>
 
               {/* ── TABLE 4b: Confusion Matrix — Priority */}
-              <div className="section-title"><i className="fas fa-th"></i>Tableau 4b — Matrice de confusion (Priorité)</div>
+              <div className="section-title"><i className="fas fa-th"></i>{t('ml_stats_table4b_title')}</div>
               <p className="section-desc">
-                Lignes = priorité <b>réelle</b>, Colonnes = priorité <b>prédite</b>.
-                Cases <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>vertes</span> = correct.
-                Cases <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>rouges</span> = erreurs.
+                {t('ml_stats_cm_desc')}
+                {t('cases')} <span style={{ background: '#e8f5e9', color: '#1b5e20', padding: '0 4px', borderRadius: 4 }}>{t('ml_stats_correct_pred')}</span>.
+                {t('cases')} <span style={{ background: '#fce4ec', color: '#b71c1c', padding: '0 4px', borderRadius: 4 }}>{t('ml_stats_errors')}</span>.
               </p>
               <div className="ag-card">
                 <div style={{ overflowX: 'auto', padding: '4px 0' }}>
@@ -400,7 +399,7 @@ export default function AgentStatsPage() {
                     </thead>
                     <tbody>
                       {mlStats.priority.confusion_matrix.map((row, i) => {
-                        const lmap: Record<string,string> = { urgente:'🔴 Urgente', normale:'🔵 Normale', faible:'🟣 Faible' }
+                        const lmap: Record<string,string> = { urgente: `🔴 ${t('urgent')}`, normale: `🔵 ${t('normal')}`, faible: `🟣 ${t('low')}` }
                         return (
                           <tr key={i}>
                             <td><strong style={{ fontSize: '.8rem' }}>{lmap[mlStats.priority.labels[i]]||mlStats.priority.labels[i]}</strong></td>
@@ -417,14 +416,14 @@ export default function AgentStatsPage() {
 
               <div style={{ textAlign: 'center', padding: '10px 0 24px', color: '#aaa', fontSize: '.76rem' }}>
                 <i className="fas fa-info-circle me-1"></i>
-                Modèle entraîné en mémoire au démarrage · TF-IDF (n-grammes 1–2) + LinearSVC · {mlStats.n_samples} exemples
+                {t('ml_model_info')} · {mlStats.n_samples} {t('samples')}
               </div>
             </>
           )}
         </div>
       </div>
 
-      <div className="ag-footer">© 2025 <span>Commune de Kélibia</span> — Espace Agent Kelibia Smart City &nbsp;|&nbsp; Tous droits réservés</div>
+      <div className="ag-footer">© 2025 <span>{t('commune_name')}</span> — {t('agent_space_title')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -23,24 +23,6 @@ type Reclamation = {
   confidence?: { category?: number; priority?: number }
 }
 
-const CAT: Record<string, { label: string; cls: string }> = {
-  lighting: { label: '💡 Éclairage', cls: 'cat-lighting' },
-  trash:    { label: '🗑️ Déchets',   cls: 'cat-trash'    },
-  roads:    { label: '🛣️ Voirie',    cls: 'cat-roads'    },
-  noise:    { label: '🔊 Nuisances', cls: 'cat-noise'    },
-  other:    { label: '📌 Autre',     cls: 'cat-other'    },
-}
-const STATUS: Record<string, { label: string; cls: string }> = {
-  pending:     { label: 'En attente', cls: 'status-pending'     },
-  in_progress: { label: 'En cours',  cls: 'status-in_progress' },
-  resolved:    { label: 'Résolue',   cls: 'status-resolved'    },
-  rejected:    { label: 'Rejetée',   cls: 'status-rejected'    },
-}
-const PRIORITY: Record<string, { label: string; cls: string }> = {
-  urgente: { label: '🔴 Urgente', cls: 'priority-urgente' },
-  normale: { label: '🔵 Normale', cls: 'priority-normale' },
-  faible:  { label: '🟣 Faible',  cls: 'priority-faible'  },
-}
 function initials(name: string) {
   if (!name?.trim()) return '?'
   return name.trim().split(/\s+/).map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
@@ -51,10 +33,10 @@ function formatDate(iso: string) {
 }
 const PAGE_SIZE = 10
 
-function getRoleLabel(u: UserInfo | null) {
-  if (!u) return 'Chargement...'
-  if (u.is_superuser || u.is_staff || u.user_type === 'supervisor' || u.user_type === 'Superviseur') return 'Superviseur'
-  return 'Agent Municipal'
+function getRoleLabel(u: UserInfo | null, t: any) {
+  if (!u) return t('loading')
+  if (u.is_superuser || u.is_staff || u.user_type === 'supervisor' || u.user_type === 'Superviseur') return t('supervisor')
+  return t('agent_municipal')
 }
 
 const CSS = `
@@ -158,8 +140,27 @@ const CSS = `
 `
 
 export default function AgentDashboardPage() {
-  const { lang, setLang } = useI18n()
+  const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
+
+  const CAT: Record<string, { label: string; cls: string }> = {
+    lighting: { label: `💡 ${t('lighting')}`, cls: 'cat-lighting' },
+    trash:    { label: `🗑️ ${t('trash')}`,   cls: 'cat-trash'    },
+    roads:    { label: `🛣️ ${t('roads')}`,    cls: 'cat-roads'    },
+    noise:    { label: `🔊 ${t('noise')}`, cls: 'cat-noise'    },
+    other:    { label: `📌 ${t('other')}`,     cls: 'cat-other'    },
+  }
+  const STATUS: Record<string, { label: string; cls: string }> = {
+    pending:     { label: t('status_pending'), cls: 'status-pending'     },
+    in_progress: { label: t('status_in_progress'),  cls: 'status-in_progress' },
+    resolved:    { label: t('status_resolved'),   cls: 'status-resolved'    },
+    rejected:    { label: t('status_rejected'),   cls: 'status-rejected'    },
+  }
+  const PRIORITY: Record<string, { label: string; cls: string }> = {
+    urgente: { label: `🔴 ${t('urgent')}`, cls: 'priority-urgente' },
+    normale: { label: `🔵 ${t('normal')}`, cls: 'priority-normale' },
+    faible:  { label: `🟣 ${t('low')}`,  cls: 'priority-faible'  },
+  }
   const access = getAccessToken()
   const [user, setUser] = useState<UserInfo | null>(null)
   const [allRecs, setAllRecs] = useState<Reclamation[]>([])
@@ -180,7 +181,7 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'stats' | 'demandes'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'stats' | 'demandes' | 'profile'>('dashboard')
   const [allEvenements, setAllEvenements] = useState<any[]>([])
   const [loadingEvenements, setLoadingEvenements] = useState(false)
   const [evStatusFilter, setEvStatusFilter] = useState('')
@@ -232,6 +233,15 @@ export default function AgentDashboardPage() {
   const [mlLoading, setMlLoading] = useState(false)
   const [mlError, setMlError] = useState<string | null>(null)
 
+  // ── Profile Tab State ──
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaveError, setProfileSaveError] = useState<string | null>(null)
+  const [profileSaveSuccess, setProfileSaveSuccess] = useState(false)
+  const [profileForm, setProfileForm] = useState({
+    first_name: '', last_name: '', phone: '', address: '', city: '', governorate: '', place_of_birth: ''
+  })
+
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
   const markersLayer = useRef<any>(null)
@@ -259,6 +269,15 @@ export default function AgentDashboardPage() {
       const u: UserInfo = await res.json()
       if (u.user_type !== 'agent' && u.user_type !== 'supervisor' && !u.is_staff && !u.is_superuser) { navigate('/dashboard'); return }
       setUser(u)
+      setProfileForm({
+        first_name:    u.first_name    || '',
+        last_name:     u.last_name     || '',
+        phone:         (u as any).phone || '',
+        address:       (u as any).address || '',
+        city:          u.city          || '',
+        governorate:   (u as any).governorate || '',
+        place_of_birth: (u as any).place_of_birth || '',
+      })
       fetchReclamations()
       if (u.user_type === 'supervisor' || u.is_staff || u.is_superuser) {
         fetchManagedUsers(usersMode)
@@ -303,8 +322,31 @@ export default function AgentDashboardPage() {
     finally { setMlLoading(false) }
   }
 
+  async function handleProfileSave() {
+    setProfileSaving(true); setProfileSaveError(null); setProfileSaveSuccess(false)
+    try {
+      const res = await fetch('/api/accounts/me/', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify(profileForm),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setUser(updated)
+        setEditingProfile(false)
+        setProfileSaveSuccess(true)
+        setTimeout(() => setProfileSaveSuccess(false), 3000)
+        showToast('Profil mis à jour !')
+      } else {
+        const err = await res.json()
+        setProfileSaveError(err.error || 'Erreur lors de la sauvegarde.')
+      }
+    } catch { setProfileSaveError('Erreur réseau.') }
+    finally { setProfileSaving(false) }
+  }
+
   async function deleteService(serviceId: number) {
-    if (!window.confirm('Supprimer définitivement ce service ?')) return
+    if (!window.confirm(t('delete_user_confirm'))) return
     try {
       const res = await fetch(`/api/services/list/${serviceId}/`, {
         method: 'DELETE',
@@ -373,7 +415,7 @@ export default function AgentDashboardPage() {
   async function handleTopicAction(id: number, action: 'pin' | 'resolve' | 'delete') {
     try {
       const isDelete = action === 'delete'
-      if (isDelete && !window.confirm('Supprimer ce sujet définitivement ?')) return
+      if (isDelete && !window.confirm(t('delete_user_confirm'))) return
       
       const res = await fetch(`/api/forum/topics/${id}/${isDelete ? '' : action + '/'}`, {
         method: isDelete ? 'DELETE' : 'POST',
@@ -393,7 +435,7 @@ export default function AgentDashboardPage() {
     try {
       const res = await fetch(`/api/forum/topics/${id}/`, { headers: { Authorization: `Bearer ${access}` } })
       if (res.ok) setForumTopicSelected(await res.json())
-    } catch { showToast('Erreur lors du chargement.', 'error') }
+    } catch { showToast('{t('reclamations_error')}', 'error') }
   }
 
   async function postForumReply() {
@@ -493,8 +535,8 @@ export default function AgentDashboardPage() {
         showToast(data.message || 'Action réussie !')
         if (action === 'verify') {
           if (usersMode === 'unverified') setManagedUsers(prev => prev.filter(u => u.id !== userId))
-          else setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_verified: true } : u))
-          if (selectedUser?.id === userId) setSelectedUser((p: any) => p ? { ...p, is_verified: true } : null)
+          else setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_verified: true, cin_front: null, cin_back: null } : u))
+          if (selectedUser?.id === userId) setSelectedUser((p: any) => p ? { ...p, is_verified: true, cin_front: null, cin_back: null } : null)
         } else {
           setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_active: data.is_active } : u))
           if (selectedUser?.id === userId) setSelectedUser((p: any) => p ? { ...p, is_active: data.is_active } : null)
@@ -669,7 +711,7 @@ export default function AgentDashboardPage() {
   }
 
   async function deleteReclamation(id: number) {
-    if (!window.confirm('Voulez-vous supprimer définitivement ce signalement ?')) return
+    if (!window.confirm(t('delete_user_confirm'))) return
     try {
       const res = await fetch(`/api/reclamations/${id}/`, {
         method: 'DELETE',
@@ -746,80 +788,86 @@ export default function AgentDashboardPage() {
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
           <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
           <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</button>
+          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</button>
         </div>
       </nav>
       <div className="ag-hero">
         <div>
-          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? 'Espace Superviseur' : 'Espace Agent'} — <strong>{user?.first_name || '...'}</strong></div>
-          <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? 'Supervisez les activités municipales et gérez les utilisateurs.' : 'Gérez les signalements des citoyens et assurez le suivi des interventions.'}</div>
+          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
+          <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
         </div>
         <div className="d-flex align-items-center gap-2">
-          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user)}</span>
+          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user, t)}</span>
           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
         </div>
       </div>
       <div className="ag-breadcrumb">
-        <a href="#"><i className="fas fa-home me-1"></i>Accueil</a><span className="mx-2 text-muted">/</span><span>Espace Agent</span><span className="mx-2 text-muted">/</span><span>Gestion des Signalements</span>
+        <a href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard'); }}><i className="fas fa-home me-1"></i>{t('nav_home')}</a>
+        <span className="mx-2 text-muted">/</span>
+        <span>{t('nav_agent_space_title')}</span>
+        <span className="mx-2 text-muted">/</span>
+        <span>{t('nav_manage_signalements')}</span>
       </div>
       <div className="ag-body">
         <div className="ag-sidebar">
-          <div className="ag-sec-title">NAVIGATION</div>
-          <a className="ag-nav-item" href="/profile"><i className="fas fa-user-circle"></i> Mon Profil</a>
+          <div className="ag-sec-title">{t('nav_navigation')}</div>
+          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); if(user?.user_type === 'supervisor' || user?.is_staff || user?.is_superuser) { fetchDemandes(); fetchTopics(); } }}>
+            <i className="fas fa-user-circle"></i> {t('nav_profile')}
+          </a>
 
           {/* ── Visible to ALL agents ── */}
           <div className="ag-divider"></div>
-          <div className="ag-sec-title">ESPACE AGENT</div>
+          <div className="ag-sec-title">{t('nav_agent_space')}</div>
           <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
-            <i className="fas fa-exclamation-circle"></i> Réclamations
+            <i className="fas fa-exclamation-circle"></i> {t('my_reclamations')}
             {pending > 0 && <span className="ag-badge">{pending}</span>}
           </a>
           <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
-            <i className="fas fa-calendar-alt"></i> Événements
+            <i className="fas fa-calendar-alt"></i> {t('nav_events_mgmt')}
             {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
               <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
             )}
           </a>
           <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
-            <i className="fas fa-robot"></i> Statistiques IA
+            <i className="fas fa-robot"></i> {t('nav_stats_ia')}
           </a>
 
           {/* ── Supervisor / Admin only ── */}
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
             <>
               <div className="ag-divider"></div>
-              <div className="ag-sec-title">ADMINISTRATION HUB</div>
+              <div className="ag-sec-title">{t('nav_admin_staff')}</div>
               <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode) }}>
-                <i className="fas fa-users-cog"></i> Gestion Utilisateurs
+                <i className="fas fa-users-cog"></i> {t('nav_managed_users')}
                 {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
               </a>
               <a className={`ag-nav-item${activeTab === 'services' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('services') }}>
-                <i className="fas fa-file-invoice"></i> Services Municipaux
+                <i className="fas fa-file-invoice"></i> {t('nav_services_villes')}
               </a>
               <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
-                <i className="fas fa-folder-open"></i> Demandes Citoyens
+                <i className="fas fa-folder-open"></i> {t('nav_demandes_citoyens')}
                 {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
               </a>
-              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics() }}>
-                <i className="fas fa-comments"></i> Modération Forum
+              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
+                <i className="fas fa-comments"></i> {t('nav_forum_moderation')}
               </a>
             </>
           )}
 
           <div className="ag-divider"></div>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> Déconnexion</a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</a>
         </div>
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
               <div className="row g-3 mb-4">
                 {([
-                  { val: total,    lbl: 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
-                  { val: pending,  lbl: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
-                  { val: inprog,   lbl: 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
-                  { val: resolved, lbl: 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
-                  { val: rejected, lbl: 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
-                  { val: dupCount, lbl: 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
+                  { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
+                  { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
+                  { val: inprog,   lbl: t('total_in_progress'), color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
+                  { val: resolved, lbl: t('total_resolved'), color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
+                  { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
+                  { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
                 ] as any[]).map((s, i) => (
                   <div key={i} className="col-6 col-md-2">
                     <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
@@ -835,15 +883,15 @@ export default function AgentDashboardPage() {
               {showDupPanel && (
                 <div className="ag-dup-card">
                   <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4a148c,#6a1b9a)' }}>
-                    <span><i className="fas fa-copy me-2"></i>Signalements potentiellement en double</span>
+                    <span><i className="fas fa-copy me-2"></i>{t('potential_duplicates')}</span>
                     <button onClick={() => setShowDupPanel(false)} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-times me-1"></i> Fermer</button>
                   </div>
                   <div style={{ padding: 16 }}>
                     {dupGroups.length === 0
-                      ? <div style={{ textAlign: 'center', padding: 30, color: '#888' }}><i className="fas fa-check-circle" style={{ color: '#2e7d32', fontSize: '2rem', display: 'block', marginBottom: 10 }}></i>Aucun doublon détecté.</div>
+                      ? <div style={{ textAlign: 'center', padding: 30, color: '#888' }}><i className="fas fa-check-circle" style={{ color: '#2e7d32', fontSize: '2rem', display: 'block', marginBottom: 10 }}></i>{t('no_duplicates')}.</div>
                       : dupGroups.map((grp, gi) => (
                         <div key={gi} style={{ background: '#f9f0ff', border: '1px solid #e1bee7', borderRadius: 8, padding: '12px 16px', marginBottom: 10 }}>
-                          <div style={{ fontSize: '.78rem', color: '#6a1b9a', fontWeight: 700, marginBottom: 8 }}><i className="fas fa-copy me-1"></i>{grp.length} signalements similaires</div>
+                          <div style={{ fontSize: '.78rem', color: '#6a1b9a', fontWeight: 700, marginBottom: 8 }}><i className="fas fa-copy me-1"></i>{grp.length} {t('similar_reports')}</div>
                           {grp.map((r: Reclamation) => (
                             <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #ede7f6', fontSize: '.8rem' }}>
                               <span><strong>#{r.id}</strong> — {r.title}</span><span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
@@ -856,31 +904,31 @@ export default function AgentDashboardPage() {
               )}
               <div className="ag-card" id="ag-map-card">
                 <div className="ag-card-hdr-blue">
-                  <span><i className="fas fa-map-marked-alt me-2"></i>Carte des Signalements — Kélibia</span>
-                  <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} signalement(s)</span>
+                  <span><i className="fas fa-map-marked-alt me-2"></i>{t('map_title_realtime')}</span>
+                  <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} {t('signalements_short')}</span>
                 </div>
                 <div id="ag-map" ref={mapRef} style={{ height: 380, width: '100%', borderRadius: '0 0 10px 10px' }}></div>
               </div>
               <div className="ag-card" id="ag-recs-card">
                 <div className="ag-card-hdr-blue">
-                  <span><i className="fas fa-bullhorn me-2"></i>Gestion des Signalements</span>
-                  <button onClick={fetchReclamations} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-sync-alt me-1"></i> Actualiser</button>
+                  <span><i className="fas fa-bullhorn me-2"></i>{t('nav_manage_signalements')}</span>
+                  <button onClick={fetchReclamations} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-sync-alt me-1"></i> {t('refresh')}</button>
                 </div>
                 <div className="ag-filter-bar">
-                  <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} /></div>
-                  <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="">Tous les statuts</option><option value="pending">En attente</option><option value="in_progress">En cours</option><option value="resolved">Résolus</option><option value="rejected">Rejetés</option></select>
-                  <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}><option value="">Toutes catégories</option><option value="lighting">Éclairage</option><option value="trash">Déchets</option><option value="roads">Voirie</option><option value="noise">Nuisances</option><option value="other">Autre</option></select>
-                  <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">Toutes priorités</option><option value="urgente">🔴 Urgente</option><option value="normale">🔵 Normale</option><option value="faible">🟣 Faible</option></select>
-                  <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> Urgents seulement</button>
-                  <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} résultat(s)</span>
+                  <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} /></div>
+                  <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="">{t('all_statuses')}</option><option value="pending">{t('status_pending')}</option><option value="in_progress">{t('status_in_progress')}</option><option value="resolved">{t('status_resolved')}</option><option value="rejected">{t('status_rejected')}</option></select>
+                  <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}><option value="">{t('all_categories')}</option><option value="lighting">{t('lighting')}</option><option value="trash">{t('trash')}</option><option value="roads">{t('roads')}</option><option value="noise">{t('noise')}</option><option value="other">{t('other')}</option></select>
+                  <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">{t('all_priorities')}</option><option value="urgente">🔴 {t('urgent')}</option><option value="normale">🔵 {t('normal')}</option><option value="faible">🟣 {t('low')}</option></select>
+                  <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> {t('urgent_only')}</button>
+                  <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} {t('results_count')}</span>
                 </div>
-                {loading && <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#1565c0', width: '2rem', height: '2rem' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>Chargement des signalements...</div></div>}
-                {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>Erreur lors du chargement.</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> Réessayer</button></div>}
-                {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>Aucun signalement trouvé.</p></div>}
+                {loading && <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#1565c0', width: '2rem', height: '2rem' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>{t('loading_reclamations')}</div></div>}
+                {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>{t('reclamations_error')}</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> {t('retry')}</button></div>}
+                {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>{t('no_reclamations_found')}</p></div>}
                 {!loading && !recError && filteredRecs.length > 0 && (
                   <div style={{ overflowX: 'auto' }}>
                     <table className="ag-table">
-                      <thead><tr><th>#</th><th>Titre</th><th>Citoyen</th><th>Catégorie</th><th>Priorité</th><th>Confiance IA</th><th>Service</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                      <thead><tr><th>{t('id_label')}</th><th>{t('title_label')}</th><th>{t('citizen_label')}</th><th>{t('category_label')}</th><th>{t('priority_label')}</th><th>{t('ai_confidence')}</th><th>{t('service_label')}</th><th>{t('status_label')}</th><th>{t('date_label')}</th><th>{t('actions_label')}</th></tr></thead>
                       <tbody>
                         {pageRecs.map(r => {
                           const cat = CAT[r.category] || CAT.other
@@ -919,7 +967,7 @@ export default function AgentDashboardPage() {
                     </table>
                     {totalPages > 1 && (
                       <div className="ag-pag-bar">
-                        <span>Page {currentPage} / {totalPages} — {filteredRecs.length} signalement(s)</span>
+                        <span>Page {currentPage} / {totalPages} — {filteredRecs.length} {t('signalements_short')}</span>
                         <div className="d-flex gap-2">
                           <button className="ag-page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><i className="fas fa-chevron-left"></i></button>
                           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const p = Math.max(1, currentPage - 2) + i; return p > totalPages ? null : <button key={p} className={`ag-page-btn${p === currentPage ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button> })}
@@ -934,28 +982,28 @@ export default function AgentDashboardPage() {
           ) : activeTab === 'users' ? (
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#004d40,#00695c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
-                <span className="fw-bold"><i className="fas fa-users-cog me-2"></i>Administration des Comptes</span>
+                <span className="fw-bold"><i className="fas fa-users-cog me-2"></i>{t('user_management')}</span>
                 <div className="btn-group btn-group-sm bg-white bg-opacity-10 p-1 rounded">
-                  <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>EN ATTENTE</button>
-                  <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? 'btn-warning' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>AGENTS</button>
-                  <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>TOUS</button>
+                  <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('pending_verification')}</button>
+                  <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? 'btn-warning' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+                  <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('all_label')}</button>
                 </div>
-                <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>AJOUTER AGENT</button>
+                <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>{t('add_agent')}</button>
               </div>
               <div className="ag-card-body p-0">
                 {loadingUsers ? (
                    <div className="text-center p-5"><div className="spinner-border text-success"></div></div>
                 ) : managedUsers.length === 0 ? (
-                  <div className="text-center p-5 text-muted"><i className="fas fa-users fa-3x mb-3 opacity-25"></i><p>Aucun utilisateur trouvé.</p></div>
+                  <div className="text-center p-5 text-muted"><i className="fas fa-users fa-3x mb-3 opacity-25"></i><p>{t('no_users_found')}</p></div>
                 ) : (
                   <div style={{ overflowX: 'auto' }}>
                     <table className="ag-table shadow-sm">
                       <thead>
                         <tr>
-                          <th>Utilisateur</th>
-                          <th>Type / Rôle</th>
-                          <th>Statut</th>
-                          <th>Actions</th>
+                          <th>{t('user_label')}</th>
+                          <th>{t('role')}</th>
+                          <th>{t('status_label')}</th>
+                          <th>{t('actions_label')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -973,39 +1021,39 @@ export default function AgentDashboardPage() {
                             </td>
                             <td>
                               <span className={`badge ${u.user_type === 'citizen' ? 'bg-light text-primary border' : 'bg-primary'}`}>
-                                {u.user_type === 'citizen' ? 'Citoyen' : u.user_type === 'agent' ? 'Agent' : 'Superviseur'}
+                                {u.user_type === 'citizen' ? t('role_citizen') : u.user_type === 'agent' ? t('role_agent') : t('role_supervisor')}
                               </span>
                             </td>
                             <td>
                                <div className="d-flex flex-column gap-1">
-                                  {u.is_verified ? <span className="badge bg-success" style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '10px' }}><i className="fas fa-check-circle me-1"></i>VÉRIFIÉ</span> 
-                                                 : <span className="badge bg-warning" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-clock me-1"></i>ATTENTE</span>}
-                                  {u.is_active ? <span className="badge bg-info" style={{ background: '#e1f5fe', color: '#0288d1', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>ACTIF</span> 
-                                               : <span className="badge bg-danger" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>BLOQUÉ</span>}
+                                  {u.is_verified ? <span className="badge bg-success" style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '10px' }}><i className="fas fa-check-circle me-1"></i>{t('verified_label')}</span> 
+                                                 : <span className="badge bg-warning" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-clock me-1"></i>{t('pending_verification')}</span>}
+                                  {u.is_active ? <span className="badge bg-info" style={{ background: '#e1f5fe', color: '#0288d1', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>{t('active_label')}</span> 
+                                               : <span className="badge bg-danger" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>{t('blocked_label')}</span>}
                                </div>
                             </td>
                             <td>
                               <div className="d-flex gap-2">
                                 {!u.is_verified && (
-                                  <button className="btn btn-sm btn-success" title="Approuver" onClick={() => handleToggleUserStatus(u.id, 'verify')}><i className="fas fa-check"></i></button>
+                                  <button className="btn btn-sm btn-success" title={t('approve')} onClick={() => handleToggleUserStatus(u.id, 'verify')}><i className="fas fa-check"></i></button>
                                 )}
-                                <button className={`btn btn-sm ${u.is_active ? 'btn-outline-danger' : 'btn-danger'}`} title={u.is_active ? 'Bloquer' : 'Débloquer'} onClick={() => handleToggleUserStatus(u.id, 'toggle_active')}>
+                                <button className={`btn btn-sm ${u.is_active ? 'btn-outline-danger' : 'btn-danger'}`} title={u.is_active ? t('block_user') : t('unblock_user')} onClick={() => handleToggleUserStatus(u.id, 'toggle_active')}>
                                   <i className={`fas ${u.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
                                 </button>
                                 {u.user_type === 'citizen' && (
-                                  <button className="btn btn-sm btn-outline-info" title="Promouvoir Agent" onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privilèges de modération.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
+                                  <button className="btn btn-sm btn-outline-info" title={t('promote_agent')} onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privilèges de modération.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
                                 )}
                                 {user?.is_superuser && u.user_type !== 'supervisor' && (
-                                  <button className="btn btn-sm btn-outline-warning" title="Promouvoir Superviseur" onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Superviseur ? Il aura des accès administratifs complets.`)) handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
+                                  <button className="btn btn-sm btn-outline-warning" title={t('promote_supervisor')} onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Superviseur ? Il aura des accès administratifs complets.`)) handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
                                 )}
                                 {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
-                                  <button className="btn btn-sm btn-outline-secondary" title="Rétrograder en Citoyen"
+                                  <button className="btn btn-sm btn-outline-secondary" title={t('demote_citizen')}
                                     onClick={(e) => { e.stopPropagation(); if(window.confirm(`Rétrograder "${u.full_name}" en Citoyen ? Il perdra ses droits d'agent.`)) handleToggleUserStatus(u.id, 'demote_to_citizen') }}>
                                     <i className="fas fa-user-minus"></i>
                                   </button>
                                 )}
                                 {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
-                                  <button className="btn btn-sm btn-outline-info" title="Réinitialiser le mot de passe"
+                                  <button className="btn btn-sm btn-outline-info" title={t('reset_pwd')}
                                     onClick={async (e) => {
                                       e.stopPropagation()
                                       if (!window.confirm(`Générer un nouveau mot de passe pour "${u.full_name}" ?`)) return
@@ -1023,9 +1071,9 @@ export default function AgentDashboardPage() {
                                     <i className="fas fa-key"></i>
                                   </button>
                                 )}
-                                <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={(e) => { e.stopPropagation(); if(window.confirm('Supprimer cet utilisateur ?')) handleToggleUserStatus(u.id, 'delete') }}><i className="fas fa-trash"></i></button>
+                                <button className="btn btn-sm btn-outline-danger" title={t('delete_label')} onClick={(e) => { e.stopPropagation(); if(window.confirm('Supprimer cet utilisateur ?')) handleToggleUserStatus(u.id, 'delete') }}><i className="fas fa-trash"></i></button>
                                 {(u.cin_front || u.cin_back) && (
-                                  <button type="button" className="btn btn-sm btn-outline-primary" title="Voir CIN" onClick={() => setSelectedUser(u)}><i className="fas fa-id-card"></i></button>
+                                  <button type="button" className="btn btn-sm btn-outline-primary" title={t('view_cin')} onClick={() => setSelectedUser(u)}><i className="fas fa-id-card"></i></button>
                                 )}
                               </div>
                             </td>
@@ -1040,9 +1088,9 @@ export default function AgentDashboardPage() {
           ) : activeTab === 'services' ? (
             <div className="ag-card animate__animated animate__fadeIn">
                <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a237e,#283593)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span className="fw-bold"><i className="fas fa-file-invoice me-2"></i>Gestion des Services Municipaux</span>
+                  <span className="fw-bold"><i className="fas fa-file-invoice me-2"></i>{t('service_management')}</span>
                   <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-light" style={{ fontSize: '11px', fontWeight: 600 }} onClick={() => setShowAddServiceModal(true)}><i className="fas fa-plus me-1"></i>AJOUTER SERVICE</button>
+                    <button className="btn btn-sm btn-light" style={{ fontSize: '11px', fontWeight: 600 }} onClick={() => setShowAddServiceModal(true)}><i className="fas fa-plus me-1"></i>{t('add_service')}</button>
                     <button className="btn btn-sm btn-outline-light" style={{ fontSize: '11px', fontWeight: 600 }} onClick={fetchCategoriesAndServices}><i className="fas fa-sync-alt"></i></button>
                   </div>
                </div>
@@ -1078,7 +1126,7 @@ export default function AgentDashboardPage() {
                                      setServiceReqs(s.requirements || []);
                                      setShowAddServiceModal(true); 
                                   }}><i className="fas fa-edit"></i></button>
-                                  <button className="btn btn-sm btn-outline-danger" title="Supprimer" onClick={() => deleteService(s.id)}><i className="fas fa-trash"></i></button>
+                                  <button className="btn btn-sm btn-outline-danger" title={t('delete_label')} onClick={() => deleteService(s.id)}><i className="fas fa-trash"></i></button>
                                 </div>
                               </td>
                             </tr>
@@ -1341,7 +1389,7 @@ export default function AgentDashboardPage() {
                         </div>
 
                         <div className="d-flex gap-2 justify-content-end">
-                          <button className="btn btn-secondary btn-sm" onClick={() => setDemandeDetail(null)}>Fermer</button>
+                          <button className="btn btn-secondary btn-sm" onClick={() => setDemandeDetail(null)}>{t('close')}</button>
                           <button
                             className="btn btn-primary btn-sm"
                             disabled={demandeSaving || demandeNewStatus === demandeDetail.status}
@@ -1359,21 +1407,21 @@ export default function AgentDashboardPage() {
             /* ── FORUM MANAGEMENT TAB ─────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)' }}>
-                <span><i className="fas fa-comments me-2"></i>Modération du Forum</span>
+                <span><i className="fas fa-comments me-2"></i>{t('forum_mgmt')}</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchTopics}>
-                  <i className="fas fa-sync-alt me-1"></i>Actualiser
+                  <i className="fas fa-sync-alt me-1"></i>{t('refresh')}
                 </button>
               </div>
-
+ 
               {/* Forum Stats Strip */}
               {!loadingTopics && forumStats && (
                 <div className="d-flex flex-wrap gap-2 p-3 border-bottom" style={{ background: '#f8f9fa' }}>
                   {[
-                    { lbl: 'Sujets',       val: forumStats.total_topics,    color: '#311b92', bg: '#ede7f6' },
-                    { lbl: 'Réponses',     val: forumStats.total_replies,   color: '#006064', bg: '#e0f7fa' },
-                    { lbl: 'Membres Actifs', val: forumStats.active_members,  color: '#c62828', bg: '#ffebee' },
-                    { lbl: 'Épinglés',    val: forumStats.pinned_topics,    color: '#f57f17', bg: '#fff8e1' },
-                    { lbl: 'Résolus',      val: forumStats.resolved_topics,  color: '#2e7d32', bg: '#e8f5e9' },
+                    { lbl: t('total_topics'),    val: forumStats.total_topics,    color: '#311b92', bg: '#ede7f6' },
+                    { lbl: t('total_replies'),   val: forumStats.total_replies,   color: '#006064', bg: '#e0f7fa' },
+                    { lbl: t('active_members'),  val: forumStats.active_members,  color: '#c62828', bg: '#ffebee' },
+                    { lbl: t('pinned'),          val: forumStats.pinned_topics,    color: '#f57f17', bg: '#fff8e1' },
+                    { lbl: t('resolved'),        val: forumStats.resolved_topics,  color: '#2e7d32', bg: '#e8f5e9' },
                   ].map(s => (
                     <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
                       style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
@@ -1382,19 +1430,19 @@ export default function AgentDashboardPage() {
                     </div>
                   ))}
                   <button className="btn btn-primary btn-sm ms-auto rounded-pill px-3" onClick={() => navigate('/forum')}>
-                    <i className="fas fa-external-link-alt me-1"></i> Voir le Forum Live
+                    <i className="fas fa-external-link-alt me-1"></i> {t('external_link_forum')}
                   </button>
                 </div>
               )}
-
+ 
               {/* Filters */}
               <div className="ag-filter-bar">
                 <div className="ag-search-wrap">
                   <i className="fas fa-search"></i>
-                  <input className="ag-search-input" placeholder="Rechercher un sujet..." value={forumSearch} onChange={e => setForumSearch(e.target.value)} />
+                  <input className="ag-search-input" placeholder={t('placeholder_search_topic')} value={forumSearch} onChange={e => setForumSearch(e.target.value)} />
                 </div>
               </div>
-
+ 
               {loadingTopics ? (
                 <div className="ag-spinner-wrap"><div className="spinner-border text-primary"></div></div>
               ) : (() => {
@@ -1402,17 +1450,17 @@ export default function AgentDashboardPage() {
                   !forumSearch || t.title.toLowerCase().includes(forumSearch.toLowerCase()) || 
                   t.author_name?.toLowerCase().includes(forumSearch.toLowerCase())
                 )
-                if (filtered.length === 0) return <div className="ag-empty">Aucun sujet trouvé.</div>
+                if (filtered.length === 0) return <div className="ag-empty">{t('forum_empty')}</div>
                 return (
                   <div className="table-responsive">
                     <table className="ag-table shadow-sm">
                       <thead>
                         <tr>
-                          <th>Sujet</th>
-                          <th>Auteur</th>
-                          <th>Stats</th>
-                          <th>État</th>
-                          <th>Actions</th>
+                          <th>{t('table_subject')}</th>
+                          <th>{t('table_author')}</th>
+                          <th>{t('table_stats')}</th>
+                          <th>{t('table_state')}</th>
+                          <th>{t('table_actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1453,7 +1501,7 @@ export default function AgentDashboardPage() {
                                 <button className={`btn btn-sm ${t.is_resolved ? 'btn-success' : 'btn-outline-success'}`} onClick={() => handleTopicAction(t.id, 'resolve')} title="Marquer Résolu">
                                   <i className="fas fa-check"></i>
                                 </button>
-                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleTopicAction(t.id, 'delete')} title="Supprimer">
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleTopicAction(t.id, 'delete')} title={t('delete_label')}>
                                   <i className="fas fa-trash"></i>
                                 </button>
                               </div>
@@ -1620,7 +1668,7 @@ export default function AgentDashboardPage() {
                     <i className="fas fa-exclamation-triangle" style={{ color: '#b71c1c', fontSize: '2rem', display: 'block', marginBottom: 12 }}></i>
                     <p style={{ color: '#b71c1c', fontWeight: 600, marginBottom: 12 }}>{mlError}</p>
                     <button onClick={fetchMlStats} style={{ background: '#1a237e', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 20px', cursor: 'pointer', fontSize: '.85rem' }}>
-                      <i className="fas fa-redo me-1"></i>Réessayer
+                      <i className="fas fa-redo me-1"></i>{t('retry')}
                     </button>
                   </div>
                 )}
@@ -1806,6 +1854,115 @@ export default function AgentDashboardPage() {
                 })()}
               </div>
             </div>
+          ) : activeTab === 'profile' ? (
+             <div className="animate__animated animate__fadeIn">
+                {/* ── PROFILE CONTENT ── */}
+                <div className="ag-card">
+                   <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #1a3a5c, #1565c0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span><i className="fas fa-user-circle me-2"></i>{t('profile_personal_info')}</span>
+                      {!editingProfile ? (
+                         <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.75rem', fontWeight: 600 }} onClick={() => setEditingProfile(true)}>
+                            <i className="fas fa-pencil-alt me-1"></i>{t('profile_edit')}
+                         </button>
+                      ) : (
+                         <div className="d-flex gap-2">
+                            <button className="btn btn-sm btn-success rounded-pill px-3" style={{ fontSize: '.75rem', fontWeight: 600 }} onClick={handleProfileSave} disabled={profileSaving}>
+                               {profileSaving ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-save me-1"></i>{t('profile_save')}</>}
+                            </button>
+                            <button className="btn btn-sm btn-outline-light rounded-pill px-3" style={{ fontSize: '.75rem', fontWeight: 600 }} onClick={() => setEditingProfile(false)}>{t('profile_cancel')}</button>
+                         </div>
+                      )
+                      }
+                   </div>
+                   <div style={{ padding: '24px 28px' }}>
+                      {profileSaveSuccess && <div className="alert alert-success py-2 mb-3" style={{ fontSize: '.85rem' }}><i className="fas fa-check-circle me-2"></i>{t('profile_success')}</div>}
+                      {profileSaveError && <div className="alert alert-danger py-2 mb-3" style={{ fontSize: '.85rem' }}><i className="fas fa-exclamation-triangle me-2"></i>{t('profile_error')}</div>}
+
+                      <div className="row g-4">
+                         <div className="col-md-3 text-center border-end">
+                            <div className="ag-profile-av" style={{ width: 100, height: 100, fontSize: '2.5rem', marginBottom: 15, background: 'var(--green-mid)', margin: '0 auto' }}>{inits}</div>
+                            <h5 className="mb-1 fw-bold">{fullName}</h5>
+                            <p className="text-muted small mb-3">{user?.email}</p>
+                            <span className="badge-role" style={{ background: '#e3f2fd', color: '#1565c0', borderColor: '#1565c0' }}>{getRoleLabel(user, t)}</span>
+                         </div>
+                         <div className="col-md-9">
+                            <div className="row g-3">
+                               {( [
+                                  { lbl: t('first_name'), val: profileForm.first_name, key: 'first_name', icon: 'fa-user' },
+                                  { lbl: t('last_name'),  val: profileForm.last_name,  key: 'last_name',  icon: 'fa-user' },
+                                  { lbl: t('phone_label'), val: profileForm.phone,      key: 'phone',      icon: 'fa-phone' },
+                                  { lbl: t('city_label'),  val: profileForm.city,       key: 'city',       icon: 'fa-city' },
+                                  { lbl: t('governorate_label'), val: profileForm.governorate, key: 'governorate', icon: 'fa-map-marker-alt' },
+                                  { lbl: t('place_of_birth'), val: profileForm.place_of_birth, key: 'place_of_birth', icon: 'fa-birthday-cake' },
+                               ] as any[] ).map(f => (
+                                  <div key={f.key} className="col-md-6">
+                                     <label style={{ fontSize: '.72rem', fontWeight: 700, color: '#888', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>
+                                        <i className={`fas ${f.icon} me-1 text-primary opacity-50`}></i>{f.lbl}
+                                     </label>
+                                     {editingProfile ? (
+                                        <input type="text" className="form-control form-control-sm shadow-sm" value={f.val} onChange={e => setProfileForm(p => ({ ...p, [f.key]: e.target.value }))} style={{ borderRadius: 8 }} />
+                                     ) : (
+                                        <div className="p-2 border-bottom fw-bold" style={{ fontSize: '.9rem', color: '#333' }}>{f.val || '—'}</div>
+                                     )}
+                                  </div>
+                               ))}
+                               <div className="col-12">
+                                  <label style={{ fontSize: '.72rem', fontWeight: 700, color: '#888', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>
+                                     <i className="fas fa-map-pin me-1 text-primary opacity-50"></i>{t('address_label')}
+                                  </label>
+                                  {editingProfile ? (
+                                     <input type="text" className="form-control form-control-sm shadow-sm" value={profileForm.address} onChange={e => setProfileForm(p => ({ ...p, address: e.target.value }))} style={{ borderRadius: 8 }} />
+                                  ) : (
+                                     <div className="p-2 border-bottom fw-bold" style={{ fontSize: '.9rem', color: '#333' }}>{profileForm.address || '—'}</div>
+                                  )}
+                               </div>
+                               <div className="col-md-6">
+                                  <label style={{ fontSize: '.72rem', fontWeight: 700, color: '#888', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>
+                                     <i className="fas fa-id-card me-1 text-primary opacity-50"></i>{t('cin_label')}
+                                  </label>
+                                  <div className="p-2 border-bottom text-muted" style={{ fontSize: '.9rem' }}>{user?.cin || '—'}</div>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                {/* ── SECTION MES DOSSIERS ── */}
+                <div className="mb-4 d-flex align-items-center gap-3 mt-5">
+                  <div className="rounded-3 p-2 shadow-sm d-flex align-items-center justify-content-center"
+                    style={{ background: 'linear-gradient(135deg,#2e7d32,#43a047)', color: '#fff', width: 38, height: 38 }}>
+                    <i className="fas fa-folder-open"></i>
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0" style={{ color: '#1a1a2e' }}>{t('profile_dossiers_title')}</h5>
+                    <p className="text-muted small mb-0">{t('profile_dossiers_desc')}</p>
+                  </div>
+                </div>
+
+                <div className="row g-3">
+                   {[
+                      { lbl: t('profile_signalements_pending'), val: pending, icon: 'fa-clock', color: '#e65100', bg: '#fff3e0', action: 'dashboard' },
+                      { lbl: t('profile_signalements_inprog'),  val: inprog,  icon: 'fa-tasks', color: '#1565c0', bg: '#e3f2fd', action: 'dashboard' },
+                      { lbl: t('profile_demandes_admin'),       val: allDemandes.length, icon: 'fa-users', color: '#2e7d32', bg: '#e8f5e9', action: 'demandes' },
+                      { lbl: t('nav_forum_moderation'),          val: allTopics.length, icon: 'fa-comments', color: '#6a1b9a', bg: '#f3e5f5', action: 'forum' },
+                   ].map(c => (
+                      <div key={c.lbl} className="col-6 col-md-3">
+                         <div className="ag-card" style={{ cursor: 'pointer', borderLeft: `4px solid ${c.color}`, height: '100%' }} onClick={() => { setActiveTab(c.action as any); if (c.action === 'demandes') fetchDemandes(); if (c.action === 'forum') fetchTopics() }}>
+                            <div className="ag-card-body d-flex align-items-center gap-2">
+                               <div className="icon-box" style={{ background: c.bg, width: 38, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <i className={`fas ${c.icon}`} style={{ color: c.color, fontSize: '1rem' }}></i>
+                               </div>
+                               <div className="overflow-hidden">
+                                  <div className="h5 mb-0 fw-bold">{c.val}</div>
+                                  <div className="text-muted text-truncate" style={{ fontSize: '.7rem' }}>{c.lbl}</div>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   ))}
+                </div>
+             </div>
           ) : null}
 
           {/* ── Événement detail modal */}
@@ -1992,9 +2149,9 @@ export default function AgentDashboardPage() {
           <div className="ag-profile-card">
             <div className="ag-profile-hdr"><div className="ag-profile-av">{inits}</div><div className="ag-profile-name">{fullName}</div><div className="ag-profile-email">{user?.email || '...'}</div></div>
             <div className="ag-profile-body">
-              <div className="ag-profile-row"><span className="lbl">Rôle</span><span className="val" style={{ color: '#1565c0' }}>{getRoleLabel(user)}</span></div>
-              <div className="ag-profile-row"><span className="lbl">Ville</span><span className="val">{user?.city || 'Kélibia'}</span></div>
-              <div className="ag-profile-row"><span className="lbl">Dossiers</span><span className="val">{inprog}</span></div>
+              <div className="ag-profile-row"><span className="lbl">{t('role')}</span><span className="val" style={{ color: '#1565c0' }}>{getRoleLabel(user, t)}</span></div>
+              <div className="ag-profile-row"><span className="lbl">{t('city_label')}</span><span className="val">{user?.city || 'Kélibia'}</span></div>
+              <div className="ag-profile-row"><span className="lbl">{t('profile_dossiers_title')}</span><span className="val">{inprog}</span></div>
             </div>
           </div>
           <div className="ag-card">
@@ -2100,7 +2257,7 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
                       <button className="btn btn-warning btn-sm mt-2 w-100" onClick={saveReclassify} disabled={reClsSaving || (!reClsCat && !reClsPrio)}>
-                        {reClsSaving ? <><span className="spinner-border spinner-border-sm me-1"></span>Enregistrement...</> : <><i className="fas fa-edit me-1"></i>Appliquer la correction</>}
+                        {reClsSaving ? <><span className="spinner-border spinner-border-sm me-1"></span>{t('registration_in_progress')}</> : <><i className="fas fa-edit me-1"></i>Appliquer la correction</>}
                       </button>
                     </div>
                   ) : null}
@@ -2111,7 +2268,7 @@ export default function AgentDashboardPage() {
                     <option value="pending">⏳ En attente</option><option value="in_progress">🔧 En cours</option><option value="resolved">✅ Résolue</option><option value="rejected">❌ Rejetée</option>
                   </select>
                   <button className="btn btn-primary w-100" onClick={saveDetailStatus} disabled={detailSaving}>
-                    {detailSaving ? <><span className="spinner-border spinner-border-sm me-2"></span>Enregistrement...</> : <><i className="fas fa-save me-2"></i>Enregistrer</>}
+                    {detailSaving ? <><span className="spinner-border spinner-border-sm me-2"></span>{t('registration_in_progress')}</> : <><i className="fas fa-save me-2"></i>{t('save_label')}</>}
                   </button>
                   <div style={{ height: 180, marginTop: 14, borderRadius: 8, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: '#aaa', fontSize: '.8rem' }}><i className="fas fa-map-pin me-1"></i>Pas de coordonnées</span>
@@ -2207,9 +2364,9 @@ export default function AgentDashboardPage() {
                                 <label className="small text-muted mb-1">FACE ARRIÈRE (VERSO)</label>
                                 <div className="ag-cin-preview">
                                    {selectedUser.cin_back ? (
-                                      <a href={selectedUser.cin_back} target="_blank" rel="noreferrer">
+                                       <div onClick={() => setEnlargedImage(selectedUser.cin_back)} style={{ cursor: 'zoom-in' }}>
                                          <img src={selectedUser.cin_back} className="rounded shadow-sm scale-on-hover" style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt="Back CIN" />
-                                      </a>
+                                       </div>
                                    ) : (
                                       <div className="p-5 text-center bg-light text-muted small rounded">Non fournie</div>
                                    )}
@@ -2409,7 +2566,7 @@ export default function AgentDashboardPage() {
          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
            <div className="bg-white rounded-3 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '450px' }}>
              <div className="p-3 bg-dark text-white d-flex justify-content-between align-items-center">
-               <h6 className="mb-0 fw-bold"><i className="fas fa-user-plus me-2"></i>Ajouter un Collaborateur</h6>
+               <h6 className="mb-0 fw-bold"><i className="fas fa-user-plus me-2"></i>{t('add_collaborator')}</h6>
                <button className="btn-close btn-close-white" onClick={() => setShowAddUserModal(false)}></button>
              </div>
              <form className="p-4" onSubmit={async (e) => {
@@ -2447,7 +2604,7 @@ export default function AgentDashboardPage() {
          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
            <div className="bg-white rounded-3 shadow-lg overflow-hidden animate__animated animate__zoomIn" style={{ width: '100%', maxWidth: '650px', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}>
              <div className="p-3 text-white d-flex justify-content-between align-items-center" style={{ background: editingService ? 'linear-gradient(90deg,#003366,#004080)' : 'linear-gradient(90deg,#1e3c72,#2a5298)' }}>
-               <h6 className="mb-0 fw-bold"><i className={`fas ${editingService ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>{editingService ? `Modifier : ${editingService.name_fr}` : 'Nouveau Service Municipal'}</h6>
+               <h6 className="mb-0 fw-bold"><i className={`fas ${editingService ? 'fa-edit' : 'fa-plus-circle'} me-2`}></i>{editingService ? `${t('edit_label')} : ${lang === 'ar' ? (editingService.name_ar || editingService.name_fr) : editingService.name_fr}` : t('new_municipal_service')}</h6>
                <button className="btn-close btn-close-white" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); setServicePdfAr(null); setServicePdfFr(null); setMagicServiceText(''); }}></button>
              </div>
              
@@ -2525,7 +2682,7 @@ export default function AgentDashboardPage() {
                         
                         showToast('Magic filling done! ✨');
                       }
-                    }}>Remplir</button>
+                    }}>  {t('fill_button')}</button>
                 </div>
              </div>
 
@@ -2660,10 +2817,10 @@ export default function AgentDashboardPage() {
                </div>
 
                <div className="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                 <button className="btn btn-light px-4 fw-bold" type="button" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); }}>Annuler</button>
+                 <button className="btn btn-light px-4 fw-bold" type="button" onClick={() => { setShowAddServiceModal(false); setEditingService(null); setServiceReqs([]); }}> {t('cancel_label')}</button>
                  <button className="btn btn-primary px-4 fw-bold shadow" type="submit" disabled={editServiceSaving}>
                    {editServiceSaving ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="fas fa-save me-2"></i>}
-                   {editingService ? 'Mettre à jour' : 'Enregistrer le Service'}
+                   {editingService ? t('update_label') : t('save_service')}
                  </button>
                </div>
              </form>

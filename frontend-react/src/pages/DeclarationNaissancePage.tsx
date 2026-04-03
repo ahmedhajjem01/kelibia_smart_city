@@ -123,12 +123,12 @@ export default function DeclarationNaissancePage() {
         const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000)
         
         if (dateNav > now) {
-          alert('La date de naissance ne peut pas être dans le futur.')
+          alert(t('date_ref_future'))
           setSubmitting(false)
           return
         }
         if (dateNav < tenDaysAgo) {
-          alert('Le délai légal de déclaration est de 10 jours. Veuillez contacter la municipalité pour une procédure de jugement.')
+          alert(t('legal_delay_10_days'))
           setSubmitting(false)
           return
         }
@@ -240,7 +240,7 @@ export default function DeclarationNaissancePage() {
                         />
                         <div className="form-text small text-primary">
                           <i className="fas fa-info-circle me-1"></i>
-                          Le délai légal de déclaration est de 10 jours maximum.
+                          {t('legal_delay_10_days')}
                         </div>
                       </div>
                       <div className="col-md-6">
@@ -264,7 +264,7 @@ export default function DeclarationNaissancePage() {
                           className="form-control"
                           id="lieu_naissance_fr"
                           name="lieu_naissance_fr"
-                          placeholder="Hôpital de Kelibia"
+                          placeholder={t('hosp_placeholder_fr')}
                           required
                         />
                       </div>
@@ -278,7 +278,7 @@ export default function DeclarationNaissancePage() {
                           id="lieu_naissance_ar"
                           name="lieu_naissance_ar"
                           dir="rtl"
-                          placeholder="مستشفى قليبية"
+                          placeholder={t('hosp_placeholder_ar')}
                           required
                         />
                       </div>
@@ -289,7 +289,7 @@ export default function DeclarationNaissancePage() {
                     <div className="row mb-4">
                       <div className="col-md-6 mb-3">
                         <label htmlFor="cin_pere" className="form-label">
-                          CIN Père
+                          {t('cin_pere')}
                         </label>
                         <input type="text" className="form-control" id="cin_pere" name="cin_pere" maxLength={8} />
                         <div className="mt-2 text-start">
@@ -299,7 +299,7 @@ export default function DeclarationNaissancePage() {
                       </div>
                       <div className="col-md-6 mb-3">
                         <label htmlFor="cin_mere" className="form-label">
-                          CIN Mère
+                          {t('cin_mere')}
                         </label>
                         <input type="text" className="form-control" id="cin_mere" name="cin_mere" maxLength={8} />
                         <div className="mt-2 text-start">
@@ -367,7 +367,7 @@ export default function DeclarationNaissancePage() {
                         {submitting ? (
                           <span>{t('processing')}</span>
                         ) : (
-                          <span>Envoyer la déclaration</span>
+                          <span>{t('send_declaration')}</span>
                         )}
                       </button>
                     </div>
@@ -378,7 +378,7 @@ export default function DeclarationNaissancePage() {
                     {t('birth_declaration_success')}
                     <div className="mt-3">
                       <Link to="/dashboard" className="btn btn-success btn-sm">
-                        Retour au tableau de bord
+                        {t('back_to_dashboard')}
                       </Link>
                     </div>
                   </div>

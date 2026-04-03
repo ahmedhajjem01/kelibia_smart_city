@@ -7,6 +7,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
 const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => void, onCancel: () => void }) => {
+  const { t } = useI18n()
   const webcamRef = useRef<Webcam>(null)
   const [imgSrc, setImgSrc] = useState<string | null>(null)
 
@@ -38,10 +39,10 @@ const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => voi
           />
           <div className="d-flex justify-content-center gap-3">
             <button type="button" onClick={capture} className="btn btn-warning rounded-pill px-4 fw-bold shadow">
-              <i className="fas fa-camera me-2"></i> Capturer
+              <i className="fas fa-camera me-2"></i> {t('btn_capture')}
             </button>
             <button type="button" onClick={onCancel} className="btn btn-outline-light rounded-pill px-4">
-              Annuler
+              {t('btn_cancel')}
             </button>
           </div>
         </>
@@ -50,10 +51,10 @@ const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => voi
           <img src={imgSrc} alt="Capture" className="w-100 rounded-3 mb-3 border border-success border-3" />
           <div className="d-flex justify-content-center gap-3">
             <button type="button" onClick={confirm} className="btn btn-success rounded-pill px-4 fw-bold shadow">
-              <i className="fas fa-check me-2"></i> Confirmer
+              <i className="fas fa-check me-2"></i> {t('btn_confirm')}
             </button>
             <button type="button" onClick={() => setImgSrc(null)} className="btn btn-outline-warning rounded-pill px-4">
-              <i className="fas fa-undo me-2"></i> Reprendre
+              <i className="fas fa-undo me-2"></i> {t('btn_retake')}
             </button>
           </div>
         </>
@@ -226,7 +227,7 @@ export default function MariageContractPage() {
                     <i className="fas fa-check-circle fa-5x"></i>
                   </div>
                   <h2 className="fw-bold mb-3">{t('mariage_apply_success')}</h2>
-                  <p className="text-muted mb-0">Redirection...</p>
+                  <p className="text-muted mb-0">{t('redirection_msg')}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>

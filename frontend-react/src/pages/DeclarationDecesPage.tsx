@@ -75,7 +75,7 @@ export default function DeclarationDecesPage() {
           const msg =
             errData.detail ||
             errData.error ||
-            `Erreur ${response.status}: impossible de charger les membres éligibles.`
+            `${t('error')} ${response.status}: ${t('err_eligible_members')}`
           if (response.status === 401) {
             clearTokens()
             navigate('/login')
@@ -101,7 +101,7 @@ export default function DeclarationDecesPage() {
         console.error(e)
         setEligible([])
         setNoEligible(true)
-        setFetchError(e.message || 'Erreur lors du chargement des membres éligibles.')
+        setFetchError(e.message || t('err_eligible_members'))
       }
     })()
   }, [navigate, lang])
@@ -127,10 +127,10 @@ export default function DeclarationDecesPage() {
         const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
         
         if (dateDeces > now) {
-          throw new Error(lang === 'ar' ? 'لا يمكن أن يكون تاريخ الوفاة في المستقبل.' : 'La date de décès ne peut pas être dans le futur.')
+          throw new Error(t('date_deces_future'))
         }
         if (dateDeces < threeDaysAgo) {
-          throw new Error(lang === 'ar' ? 'يجب التصريح بالوفاة في غضون 72 ساعة (3 أيام).' : 'Le décès doit être déclaré dans un délai de 3 jours (72 heures).')
+          throw new Error(t('legal_delay_3_days'))
         }
       }
 
@@ -208,7 +208,7 @@ export default function DeclarationDecesPage() {
                       </label>
                       <select className="form-select form-select-lg" id="defunt" name="defunt" required disabled={noEligible}>
                         <option value="" disabled selected>
-                          Chargement...
+                          {t('loading')}
                         </option>
                         {(eligible || []).map((rel) => {
                           const name = lang === 'ar' ? `${rel.prenom_ar} ${rel.nom_ar}` : `${rel.prenom_fr} ${rel.nom_fr}`
@@ -245,14 +245,14 @@ export default function DeclarationDecesPage() {
 
                     <div className="mb-4">
                       <label htmlFor="lieu_deces" className="form-label">
-                        {lang === 'ar' ? t('place_of_death_ar') : t('place_of_death_fr')}
+                        {t('place_of_death')}
                       </label>
                       <input 
                         type="text" 
                         className="form-control" 
                         id="lieu_deces" 
                         name={lang === 'ar' ? 'lieu_deces_ar' : 'lieu_deces_fr'} 
-                        placeholder={lang === 'ar' ? 'مستشفى قليبية' : 'Hôpital de Kelibia'} 
+                        placeholder={t('hosp_placeholder_fr')} 
                         required 
                       />
                     </div>
@@ -294,7 +294,7 @@ export default function DeclarationDecesPage() {
                           >
                             &times;
                           </button>
-                          <div className="small text-success mt-1">Photo capturée prête</div>
+                          <div className="small text-success mt-1">{t('photo_ready')}</div>
                         </div>
                       )}
                     </div>
@@ -324,22 +324,22 @@ export default function DeclarationDecesPage() {
                       <i className="fas fa-check-circle fa-2x" />
                       <h4 className="mb-0 fw-bold">{t('declaration_success')}</h4>
                     </div>
-                    <p className="mb-3">Votre déclaration a été enregistrée. Elle sera examinée par un agent municipal sous peu.</p>
+                    <p className="mb-3">{t('decl_success_msg')}</p>
                     <div className="d-flex gap-2 flex-wrap mb-3">
                       <Link to="/dashboard" className="btn btn-success btn-sm rounded-pill px-3">
                         {t('dashboard')}
                       </Link>
                       <Link to="/mes-demandes" className="btn btn-outline-success btn-sm rounded-pill px-3">
-                        Suivre mes demandes
+                        {t('track_my_requests')}
                       </Link>
                     </div>
                     <div className="mt-4 pt-3 border-top border-success border-opacity-25">
                        <p className="small text-muted mb-2">
                         <i className="fas fa-info-circle me-1 text-primary"></i>
-                        <strong>Étape suivante :</strong> Dès que cette déclaration sera validée, vous pourrez demander un <strong>permis d'inhumation</strong>.
+                        <strong>{t('next_step_label')}</strong> {t('next_step_inhumation')}
                       </p>
                       <Link to="/demande-inhumation" className="btn btn-link btn-sm p-0 text-success fw-bold text-decoration-none">
-                        Aller vers le service d'inhumation <i className="fas fa-arrow-right ms-1"></i>
+                        {t('go_to_inhumation')} <i className="fas fa-arrow-right ms-1"></i>
                       </Link>
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export default function DeclarationDecesPage() {
                   mirrored={false}
                   videoConstraints={videoConstraints}
                   className="w-100"
-                  onUserMediaError={(err) => alert("Erreur caméra: " + err)}
+                  onUserMediaError={(err) => alert(`${t('error')} ${t('camera')}: ${err}`)}
                 />
               </div>
               <div className="modal-footer border-0 justify-content-center pt-3 pb-4">

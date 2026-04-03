@@ -20,13 +20,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
 
   return (
     <div className="sidebar d-none d-md-block">
-      <div className="sidebar-section-title">{isAgentOrAdmin ? 'ESPACE AGENT' : t('nav_title')}</div>
+      <div className="sidebar-section-title">{isAgentOrAdmin ? t('nav_agent_space') : t('nav_title')}</div>
 
       {isAgentOrAdmin ? (
         <>
           <NavLink to="/agent-dashboard" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
             <i className="fas fa-shield-alt"></i>
-            <span>Retour à l'Espace Agent</span>
+            <span>{t('back_to_agent_space')}</span>
           </NavLink>
         </>
       ) : (

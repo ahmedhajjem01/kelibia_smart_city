@@ -257,8 +257,13 @@ class UserVerificationView(APIView):
             target_user = User.objects.get(id=user_id)
             if action == 'verify':
                 target_user.is_verified = True
+                # Effacer les images du CIN pour la confidentialité après vérification
+                target_user.cin_front_utf = None
+                target_user.cin_back_utf = None
+                target_user.cin_front_image = None
+                target_user.cin_back_image = None
                 target_user.save()
-                return Response({"message": "Compte citoyen vérifié avec succès."})
+                return Response({"message": "Compte citoyen vérifié avec succès. Les images du CIN ont été supprimées par mesure de confidentialité."})
             elif action == 'toggle_active':
                 target_user.is_active = not target_user.is_active
                 target_user.save()

@@ -116,7 +116,7 @@ export default function AgentReclamationsPage() {
                     </Link>
                     <h5 className="mb-0 text-white fw-bold">
                         <i className="fas fa-map-marked-alt text-danger me-2"></i>
-                        Centre de Commandement des Réclamations
+                        {t('claim_command_center')}
                     </h5>
                 </div>
                 <div className="d-flex align-items-center gap-3">
@@ -139,7 +139,7 @@ export default function AgentReclamationsPage() {
                       </button>
                     </div>
                     <span className="badge bg-danger rounded-pill px-3">
-                        {reclamations.filter(r => r.status === 'pending').length} en attente
+                        {reclamations.filter(r => r.status === 'pending').length} {t('pending_count')}
                     </span>
                     <button onClick={fetchReclamations} className="btn btn-sm btn-outline-warning rounded-pill px-3">
                         <i className="fas fa-sync-alt"></i>
@@ -154,7 +154,7 @@ export default function AgentReclamationsPage() {
                 <div className="p-3 border-bottom bg-light">
                     <div className="input-group">
                         <span className="input-group-text bg-white border-end-0"><i className="fas fa-search text-muted"></i></span>
-                        <input type="text" className="form-control border-start-0" placeholder="Filtrer les signalements..." />
+                        <input type="text" className="form-control border-start-0" placeholder={t('filter_claims_placeholder')} />
                     </div>
                 </div>
                 <div className="overflow-auto flex-grow-1 p-2">
@@ -203,7 +203,7 @@ export default function AgentReclamationsPage() {
                                 <div className="p-1">
                                     <h6 className="fw-bold mb-1">{rec.title}</h6>
                                     <p className="small text-muted mb-2">{rec.description}</p>
-                                    <button onClick={() => setSelectedRec(rec)} className="btn btn-xs btn-primary w-100 py-1">Voir Détails</button>
+                                    <button onClick={() => setSelectedRec(rec)} className="btn btn-xs btn-primary w-100 py-1">{t('view_details')}</button>
                                 </div>
                             </Popup>
                         </Marker>
@@ -220,11 +220,11 @@ export default function AgentReclamationsPage() {
                                         <div className="d-flex align-items-center gap-2 mb-2">
                                             {getStatusBadge(selectedRec.status)}
                                             <span className={`badge bg-${getPriorityColor(selectedRec.priority)}`}>
-                                                {t(`priority_${selectedRec.priority}`)} (AI Classification)
+                                                {t(`priority_${selectedRec.priority}`)} {t('ai_classification')}
                                             </span>
                                         </div>
                                         <h4 className="fw-bold mb-1">{selectedRec.title}</h4>
-                                        <p className="text-muted small mb-3">Service Responsable: <span className="text-primary fw-bold">{selectedRec.service_responsable}</span></p>
+                                        <p className="text-muted small mb-3">{t('responsible_service')} <span className="text-primary fw-bold">{selectedRec.service_responsable}</span></p>
                                     </div>
                                     <button onClick={() => setSelectedRec(null)} className="btn-close"></button>
                                 </div>
@@ -232,16 +232,16 @@ export default function AgentReclamationsPage() {
                                 <div className="d-flex gap-3">
                                     {selectedRec.status === 'pending' && (
                                         <button onClick={() => handleStatusUpdate(selectedRec.id, 'in_progress')} className="btn btn-primary rounded-pill px-4">
-                                            Marquer comme En Cours
+                                            {t('mark_claim_in_progress')}
                                         </button>
                                     )}
                                     {selectedRec.status === 'in_progress' && (
                                         <button onClick={() => handleStatusUpdate(selectedRec.id, 'resolved')} className="btn btn-success rounded-pill px-4">
-                                            Marquer comme Résolue
+                                            {t('mark_claim_resolved')}
                                         </button>
                                     )}
                                     <button onClick={() => handleStatusUpdate(selectedRec.id, 'rejected')} className="btn btn-outline-danger rounded-pill px-4">
-                                        Rejeter
+                                        {t('reject_claim')}
                                     </button>
                                 </div>
                             </div>

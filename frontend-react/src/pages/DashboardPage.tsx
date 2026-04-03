@@ -41,7 +41,7 @@ type ForumNotif = {
 }
 
 export default function DashboardPage() {
-  const { t, lang } = useI18n()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserInfo | null>(null)
@@ -159,9 +159,9 @@ export default function DashboardPage() {
           <div className="d-flex align-items-center">
             <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
             <div>
-              <h5 className="alert-heading mb-1">Compte en attente de vérification</h5>
+              <h5 className="alert-heading mb-1">{t('account_waiting_verification')}</h5>
               <p className="mb-0 small">
-                {lang === 'ar' ? 'يتم حالياً التحقق من هويتك من قبل وكيل البلدية.' : 'Votre identité est en cours de validation par un agent municipal.'}
+                {t('unverified_msg')}
               </p>
             </div>
           </div>
@@ -190,16 +190,14 @@ export default function DashboardPage() {
             <i className="fas fa-book-open fa-lg text-success me-3"></i>
             <div className="flex-grow-1">
               <h6 className="fw-bold mb-1">
-                {lang === 'ar' ? 'دفتر العائلة جاهز!' : 'Votre livret de famille est prêt !'}
+                {t('livret_famille_ready')}
               </h6>
               <p className="mb-0 small">
-                {lang === 'ar' 
-                  ? `يمكنكم استلامه من الشباك رقم ${notif.guichet_recuperation || '..'} بمقر البلدية.` 
-                  : `Vous pouvez le récupérer au guichet n°${notif.guichet_recuperation || '..'} de la municipalité.`}
+                {t('livret_famille_ready_msg').replace('{guichet}', notif.guichet_recuperation || '..')}
               </p>
             </div>
             <Link to="/mes-demandes" className="btn btn-sm btn-success rounded-pill px-3">
-              {lang === 'ar' ? 'عرض الطلبات' : 'Voir mes demandes'}
+              {t('view_requests')}
             </Link>
           </div>
         </div>
@@ -209,7 +207,7 @@ export default function DashboardPage() {
 
       <div className="content-card mb-4" style={{ borderRadius: '12px', overflow: 'hidden' }}>
         <div className="card-header-custom" style={{ backgroundColor: 'var(--primary-navy)', color: 'white' }}>
-          <span><i className="fas fa-bolt icon text-warning"></i><span>{lang === 'ar' ? 'إجراءات سريعة' : 'Actions Rapides'}</span></span>
+          <span><i className="fas fa-bolt icon text-warning"></i><span>{t('quick_actions')}</span></span>
         </div>
         <div className="card-body-custom p-0">
           <div className="row g-0 text-center">
@@ -256,8 +254,8 @@ export default function DashboardPage() {
       {/* MAP CARD */}
       <div className="content-card mb-4" id="mapCard" style={{ minHeight: '450px' }}>
         <div className="card-header-custom d-flex justify-content-between align-items-center">
-          <span><i className="fas fa-map-marked-alt icon text-primary"></i><span>{lang === 'ar' ? 'خريطة قليبية — بلاغات حقيقية' : 'Carte de Kélibia — Signalements en temps réel'}</span></span>
-          <span className="badge bg-primary rounded-pill font-monospace" style={{ fontSize: '0.7rem' }}>{reclamations.length} {lang === 'ar' ? 'بلاغات' : 'signalement(s) affiché(s)'}</span>
+          <span><i className="fas fa-map-marked-alt icon text-primary"></i><span>{t('map_title_realtime')}</span></span>
+          <span className="badge bg-primary rounded-pill font-monospace" style={{ fontSize: '0.7rem' }}>{reclamations.length} {t('map_signalements_count')}</span>
         </div>
         <div className="position-relative" style={{ height: '380px' }}>
           {loadingMap ? (
@@ -267,10 +265,10 @@ export default function DashboardPage() {
           ) : (
             <MapContainer center={KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
               <LayersControl position="topright">
-                <LayersControl.BaseLayer checked name={lang === 'ar' ? 'خريطة عادية' : 'OpenStreetMap'}>
+                <LayersControl.BaseLayer checked name={t('map_osm')}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name={lang === 'ar' ? 'قمر صناعي' : 'Satellite (Esri)'}>
+                <LayersControl.BaseLayer name={t('map_satellite')}>
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
                 </LayersControl.BaseLayer>
               </LayersControl>
@@ -291,12 +289,12 @@ export default function DashboardPage() {
 
               <div className="leaflet-bottom leaflet-left" style={{ zIndex: 1000, margin: '15px' }}>
                   <div className="card shadow-sm border-0 p-3 bg-white" style={{ borderRadius: '8px', opacity: 0.9 }}>
-                    <div className="small fw-bold mb-2 border-bottom pb-1">{lang === 'ar' ? 'دليل الخريطة' : 'Légende'}</div>
+                    <div className="small fw-bold mb-2 border-bottom pb-1">{t('map_legend')}</div>
                     <div className="d-flex flex-column gap-1">
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-warning me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'قيد الانتظار' : 'En attente'}</span>
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-primary me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'قيد الإنجاز' : 'En cours'}</span>
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-success me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'تم الحل' : 'Résolu'}</span>
-                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-danger me-2" style={{ fontSize: '0.6rem' }}></i> {lang === 'ar' ? 'مرفوض' : 'Rejeté'}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-warning me-2" style={{ fontSize: '0.6rem' }}></i> {t('status_pending')}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-primary me-2" style={{ fontSize: '0.6rem' }}></i> {t('status_in_progress')}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-success me-2" style={{ fontSize: '0.6rem' }}></i> {t('status_resolved')}</span>
+                       <span className="small d-flex align-items-center"><i className="fas fa-circle text-danger me-2" style={{ fontSize: '0.6rem' }}></i> {t('status_rejected')}</span>
                     </div>
                   </div>
               </div>
@@ -331,7 +329,7 @@ export default function DashboardPage() {
           <Link to="/evenements" className="btn btn-sm rounded-pill px-3 fw-bold"
             style={{ background: '#6f42c1', color: '#fff', border: 'none', fontSize: '.75rem' }}>
             <i className="fas fa-calendar-star me-1"></i>
-            {lang === 'ar' ? 'التظاهرات العمومية' : 'Événements publics'}
+            {t('events_public')}
           </Link>
         </div>
         <div className="card-body-custom">

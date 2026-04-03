@@ -212,14 +212,14 @@ export default function MesDemandesPage() {
         </div>
       )
       case 'in_progress': 
-        return <span className="badge bg-primary rounded-pill px-3"><i className="fas fa-spinner fa-spin me-1"></i> {lang === 'ar' ? 'قيد المعالجة' : 'En cours'}</span>
+        return <span className="badge bg-primary rounded-pill px-3"><i className="fas fa-spinner fa-spin me-1"></i> {t('status_in_progress')}</span>
       case 'validated':
       case 'approved':
       case 'signed':
       case 'resolved':
         return <span className="badge bg-success rounded-pill px-3"><i className="fas fa-check-circle me-1"></i> {t('status_validated')}</span>
       case 'ready':
-        return <span className="badge bg-info text-dark rounded-pill px-3"><i className="fas fa-box-open me-1"></i> {lang === 'ar' ? 'جاهز للاستلام' : 'Prêt pour retrait'}</span>
+        return <span className="badge bg-info text-dark rounded-pill px-3"><i className="fas fa-box-open me-1"></i> {t('status_ready')}</span>
       case 'rejected': return <span className="badge bg-danger rounded-pill px-3"><i className="fas fa-times-circle me-1"></i> {t('status_rejected')}</span>
 
 
@@ -272,10 +272,10 @@ export default function MesDemandesPage() {
             <div className="mb-4 opacity-25">
               <i className="fas fa-folder-open fa-4x text-muted"></i>
             </div>
-            <h4 className="fw-bold text-muted">Aucune demande trouvée</h4>
-            <p className="text-muted mb-4">Vous n'avez pas encore soumis de demande administrative.</p>
+            <h4 className="fw-bold text-muted">{t('no_requests_found')}</h4>
+            <p className="text-muted mb-4">{t('no_requests_desc')}</p>
             <Link to="/services" className="btn btn-outline-primary rounded-pill px-4">
-              Faire ma première demande
+              {t('make_first_request')}
             </Link>
           </div>
         ) : (
@@ -284,10 +284,10 @@ export default function MesDemandesPage() {
               <table className="table table-hover align-middle mb-0">
                 <thead className="bg-light">
                   <tr>
-                    <th className="px-4 py-3 border-0">{lang === 'ar' ? 'الطلب' : 'Demande'}</th>
-                    <th className="py-3 border-0">{lang === 'ar' ? 'التوجيه' : 'Détails'}</th>
-                    <th className="py-3 border-0 text-center">{lang === 'ar' ? 'التاريخ' : 'Date'}</th>
-                    <th className="py-3 border-0 text-center">{lang === 'ar' ? 'الحالة' : 'Statut'}</th>
+                    <th className="px-4 py-3 border-0">{t('request_label')}</th>
+                    <th className="py-3 border-0">{t('details_label')}</th>
+                    <th className="py-3 border-0 text-center">{t('date')}</th>
+                    <th className="py-3 border-0 text-center">{t('status_label')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -314,12 +314,12 @@ export default function MesDemandesPage() {
                                 style={{ fontSize: '0.65rem' }}
                                 onClick={() => navigate(`/paiement?amount=2.000&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}`)}
                              >
-                                <i className="fas fa-credit-card me-1"></i> Payer 2 DT
+                                <i className="fas fa-credit-card me-1"></i> {t('pay_2dt')}
                              </button>
                            )}
                            {req.isPaid && (
                              <span className="badge bg-light text-success border border-success extra-small" style={{ fontSize: '0.6rem' }}>
-                                PAYÉ <i className="fas fa-check"></i>
+                                {t('paid_label')} <i className="fas fa-check"></i>
                              </span>
                            )}
                         </div>
