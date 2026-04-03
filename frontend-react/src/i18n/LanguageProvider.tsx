@@ -1260,7 +1260,6 @@ const translations: Record<Lang, Record<string, string>> = {
     first_and_last_name: 'الاسم واللقب',
     birth_date_label: 'تاريخ الولادة',
     not_provided: 'غير متوفر(ة)',
-    status_rejected: 'مرفوض',
     status_approved: 'مقبول',
     status_changes_requested: 'تعديلات مطلوبة',
     commune_kelibia: 'بلدية قليبية',

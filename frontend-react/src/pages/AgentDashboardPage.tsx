@@ -2837,6 +2837,7 @@ export default function AgentDashboardPage() {
 }
 
 function QSSelect({ rec, onUpdate }: { rec: Reclamation; onUpdate: (id: number, ns: string, os: string, cb: (ok: boolean) => void) => void }) {
+  const { t } = useI18n()
   const [val, setVal] = useState(rec.status)
   const [dis, setDis] = useState(false)
   return (
