@@ -34,6 +34,8 @@ urlpatterns = [
     path('signalement/', include('signalement.urls')),
     path('dashboard/', include('signalement.urls')),
     path('login/', login_redirect, name='login'),
+    path('api/construction/', include('maison_construction.urls')),
+    path('livret-famille/', include('livret_famille.urls')),
     path('api/supervisor/services-summary/', get_supervisor_services_summary, name='supervisor_services_summary'),
     path('api/supervisor/manage-orders/', manage_supervisor_orders, name='manage_supervisor_orders'),
     path('api/supervisor/manage-orders/<str:order_type>/<int:order_id>/', manage_supervisor_orders, name='manage_supervisor_order_detail'),

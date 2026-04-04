@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "forum",
     "livret_famille",
     "social_evenements",
+    "maison_construction",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

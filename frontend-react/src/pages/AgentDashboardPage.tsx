@@ -183,9 +183,15 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'stats' | 'demandes' | 'profile'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile'>('dashboard')
   const [allEvenements, setAllEvenements] = useState<any[]>([])
   const [loadingEvenements, setLoadingEvenements] = useState(false)
+  const [allConstructions, setAllConstructions] = useState<any[]>([])
+  const [loadingConstructions, setLoadingConstructions] = useState(false)
+  const [constructionStats, setConstructionStats] = useState<any | null>(null)
+  const [constructionDetail, setConstructionDetail] = useState<any | null>(null)
+  const [constructionSearch, setConstructionSearch] = useState('')
+  const [constructionFilter, setConstructionFilter] = useState<string>('all')
   const [evStatusFilter, setEvStatusFilter] = useState('')
   const [evTypeFilter, setEvTypeFilter] = useState('')
   const [evSearch, setEvSearch] = useState('')
@@ -400,6 +406,40 @@ export default function AgentDashboardPage() {
       }
     } catch (e) { console.error(e) }
     finally { setLoadingEvenements(false) }
+  }
+
+  async function fetchConstructions() {
+    setLoadingConstructions(true)
+    try {
+      const [listRes, statsRes] = await Promise.all([
+        fetch('/api/construction/demandes/', { headers: { Authorization: `Bearer ${access}` } }),
+        fetch('/api/construction/demandes/stats/', { headers: { Authorization: `Bearer ${access}` } }),
+      ])
+      if (listRes.ok) {
+        const data = await listRes.json()
+        setAllConstructions(Array.isArray(data) ? data : (data.results || []))
+      }
+      if (statsRes.ok) setConstructionStats(await statsRes.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingConstructions(false) }
+  }
+
+  async function updateConstructionStatus(id: number, status: string, commentaire?: string, priorite?: string) {
+    const fd = new FormData()
+    fd.append('status', status)
+    if (commentaire) fd.append('commentaire_agent', commentaire)
+    if (priorite) fd.append('priorite', priorite)
+    try {
+      const res = await fetch(`/api/construction/demandes/${id}/update-status/`, {
+        method: 'PATCH', headers: { Authorization: `Bearer ${access}` }, body: fd,
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setAllConstructions(prev => prev.map(c => c.id === id ? updated : c))
+        if (constructionDetail?.id === id) setConstructionDetail(updated)
+        showToast('Statut mis à jour ✓')
+      }
+    } catch (e) { console.error(e) }
   }
 
   async function fetchTopics() {
@@ -828,6 +868,12 @@ export default function AgentDashboardPage() {
             <i className="fas fa-calendar-alt"></i> {t('nav_events_mgmt')}
             {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
               <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
+            )}
+          </a>
+          <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
+            <i className="fas fa-hard-hat"></i> Permis de construire
+            {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && (
+              <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>
             )}
           </a>
           <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
@@ -1641,6 +1687,147 @@ export default function AgentDashboardPage() {
                 )
               })()}
             </div>
+          ) : activeTab === 'construction' ? (
+            /* ── CONSTRUCTION TAB ─────────────────────────────────────────── */
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#e65100,#f57f17)' }}>
+                <span><i className="fas fa-hard-hat me-2"></i>Permis de Construire — Gestion des dossiers</span>
+                <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchConstructions}>
+                  <i className="fas fa-sync-alt me-1"></i>Actualiser
+                </button>
+              </div>
+              <div className="p-4">
+                {/* Stats cards */}
+                {constructionStats && (
+                  <div className="row g-3 mb-4">
+                    {[
+                      { lbl: 'Total', val: constructionStats.total, color: '#1a237e', bg: '#e8eaf6' },
+                      { lbl: 'En attente', val: constructionStats.pending, color: '#e65100', bg: '#fff3e0' },
+                      { lbl: 'En instruction', val: constructionStats.en_cours, color: '#1565c0', bg: '#e3f2fd' },
+                      { lbl: 'Permis délivrés', val: constructionStats.permis_delivre, color: '#2e7d32', bg: '#e8f5e9' },
+                      { lbl: 'Rejetés', val: constructionStats.rejet, color: '#c62828', bg: '#ffebee' },
+                      { lbl: '⚠️ Haute priorité', val: constructionStats.high_risk, color: '#e65100', bg: '#fff3e0' },
+                    ].map(s => (
+                      <div className="col-6 col-md-4 col-lg-2" key={s.lbl}>
+                        <div className="text-center p-3 rounded-3" style={{ background: s.bg }}>
+                          <div className="fw-bold" style={{ fontSize: '1.5rem', color: s.color }}>{s.val}</div>
+                          <div style={{ fontSize: '.73rem', color: s.color, fontWeight: 600 }}>{s.lbl}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Filters */}
+                <div className="d-flex gap-2 flex-wrap mb-3 align-items-center">
+                  <div className="ag-search-wrap flex-grow-1">
+                    <i className="fas fa-search"></i>
+                    <input className="ag-search-input" placeholder="Rechercher par nom, adresse..." value={constructionSearch} onChange={e => setConstructionSearch(e.target.value)} />
+                  </div>
+                  {['all','pending','en_cours_instruction','permis_delivre','rejet_definitif','changes_requested'].map(f => (
+                    <button key={f} className={`btn btn-sm rounded-pill ${constructionFilter===f?'btn-warning':'btn-outline-secondary'}`}
+                      onClick={() => setConstructionFilter(f)} style={{ fontSize: '.75rem' }}>
+                      {f==='all'?'Tous':f==='pending'?'En attente':f==='en_cours_instruction'?'En instruction':f==='permis_delivre'?'Permis délivré':f==='rejet_definitif'?'Rejeté':'Modif. demandées'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* List */}
+                {loadingConstructions ? (
+                  <div className="text-center py-4"><div className="spinner-border text-warning"></div></div>
+                ) : (
+                  <div className="d-flex flex-column gap-2">
+                    {allConstructions
+                      .filter(c => constructionFilter === 'all' || c.status === constructionFilter)
+                      .filter(c => !constructionSearch || c.nom_proprietaire?.toLowerCase().includes(constructionSearch.toLowerCase()) || c.adresse_terrain?.toLowerCase().includes(constructionSearch.toLowerCase()))
+                      .map(c => {
+                        const statusColors: Record<string, string> = {
+                          pending: '#ff9800', en_cours_instruction: '#1565c0', favorable: '#00897b',
+                          defavorable: '#c62828', changes_requested: '#f57f17',
+                          permis_delivre: '#2e7d32', rejet_definitif: '#424242',
+                        }
+                        const color = statusColors[c.status] || '#666'
+                        return (
+                          <div key={c.id} className="p-3 rounded-3 border d-flex align-items-start gap-3 flex-wrap"
+                            style={{ background: constructionDetail?.id === c.id ? '#fff8e1' : '#fff', cursor: 'pointer', borderColor: c.is_high_risk ? '#ff9800' : '#e9ecef' }}
+                            onClick={() => setConstructionDetail(constructionDetail?.id === c.id ? null : c)}>
+                            <div className="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                              style={{ width: 40, height: 40, background: '#fff3e0', fontSize: '1.2rem' }}>
+                              🏗️
+                            </div>
+                            <div className="flex-grow-1 min-w-0">
+                              <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                <span className="fw-bold" style={{ fontSize: '.9rem' }}>{c.nom_proprietaire}</span>
+                                <span className="badge rounded-pill text-white" style={{ background: color, fontSize: '.7rem' }}>{c.status_display}</span>
+                                {c.is_high_risk && <span className="badge bg-danger rounded-pill" style={{ fontSize: '.68rem' }}>⚠️ Haute priorité</span>}
+                              </div>
+                              <div style={{ fontSize: '.8rem', color: '#777' }}>
+                                <span className="me-3"><i className="fas fa-tools me-1 text-warning"></i>{c.type_travaux_display}</span>
+                                <span className="me-3"><i className="fas fa-map-marker-alt me-1 text-danger"></i>{c.adresse_terrain}</span>
+                                <span><i className="fas fa-expand me-1 text-success"></i>{c.surface_construite} m² — {c.nombre_etages} étage{c.nombre_etages > 1 ? 's' : ''}</span>
+                              </div>
+                            </div>
+                            <i className={`fas fa-chevron-${constructionDetail?.id === c.id ? 'up' : 'down'} text-muted`}></i>
+                          </div>
+                        )
+                      })}
+                    {allConstructions.filter(c => constructionFilter === 'all' || c.status === constructionFilter).length === 0 && (
+                      <div className="text-center text-muted py-4"><i className="fas fa-hard-hat fa-2x opacity-25 mb-2 d-block"></i>Aucun dossier trouvé</div>
+                    )}
+                  </div>
+                )}
+
+                {/* Detail panel */}
+                {constructionDetail && (
+                  <div className="mt-4 p-4 rounded-3 border" style={{ background: '#fffde7', borderColor: '#f9a825' }}>
+                    <div className="d-flex align-items-center gap-2 mb-3">
+                      <span className="fw-bold fs-6">🏗️ Dossier #{constructionDetail.id} — {constructionDetail.nom_proprietaire}</span>
+                      <span className="ms-auto badge bg-secondary rounded-pill" style={{ fontSize: '.72rem' }}>CIN: {constructionDetail.cin_proprietaire}</span>
+                    </div>
+                    <div className="row g-2 mb-3" style={{ fontSize: '.83rem' }}>
+                      <div className="col-md-4"><strong>Type :</strong> {constructionDetail.type_travaux_display}</div>
+                      <div className="col-md-4"><strong>Usage :</strong> {constructionDetail.usage_batiment_display}</div>
+                      <div className="col-md-4"><strong>Surface :</strong> {constructionDetail.surface_construite} m²</div>
+                      <div className="col-md-4"><strong>Étages :</strong> {constructionDetail.nombre_etages}</div>
+                      <div className="col-md-4"><strong>Début prévu :</strong> {constructionDetail.date_debut_prevue}</div>
+                      <div className="col-md-4"><strong>Durée :</strong> {constructionDetail.duree_travaux_mois} mois</div>
+                      <div className="col-md-6"><strong>Adresse :</strong> {constructionDetail.adresse_terrain}</div>
+                      <div className="col-md-6"><strong>Tél. propriétaire :</strong> {constructionDetail.telephone_proprietaire}</div>
+                      {constructionDetail.cout_estime && <div className="col-md-4"><strong>Coût estimé :</strong> {constructionDetail.cout_estime} DT</div>}
+                      {constructionDetail.nom_entrepreneur && <div className="col-md-4"><strong>Entrepreneur :</strong> {constructionDetail.nom_entrepreneur}</div>}
+                    </div>
+                    {constructionDetail.commentaire_agent && (
+                      <div className="mb-3 p-2 rounded-3 bg-white border" style={{ fontSize: '.83rem' }}>
+                        <strong>Commentaire précédent :</strong> {constructionDetail.commentaire_agent}
+                      </div>
+                    )}
+                    {/* Action buttons */}
+                    <div className="d-flex gap-2 flex-wrap mt-2">
+                      {[
+                        { s: 'en_cours_instruction', label: '🔍 Mettre en instruction', cls: 'btn-primary' },
+                        { s: 'favorable', label: '👍 Avis favorable', cls: 'btn-info text-white' },
+                        { s: 'permis_delivre', label: '✅ Délivrer le permis', cls: 'btn-success' },
+                        { s: 'changes_requested', label: '✏️ Demander modifications', cls: 'btn-warning' },
+                        { s: 'defavorable', label: '👎 Avis défavorable', cls: 'btn-danger' },
+                        { s: 'rejet_definitif', label: '🚫 Rejet définitif', cls: 'btn-dark' },
+                      ].map(btn => (
+                        <button key={btn.s} className={`btn btn-sm rounded-pill ${btn.cls}`}
+                          style={{ fontSize: '.78rem' }}
+                          onClick={() => {
+                            const comment = btn.s === 'changes_requested' || btn.s === 'defavorable' || btn.s === 'rejet_definitif'
+                              ? prompt('Commentaire pour le citoyen (optionnel) :') ?? ''
+                              : ''
+                            updateConstructionStatus(constructionDetail.id, btn.s, comment)
+                          }}>
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
           ) : activeTab === 'stats' ? (
             /* ── STATISTIQUES IA TAB ──────────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
@@ -1925,7 +2112,7 @@ export default function AgentDashboardPage() {
                                   <label style={{ fontSize: '.72rem', fontWeight: 700, color: '#888', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>
                                      <i className="fas fa-id-card me-1 text-primary opacity-50"></i>{t('cin_label')}
                                   </label>
-                                  <div className="p-2 border-bottom text-muted" style={{ fontSize: '.9rem' }}>{user?.cin || '—'}</div>
+                                  <div className="p-2 border-bottom text-muted" style={{ fontSize: '.9rem' }}>{(user as any)?.cin || '—'}</div>
                                </div>
                             </div>
                          </div>

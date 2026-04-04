@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -195,6 +195,31 @@ export default function ServicesPage() {
           kind: 'declare_birth',
           label: lang === 'ar' ? 'طلب ترخيص' : 'Demander une autorisation',
           target: '/demande-evenement',
+        }
+      } else if (nameLower.includes('goudronnage') || nameAr.includes('تعبيد') || nameAr.includes('رصف الطريق')) {
+        requestButton = {
+          kind: 'declare_birth',
+          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+          target: '/demande-goudronnage',
+        }
+      } else if (nameLower.includes('vocation') || nameAr.includes('صبغة عقار') || nameAr.includes('صبغة')) {
+        requestButton = {
+          kind: 'declare_birth',
+          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+          target: '/demande-certificat-vocation',
+        }
+      } else if (
+        nameLower.includes('construire') || nameLower.includes('construction') ||
+        nameLower.includes('permis') || nameLower.includes('rénovation') ||
+        nameLower.includes('renovation') || nameLower.includes('extension') ||
+        nameLower.includes('bâtiment') || nameLower.includes('batiment') ||
+        nameLower.includes('immobilier') || nameLower.includes('terrain') ||
+        nameAr.includes('بناء') || nameAr.includes('ترخيص بناء') || nameAr.includes('تعمير')
+      ) {
+        requestButton = {
+          kind: 'declare_birth',
+          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+          target: '/demande-construction',
         }
       } else {
       requestButton = {
