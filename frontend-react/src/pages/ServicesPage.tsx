@@ -48,8 +48,15 @@ export default function ServicesPage() {
   const [allCategories, setAllCategories] = useState<ServiceCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [errorText, setErrorText] = useState<string | null>(null)
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
-  // Track which category accordion is open (by id, null = all closed)
+  const [user, setUser] = useState<{ 
+    first_name: string; 
+    last_name: string; 
+    email: string; 
+    is_verified: boolean;
+    has_active_asd: boolean;
+    asd_expiration: string | null;
+  } | null>(null)
+  
   const [openCatId, setOpenCatId] = useState<number | null>(null)
 
   const [modalState, setModalState] = useState<{
@@ -72,7 +79,6 @@ export default function ServicesPage() {
 
     ;(async () => {
       try {
-        // Fetch user for TopNav
         const uRes = await fetch('/api/accounts/me/', {
           headers: { Authorization: `Bearer ${access}` },
         })
@@ -109,27 +115,12 @@ export default function ServicesPage() {
     const svcName = lang === 'ar' ? svc.name_ar : svc.name_fr
     const svcDesc = lang === 'ar' ? svc.description_ar : svc.description_fr
     let timeText = svc.processing_time || (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
-    if (svc.processing_time) {
-      if (/[\u0600-\u06FF]/.test(svc.processing_time)) {
-        if (lang === 'ar') {
-          const match = svc.processing_time.match(/\(([\u0600-\u06FF\s]+.*?)\)$/)
-          if (match) timeText = match[1]
-        } else {
-          timeText = svc.processing_time.replace(/\([\u0600-\u06FF\s]+.*?\)$/g, '').trim()
-        }
-      }
-    }
-
+    
     const reqs = svc.requirements.map((r) => ({ ar: r.name_ar, fr: r.name_fr }))
 
-    // Determine request target based on service name
     const nameLower = svc.name_fr.toLowerCase().trim()
     const nameAr = svc.name_ar.trim()
-
-    const isBirthReg =
-      nameLower.includes('naissance') ||
-      nameAr.includes('ولادة') ||
-      nameAr.includes('ترسيم')
+    const isBirthReg = nameLower.includes('naissance') || nameAr.includes('ولادة')
 
     let requestButton: RequestButtonState = { kind: 'disabled', label: t('request_online') }
 
@@ -145,11 +136,7 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
         target: '/declaration-naissance',
       }
-    } else if (
-      nameLower === 'extrait de mariage' ||
-      nameAr === 'مضمون من رسم زواج' ||
-      nameAr === 'مضمون زواج'
-    ) {
+    } else if (nameLower === 'extrait de mariage' || nameAr.includes('مضمون زواج')) {
       requestButton = {
         kind: 'extract_now',
         label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
@@ -168,60 +155,24 @@ export default function ServicesPage() {
         target: '/declaration-deces',
       }
     } else if (nameLower.includes('mariage') || nameAr.includes('زواج')) {
-        requestButton = {
-          kind: 'declare_birth',
-          label: t('request_online'),
-          target: '/demande-mariage',
-        }
-      } else if (nameLower.includes('inhumation') || nameAr.includes('دفن')) {
-        requestButton = {
-          kind: 'declare_death',
-          label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
-          target: '/demande-inhumation',
-        }
-      } else if (nameLower.includes('livret') || nameAr.includes('الدفتر')) {
-        requestButton = {
-          kind: 'declare_birth',
-          label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
-          target: '/demande-livret-famille',
-        }
-      } else if (
-        nameLower.includes('fête') || nameLower.includes('fete') || nameLower.includes('événement') ||
-        nameLower.includes('evenement') || nameLower.includes('concert') || nameLower.includes('association') ||
-        nameLower.includes('manifestation') || nameLower.includes('rassemblement') ||
-        nameAr.includes('حفل') || nameAr.includes('تظاهرة') || nameAr.includes('مهرجان') || nameAr.includes('تجمع')
-      ) {
-        requestButton = {
-          kind: 'declare_birth',
-          label: lang === 'ar' ? 'طلب ترخيص' : 'Demander une autorisation',
-          target: '/demande-evenement',
-        }
-      } else if (nameLower.includes('goudronnage') || nameAr.includes('تعبيد') || nameAr.includes('رصف الطريق')) {
-        requestButton = {
-          kind: 'declare_birth',
-          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-          target: '/demande-goudronnage',
-        }
-      } else if (nameLower.includes('vocation') || nameAr.includes('صبغة عقار') || nameAr.includes('صبغة')) {
-        requestButton = {
-          kind: 'declare_birth',
-          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-          target: '/demande-certificat-vocation',
-        }
-      } else if (
-        nameLower.includes('construire') || nameLower.includes('construction') ||
-        nameLower.includes('permis') || nameLower.includes('rénovation') ||
-        nameLower.includes('renovation') || nameLower.includes('extension') ||
-        nameLower.includes('bâtiment') || nameLower.includes('batiment') ||
-        nameLower.includes('immobilier') || nameLower.includes('terrain') ||
-        nameAr.includes('بناء') || nameAr.includes('ترخيص بناء') || nameAr.includes('تعمير')
-      ) {
-        requestButton = {
-          kind: 'declare_birth',
-          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-          target: '/demande-construction',
-        }
-      } else {
+      requestButton = {
+        kind: 'declare_birth',
+        label: t('request_online'),
+        target: '/demande-mariage',
+      }
+    } else if (nameLower.includes('inhumation') || nameAr.includes('دفن')) {
+      requestButton = {
+        kind: 'declare_death',
+        label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
+        target: '/demande-inhumation',
+      }
+    } else if (nameLower.includes('construction') || nameAr.includes('بناء')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-construction',
+      }
+    } else {
       requestButton = {
         kind: 'disabled',
         label: lang === 'ar' ? 'طلب عن بعد (قريبا)' : 'Demander en ligne (Bientôt)',
@@ -244,7 +195,6 @@ export default function ServicesPage() {
       requestButton,
     })
 
-    // Show modal
     const modalEl = document.getElementById('serviceModal')
     if ((window as any).bootstrap?.Modal && modalEl) {
       const instance = (window as any).bootstrap.Modal.getOrCreateInstance(modalEl)
@@ -265,11 +215,10 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      <div id="servicesContainer">
+      <div id="servicesContainer" style={{ minHeight: '600px' }}>
         {loading ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status" />
-            <p className="mt-2 text-muted">{t('loading_services')}</p>
+          <div className="py-4">
+            <div className="skeleton-box services-skeleton" style={{ height: '400px' }}></div>
           </div>
         ) : errorText ? (
           <div className="alert alert-danger">{errorText}</div>
@@ -284,20 +233,13 @@ export default function ServicesPage() {
               .map((cat) => {
                 const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
                 const isOpen = openCatId === cat.id
-                const visibleServices = cat.services.filter((s) => {
-                  const nameFr = s.name_fr.toLowerCase()
-                  const nameAr = s.name_ar
-                  return (
-                    !nameFr.includes('extrait') &&
-                    !nameAr.includes('مضمون') &&
-                    !nameFr.includes('résidence') &&
-                    !nameAr.includes('مسكن')
-                  )
+                const visibleServices = cat.services.filter(s => {
+                  const nf = s.name_fr.toLowerCase()
+                  const na = s.name_ar
+                  return !nf.includes('extrait') && !na.includes('مضمون') && !nf.includes('résidence')
                 })
                 return (
-                  <div key={cat.id} className="border rounded-4 overflow-hidden shadow-sm"
-                    style={{ transition: 'all .2s' }}>
-                    {/* ── Accordion header (clickable) ── */}
+                  <div key={cat.id} className="border rounded-4 overflow-hidden shadow-sm mb-2">
                     <button
                       className="w-100 d-flex align-items-center justify-content-between px-4 py-3 border-0 text-start"
                       style={{
@@ -309,130 +251,59 @@ export default function ServicesPage() {
                       onClick={() => setOpenCatId(isOpen ? null : cat.id)}
                     >
                       <div className="d-flex align-items-center gap-3">
-                        <div className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                          style={{
-                            width: 40, height: 40,
-                            background: isOpen ? 'rgba(255,255,255,.2)' : '#e3f2fd',
-                            color: isOpen ? '#fff' : '#1565c0',
-                            fontSize: '1.1rem',
-                          }}>
+                        <div className="rounded-3 d-flex align-items-center justify-content-center"
+                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : '#e3f2fd', color: isOpen ? '#fff' : '#1565c0' }}>
                           <i className={`fas ${cat.icon || 'fa-folder-open'}`} />
                         </div>
                         <div>
-                          <div className="fw-bold" style={{ fontSize: '1rem' }}>{catName}</div>
-                          <div style={{ fontSize: '.78rem', opacity: .75 }}>
-                            {visibleServices.length} {lang === 'ar' ? 'خدمة' : 'service(s)'}
-                          </div>
+                          <div className="fw-bold">{catName}</div>
+                          <div style={{ fontSize: '.78rem', opacity: .75 }}>{visibleServices.length} {lang === 'ar' ? 'خدمة' : 'service(s)'}</div>
                         </div>
                       </div>
-                      <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'}`}
-                        style={{ fontSize: '.85rem', opacity: .7 }} />
+                      <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'}`} />
                     </button>
-
-                    {/* ── Accordion body (services grid) ── */}
                     {isOpen && (
                       <div className="p-4" style={{ background: '#f8faff', borderTop: '1px solid #e3f2fd' }}>
-                        {visibleServices.length === 0 ? (
-                          <p className="text-muted small mb-0">
-                            {lang === 'ar' ? 'لا توجد خدمات متاحة.' : 'Aucun service disponible.'}
-                          </p>
-                        ) : (
-                          <div className="row g-3">
-                            {visibleServices.map((service) => {
-                              const svcName = lang === 'ar' ? service.name_ar : service.name_fr
-                              const svcDesc = lang === 'ar' ? service.description_ar : service.description_fr
-                              return (
-                                <div key={service.id} className="col-md-4">
-                                  <div
-                                    className="card h-100 service-card border-0 shadow-sm"
-                                    role="button"
-                                    tabIndex={0}
-                                    style={{ cursor: 'pointer', borderRadius: '12px', transition: 'transform .15s' }}
-                                    onClick={() => showModalById(cat.id, service.id)}
-                                    onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-3px)')}
-                                    onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
-                                  >
-                                    <div className="card-body">
-                                      <h6 className="card-title fw-bold" style={{ fontSize: '.9rem' }}>{svcName}</h6>
-                                      <p className="card-text small text-muted" style={{ maxHeight: '3rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                                        {svcDesc}
-                                      </p>
-                                      <div className="d-flex justify-content-between align-items-center mt-3">
-                                        <span className="badge bg-light text-primary border" style={{ fontSize: '0.7rem' }}>
-                                          {service.requirements.length} documents
-                                        </span>
-                                        <i className="fas fa-chevron-right text-primary opacity-50" />
-                                      </div>
-                                    </div>
-                                  </div>
+                        <div className="row g-3">
+                          {visibleServices.map(service => (
+                            <div key={service.id} className="col-md-4">
+                              <div className="card h-100 service-card border-0 shadow-sm" role="button" onClick={() => showModalById(cat.id, service.id)} style={{ cursor: 'pointer', borderRadius: '12px' }}>
+                                <div className="card-body">
+                                  <h6 className="fw-bold">{lang === 'ar' ? service.name_ar : service.name_fr}</h6>
+                                  <p className="small text-muted mb-0">{lang === 'ar' ? service.description_ar : service.description_fr}</p>
                                 </div>
-                              )
-                            })}
-                          </div>
-                        )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
                 )
-              })
-            }
+              })}
           </div>
         )}
 
-        {/* MUNICIPAL PAYMENTS SIMULATION (FOR PFE) */}
-
         {!loading && (
-          <div className="category-section mb-5 animate__animated animate__fadeInUp">
-            <div className="category-header border-bottom pb-2 mb-4 d-flex align-items-center">
-              <div className="bg-warning text-white rounded-circle p-2 me-3 shadow-sm" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="fas fa-money-bill-wave fs-5"></i>
-              </div>
-              <h4 className="fw-bold mb-0">
-                {lang === 'ar' ? 'الأداء والجباية المحلية' : 'Paiements et Taxes Locales'}
-                <span className="badge bg-danger ms-3 rounded-pill" style={{ fontSize: '0.6rem' }}>SIMULATION PFE</span>
-              </h4>
-            </div>
-            
-            <div className="row g-4 text-start">
+          <div className="category-section mb-5 mt-5">
+            <h4 className="fw-bold border-bottom pb-2 mb-4">
+              {lang === 'ar' ? 'الأداء والجباية المحلية' : 'Paiements et Taxes Locales'}
+              <span className="badge bg-danger ms-2 small" style={{ fontSize: '0.6rem' }}>SIMULATION PFE</span>
+            </h4>
+            <div className="row g-4">
               {[
-                { 
-                  id: 'taxe1', 
-                  title: lang === 'ar' ? 'معلوم على العقارات المبنية' : 'Taxe d\'habitation (TIB)', 
-                  desc: lang === 'ar' ? 'دفع المعاليم السنوية للعقارات السكنية ببلدية قليبية.' : 'Paiement des taxes annuelles pour les locaux résidentiels à Kélibia.',
-                  icon: 'fa-home',
-                  amount: '125.000',
-                  reason: 'Taxe Habitation 2024'
-                },
-                { 
-                  id: 'fine1', 
-                  title: lang === 'ar' ? 'الخطايا المرورية' : 'Amendes de Stationnement', 
-                  desc: lang === 'ar' ? 'تسوية مخالفات المرور والوقوف المحررة بالمجال البلدي.' : 'Règlement des amendes de circulation constatées sur la zone municipale.',
-                  icon: 'fa-car',
-                  amount: '20.000',
-                  reason: 'Amande Stationnement'
-                },
-                { 
-                  id: 'service1', 
-                  title: lang === 'ar' ? 'خلاص معلوم الخدمات' : 'Paiement Services Admin', 
-                  desc: lang === 'ar' ? 'دفع معلوم استخراج الوثائق الإدارية عن بعد.' : 'Paiement des frais pour l\'obtention de documents administratifs.',
-                  icon: 'fa-file-invoice',
-                  amount: '2.000',
-                  reason: 'Frais de Service'
-                }
+                { id: 't1', title: lang === 'ar' ? 'معلوم على العقارات' : 'Taxe Habitation', amount: '125.000', icon: 'fa-home' },
+                { id: 't2', title: lang === 'ar' ? 'الخطايا المرورية' : 'Amendes', amount: '20.000', icon: 'fa-car' },
+                { id: 't3', title: lang === 'ar' ? 'معلوم الخدمات' : 'Frais Services', amount: '2.000', icon: 'fa-file-invoice' }
               ].map(pay => (
                 <div key={pay.id} className="col-md-4">
-                  <div className="card h-100 border-0 shadow-sm transition-hover" style={{ borderRadius: '15px' }}>
-                    <div className="card-body p-4">
-                      <div className={`mb-3 text-primary bg-light rounded-circle d-flex align-items-center justify-content-center`} style={{ width: '50px', height: '50px' }}>
-                        <i className={`fas ${pay.icon} fs-4`}></i>
-                      </div>
-                      <h5 className="fw-bold mb-2">{pay.title}</h5>
-                      <p className="small text-muted mb-4">{pay.desc}</p>
-                      <button 
-                        className="btn btn-primary w-100 rounded-pill fw-bold"
-                        onClick={() => navigate(`/paiement?amount=${pay.amount}&reason=${encodeURIComponent(pay.reason)}&ref=PAY-${Math.floor(Math.random()*9000)}`)}
-                      >
-                        {lang === 'ar' ? 'دفع الآن 💳' : 'Payer Maintenant 💳'}
+                  <div className="card h-100 border-0 shadow-sm" style={{ borderRadius: '15px' }}>
+                    <div className="card-body p-4 text-center">
+                      <i className={`fas ${pay.icon} fs-1 text-primary mb-3`}></i>
+                      <h5 className="fw-bold">{pay.title}</h5>
+                      <h4 className="text-primary fw-bold mb-3">{pay.amount} DT</h4>
+                      <button className="btn btn-primary w-100 rounded-pill" onClick={() => navigate(`/paiement?amount=${pay.amount}`)}>
+                        {lang === 'ar' ? 'دفع الآن' : 'Payer'}
                       </button>
                     </div>
                   </div>
@@ -443,89 +314,79 @@ export default function ServicesPage() {
         )}
       </div>
 
-
-      {/* Modal for service details */}
       <div className="modal fade" id="serviceModal" tabIndex={-1}>
         <div className="modal-dialog modal-lg">
           <div className="modal-content border-0 shadow">
             <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title" id="modalTitle">
-                {modalState?.title ?? t('details_title')}
-              </h5>
+              <h5 className="modal-title">{modalState?.title ?? t('details_title')}</h5>
               <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" />
             </div>
-
             <div className="modal-body p-4">
-              <div id="modalDescription" className="mb-4 text-muted">
-                {modalState?.description ?? ''}
-              </div>
-
-              <div className="row">
-                <div className="col-md-6">
-                  <h6 className="fw-bold mb-3">
-                    <i className="fas fa-file-alt me-2 text-primary" />
-                    <span>{t('documents_required')}</span>
-                  </h6>
-                  <ul className="list-group list-group-flush mb-4" id="modalRequirements">
-                    {modalState?.requirements?.length
-                      ? modalState.requirements.map((r, idx) => (
-                          <li
-                            key={idx}
-                            className="list-group-item bg-transparent d-flex justify-content-between align-items-center p-3"
-                          >
-                            <span>{lang === 'ar' ? r.ar : r.fr}</span>
-                          </li>
-                        ))
-                      : null}
-                  </ul>
-                </div>
-                <div className="col-md-1" />
-                <div className="col-md-5">
-                  <div className="card bg-light border-0">
-                    <div className="card-body">
-                      <h6 className="fw-bold mb-2">
-                        <i className="fas fa-clock me-2 text-info" />
-                        <span>{t('estimated_time')}</span>
-                      </h6>
-                      <p className="mb-0">{modalState?.timeText ?? ''}</p>
-                    </div>
-                  </div>
-                </div>
+              <p className="text-muted">{modalState?.description}</p>
+              <h6 className="fw-bold mt-4 mb-3">{t('documents_required')}</h6>
+              <ul className="list-group list-group-flush">
+                {modalState?.requirements.map((r, i) => (
+                  <li key={i} className="list-group-item bg-transparent">{lang === 'ar' ? r.ar : r.fr}</li>
+                ))}
+              </ul>
+              <div className="mt-4 p-3 bg-light rounded">
+                <h6 className="fw-bold small mb-1">{t('estimated_time')}</h6>
+                <p className="mb-0">{modalState?.timeText}</p>
               </div>
             </div>
-
             <div className="modal-footer border-0">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
-                {t('close')}
-              </button>
-
+              <button type="button" className="btn btn-light" data-bs-dismiss="modal">{t('close')}</button>
               <button
                 type="button"
-                id="modalRequestBtn"
-                className={`btn ${
-                  modalState?.requestButton.kind === 'disabled' ? 'btn-primary disabled' : 'btn-primary'
-                }`}
+                className={`btn btn-primary ${modalState?.requestButton.kind === 'disabled' ? 'disabled' : ''}`}
                 onClick={() => {
-                  if (!modalState) return
-                  if (modalState.requestButton.kind === 'disabled') return
+                  if (!modalState || modalState.requestButton.kind === 'disabled') return
+                  
+                  if (modalState.requestButton.kind === 'extract_now') {
+                    if (!user?.is_verified) { 
+                      alert(t('account_unverified_msg'))
+                      return 
+                    }
+                    
+                    if (!user?.has_active_asd) {
+                      if (window.confirm(t('pay_per_act_msg'))) {
+                        const target = modalState.requestButton.target
+                        const svcName = modalState.title
+                        const url = `/paiement?amount=2.000&reason=${encodeURIComponent(svcName)}&target=${encodeURIComponent(target)}`
+                        
+                        // Close modal
+                        const modalEl = document.getElementById('serviceModal')
+                        if (modalEl) {
+                          const inst = (window as any).bootstrap?.Modal?.getInstance(modalEl)
+                          if (inst) inst.hide()
+                        }
+                        navigate(url)
+                        return
+                      } else {
+                        return
+                      }
+                    }
+                  }
 
                   const modalEl = document.getElementById('serviceModal')
-                  const bootstrap = (window as any).bootstrap
-                  if (bootstrap?.Modal && modalEl) {
-                    const instance = bootstrap.Modal.getInstance(modalEl)
-                    if (instance) instance.hide()
+                  if (modalEl) {
+                    const inst = (window as any).bootstrap?.Modal?.getInstance(modalEl)
+                    if (inst) inst.hide()
                   }
-                  navigate((modalState.requestButton as any).target)
+                  navigate(modalState.requestButton.target as string)
                 }}
               >
-                <i className="fas fa-paper-plane me-2" />
-                <span>{modalState?.requestButton.label}</span>
+                {modalState?.requestButton.label}
               </button>
             </div>
           </div>
         </div>
       </div>
+      
+      <style>{`
+        .skeleton-box { background: #eee; background-image: linear-gradient(90deg, #eee 0px, #f5f5f5 40px, #eee 80px); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; border-radius: 8px; }
+        @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
+      `}</style>
     </MainLayout>
   )
 }
-

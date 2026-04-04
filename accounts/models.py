@@ -61,6 +61,19 @@ class CustomUser(AbstractUser):
     spouse_first_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Prénom du conjoint")
     spouse_last_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Nom du conjoint")
 
+    # ASD: Abonnement Service à Distance (Yearly municipal subscription)
+    asd_active = models.BooleanField(default=False, verbose_name="Abonnement ASD Actif")
+    asd_expiration = models.DateTimeField(null=True, blank=True, verbose_name="Date d'expiration ASD")
+
+    @property
+    def has_active_asd(self):
+        from django.utils import timezone
+        if not self.asd_active:
+            return False
+        if self.asd_expiration and self.asd_expiration < timezone.now():
+            return False
+        return True
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'cin', 'phone']
 

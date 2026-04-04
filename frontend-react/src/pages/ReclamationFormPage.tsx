@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, LayersControl, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -31,6 +31,16 @@ function LocationMarker({ position, onMapClick }: { position: [number, number] |
   return position === null ? null : (
     <Marker position={position} />
   )
+}
+
+function RecenterMap({ position }: { position: [number, number] | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (position) {
+      map.setView(position)
+    }
+  }, [position, map])
+  return null
 }
 
 // GPS accuracy badge colors
@@ -268,15 +278,54 @@ export default function ReclamationFormPage() {
                     {(() => {
                       const cfg = gpsStatusConfig[gpsStatus]
                       return (
-                        <div className="d-flex align-items-center gap-2 mb-2 px-3 py-2 rounded-3"
-                          style={{ background: cfg.bg, border: `1px solid ${cfg.color}30` }}>
-                          <i className={`fas ${cfg.icon}`} style={{ color: cfg.color, fontSize: '0.9rem' }}></i>
-                          <span style={{ color: cfg.color, fontSize: '0.85rem', fontWeight: 500 }}>{cfg.text}</span>
-                          {position && (
-                            <span className="ms-auto text-muted" style={{ fontSize: '0.75rem' }}>
-                              {position[0].toFixed(5)}, {position[1].toFixed(5)}
-                            </span>
-                          )}
+                        <div className="d-flex flex-column gap-2 mb-3 px-3 py-3 rounded-4 bg-white border shadow-sm">
+                          <div className="d-flex align-items-center gap-2">
+                             <i className={`fas ${cfg.icon}`} style={{ color: cfg.color, fontSize: '0.9rem' }}></i>
+                             <span style={{ color: cfg.color, fontSize: '0.85rem', fontWeight: 600 }}>{cfg.text}</span>
+                          </div>
+                          
+                          <div className="row g-2 mt-1">
+                             <div className="col-6">
+                               <label className="form-label small text-muted mb-1">Latitude</label>
+                               <input 
+                                 type="number" 
+                                 step="0.000001"
+                                 className="form-control form-control-sm border-0 bg-light"
+                                 placeholder="ex: 36.8474"
+                                 value={position ? position[0] : ''}
+                                 onChange={(e) => {
+                                   const val = parseFloat(e.target.value)
+                                   if (!isNaN(val)) {
+                                     setPosition([val, position ? position[1] : KELIBIA_CENTER[1]])
+                                     setGpsStatus('manual')
+                                   } else if (e.target.value === '') {
+                                      setPosition(null)
+                                      setGpsStatus('none')
+                                   }
+                                 }}
+                               />
+                             </div>
+                             <div className="col-6">
+                               <label className="form-label small text-muted mb-1">Longitude</label>
+                               <input 
+                                 type="number" 
+                                 step="0.000001"
+                                 className="form-control form-control-sm border-0 bg-light"
+                                 placeholder="ex: 11.0991"
+                                 value={position ? position[1] : ''}
+                                 onChange={(e) => {
+                                   const val = parseFloat(e.target.value)
+                                   if (!isNaN(val)) {
+                                     setPosition([position ? position[0] : KELIBIA_CENTER[0], val])
+                                     setGpsStatus('manual')
+                                   } else if (e.target.value === '') {
+                                      setPosition(null)
+                                      setGpsStatus('none')
+                                   }
+                                 }}
+                               />
+                             </div>
+                          </div>
                         </div>
                       )
                     })()}
@@ -284,11 +333,24 @@ export default function ReclamationFormPage() {
                     {/* Map */}
                     <div className="rounded-4 overflow-hidden shadow-sm border" style={{ height: '300px' }}>
                       <MapContainer center={position ?? KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
-                        <TileLayer
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        />
+                        <LayersControl position="topright">
+                          <LayersControl.BaseLayer checked name={t('map_standard') || "Standard"}>
+                            <TileLayer
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            />
+                          </LayersControl.BaseLayer>
+                          
+                          <LayersControl.BaseLayer name={t('map_satellite') || "Satellite"}>
+                            <TileLayer
+                              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                              attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
+                            />
+                          </LayersControl.BaseLayer>
+                        </LayersControl>
+                        
                         <LocationMarker position={position} onMapClick={handleMapClick} />
+                        <RecenterMap position={position} />
                       </MapContainer>
                     </div>
 

@@ -8,10 +8,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordConfirmPage from './pages/ResetPasswordConfirmPage'
 import DashboardPage from './pages/DashboardPage'
 import AgentDashboardPage from './pages/AgentDashboardPage'
-import SupervisorAdminPage from './pages/SupervisorAdminPage'
-import AgentStatsPage from './pages/AgentStatsPage'
 import ServicesPage from './pages/ServicesPage'
-import MunicipaliteNaissancesPage from './pages/MunicipaliteNaissancesPage'
 import DeclarationNaissancePage from './pages/DeclarationNaissancePage'
 import DeclarationDecesPage from './pages/DeclarationDecesPage'
 import MesExtraitsPage from './pages/MesExtraitsPage'
@@ -22,7 +19,6 @@ import DemandeResidencePage from './pages/DemandeResidencePage'
 import MesResidencesPage from './pages/MesResidencesPage'
 import ReclamationFormPage from './pages/ReclamationFormPage'
 import MesReclamationsPage from './pages/MesReclamationsPage'
-import AgentReclamationsPage from './pages/AgentReclamationsPage'
 import MariageContractPage from './pages/MariageContractPage'
 import MesDemandesPage from './pages/MesDemandesPage'
 import DemandeInhumationPage from './pages/DemandeInhumationPage'
@@ -30,7 +26,6 @@ import DemandeLivretFamillePage from './pages/DemandeLivretFamillePage'
 import ComingSoonPage from './pages/ComingSoonPage'
 import ForumPage from './pages/ForumPage'
 import ForumTopicPage from './pages/ForumTopicPage'
-import MunicipaliteLivretPage from './pages/MunicipaliteLivretPage'
 import PaymentSimulationPage from './pages/PaymentSimulationPage'
 import DemandeEvenementPage from './pages/DemandeEvenementPage'
 import MesEvenementsPage from './pages/MesEvenementsPage'
@@ -68,12 +63,8 @@ export default function App() {
             element={<AgentDashboardPage />}
           />
           <Route
-            path="/supervisor-admin"
-            element={<SupervisorAdminPage />}
-          />
-          <Route
-            path="/agent-stats"
-            element={<AgentStatsPage />}
+            path="/agent-dashboard"
+            element={<AgentDashboardPage />}
           />
           <Route
             path="/services"
@@ -108,10 +99,6 @@ export default function App() {
             element={<DeclarationDecesPage />}
           />
           <Route
-            path="/municipalite-naissances"
-            element={<MunicipaliteNaissancesPage />}
-          />
-          <Route
             path="/demande-residence"
             element={<DemandeResidencePage />}
           />
@@ -128,10 +115,6 @@ export default function App() {
             element={<MesReclamationsPage />}
           />
           <Route
-            path="/agent-reclamations"
-            element={<AgentReclamationsPage />}
-          />
-          <Route
             path="/demande-mariage"
             element={<MariageContractPage />}
           />
@@ -140,7 +123,6 @@ export default function App() {
             element={<DemandeInhumationPage />}
           />
           <Route path="/demande-livret-famille" element={<DemandeLivretFamillePage />} />
-          <Route path="/municipalite-livret" element={<MunicipaliteLivretPage />} />
           <Route path="/paiement" element={<PaymentSimulationPage />} />
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<ForumTopicPage />} />
@@ -160,10 +142,7 @@ export default function App() {
           {/* Backward-compatible aliases with old .html URLs */}
           <Route path="/agent_dashboard.html" element={<AgentDashboardPage />} />
           <Route path="/services.html" element={<ServicesPage />} />
-          <Route
-            path="/municipalite-naissances.html"
-            element={<MunicipaliteNaissancesPage />}
-          />
+          <Route path="/agent-dashboard" element={<AgentDashboardPage />} />
           <Route path="/dashboard.html" element={<DashboardPage />} />
 
           <Route path="/login.html" element={<LoginPage />} />

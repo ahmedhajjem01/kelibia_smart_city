@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     "extrait_naissance",
     "extrait_mariage",
     "extrait_deces",
-    "signalement",
     "attestation_residence",
     "forum",
     "livret_famille",

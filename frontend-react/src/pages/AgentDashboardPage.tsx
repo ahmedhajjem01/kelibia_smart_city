@@ -13,9 +13,12 @@ const resolveBackendUrl = (path: string) => {
 }
 
 type UserInfo = {
+  id?: number;
   first_name: string; last_name: string; email: string
   user_type?: string; is_staff?: boolean; is_superuser?: boolean; city?: string
   cin?: string; phone?: string; address?: string; governorate?: string; place_of_birth?: string
+  has_active_asd?: boolean;
+  asd_expiration?: string | null;
 }
 type Reclamation = {
   id: number; title: string; description: string; created_at: string
@@ -139,6 +142,12 @@ const CSS = `
 /* reclassify box */
 .reclassify-box{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 14px;margin-top:12px}
 .reclassify-box .rc-title{font-size:.8rem;font-weight:700;color:#f57f17;margin-bottom:8px}
+.ag-main{flex:1;padding:24px;min-height:800px;display:flex;flex-direction:column;gap:24px}
+.skeleton-box{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px;width:100%}
+@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.table-skeleton{height:400px;margin-bottom:20px}
+#ag-map-card{min-height:430px}
+#ag-recs-card{min-height:500px}
 `
 
 export default function AgentDashboardPage() {
@@ -208,6 +217,7 @@ export default function AgentDashboardPage() {
   const [allCategories, setAllCategories] = useState<any[]>([])
   const [allServices, setAllServices] = useState<any[]>([])
   const [loadingServicesTab, setLoadingServicesTab] = useState(false)
+  const [userSearch, setUserSearch] = useState('')
   const [showAddUserModal, setShowAddUserModal] = useState(false)
   const [showAddServiceModal, setShowAddServiceModal] = useState(false)
   const [editingService, setEditingService] = useState<any | null>(null)
@@ -560,7 +570,12 @@ export default function AgentDashboardPage() {
     setLoadingUsers(true)
     try {
       const res = await fetch(`/api/accounts/verify-citizens/?mode=${mode}`, { headers: { Authorization: `Bearer ${access}` } })
-      if (res.ok) setManagedUsers(await res.json())
+      if (res.ok) {
+        const data = await res.json()
+        // Sort by date_joined ascending (Oldest first) for chronological processing
+        data.sort((a: any, b: any) => new Date(a.date_joined).getTime() - new Date(b.date_joined).getTime())
+        setManagedUsers(data)
+      }
     } catch (e) { console.error(e) }
     finally { setLoadingUsers(false) }
   }
@@ -585,6 +600,24 @@ export default function AgentDashboardPage() {
         }
       }
     } catch (e) { showToast('Erreur lors de l\'action.', 'error') }
+  }
+
+  async function handleActivateAsd(userId: number) {
+    if (!window.confirm(t('activate_asd_btn') + " ?")) return
+    try {
+      const res = await fetch('/api/accounts/verify-citizens/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ user_id: userId, action: 'activate_asd' })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        showToast(data.message || 'ASD Activé !')
+        setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, has_active_asd: true, asd_expiration: data.asd_expiration } : u))
+      } else {
+        showToast('Erreur lors de l’activation ASD.', 'error')
+      }
+    } catch { showToast('Erreur réseau.', 'error') }
   }
 
 
@@ -615,11 +648,18 @@ export default function AgentDashboardPage() {
       return matchesBaseFilters
     })
 
-    // Sort: resolved items always go to the very end
+    const priorityWeights: Record<string, number> = { urgente: 1, normale: 2, faible: 3 }
     filtered.sort((a, b) => {
       if (a.status === 'resolved' && b.status !== 'resolved') return 1
       if (a.status !== 'resolved' && b.status === 'resolved') return -1
-      return b.id - a.id // newest first for the rest
+
+      // Sort by Priority (Urgent first)
+      const wa = priorityWeights[a.priority] || 2
+      const wb = priorityWeights[b.priority] || 2
+      if (wa !== wb) return wa - wb
+
+      // Sort by Date (Oldest first within same priority)
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     })
 
     setFilteredRecs(filtered)
@@ -970,7 +1010,8 @@ export default function AgentDashboardPage() {
                   <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> {t('urgent_only')}</button>
                   <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} {t('results_count')}</span>
                 </div>
-                {loading && <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#1565c0', width: '2rem', height: '2rem' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>{t('loading_reclamations')}</div></div>}
+                {loading ? <div className="p-4"><div className="skeleton-box table-skeleton"></div></div> : <></>}
+                {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>{t('reclamations_error')}</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> {t('retry')}</button></div>}
                 {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>{t('reclamations_error')}</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> {t('retry')}</button></div>}
                 {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>{t('no_reclamations_found')}</p></div>}
                 {!loading && !recError && filteredRecs.length > 0 && (
@@ -1038,9 +1079,28 @@ export default function AgentDashboardPage() {
                 </div>
                 <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>{t('add_agent')}</button>
               </div>
-              <div className="ag-card-body p-0">
+              
+              <div className="ag-filter-bar bg-white border-bottom px-3 py-2 d-flex align-items-center gap-3">
+                 <div className="ag-search-wrap flex-grow-1" style={{ maxWidth: '400px' }}>
+                    <i className="fas fa-search"></i>
+                    <input 
+                      className="ag-search-input" 
+                      placeholder="Rechercher par Nom, Email ou CIN..." 
+                      value={userSearch}
+                      onChange={e => setUserSearch(e.target.value)}
+                    />
+                 </div>
+                 <div className="text-muted small">
+                    {managedUsers.filter(u => {
+                      const q = userSearch.toLowerCase()
+                      return !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.cin?.toLowerCase().includes(q)
+                    }).length} {t('results_count')}
+                 </div>
+              </div>
+
+              <div className="ag-card-body p-0" style={{ minHeight: '400px' }}>
                 {loadingUsers ? (
-                   <div className="text-center p-5"><div className="spinner-border text-success"></div></div>
+                   <div className="p-4"><div className="skeleton-box table-skeleton" style={{ height: '350px' }}></div></div>
                 ) : managedUsers.length === 0 ? (
                   <div className="text-center p-5 text-muted"><i className="fas fa-users fa-3x mb-3 opacity-25"></i><p>{t('no_users_found')}</p></div>
                 ) : (
@@ -1055,8 +1115,15 @@ export default function AgentDashboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {managedUsers.map(u => (
-                          <tr key={u.id} className="ag-row-clickable" onClick={() => setSelectedUser(u)} style={{ borderLeft: u.is_verified ? 'none' : '4px solid #ff9800' }}>
+                        {managedUsers.filter(u => {
+                          const q = userSearch.toLowerCase()
+                          return !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.cin?.toLowerCase().includes(q)
+                        }).map(u => (
+                          <tr key={u.id} className="ag-row-clickable" onClick={() => setSelectedUser(u)} 
+                              style={{ 
+                                borderLeft: u.is_verified ? 'none' : '4px solid #ff9800',
+                                background: u.has_active_asd ? '#f0f7ff' : 'inherit'
+                              }}>
                             <td>
                               <div className="d-flex align-items-center gap-2">
                                  <div className="ag-user-av-sm">{u.full_name?.charAt(0) || 'U'}</div>
@@ -1078,12 +1145,26 @@ export default function AgentDashboardPage() {
                                                  : <span className="badge bg-warning" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-clock me-1"></i>{t('pending_verification')}</span>}
                                   {u.is_active ? <span className="badge bg-info" style={{ background: '#e1f5fe', color: '#0288d1', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>{t('active_label')}</span> 
                                                : <span className="badge bg-danger" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>{t('blocked_label')}</span>}
+                                  {u.has_active_asd ? (
+                                    <span className="badge bg-primary" style={{ background: '#e3f2fd', color: '#0d47a1', fontSize: '10px' }}>
+                                      <i className="fas fa-id-card me-1"></i> ASD: {formatDate(u.asd_expiration)}
+                                    </span>
+                                  ) : (
+                                    <span className="badge bg-secondary" style={{ background: '#f5f5f5', color: '#888', fontSize: '10px' }}>
+                                      <i className="fas fa-id-card me-1"></i> ASD: Off
+                                    </span>
+                                  )}
                                </div>
                             </td>
                             <td>
                               <div className="d-flex gap-2">
                                 {!u.is_verified && (
-                                  <button className="btn btn-sm btn-success" title={t('approve')} onClick={() => handleToggleUserStatus(u.id, 'verify')}><i className="fas fa-check"></i></button>
+                                  <button className="btn btn-sm btn-success" title={t('approve')} onClick={(e) => { e.stopPropagation(); handleToggleUserStatus(u.id, 'verify') }}><i className="fas fa-check"></i></button>
+                                )}
+                                {u.user_type === 'citizen' && !u.has_active_asd && (
+                                  <button className="btn btn-sm btn-primary" title={t('activate_asd_btn')} onClick={(e) => { e.stopPropagation(); handleActivateAsd(u.id) }}>
+                                    <i className="fas fa-id-card"></i>
+                                  </button>
                                 )}
                                 <button className={`btn btn-sm ${u.is_active ? 'btn-outline-danger' : 'btn-danger'}`} title={u.is_active ? t('block_user') : t('unblock_user')} onClick={() => handleToggleUserStatus(u.id, 'toggle_active')}>
                                   <i className={`fas ${u.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>

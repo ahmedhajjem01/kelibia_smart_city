@@ -14,6 +14,7 @@ export default function PaymentSimulationPage() {
   const amount = queryParams.get('amount') || '5.000'
   const reason = queryParams.get('reason') || (lang === 'ar' ? 'رسوم إدارية' : 'Frais de dossier')
   const reference = queryParams.get('ref') || `REF-${Math.floor(Math.random() * 900000) + 100000}`
+  const targetUrl = queryParams.get('target') || '/dashboard'
 
   const [step, setStep] = useState(1) // 1: Card Selection, 3: Processing, 4: Success
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' })
@@ -251,10 +252,10 @@ export default function PaymentSimulationPage() {
 
                       <div className="d-grid gap-2">
                          <button className="btn btn-dark btn-lg rounded-pill fw-bold" onClick={() => window.print()}>
-                            <i className="fas fa-receipt me-2"></i> Télécharger le reçu
+                            <i className="fas fa-receipt me-2"></i> {lang === 'ar' ? 'طباعة الوصل' : 'Télécharger le reçu'}
                          </button>
-                         <button className="btn btn-outline-primary rounded-pill border-2 fw-bold" onClick={() => navigate('/dashboard')}>
-                            Retour au portail
+                         <button className="btn btn-outline-primary rounded-pill border-2 fw-bold" onClick={() => navigate(targetUrl)}>
+                            {targetUrl === '/dashboard' ? (lang === 'ar' ? 'العودة للمنظومة' : 'Retour au portail') : (lang === 'ar' ? 'الدخول للخدمة الآن ⚡' : 'Accéder au service maintenant ⚡')}
                          </button>
                       </div>
                     </div>

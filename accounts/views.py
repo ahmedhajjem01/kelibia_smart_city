@@ -242,6 +242,9 @@ class UserVerificationView(APIView):
             "spouse_last_name": u.spouse_last_name,
             "cin_front": u.cin_front_utf if u.cin_front_utf else (u.cin_front_image if u.cin_front_image else None),
             "cin_back": u.cin_back_utf if u.cin_back_utf else (u.cin_back_image if u.cin_back_image else None),
+            "asd_active": u.asd_active,
+            "asd_expiration": u.asd_expiration,
+            "has_active_asd": u.has_active_asd,
         } for u in users]
         
         return Response(data)
@@ -303,6 +306,19 @@ class UserVerificationView(APIView):
                 target_user.set_password(new_password)
                 target_user.save()
                 return Response({"message": f"Mot de passe réinitialisé.", "new_password": new_password})
+            elif action == 'activate_asd':
+                from django.utils import timezone
+                # Activating ASD implies physical verification of CIN, so we also verify the account
+                target_user.is_verified = True
+                target_user.asd_active = True
+                duration_months = int(request.data.get('duration_months', 12))
+                target_user.asd_expiration = timezone.now() + timezone.timedelta(days=30 * duration_months)
+                target_user.save()
+                return Response({
+                    'message': f'Abonnement ASD activé pour {duration_months} mois (et compte vérifié).',
+                    'asd_expiration': target_user.asd_expiration,
+                    'is_verified': True
+                })
             else:
                 return Response({"error": "Action non reconnue."}, status=400)
         except User.DoesNotExist:

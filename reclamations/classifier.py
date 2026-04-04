@@ -285,39 +285,6 @@ def classify(title: str, description: str, category: str = "other") -> dict:
 
 # ─── Duplicate detection ──────────────────────────────────────────────────────
 
-def _geo_score(lat1, lon1, lat2, lon2) -> float:
-    """
-    Calcule un score géographique (0.0–1.0) basé sur la distance en mètres
-    entre deux coordonnées GPS via la formule de Haversine.
-
-    Seuils :
-      < 100m  → 1.0  (même endroit)
-      < 300m  → 0.7  (quartier immédiat)
-      < 500m  → 0.4  (zone proche)
-      >= 500m → 0.0  (trop loin, pas de bonus géo)
-    """
-    if None in (lat1, lon1, lat2, lon2):
-        return 0.0  # pas de GPS → pas de bonus géo
-
-    import math
-    R = 6_371_000  # rayon de la Terre en mètres
-
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    d_phi      = math.radians(lat2 - lat1)
-    d_lam      = math.radians(lon2 - lon1)
-
-    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lam / 2) ** 2
-    distance_m = R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    if distance_m < 100:
-        return 1.0
-    elif distance_m < 300:
-        return 0.7
-    elif distance_m < 500:
-        return 0.4
-    else:
-        return 0.0
-
 
 def detect_duplicate(title: str, description: str,
                      latitude: float = None, longitude: float = None,
@@ -326,37 +293,18 @@ def detect_duplicate(title: str, description: str,
     """
     Détecte si une réclamation est similaire à une réclamation existante en DB.
 
-    Stratégie hybride (texte + géolocalisation) :
+    Stratégie hybride (texte + géolocalisation) utilisant PostGIS :
       1. Récupère les réclamations existantes (non-rejetées) depuis la DB.
       2. Calcule la similarité cosinus TF-IDF sur titre + description.
-      3. Calcule un score géographique basé sur la distance GPS (Haversine).
+      3. Calcule un score géographique via ST_Distance (PostGIS).
       4. Score final = 0.6 × score_texte + 0.4 × score_geo
-         (si pas de GPS disponible → score final = score_texte uniquement)
-      5. Si le score final dépasse le seuil (défaut 0.65), c'est un doublon.
-
-    Exemples :
-      - Texte identique + même lieu      → score ~1.0  → doublon ✅
-      - Texte différent + même lieu      → score ~0.4  → pas doublon ❌
-      - Texte similaire + lieu proche    → score ~0.75 → doublon ✅
-      - Texte similaire + lieu lointain  → score ~0.45 → pas doublon ❌
-
-    Parameters
-    ----------
-    title       : titre de la nouvelle réclamation
-    description : description de la nouvelle réclamation
-    latitude    : latitude GPS de la nouvelle réclamation (optionnel)
-    longitude   : longitude GPS de la nouvelle réclamation (optionnel)
-    exclude_id  : id à exclure (utile si on re-teste une réclamation existante)
-    threshold   : seuil du score final (0.0–1.0), défaut 0.65
-
-    Returns
-    -------
-    dict(is_duplicate, duplicate_of, similarity_score, geo_score, final_score)
+      5. Si le score final dépasse le seuil, c'est un doublon.
     """
     try:
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.metrics.pairwise import cosine_similarity
         import numpy as np
+        from django.db import connection
         from reclamations.models import Reclamation
 
         # ── 1. Fetch existing reclamations from DB ───────────────────────────
@@ -392,19 +340,42 @@ def detect_duplicate(title: str, description: str,
         existing_mat = tfidf_matrix[:-1]
         text_scores  = cosine_similarity(new_vec, existing_mat)[0]  # shape (n,)
 
-        # ── 3. Geo scores for each existing reclamation ──────────────────────
-        geo_scores = np.array([
-            _geo_score(latitude, longitude, r['latitude'], r['longitude'])
-            for r in existing
-        ])
+        # ── 3. Geo scores for each existing reclamation (PostGIS) ────────────
+        has_gps = latitude is not None and longitude is not None
+        geo_scores = np.zeros(len(existing))
+
+        if has_gps:
+            with connection.cursor() as cursor:
+                # Calcul des distances en une seule requête spatiale
+                query = """
+                    SELECT id, ST_Distance(
+                        ST_MakePoint(longitude, latitude)::geography,
+                        ST_MakePoint(%s, %s)::geography
+                    ) as dist_m
+                    FROM reclamations_reclamation
+                    WHERE status != 'rejected'
+                """
+                if exclude_id:
+                    query += f" AND id != {exclude_id}"
+                
+                cursor.execute(query, [longitude, latitude])
+                dist_map = {row[0]: row[1] for row in cursor.fetchall()}
+            
+            geo_list = []
+            for r in existing:
+                dist_m = dist_map.get(r['id'], 1000000)
+                if dist_m < 100:     score = 1.0
+                elif dist_m < 300:   score = 0.7
+                elif dist_m < 500:   score = 0.4
+                else:                score = 0.0
+                geo_list.append(score)
+            geo_scores = np.array(geo_list)
 
         # ── 4. Combined score ────────────────────────────────────────────────
-        has_gps = latitude is not None and longitude is not None
         if has_gps:
             # Weighted combination: 60% text + 40% geo
             final_scores = 0.6 * text_scores + 0.4 * geo_scores
         else:
-            # No GPS provided → fall back to text only (raise threshold slightly)
             final_scores = text_scores
 
         # ── 5. Find best match ───────────────────────────────────────────────

@@ -281,3 +281,59 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             })
         except Exception as e:
             return Response({"error": f"Stats computation failed: {e}\n{traceback.format_exc()}"}, status=500)
+
+
+
+    # ── nearby (PostGIS optimized) ───────────────────────────────────────────
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def nearby(self, request):
+        """
+        GET /api/reclamations/nearby/?lat=...&lon=...&radius=1000
+        Returns reclamations within X meters using PostGIS ST_DWithin.
+        """
+        try:
+            lat      = float(request.query_params.get('lat'))
+            lon      = float(request.query_params.get('lon'))
+            radius_m = float(request.query_params.get('radius', 1000))
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "Les paramètres 'lat', 'lon' et 'radius' (optionnel, en mètres) sont requis et doivent être numériques."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Query spatiale optimisée : ST_DWithin utilise l'index GIST
+            # ST_Distance (geography) renvoie la distance précise en mètres
+            query = """
+                SELECT id, ST_Distance(
+                    ST_MakePoint(longitude, latitude)::geography,
+                    ST_MakePoint(%s, %s)::geography
+                ) as dist_m
+                FROM reclamations_reclamation
+                WHERE ST_DWithin(
+                    ST_MakePoint(longitude, latitude)::geography,
+                    ST_MakePoint(%s, %s)::geography,
+                    %s
+                ) AND status != 'rejected'
+                ORDER BY dist_m
+                LIMIT 50;
+            """
+            cursor.execute(query, [lon, lat, lon, lat, radius_m])
+            rows = cursor.fetchall()
+
+        if not rows:
+            return Response([])
+
+        ids      = [r[0] for r in rows]
+        dist_map = {r[0]: r[1] for r in rows}
+
+        reclamations = Reclamation.objects.filter(id__in=ids)
+        serializer   = self.get_serializer(reclamations, many=True)
+
+        for data in serializer.data:
+            data['distance_m'] = round(dist_map.get(data['id'], 0), 1)
+
+        # Trier par distance (le queryset perd l'ordre SQL)
+        sorted_data = sorted(serializer.data, key=lambda x: x['distance_m'])
+        return Response(sorted_data)
