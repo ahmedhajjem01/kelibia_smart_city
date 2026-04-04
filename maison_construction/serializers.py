@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DemandeConstruction
+from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation
 
 
 class DemandeConstructionSerializer(serializers.ModelSerializer):
@@ -26,3 +26,37 @@ class DemandeConstructionSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         instance.compute_risk()
         return instance
+
+
+class DemandeGoudronnageSerializer(serializers.ModelSerializer):
+    citizen_name = serializers.SerializerMethodField()
+    citizen_email = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = DemandeGoudronnage
+        fields = '__all__'
+        read_only_fields = ['citizen', 'status', 'commentaire_agent', 'created_at', 'updated_at']
+
+    def get_citizen_name(self, obj):
+        return f"{obj.citizen.first_name} {obj.citizen.last_name}".strip() or obj.citizen.email
+
+    def get_citizen_email(self, obj):
+        return obj.citizen.email
+
+
+class DemandeCertificatVocationSerializer(serializers.ModelSerializer):
+    citizen_name = serializers.SerializerMethodField()
+    citizen_email = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = DemandeCertificatVocation
+        fields = '__all__'
+        read_only_fields = ['citizen', 'status', 'commentaire_agent', 'certificat_signe', 'created_at', 'updated_at']
+
+    def get_citizen_name(self, obj):
+        return f"{obj.citizen.first_name} {obj.citizen.last_name}".strip() or obj.citizen.email
+
+    def get_citizen_email(self, obj):
+        return obj.citizen.email

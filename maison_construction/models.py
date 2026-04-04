@@ -112,3 +112,73 @@ class DemandeConstruction(models.Model):
             self.is_high_risk = True
             self.priorite = 'haute'
         self.save(update_fields=['is_high_risk', 'priorite'])
+
+
+class DemandeGoudronnage(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('en_cours', 'En cours de traitement'),
+        ('traite', 'Traité'),
+        ('rejete', 'Rejeté'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='demandes_goudronnage'
+    )
+    nom_prenom = models.CharField(max_length=200)
+    cin = models.CharField(max_length=8)
+    adresse_residence = models.CharField(max_length=300)
+    localisation_rue = models.TextField(help_text='Description de la rue concernée')
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    cin_copie = models.ImageField(upload_to='goudronnage/cin/', null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    commentaire_agent = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Demande de goudronnage'
+        verbose_name_plural = 'Demandes de goudronnage'
+
+    def __str__(self):
+        return f"Goudronnage — {self.adresse_residence} ({self.citizen.email})"
+
+
+class DemandeCertificatVocation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('en_cours', 'En cours de traitement'),
+        ('delivre', 'Certificat délivré'),
+        ('rejete', 'Rejeté'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='demandes_certificat_vocation'
+    )
+    nom_prenom = models.CharField(max_length=200)
+    cin = models.CharField(max_length=8)
+    adresse_bien = models.CharField(max_length=300)
+    cin_copie = models.ImageField(upload_to='vocation/cin/', null=True, blank=True)
+    quitus = models.FileField(upload_to='vocation/quitus/', null=True, blank=True)
+    certificat_propriete = models.FileField(upload_to='vocation/propriete/', null=True, blank=True)
+    plan_cadastral = models.FileField(upload_to='vocation/cadastral/', null=True, blank=True)
+    plan_situation = models.FileField(upload_to='vocation/situation/', null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    commentaire_agent = models.TextField(blank=True)
+    certificat_signe = models.FileField(upload_to='vocation/delivre/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Demande de certificat de vocation'
+        verbose_name_plural = 'Demandes de certificat de vocation'
+
+    def __str__(self):
+        return f"Certificat vocation — {self.adresse_bien} ({self.citizen.email})"

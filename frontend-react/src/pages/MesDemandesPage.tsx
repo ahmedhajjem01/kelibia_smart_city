@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation'
   title: string
   status: string
   date: string
@@ -46,7 +46,7 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
@@ -56,6 +56,8 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/extrait-mariage/extraits/'), { headers }),
           fetch(resolveBackendUrl('/livret-famille/demandes/'), { headers }),
           fetch(resolveBackendUrl('/api/construction/demandes/'), { headers }),
+          fetch(resolveBackendUrl('/api/construction/goudronnage/'), { headers }),
+          fetch(resolveBackendUrl('/api/construction/vocation/'), { headers }),
         ])
 
 
@@ -205,6 +207,36 @@ export default function MesDemandesPage() {
           })
         }
 
+        // 10. Goudronnage
+        if (resGoudronnage.ok) {
+          const goudronnages = await resGoudronnage.json()
+          goudronnages.forEach((g: any) => {
+            unified.push({
+              id: g.id,
+              type: 'goudronnage',
+              title: lang === 'ar' ? 'طلب تعبيد طريق' : 'Demande de Goudronnage',
+              status: g.status,
+              date: g.created_at,
+              details: g.adresse_residence || '',
+            })
+          })
+        }
+
+        // 11. Certificat de vocation
+        if (resVocation.ok) {
+          const vocations = await resVocation.json()
+          vocations.forEach((v: any) => {
+            unified.push({
+              id: v.id,
+              type: 'vocation',
+              title: lang === 'ar' ? 'شهادة صبغة عقار' : 'Certificat de vocation',
+              status: v.status,
+              date: v.created_at,
+              details: v.adresse_bien || '',
+            })
+          })
+        }
+
         // Sort by date descending
         unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         setRequests(unified)
@@ -236,6 +268,8 @@ export default function MesDemandesPage() {
       case 'resolved':
       case 'favorable':
       case 'permis_delivre':
+      case 'traite':
+      case 'delivre':
         return <span className="badge bg-success rounded-pill px-3"><i className="fas fa-check-circle me-1"></i> {t('status_validated')}</span>
       case 'en_cours_instruction':
         return <span className="badge bg-primary rounded-pill px-3"><i className="fas fa-spinner fa-spin me-1"></i> {t('status_in_progress')}</span>
@@ -261,6 +295,8 @@ export default function MesDemandesPage() {
       case 'inhumation': return <i className="fas fa-monument text-secondary"></i>
       case 'livret': return <i className="fas fa-book-open text-info"></i>
       case 'construction': return <i className="fas fa-hard-hat text-warning"></i>
+      case 'goudronnage': return <i className="fas fa-road text-secondary"></i>
+      case 'vocation': return <i className="fas fa-building text-info"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }

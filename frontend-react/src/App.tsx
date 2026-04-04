@@ -38,6 +38,8 @@ import EvenementsPublicsPage from './pages/EvenementsPublicsPage'
 import ProfilePage from './pages/ProfilePage'
 import DemandeConstructionPage from './pages/DemandeConstructionPage'
 import MesConstructionsPage from './pages/MesConstructionsPage'
+import DemandeGoudronnagePage from './pages/DemandeGoudronnagePage'
+import DemandeCertificatVocationPage from './pages/DemandeCertificatVocationPage'
 
 
 
@@ -147,6 +149,8 @@ export default function App() {
           <Route path="/demande-evenement" element={<DemandeEvenementPage />} />
           <Route path="/mes-evenements" element={<MesEvenementsPage />} />
           <Route path="/demande-construction" element={<DemandeConstructionPage />} />
+          <Route path="/demande-goudronnage" element={<DemandeGoudronnagePage />} />
+          <Route path="/demande-certificat-vocation" element={<DemandeCertificatVocationPage />} />
           <Route path="/mes-constructions" element={<MesConstructionsPage />} />
           <Route path="/evenements" element={<EvenementsPublicsPage />} />
 

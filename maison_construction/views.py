@@ -2,8 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from .models import DemandeConstruction
-from .serializers import DemandeConstructionSerializer
+from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation
+from .serializers import DemandeConstructionSerializer, DemandeGoudronnageSerializer, DemandeCertificatVocationSerializer
 
 
 class IsAgentOrAdmin(permissions.BasePermission):
@@ -66,3 +66,65 @@ class DemandeConstructionViewSet(viewsets.ModelViewSet):
     def high_risk(self, request):
         qs = DemandeConstruction.objects.filter(is_high_risk=True).select_related('citizen')
         return Response(DemandeConstructionSerializer(qs, many=True).data)
+
+
+class DemandeGoudronnageViewSet(viewsets.ModelViewSet):
+    serializer_class = DemandeGoudronnageSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_permissions(self):
+        if self.action == 'update_status':
+            return [IsAgentOrAdmin()]
+        return [permissions.IsAuthenticated()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+            return DemandeGoudronnage.objects.all().select_related('citizen')
+        return DemandeGoudronnage.objects.filter(citizen=user).select_related('citizen')
+
+    def perform_create(self, serializer):
+        serializer.save(citizen=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='update-status')
+    def update_status(self, request, pk=None):
+        demande = self.get_object()
+        new_status = request.data.get('status')
+        if new_status and new_status in dict(DemandeGoudronnage.STATUS_CHOICES):
+            demande.status = new_status
+        if 'commentaire_agent' in request.data:
+            demande.commentaire_agent = request.data['commentaire_agent']
+        demande.save()
+        return Response(DemandeGoudronnageSerializer(demande).data)
+
+
+class DemandeCertificatVocationViewSet(viewsets.ModelViewSet):
+    serializer_class = DemandeCertificatVocationSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_permissions(self):
+        if self.action == 'update_status':
+            return [IsAgentOrAdmin()]
+        return [permissions.IsAuthenticated()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+            return DemandeCertificatVocation.objects.all().select_related('citizen')
+        return DemandeCertificatVocation.objects.filter(citizen=user).select_related('citizen')
+
+    def perform_create(self, serializer):
+        serializer.save(citizen=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='update-status')
+    def update_status(self, request, pk=None):
+        demande = self.get_object()
+        new_status = request.data.get('status')
+        if new_status and new_status in dict(DemandeCertificatVocation.STATUS_CHOICES):
+            demande.status = new_status
+        if 'commentaire_agent' in request.data:
+            demande.commentaire_agent = request.data['commentaire_agent']
+        if 'certificat_signe' in request.FILES:
+            demande.certificat_signe = request.FILES['certificat_signe']
+        demande.save()
+        return Response(DemandeCertificatVocationSerializer(demande).data)

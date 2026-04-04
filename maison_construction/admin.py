@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DemandeConstruction
+from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation
 
 
 @admin.register(DemandeConstruction)
@@ -17,5 +17,35 @@ class DemandeConstructionAdmin(admin.ModelAdmin):
         ('Entrepreneur', {'fields': ('nom_entrepreneur', 'telephone_entrepreneur')}),
         ('Documents', {'fields': ('titre_foncier', 'plan_architectural', 'photo_terrain', 'devis_estimatif', 'cin_proprietaire_recto', 'cin_proprietaire_verso')}),
         ('Statut', {'fields': ('status', 'priorite', 'commentaire_agent', 'permis_signe', 'is_paid', 'is_high_risk')}),
+        ('Dates', {'fields': ('created_at', 'updated_at')}),
+    )
+
+
+@admin.register(DemandeGoudronnage)
+class DemandeGoudronnageAdmin(admin.ModelAdmin):
+    list_display = ['id', 'citizen', 'nom_prenom', 'adresse_residence', 'status', 'created_at']
+    list_filter = ['status']
+    search_fields = ['citizen__email', 'nom_prenom', 'adresse_residence', 'cin']
+    readonly_fields = ['citizen', 'created_at', 'updated_at']
+    fieldsets = (
+        ('Demandeur', {'fields': ('citizen', 'nom_prenom', 'cin')}),
+        ('Localisation', {'fields': ('adresse_residence', 'localisation_rue', 'latitude', 'longitude')}),
+        ('Documents', {'fields': ('cin_copie',)}),
+        ('Statut', {'fields': ('status', 'commentaire_agent')}),
+        ('Dates', {'fields': ('created_at', 'updated_at')}),
+    )
+
+
+@admin.register(DemandeCertificatVocation)
+class DemandeCertificatVocationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'citizen', 'nom_prenom', 'adresse_bien', 'status', 'created_at']
+    list_filter = ['status']
+    search_fields = ['citizen__email', 'nom_prenom', 'adresse_bien', 'cin']
+    readonly_fields = ['citizen', 'created_at', 'updated_at']
+    fieldsets = (
+        ('Demandeur', {'fields': ('citizen', 'nom_prenom', 'cin')}),
+        ('Bien immobilier', {'fields': ('adresse_bien',)}),
+        ('Documents', {'fields': ('cin_copie', 'quitus', 'certificat_propriete', 'plan_cadastral', 'plan_situation')}),
+        ('Statut', {'fields': ('status', 'commentaire_agent', 'certificat_signe')}),
         ('Dates', {'fields': ('created_at', 'updated_at')}),
     )
