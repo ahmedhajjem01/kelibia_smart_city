@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction'
   title: string
   status: string
   date: string
@@ -46,7 +46,7 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
@@ -55,6 +55,7 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/extraits/'), { headers }),
           fetch(resolveBackendUrl('/livret-famille/demandes/'), { headers }),
+          fetch(resolveBackendUrl('/api/construction/demandes/'), { headers }),
         ])
 
 
@@ -187,6 +188,22 @@ export default function MesDemandesPage() {
           })
         }
 
+        // 9. Permis de construire
+        if (resConstruction.ok) {
+          const constructions = await resConstruction.json()
+          constructions.forEach((c: any) => {
+            const typeLabel = c.type_travaux_display || c.type_travaux || ''
+            unified.push({
+              id: c.id,
+              type: 'construction',
+              title: lang === 'ar' ? 'طلب ترخيص بناء' : 'Autorisation de construire',
+              status: c.status,
+              date: c.created_at,
+              details: `${typeLabel} — ${c.adresse_terrain || ''}`,
+              isPaid: c.is_paid
+            })
+          })
+        }
 
         // Sort by date descending
         unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -217,9 +234,17 @@ export default function MesDemandesPage() {
       case 'approved':
       case 'signed':
       case 'resolved':
+      case 'favorable':
+      case 'permis_delivre':
         return <span className="badge bg-success rounded-pill px-3"><i className="fas fa-check-circle me-1"></i> {t('status_validated')}</span>
+      case 'en_cours_instruction':
+        return <span className="badge bg-primary rounded-pill px-3"><i className="fas fa-spinner fa-spin me-1"></i> {t('status_in_progress')}</span>
+      case 'changes_requested':
+        return <span className="badge bg-warning text-dark rounded-pill px-3"><i className="fas fa-edit me-1"></i> {lang === 'ar' ? 'تعديلات مطلوبة' : 'Modifications demandées'}</span>
       case 'ready':
         return <span className="badge bg-info text-dark rounded-pill px-3"><i className="fas fa-box-open me-1"></i> {t('status_ready')}</span>
+      case 'defavorable':
+      case 'rejet_definitif':
       case 'rejected': return <span className="badge bg-danger rounded-pill px-3"><i className="fas fa-times-circle me-1"></i> {t('status_rejected')}</span>
 
 
@@ -235,6 +260,7 @@ export default function MesDemandesPage() {
       case 'residence': return <i className="fas fa-home text-warning"></i>
       case 'inhumation': return <i className="fas fa-monument text-secondary"></i>
       case 'livret': return <i className="fas fa-book-open text-info"></i>
+      case 'construction': return <i className="fas fa-hard-hat text-warning"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }

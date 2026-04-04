@@ -47,10 +47,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
             <i className="fas fa-tasks"></i>
             <span>{t('my_requests')}</span>
           </NavLink>
-          <NavLink to="/mes-constructions" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
-            <i className="fas fa-hard-hat"></i>
-            <span>Mes permis de construire</span>
-          </NavLink>
           <NavLink to="/mes-extraits" className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}>
             <i className="fas fa-file-contract"></i>
             <span>{t('extraits_hub_title')}</span>

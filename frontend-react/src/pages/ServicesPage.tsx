@@ -196,6 +196,21 @@ export default function ServicesPage() {
           label: lang === 'ar' ? 'طلب ترخيص' : 'Demander une autorisation',
           target: '/demande-evenement',
         }
+      } else if (
+        nameLower.includes('construire') || nameLower.includes('construction') ||
+        nameLower.includes('permis') || nameLower.includes('rénovation') ||
+        nameLower.includes('renovation') || nameLower.includes('extension') ||
+        nameLower.includes('goudronnage') || nameLower.includes('vocation') ||
+        nameLower.includes('bâtiment') || nameLower.includes('batiment') ||
+        nameLower.includes('immobilier') || nameLower.includes('terrain') ||
+        nameAr.includes('بناء') || nameAr.includes('ترخيص بناء') || nameAr.includes('تعمير') ||
+        nameAr.includes('رصف') || nameAr.includes('عقار')
+      ) {
+        requestButton = {
+          kind: 'declare_birth',
+          label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+          target: '/demande-construction',
+        }
       } else {
       requestButton = {
         kind: 'disabled',
