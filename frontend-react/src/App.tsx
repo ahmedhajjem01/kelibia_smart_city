@@ -27,7 +27,9 @@ import ComingSoonPage from './pages/ComingSoonPage'
 import ForumPage from './pages/ForumPage'
 import ForumTopicPage from './pages/ForumTopicPage'
 import PaymentSimulationPage from './pages/PaymentSimulationPage'
-import DemandeEvenementPage from './pages/DemandeEvenementPage'
+import DemandeEvenementChoixPage from './pages/DemandeEvenementChoixPage'
+import DemandeEvenementPublicPage from './pages/DemandeEvenementPublicPage'
+import DemandeEvenementPrivePage from './pages/DemandeEvenementPrivePage'
 import MesEvenementsPage from './pages/MesEvenementsPage'
 import EvenementsPublicsPage from './pages/EvenementsPublicsPage'
 import ProfilePage from './pages/ProfilePage'
@@ -130,7 +132,9 @@ export default function App() {
           <Route path="/forum/:id" element={<ForumTopicPage />} />
 
           {/* Social & Événements */}
-          <Route path="/demande-evenement" element={<DemandeEvenementPage />} />
+          <Route path="/demande-evenement" element={<DemandeEvenementChoixPage />} />
+          <Route path="/demande-evenement-public" element={<DemandeEvenementPublicPage />} />
+          <Route path="/demande-evenement-prive" element={<DemandeEvenementPrivePage />} />
           <Route path="/mes-evenements" element={<MesEvenementsPage />} />
           <Route path="/demande-construction" element={<DemandeConstructionPage />} />
           <Route path="/demande-goudronnage" element={<DemandeGoudronnagePage />} />
