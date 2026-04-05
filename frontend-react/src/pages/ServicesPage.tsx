@@ -79,16 +79,21 @@ export default function ServicesPage() {
 
     ;(async () => {
       try {
-        const uRes = await fetch('/api/accounts/me/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
-        if (uRes.ok) setUser(await uRes.json())
+        // Fetch user profile and services in parallel for speed
+        const [uRes, svcRes] = await Promise.all([
+          fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } }),
+          fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } }),
+        ])
 
-        const response = await fetch('/api/services/categories/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
-        const data = (await response.json()) as ServiceCategory[]
-        if (!response.ok) throw new Error('bad response')
+        // User profile — optional, don't fail if it errors
+        if (uRes.ok) {
+          try { setUser(await uRes.json()) } catch { /* ignore parse errors */ }
+        }
+
+        // Services — required
+        if (!svcRes.ok) throw new Error(`Services returned ${svcRes.status}`)
+        const data = (await svcRes.json()) as ServiceCategory[]
+        if (!Array.isArray(data)) throw new Error('Unexpected response format')
         setAllCategories(data)
       } catch (e) {
         console.error(e)
