@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -174,6 +174,18 @@ export default function ServicesPage() {
         kind: 'declare_death',
         label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
         target: '/demande-inhumation',
+      }
+    } else if (nameLower === 'événement public' || nameAr === 'فعالية عمومية') {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander une autorisation',
+        target: '/demande-evenement-public',
+      }
+    } else if (nameLower === 'événement privé' || nameAr === 'فعالية خاصة') {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Faire une déclaration',
+        target: '/demande-evenement-prive',
       }
     } else if (nameLower.includes('goudronnage') || nameAr.includes('تعبيد') || nameAr.includes('رصف')) {
       requestButton = {
