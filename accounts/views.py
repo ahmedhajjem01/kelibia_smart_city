@@ -4,7 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -138,6 +138,8 @@ class UserProfileView(APIView):
     GET  — returns the current user's profile information.
     PATCH — updates editable profile fields (no email, cin, or user_type changes).
     """
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
@@ -165,7 +167,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
         return response
 
 from .models import SavedCard
-from rest_framework import permissions
 
 class SavedCardView(APIView):
     permission_classes = [permissions.IsAuthenticated]
