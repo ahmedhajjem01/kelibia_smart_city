@@ -35,6 +35,7 @@ import DemandeConstructionPage from './pages/DemandeConstructionPage'
 import MesConstructionsPage from './pages/MesConstructionsPage'
 import DemandeGoudronnagePage from './pages/DemandeGoudronnagePage'
 import DemandeCertificatVocationPage from './pages/DemandeCertificatVocationPage'
+import NewsPage from './pages/NewsPage'
 
 
 
@@ -124,6 +125,7 @@ export default function App() {
           />
           <Route path="/demande-livret-famille" element={<DemandeLivretFamillePage />} />
           <Route path="/paiement" element={<PaymentSimulationPage />} />
+          <Route path="/news" element={<NewsPage />} />
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:id" element={<ForumTopicPage />} />
 

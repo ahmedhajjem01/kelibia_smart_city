@@ -42,6 +42,7 @@ const translations: Record<Lang, Record<string, string>> = {
     news_title: 'Actualités de Kélibia',
     news_desc:
       'Restez informé des derniers événements et annonces de votre commune.',
+    see_all_news: 'Tout voir',
     submit: 'Envoyer',
     processing: 'Traitement en cours...',
     success_msg: 'Opération réussie !',
@@ -705,6 +706,7 @@ const translations: Record<Lang, Record<string, string>> = {
     reclamations_desc: 'أبلغ عن مشكل (إضاءة، نفايات، طرقات) وتابع عملية الإصلاح.',
     news_title: 'أخبار قليبية',
     news_desc: 'ابق على اطلاع بآخر الأحداث والبلاغات الصادرة عن بلديتك.',
+    see_all_news: 'عرض الكل',
     submit: 'إرسال',
     processing: 'جاري المعالجة...',
     success_msg: 'تمت العملية بنجاح!',

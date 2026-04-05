@@ -50,6 +50,7 @@ export default function DashboardPage() {
   const [reclamations, setReclamations] = useState<any[]>([])
   const [livretNotifications, setLivretNotifications] = useState<any[]>([])
   const [loadingMap, setLoadingMap] = useState(true)
+  const [newsItems, setNewsItems] = useState<{ id: number; title: string; created_at: string }[]>([])
 
 
   useEffect(() => {
@@ -101,6 +102,14 @@ export default function DashboardPage() {
           const nData = (await nRes.json()) as ForumNotif[]
           const unread = nData.filter((n) => !n.is_read).length
           setForumUnread(unread)
+        }
+
+        // Fetch latest news (public endpoint — no auth needed)
+        const newsRes = await fetch('/api/news/')
+        if (newsRes.ok) {
+          const newsData = await newsRes.json()
+          const list = Array.isArray(newsData) ? newsData : (newsData.results || [])
+          setNewsItems(list.slice(0, 3))
         }
 
         // Fetch Livret de famille requests
@@ -347,27 +356,50 @@ export default function DashboardPage() {
       <div className="content-card">
         <div className="card-header-custom d-flex justify-content-between align-items-center">
           <span><i className="fas fa-newspaper icon"></i><span>{t('news_title')}</span></span>
-          <Link to="/evenements" className="btn btn-sm rounded-pill px-3 fw-bold"
-            style={{ background: '#6f42c1', color: '#fff', border: 'none', fontSize: '.75rem' }}>
-            <i className="fas fa-calendar-star me-1"></i>
-            {t('events_public')}
-          </Link>
+          <div className="d-flex gap-2">
+            <Link to="/evenements" className="btn btn-sm rounded-pill px-3 fw-bold"
+              style={{ background: '#6f42c1', color: '#fff', border: 'none', fontSize: '.75rem' }}>
+              <i className="fas fa-calendar-star me-1"></i>
+              {t('events_public')}
+            </Link>
+            <Link to="/news" className="btn btn-sm rounded-pill px-3 fw-bold"
+              style={{ background: '#1565c0', color: '#fff', border: 'none', fontSize: '.75rem' }}>
+              <i className="fas fa-arrow-right me-1"></i>
+              {t('see_all_news')}
+            </Link>
+          </div>
         </div>
         <div className="card-body-custom">
-          <div className="news-mini">
-            <div className="news-dot"></div>
-            <div>
-              <div className="news-text">{t('news_item_1')}</div>
-              <div className="news-date">{t('news_date_1')}</div>
-            </div>
-          </div>
-          <div className="news-mini">
-            <div className="news-dot"></div>
-            <div>
-              <div className="news-text">{t('news_item_2')}</div>
-              <div className="news-date">{t('news_date_2')}</div>
-            </div>
-          </div>
+          {newsItems.length === 0 ? (
+            <>
+              <div className="news-mini">
+                <div className="news-dot"></div>
+                <div>
+                  <div className="news-text">{t('news_item_1')}</div>
+                  <div className="news-date">{t('news_date_1')}</div>
+                </div>
+              </div>
+              <div className="news-mini">
+                <div className="news-dot"></div>
+                <div>
+                  <div className="news-text">{t('news_item_2')}</div>
+                  <div className="news-date">{t('news_date_2')}</div>
+                </div>
+              </div>
+            </>
+          ) : (
+            newsItems.map(item => (
+              <Link key={item.id} to="/news" className="news-mini text-decoration-none" style={{ color: 'inherit' }}>
+                <div className="news-dot"></div>
+                <div>
+                  <div className="news-text">{item.title}</div>
+                  <div className="news-date">
+                    {new Date(item.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </div>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </MainLayout>

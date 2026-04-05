@@ -166,7 +166,19 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
         target: '/demande-inhumation',
       }
-    } else if (nameLower.includes('construction') || nameAr.includes('بناء')) {
+    } else if (nameLower.includes('goudronnage') || nameAr.includes('تعبيد') || nameAr.includes('رصف')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-goudronnage',
+      }
+    } else if (nameLower.includes('vocation') || nameAr.includes('صبغة') || nameAr.includes('وجهة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-certificat-vocation',
+      }
+    } else if (nameLower.includes('construction') || nameLower.includes('construire') || nameAr.includes('بناء') || nameAr.includes('ترخيص بناء')) {
       requestButton = {
         kind: 'declare_birth',
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
