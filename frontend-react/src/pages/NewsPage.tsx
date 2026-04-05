@@ -47,6 +47,12 @@ const CATEGORY_TAGS = [
   { value: 'sport', label_fr: 'Sport', label_ar: 'رياضة', icon: 'fa-running' },
 ]
 
+// Only show public/community events — exclude private family events
+const PUBLIC_EVENT_TYPES = [
+  'concert', 'culturel', 'sportif', 'marche', 'association',
+  'religieux', 'commercial', 'charite', 'politique', 'autre',
+]
+
 const TYPE_COLOR: Record<string, string> = {
   fete_familiale: '#e91e63', mariage: '#f06292', remise_diplomes: '#7b1fa2',
   concert: '#9c27b0', marche: '#ff9800', association: '#2196f3',
@@ -160,6 +166,9 @@ export default function NewsPage() {
 
   function logout() { clearTokens(); navigate('/login') }
 
+  // Only public/community events (no private family events)
+  const publicEvents = events.filter(ev => PUBLIC_EVENT_TYPES.includes(ev.type_evenement))
+
   // Filtered articles
   const filteredArticles = articles.filter(a => {
     const q = search.toLowerCase()
@@ -169,16 +178,16 @@ export default function NewsPage() {
   })
   const restArticles = featured ? filteredArticles.filter(a => a.id !== featured.id) : filteredArticles
 
-  // Filtered events
-  const filteredEvents = events.filter(ev => {
+  // Filtered events (only from public event types)
+  const filteredEvents = publicEvents.filter(ev => {
     const q = eventSearch.toLowerCase()
     const matchSearch = !q || ev.titre_evenement.toLowerCase().includes(q) || ev.description.toLowerCase().includes(q)
     const matchType = !eventTypeFilter || ev.type_evenement === eventTypeFilter
     return matchSearch && matchType
   })
 
-  // Unique event types for filter dropdown
-  const eventTypes = Array.from(new Set(events.map(e => e.type_evenement)))
+  // Unique event types for filter dropdown (only public types present in data)
+  const eventTypes = Array.from(new Set(publicEvents.map(e => e.type_evenement)))
 
   return (
     <MainLayout
@@ -212,7 +221,7 @@ export default function NewsPage() {
             </span>
             <span className="badge rounded-pill px-3 py-2" style={{ background: 'rgba(111,66,193,.5)', fontSize: '.82rem' }}>
               <i className="fas fa-calendar-star me-1"></i>
-              {events.length > 0 ? events.length : '—'} {lang === 'ar' ? 'تظاهرة' : 'événement(s)'}
+              {eventsFetched ? publicEvents.length : '—'} {lang === 'ar' ? 'فعالية' : 'événement(s)'}
             </span>
           </div>
         </div>
@@ -234,7 +243,7 @@ export default function NewsPage() {
         </button>
         <button
           onClick={() => setActiveTab('events')}
-          className={`btn rounded-pill px-4 fw-bold ${activeTab === 'events' ? 'btn-purple shadow-sm' : 'btn-outline-secondary'}`}
+          className={`btn rounded-pill px-4 fw-bold ${activeTab === 'events' ? 'shadow-sm' : 'btn-outline-secondary'}`}
           style={{
             fontSize: '.88rem', transition: 'all .2s',
             background: activeTab === 'events' ? '#6f42c1' : '',
@@ -243,10 +252,10 @@ export default function NewsPage() {
           }}
         >
           <i className="fas fa-calendar-star me-2"></i>
-          {lang === 'ar' ? 'التظاهرات المرخصة' : 'Événements citoyens'}
-          {eventsFetched && events.length > 0 && (
-            <span className={`ms-2 badge rounded-pill ${activeTab === 'events' ? 'bg-white text-purple' : 'bg-secondary text-white'}`}
-              style={{ fontSize: '.7rem', color: activeTab === 'events' ? '#6f42c1' : '' }}>{events.length}</span>
+          {lang === 'ar' ? 'الفعاليات' : 'Événements'}
+          {eventsFetched && publicEvents.length > 0 && (
+            <span className={`ms-2 badge rounded-pill ${activeTab === 'events' ? 'bg-white' : 'bg-secondary text-white'}`}
+              style={{ fontSize: '.7rem', color: activeTab === 'events' ? '#6f42c1' : '' }}>{publicEvents.length}</span>
           )}
         </button>
       </div>
@@ -435,20 +444,6 @@ export default function NewsPage() {
       ════════════════════════════════════════════════════════════ */}
       {activeTab === 'events' && (
         <>
-          {/* Info banner */}
-          <div className="alert border-0 rounded-4 mb-4 d-flex align-items-start gap-3"
-            style={{ background: 'linear-gradient(135deg, #f3e5f5, #ede7f6)', color: '#4a148c' }}>
-            <i className="fas fa-shield-alt fa-lg mt-1" style={{ color: '#6f42c1' }}></i>
-            <div>
-              <strong>{lang === 'ar' ? 'تظاهرات مرخصة من البلدية' : 'Événements autorisés par la municipalité'}</strong>
-              <p className="mb-0 small mt-1" style={{ color: '#6a1b9a', opacity: .85 }}>
-                {lang === 'ar'
-                  ? 'هذه التظاهرات مقدمة من المواطنين وتمت الموافقة عليها رسميًا من قبل عون بلدي.'
-                  : 'Ces événements sont soumis par des citoyens et officiellement approuvés par un agent municipal.'}
-              </p>
-            </div>
-          </div>
-
           {/* Search + type filter */}
           <div className="card shadow-sm border-0 rounded-4 mb-4">
             <div className="card-body p-3">
@@ -504,10 +499,10 @@ export default function NewsPage() {
             <div className="text-center py-5">
               <i className="fas fa-calendar-times fa-3x opacity-25 mb-3 d-block" style={{ color: '#6f42c1' }}></i>
               <p className="text-muted fw-bold">
-                {lang === 'ar' ? 'لا توجد تظاهرات مرخصة حاليًا' : 'Aucun événement autorisé pour le moment'}
+                {lang === 'ar' ? 'لا توجد فعاليات حاليًا' : 'Aucun événement pour le moment'}
               </p>
               <p className="text-muted small">
-                {lang === 'ar' ? 'تحقق لاحقًا أو قدم طلب تنظيم تظاهرة' : 'Revenez plus tard ou déposez une demande d\'organisation'}
+                {lang === 'ar' ? 'تحقق لاحقًا' : 'Revenez plus tard'}
               </p>
               <button className="btn btn-sm rounded-pill px-4 mt-2 fw-bold text-white"
                 style={{ background: '#6f42c1' }}
@@ -557,10 +552,6 @@ export default function NewsPage() {
                               {lang === 'ar' ? 'قادم' : 'À venir'}
                             </span>
                           )}
-                          <span className="badge rounded-pill" style={{ fontSize: '.65rem', background: '#6f42c1' }}>
-                            <i className="fas fa-check me-1"></i>
-                            {lang === 'ar' ? 'مرخص' : 'Autorisé'}
-                          </span>
                         </div>
                       </div>
 
@@ -579,9 +570,6 @@ export default function NewsPage() {
                           <div><i className="fas fa-users me-2 text-info"></i>
                             {ev.nombre_participants} {lang === 'ar' ? 'مشارك' : 'participants attendus'}
                           </div>
-                          {ev.association_nom && (
-                            <div><i className="fas fa-building me-2 text-secondary"></i>{ev.association_nom}</div>
-                          )}
                         </div>
 
                         {ev.description && (
@@ -594,10 +582,11 @@ export default function NewsPage() {
                           <span style={{ fontSize: '.75rem', color: '#888' }}>
                             <i className="fas fa-user me-1"></i>{ev.nom_organisateur}
                           </span>
-                          <span className="badge bg-light text-success border border-success-subtle" style={{ fontSize: '.7rem' }}>
-                            <i className="fas fa-check-circle me-1"></i>
-                            {lang === 'ar' ? 'معتمد' : 'Approuvé'}
-                          </span>
+                          {ev.association_nom && (
+                            <span className="badge bg-light text-secondary border" style={{ fontSize: '.7rem' }}>
+                              <i className="fas fa-building me-1"></i>{ev.association_nom}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -613,12 +602,12 @@ export default function NewsPage() {
               style={{ background: 'linear-gradient(135deg, #f3e5f5, #ede7f6)' }}>
               <i className="fas fa-calendar-plus fa-2x mb-3 d-block" style={{ color: '#6f42c1' }}></i>
               <h5 className="fw-bold" style={{ color: '#4a148c' }}>
-                {lang === 'ar' ? 'هل تريد تنظيم تظاهرة؟' : 'Vous souhaitez organiser un événement ?'}
+                {lang === 'ar' ? 'هل تريد تنظيم فعالية؟' : 'Vous souhaitez organiser un événement ?'}
               </h5>
               <p className="text-muted small mb-3">
                 {lang === 'ar'
-                  ? 'قدم طلب ترخيص تظاهرة وسيتم مراجعته من قبل الوكلاء البلديين.'
-                  : 'Déposez une demande d\'autorisation et elle sera examinée par les agents municipaux.'}
+                  ? 'قدّم طلب ترخيص وسيتم مراجعته من قبل البلدية.'
+                  : 'Déposez une demande d\'autorisation auprès de la municipalité.'}
               </p>
               <button className="btn rounded-pill px-5 fw-bold text-white shadow-sm"
                 style={{ background: '#6f42c1' }}
