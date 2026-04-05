@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' | '/demande-residence' | '/demande-raccordement' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -205,10 +205,27 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-construction',
       }
+    } else if (nameLower.includes('résidence') || nameAr.includes('مسكن') || nameAr.includes('إقامة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-residence',
+      }
+    } else if (nameLower.includes('raccordement') || nameAr.includes('ربط') || nameAr.includes('توصيل')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-raccordement',
+      }
+    } else if (nameLower.includes('signature') || nameAr.includes('تعريف') || nameAr.includes('إمضاء')) {
+      requestButton = {
+        kind: 'disabled',
+        label: lang === 'ar' ? 'يتطلب حضوراً شخصياً' : 'Présence physique requise',
+      }
     } else {
       requestButton = {
         kind: 'disabled',
-        label: lang === 'ar' ? 'طلب عن بعد (قريبا)' : 'Demander en ligne (Bientôt)',
+        label: lang === 'ar' ? 'قريباً على المنصة' : 'Prochainement disponible',
       }
     }
 
@@ -269,7 +286,7 @@ export default function ServicesPage() {
                 const visibleServices = cat.services.filter(s => {
                   const nf = s.name_fr.toLowerCase()
                   const na = s.name_ar
-                  return !nf.includes('extrait') && !na.includes('مضمون') && !nf.includes('résidence')
+                  return !nf.includes('extrait') && !na.includes('مضمون')
                 })
                 return (
                   <div key={cat.id} className="border rounded-4 overflow-hidden shadow-sm mb-2">
@@ -321,7 +338,7 @@ export default function ServicesPage() {
           <div className="category-section mb-5 mt-5">
             <h4 className="fw-bold border-bottom pb-2 mb-4">
               {lang === 'ar' ? 'الأداء والجباية المحلية' : 'Paiements et Taxes Locales'}
-              <span className="badge bg-danger ms-2 small" style={{ fontSize: '0.6rem' }}>SIMULATION PFE</span>
+              <span className="badge bg-primary ms-2 small" style={{ fontSize: '0.6rem' }}>OFFICIEL PORTAIL</span>
             </h4>
             <div className="row g-4">
               {[

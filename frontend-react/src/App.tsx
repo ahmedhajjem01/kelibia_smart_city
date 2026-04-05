@@ -37,6 +37,7 @@ import DemandeConstructionPage from './pages/DemandeConstructionPage'
 import MesConstructionsPage from './pages/MesConstructionsPage'
 import DemandeGoudronnagePage from './pages/DemandeGoudronnagePage'
 import DemandeCertificatVocationPage from './pages/DemandeCertificatVocationPage'
+import DemandeRaccordementPage from './pages/DemandeRaccordementPage'
 import NewsPage from './pages/NewsPage'
 
 
@@ -139,6 +140,7 @@ export default function App() {
           <Route path="/demande-construction" element={<DemandeConstructionPage />} />
           <Route path="/demande-goudronnage" element={<DemandeGoudronnagePage />} />
           <Route path="/demande-certificat-vocation" element={<DemandeCertificatVocationPage />} />
+          <Route path="/demande-raccordement" element={<DemandeRaccordementPage />} />
           <Route path="/mes-constructions" element={<MesConstructionsPage />} />
           <Route path="/evenements" element={<EvenementsPublicsPage />} />
 

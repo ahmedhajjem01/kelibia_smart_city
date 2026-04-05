@@ -2,8 +2,11 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation
-from .serializers import DemandeConstructionSerializer, DemandeGoudronnageSerializer, DemandeCertificatVocationSerializer
+from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation, DemandeRaccordement
+from .serializers import (
+    DemandeConstructionSerializer, DemandeGoudronnageSerializer, 
+    DemandeCertificatVocationSerializer, DemandeRaccordementSerializer
+)
 
 
 class IsAgentOrAdmin(permissions.BasePermission):
@@ -128,3 +131,39 @@ class DemandeCertificatVocationViewSet(viewsets.ModelViewSet):
             demande.certificat_signe = request.FILES['certificat_signe']
         demande.save()
         return Response(DemandeCertificatVocationSerializer(demande).data)
+
+
+class DemandeRaccordementViewSet(viewsets.ModelViewSet):
+    serializer_class = DemandeRaccordementSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_permissions(self):
+        if self.action == 'update_status':
+            return [IsAgentOrAdmin()]
+        return [permissions.IsAuthenticated()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+            return DemandeRaccordement.objects.all().select_related('citizen')
+        return DemandeRaccordement.objects.filter(citizen=user).select_related('citizen')
+
+    def perform_create(self, serializer):
+        serializer.save(citizen=self.request.user)
+
+    @action(detail=True, methods=['patch'], url_path='update-status')
+    def update_status(self, request, pk=None):
+        demande = self.get_object()
+        new_status = request.data.get('status')
+        if new_status and new_status in dict(DemandeRaccordement.STATUS_CHOICES):
+            demande.status = new_status
+        if 'commentaire_agent' in request.data:
+            demande.commentaire_agent = request.data['commentaire_agent']
+        if 'date_visite' in request.data:
+            demande.date_visite = request.data['date_visite']
+        if 'devis_montant' in request.data:
+            demande.devis_montant = request.data['devis_montant']
+        if 'devis_pdf' in request.FILES:
+            demande.devis_pdf = request.FILES['devis_pdf']
+        demande.save()
+        return Response(DemandeRaccordementSerializer(demande).data)
