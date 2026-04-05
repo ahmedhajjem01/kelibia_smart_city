@@ -90,9 +90,13 @@ export default function ServicesPage() {
           try { setUser(await uRes.json()) } catch { /* ignore parse errors */ }
         }
 
-        // Services — required
-        if (!svcRes.ok) throw new Error(`Services returned ${svcRes.status}`)
-        const data = (await svcRes.json()) as ServiceCategory[]
+        // Services — if token expired (401), retry without auth (it's a public endpoint)
+        let finalSvcRes = svcRes
+        if (svcRes.status === 401) {
+          finalSvcRes = await fetch('/api/services/categories/')
+        }
+        if (!finalSvcRes.ok) throw new Error(`Services returned ${finalSvcRes.status}`)
+        const data = (await finalSvcRes.json()) as ServiceCategory[]
         if (!Array.isArray(data)) throw new Error('Unexpected response format')
         setAllCategories(data)
       } catch (e) {
