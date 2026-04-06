@@ -34,35 +34,35 @@ def get_facebook_posts():
                 "id": "commune_kel_1001",
                 "message": "📢 BLAĞ MUNIĆIPAL : Entretien de l'Éclairage Public 💡\n\nLa municipalité de Kélibia informe tous les citoyens que l'équipe technique municipale a entamé hier soir une campagne d'entretien et de réparation du réseau d'éclairage public au niveau de l'avenue de l'Environnement et la route du Port.\n\nNous invitons les citoyens à signaler toute panne d'éclairage dans leurs quartiers via le portail citoyen.\n\n#Kelibia #TravauxMunicipaux",
                 "created_time": "2026-04-05T09:00:00+0000",
-                "full_picture": "https://images.unsplash.com/photo-1519754877717-3806cd988358?q=80&w=1000&auto=format&fit=crop", # Street lights / technician
+                "full_picture": "https://picsum.photos/seed/kelibia_light/800/600", 
                 "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1001"
             },
             {
                 "id": "commune_kel_1002",
                 "message": "🌳🌿 Campagne Exceptionnelle de Propreté à Kélibia 🌊\n\nEn prévision de la saison estivale, la Municipalité de Kélibia, en collaboration avec l'Association des Amis de l'Environnement, organise une grande campagne de nettoyage de la plage de Mansoura et du circuit touristique menant au Fort.\n\n📍 Rendez-vous : Ce dimanche à 08h00 devant le parking de Mansoura.\nDes sacs et des gants seront fournis sur place. Soyez nombreux pour garder notre ville, la perle du Cap Bon, propre !\n\n#KelibiaVivre #Environnement #Mansoura",
                 "created_time": "2026-04-03T14:30:00+0000",
-                "full_picture": "https://images.unsplash.com/photo-1618477461853-cf6ed80fbfc5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", # Beach cleaning
+                "full_picture": "https://picsum.photos/seed/kelibia_beach/800/600", 
                 "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1002"
             },
             {
                 "id": "commune_kel_1003",
                 "message": "⚠️ Avis aux citoyens : Campagne de fumigation (Lutte contre les moustiques) 🦟\n\nDans le cadre du programme de prévention sanitaire, la municipalité de Kélibia annonce qu'une opération de pulvérisation d'insecticides aura lieu durant la nuit (de 22h à 04h du matin) dans les zones suivantes :\n- Oued El Khatfa\n- Cité El Wafa\n- Zone du Vieux Port\n\nNous prions les habitants de ces zones de maintenir leurs fenêtres fermées durant cette période.\nMerci de votre compréhension.",
                 "created_time": "2026-04-01T17:00:00+0000",
-                "full_picture": "https://images.unsplash.com/photo-1627913317768-450ae9ba33ea?q=80&w=1000&auto=format&fit=crop", # Spraying / sunset
+                "full_picture": "https://picsum.photos/seed/kelibia_night/800/600", 
                 "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1003"
             },
             {
                 "id": "commune_kel_1004",
                 "message": "🏆 Cérémonie de gratification des élèves excellents 🎓\n\nSous l'égide du Maire de Kélibia, une cérémonie s'est tenue aujourd'hui au Palais Municipal pour honorer les bacheliers lauréats des différents lycées de Kélibia (Lycée Abdelaziz Khouja, Lycée Route de la Plage, etc.).\n\nUn grand bravo à nos brillants élèves qui honorent notre ville. La municipalité s'engage toujours à soutenir le savoir et l'éducation ! 👏🇹🇳",
                 "created_time": "2026-03-25T11:15:00+0000",
-                "full_picture": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop", # Graduation / students
+                "full_picture": "https://picsum.photos/seed/kelibia_school/800/600", 
                 "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1004"
             },
             {
                 "id": "commune_kel_1005",
                 "message": "🚧 Projet en cours : Réaménagement du centre-ville 🚜\n\nLe Conseil Municipal a le plaisir d'informer les citoyens que les travaux de bitumage de la Rue de la République (près de la Poste) avancent à un rythme soutenu. Ces travaux s'inscrivent dans le Plan d'Investissement Communal (PIC) pour l'année en cours.\n\nNous nous excusons pour le dérangement occasionné par le chantier et vous remercions de votre patience.",
                 "created_time": "2026-03-20T10:00:00+0000",
-                "full_picture": "https://images.unsplash.com/photo-1541888086425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop", # Construction
+                "full_picture": "https://picsum.photos/seed/kelibia_street/800/600",
                 "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1005"
             }
         ]
@@ -138,7 +138,8 @@ def sync_posts():
         picture_url = post.get('full_picture')
         if picture_url:
             try:
-                img_res = requests.get(picture_url, timeout=10)
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+                img_res = requests.get(picture_url, headers=headers, timeout=10)
                 if img_res.status_code == 200:
                     image_name = f"fb_{post_id}.jpg"
                     article.image.save(image_name, ContentFile(img_res.content), save=False)
