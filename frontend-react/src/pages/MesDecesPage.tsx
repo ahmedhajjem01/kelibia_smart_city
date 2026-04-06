@@ -13,6 +13,7 @@ type ActeDeces = {
   date_deces: string
   url_fr: string
   url_ar: string
+  is_paid?: boolean
 }
 
 export default function MesDecesPage() {
@@ -122,22 +123,33 @@ export default function MesDecesPage() {
                         {d.date_deces}
                       </p>
                       <div className="d-flex gap-2">
-                        <a
-                          href={resolveBackendUrl(d.url_fr)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-dark flex-fill fw-bold"
-                        >
-                          <i className="fas fa-print me-1" /> Version FR
-                        </a>
-                        <a
-                          href={resolveBackendUrl(d.url_ar)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-outline-dark flex-fill arabic-font fw-bold"
-                        >
-                          <i className="fas fa-print me-1" /> النسخة العربية
-                        </a>
+                        {!d.is_paid ? (
+                            <button
+                              className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
+                              onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.numero_registre}&requestType=deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
+                            >
+                              <i className="fas fa-lock me-2"></i> Payer 0.500 DT
+                            </button>
+                        ) : (
+                            <>
+                              <a
+                                href={resolveBackendUrl(d.url_fr)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-dark flex-fill fw-bold"
+                              >
+                                <i className="fas fa-print me-1" /> Version FR
+                              </a>
+                              <a
+                                href={resolveBackendUrl(d.url_ar)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-outline-dark flex-fill arabic-font fw-bold"
+                              >
+                                <i className="fas fa-print me-1" /> النسخة العربية
+                              </a>
+                            </>
+                        )}
                       </div>
                     </div>
                   </div>

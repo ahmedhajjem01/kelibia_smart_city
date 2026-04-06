@@ -648,10 +648,12 @@ export default function AgentDashboardPage() {
       return matchesBaseFilters
     })
 
+    const statusWeights: Record<string, number> = { resolved: 3, rejected: 2, pending: 1, in_progress: 1 }
     const priorityWeights: Record<string, number> = { urgente: 1, normale: 2, faible: 3 }
     filtered.sort((a, b) => {
-      if (a.status === 'resolved' && b.status !== 'resolved') return 1
-      if (a.status !== 'resolved' && b.status === 'resolved') return -1
+      const sa = statusWeights[a.status] || 1
+      const sb = statusWeights[b.status] || 1
+      if (sa !== sb) return sa - sb
 
       // Sort by Priority (Urgent first)
       const wa = priorityWeights[a.priority] || 2
@@ -859,7 +861,7 @@ export default function AgentDashboardPage() {
     <div className="agent-page">
       <div className="ag-topbar">
         <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
-        <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 295 XXX</a><a href="#"><i className="fas fa-envelope me-1"></i>contact@kelibia.tn</a></div>
+        <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 296 239</a><a href="#"><i className="fas fa-envelope me-1"></i>webmaster.commune-kelibia@topnet.tn</a></div>
       </div>
       <nav className="ag-navbar">
         <a className="ag-brand" href="#">
@@ -929,9 +931,11 @@ export default function AgentDashboardPage() {
                 <i className="fas fa-users-cog"></i> {t('nav_managed_users')}
                 {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
               </a>
+              {/*
               <a className={`ag-nav-item${activeTab === 'services' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('services') }}>
                 <i className="fas fa-file-invoice"></i> {t('nav_services_villes')}
               </a>
+              */}
               <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
                 <i className="fas fa-folder-open"></i> {t('nav_demandes_citoyens')}
                 {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
@@ -945,7 +949,8 @@ export default function AgentDashboardPage() {
           <div className="ag-divider"></div>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</a>
         </div>
-        <div className="ag-main">
+        <div className="ag-main" id="ag-main-content">
+          <>
           {activeTab === 'dashboard' ? (
             <>
               <div className="row g-3 mb-4">
@@ -1266,7 +1271,6 @@ export default function AgentDashboardPage() {
                   )}
                   
                   {/* Summary Section below table */}
-                  <div className="ag-divider"></div>
                   <div className="p-4 bg-light border-top">
                      <h6 className="fw-bold mb-3"><i className="fas fa-chart-line me-2"></i>Résumé des Demandes Actives</h6>
                      <div className="row g-3">
@@ -1293,7 +1297,7 @@ export default function AgentDashboardPage() {
                </div>
             </div>
           ) : activeTab === 'demandes' ? (
-            /* ── DEMANDES CITOYENS TAB ─────────────────────────────────── */
+            <div className="ag-demandes-wrap">
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#004968,#006d94)', height: '50px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span className="fw-bold"><i className="fas fa-folder-open me-2"></i>{t('admin_demandes_title')}</span>
@@ -1327,7 +1331,7 @@ export default function AgentDashboardPage() {
                     </div>
                     <div className="d-flex flex-wrap gap-2">
                       {Object.entries(typeCounts).map(([type, count]) => {
-                        const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
+                        const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
                         return <span key={type} style={{ background: '#e8eaf6', color: '#283593', border: '1px solid #c5cae9', borderRadius: 12, padding: '2px 10px', fontSize: '.75rem', fontWeight: 600 }}>{typeLabels[type] || type} ({count})</span>
                       })}
                     </div>
@@ -1348,6 +1352,12 @@ export default function AgentDashboardPage() {
                   <option value="naissance">👶 {t('birth_cert')}</option>
                   <option value="mariage">💍 {t('mariage_cert')}</option>
                   <option value="deces">⚰️ {t('deces_cert')}</option>
+                  <option value="transfert">🚑 {lang === 'ar' ? 'رخصة نقل جثة' : 'Transfert de Corps'}</option>
+                  <option value="legalisation">✒️ {lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation Signature'}</option>
+                  <option value="goudronnage">🛤️ {lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage Street'}</option>
+                  <option value="bien">🏢 {lang === 'ar' ? 'تسجيل عقار' : 'Bien Immobilier'}</option>
+                  <option value="mutation">🔄 {lang === 'ar' ? 'تحيين ملكية' : 'Mutation Propriété'}</option>
+                  <option value="vocation">🏗️ {lang === 'ar' ? 'تغيير صبغة' : 'Vocation Change'}</option>
                 </select>
                 <select className="ag-filter-select" value={demandeStatusFilter} onChange={e => setDemandeStatusFilter(e.target.value)}>
                   <option value="">{t('demande_all_statuses')}</option>
@@ -1367,7 +1377,7 @@ export default function AgentDashboardPage() {
                 <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#006d94' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>{t('loading')}</div></div>
               ) : (() => {
                 const q = demandeSearchQ.toLowerCase()
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
                 const filtered = allDemandes.filter((d: any) => {
                   if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
                   if (demandeStatusFilter && d.status !== demandeStatusFilter) return false
@@ -1407,6 +1417,12 @@ export default function AgentDashboardPage() {
                           if (d.type === 'residence') summary = d.adresse ? `📍 ${String(d.adresse).slice(0, 40)}` : ''
                           else if (d.type === 'livret') summary = d.nom_chef ? `👤 ${d.nom_chef} ${d.prenom_chef}` : ''
                           else if (d.type === 'naissance') summary = d.prenom_fr ? `👶 ${d.prenom_fr} ${d.nom_fr}` : ''
+                          else if (d.type === 'transfert') summary = d.nom_defunt ? `🚑 ${d.nom_defunt} → ${d.lieu_inhumation}` : ''
+                          else if (d.type === 'legalisation') summary = d.type_document ? `✒️ ${d.type_document} (${d.nombre_copies} ex.)` : ''
+                          else if (d.type === 'goudronnage') summary = d.localisation_rue ? `🛤️ ${d.localisation_rue}` : ''
+                          else if (d.type === 'bien') summary = d.type_bien ? `🏢 ${d.type_bien} (${d.surface} m²)` : ''
+                          else if (d.type === 'mutation') summary = d.type_mutation ? `🔄 ${d.type_mutation.toUpperCase()}: ${d.nouveau_proprio}` : ''
+                          else if (d.type === 'vocation') summary = d.vocation_nouvelle ? `🏗️ ${d.vocation_actuelle} → ${d.vocation_nouvelle}` : ''
                           return (
                             <tr key={`${d.type}-${d.id}`}>
                               <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{d.id}</td>
@@ -1448,7 +1464,7 @@ export default function AgentDashboardPage() {
 
               {/* ── Detail Modal */}
               {demandeDetail && (() => {
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
                 return (
                   <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 9100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                     <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
@@ -1478,10 +1494,47 @@ export default function AgentDashboardPage() {
                             {demandeDetail.etat_livret && <div className="col-6"><div className="det-label">{t('event_status')}</div><div className="det-value">{demandeDetail.etat_livret}</div></div>}
                           </>)}
                           {demandeDetail.type === 'naissance' && (<>
-                            <div className="col-6"><div className="det-label">{t('newborn_info')}</div><div className="det-value">{demandeDetail.prenom_fr} {demandeDetail.nom_fr}</div></div>
-                            <div className="col-6"><div className="det-label">{t('date_of_birth')}</div><div className="det-value">{demandeDetail.date_naissance}</div></div>
-                            {demandeDetail.lieu_naissance_fr && <div className="col-6"><div className="det-label">{t('place_of_birth')}</div><div className="det-value">{demandeDetail.lieu_naissance_fr}</div></div>}
+                            <div className="col-6"><div className="det-label">{t('place_of_birth')}</div><div className="det-value">{demandeDetail.lieu_naissance_fr}</div></div>
                             {demandeDetail.sexe && <div className="col-6"><div className="det-label">{t('gender')}</div><div className="det-value">{demandeDetail.sexe}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'transfert' && (<>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المتوفي' : 'Défunt'}</div><div className="det-value">{demandeDetail.nom_defunt}</div></div>
+                            <div className="col-6"><div className="det-label">{t('deces_date')}</div><div className="det-value">{demandeDetail.date_deces}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'مكان الوفاة' : 'Lieu décès'}</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الوجهة' : 'Destination'}</div><div className="det-value">{demandeDetail.lieu_inhumation}</div></div>
+                          </>)}
+                          {demandeDetail.type === 'legalisation' && (<>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع الوثيقة' : 'Type de document'}</div><div className="det-value">{demandeDetail.type_document}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'عدد النسخ' : 'Nombre de copies'}</div><div className="det-value">{demandeDetail.nombre_copies}</div></div>
+                            {demandeDetail.motif && <div className="col-12"><div className="det-label">{t('motif')}</div><div className="det-value">{demandeDetail.motif}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'goudronnage' && (<>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع المطلوب تعبيده' : 'Localisation de la rue'}</div><div className="det-value">{demandeDetail.localisation_rue}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'إحداثيات الموقع' : 'Coordonnées'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'Non spécifié'}</div></div>
+                            {demandeDetail.adresse_residence && <div className="col-6"><div className="det-label">{lang === 'ar' ? 'عنوان السكن' : 'Adresse Demandeur'}</div><div className="det-value">{demandeDetail.adresse_residence}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'bien' && (<>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع العقار' : 'Type de bien'}</div><div className="det-value">{demandeDetail.type_bien}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المساحة' : 'Surface'}</div><div className="det-value">{demandeDetail.surface} m²</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الإحداثيات' : 'Coordonnées GPS'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'Manual'}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'العنوان' : 'Adresse'}</div><div className="det-value">{demandeDetail.adresse}</div></div>
+                          </>)}
+                          {demandeDetail.type === 'mutation' && (<>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع العملية' : 'Type de mutation'}</div><div className="det-value">{demandeDetail.type_mutation?.toUpperCase()}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المالك السابق' : 'Ancien propriétaire'}</div><div className="det-value">{demandeDetail.ancien_proprio}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المالك الجديد' : 'Nouveau propriétaire'}</div><div className="det-value">{demandeDetail.nouveau_proprio}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'عنوان العقار' : 'Adresse du bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
+                          </>)}
+                          {demandeDetail.type === 'vocation' && (<>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة الأصلية' : 'Vocation Actuelle'}</div><div className="det-value">{demandeDetail.vocation_actuelle?.toUpperCase()}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة المطلوبة' : 'Nouvelle Vocation'}</div><div className="det-value">{demandeDetail.vocation_nouvelle?.toUpperCase()}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الهدف / المبررات' : 'Justification'}</div><div className="det-value">{demandeDetail.motif}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'العنوان' : 'Adresse Bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
                           </>)}
 
                           <div className="col-6"><div className="det-label">{t('demande_payment')}</div><div className="det-value">{demandeDetail.is_paid ? `✅ ${t('paid_label')}` : `⏳ ${t('status_pending')}`}</div></div>
@@ -1531,6 +1584,7 @@ export default function AgentDashboardPage() {
                   </div>
                 )
               })()}
+              </div>
             </div>
           ) : activeTab === 'forum' ? (
             /* ── FORUM MANAGEMENT TAB ─────────────────────────────────── */
@@ -1787,7 +1841,6 @@ export default function AgentDashboardPage() {
                       { lbl: 'En instruction', val: constructionStats.en_cours, color: '#1565c0', bg: '#e3f2fd' },
                       { lbl: 'Permis délivrés', val: constructionStats.permis_delivre, color: '#2e7d32', bg: '#e8f5e9' },
                       { lbl: 'Rejetés', val: constructionStats.rejet, color: '#c62828', bg: '#ffebee' },
-                      { lbl: '⚠️ Haute priorité', val: constructionStats.high_risk, color: '#e65100', bg: '#fff3e0' },
                     ].map(s => (
                       <div className="col-6 col-md-4 col-lg-2" key={s.lbl}>
                         <div className="text-center p-3 rounded-3" style={{ background: s.bg }}>
@@ -1830,7 +1883,7 @@ export default function AgentDashboardPage() {
                         const color = statusColors[c.status] || '#666'
                         return (
                           <div key={c.id} className="p-3 rounded-3 border d-flex align-items-start gap-3 flex-wrap"
-                            style={{ background: constructionDetail?.id === c.id ? '#fff8e1' : '#fff', cursor: 'pointer', borderColor: c.is_high_risk ? '#ff9800' : '#e9ecef' }}
+                            style={{ background: constructionDetail?.id === c.id ? '#fff8e1' : '#fff', cursor: 'pointer', borderColor: '#e9ecef' }}
                             onClick={() => setConstructionDetail(constructionDetail?.id === c.id ? null : c)}>
                             <div className="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
                               style={{ width: 40, height: 40, background: '#fff3e0', fontSize: '1.2rem' }}>
@@ -1840,7 +1893,6 @@ export default function AgentDashboardPage() {
                               <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
                                 <span className="fw-bold" style={{ fontSize: '.9rem' }}>{c.nom_proprietaire}</span>
                                 <span className="badge rounded-pill text-white" style={{ background: color, fontSize: '.7rem' }}>{c.status_display}</span>
-                                {c.is_high_risk && <span className="badge bg-danger rounded-pill" style={{ fontSize: '.68rem' }}>⚠️ Haute priorité</span>}
                               </div>
                               <div style={{ fontSize: '.8rem', color: '#777' }}>
                                 <span className="me-3"><i className="fas fa-tools me-1 text-warning"></i>{c.type_travaux_display}</span>
@@ -2212,8 +2264,7 @@ export default function AgentDashboardPage() {
                     <p className="text-muted small mb-0">{t('profile_dossiers_desc')}</p>
                   </div>
                 </div>
-
-                <div className="row g-3">
+                      <div className="row g-3">
                    {[
                       { lbl: t('profile_signalements_pending'), val: pending, icon: 'fa-clock', color: '#e65100', bg: '#fff3e0', action: 'dashboard' },
                       { lbl: t('profile_signalements_inprog'),  val: inprog,  icon: 'fa-tasks', color: '#1565c0', bg: '#e3f2fd', action: 'dashboard' },
@@ -2238,184 +2289,161 @@ export default function AgentDashboardPage() {
              </div>
           ) : null}
 
-          {/* ── Événement detail modal */}
-          {activeTab === 'evenements' && evDetail && (() => {
-            return (
-              <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 620, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
-                  <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)', borderRadius: '16px 16px 0 0' }}>
-                    <span className="title"><i className="fas fa-calendar-alt me-2"></i>{evDetail.titre_evenement}</span>
-                    <button className="ag-close-btn" onClick={() => setEvDetail(null)}><i className="fas fa-times"></i></button>
-                  </div>
-                  <div className="p-4">
-                    <div className="row g-3 mb-3">
-                      <div className="col-6">
-                        <div className="det-label">{t('event_type')}</div>
-                        <div className="det-value">{evDetail.type_evenement_display}</div>
-                      </div>
-                      <div className="col-6">
-                        <div className="det-label">{t('event_organizer')}</div>
-                        <div className="det-value">{evDetail.nom_organisateur} — {evDetail.telephone_organisateur}</div>
-                      </div>
-                      <div className="col-6">
-                        <div className="det-label">{t('event_place')}</div>
-                        <div className="det-value">{evDetail.lieu_type_display} — {evDetail.lieu_details}</div>
-                      </div>
-                      <div className="col-6">
-                        <div className="det-label">{t('event_dates')}</div>
-                        <div className="det-value">{evDetail.date_debut} → {evDetail.date_fin}</div>
-                        <div className="det-value" style={{ fontSize: '.83rem', color: '#777' }}>{evDetail.heure_debut?.slice(0,5)} — {evDetail.heure_fin?.slice(0,5)}</div>
-                      </div>
-                      <div className="col-6">
-                        <div className="det-label">{t('event_participants')}</div>
-                        <div className="det-value">{evDetail.nombre_participants}</div>
-                      </div>
-                      <div className="col-6">
-                        <div className="det-label">{t('event_cin_organizer')}</div>
-                        <div className="det-value">{evDetail.cin_organisateur}</div>
-                      </div>
-                      <div className="col-12">
-                        <div className="det-label">{t('event_description')}</div>
-                        <div className="det-value" style={{ lineHeight: 1.7, fontSize: '.88rem' }}>{evDetail.description}</div>
-                      </div>
-                      {evDetail.has_conflict && (
-                        <div className="col-12">
-                          <div className="p-3 rounded-3 d-flex gap-2 align-items-start" style={{ background: '#fff8e1', border: '1px solid #ffe082', fontSize: '.85rem', color: '#e65100' }}>
-                            <i className="fas fa-exclamation-triangle mt-1"></i>
-                            <div>
-                              <strong>{t('event_conflict_detected')}</strong> — {t('event_conflict_detected_long')}
-                              {evDetail.conflict_with_title && <span> {t('event_conflict_with')} <em>« {evDetail.conflict_with_title} »</em></span>}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+          {activeTab === 'evenements' && evDetail && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+              <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 620, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+                <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)', borderRadius: '16px 16px 0 0' }}>
+                  <span className="title"><i className="fas fa-calendar-alt me-2"></i>{evDetail.titre_evenement}</span>
+                  <button className="ag-close-btn" onClick={() => setEvDetail(null)}><i className="fas fa-times"></i></button>
+                </div>
+                <div className="p-4">
+                  <div className="row g-3 mb-3">
+                    <div className="col-6">
+                      <div className="det-label">{t('event_type')}</div>
+                      <div className="det-value">{evDetail.type_evenement_display}</div>
                     </div>
-
-                    {/* Documents */}
-                    {[
-                      { key: 'cin_recto', label: 'CIN Recto' },
-                      { key: 'cin_verso', label: 'CIN Verso' },
-                      { key: 'programme_evenement', label: 'Programme' },
-                      { key: 'plan_lieu', label: 'Plan du lieu' },
-                      { key: 'attestation_assurance', label: 'Assurance' },
-                      { key: 'plan_securite', label: 'Plan sécurité' },
-                      { key: 'attestation_association', label: 'Attestation asso.' },
-                    ].some(doc => evDetail[doc.key]) && (
-                      <div className="mb-3">
-                        <div className="det-label mb-2">{t('event_docs')}</div>
-                        <div className="d-flex flex-wrap gap-2">
-                          {[
-                            { key: 'cin_recto', label: 'CIN Recto' },
-                            { key: 'cin_verso', label: 'CIN Verso' },
-                            { key: 'programme_evenement', label: 'Programme' },
-                            { key: 'plan_lieu', label: 'Plan du lieu' },
-                            { key: 'attestation_assurance', label: 'Assurance' },
-                            { key: 'plan_securite', label: 'Plan sécurité' },
-                            { key: 'attestation_association', label: 'Attestation asso.' },
-                          ].filter(doc => evDetail[doc.key]).map(doc => (
-                            <a key={doc.key} href={resolveBackendUrl(evDetail[doc.key])} target="_blank" rel="noopener noreferrer"
-                              className="btn btn-sm btn-outline-primary rounded-pill">
-                              <i className="fas fa-file me-1"></i>{doc.label}
-                            </a>
-                          ))}
+                    <div className="col-6">
+                      <div className="det-label">{t('event_organizer')}</div>
+                      <div className="det-value">{evDetail.nom_organisateur} — {evDetail.telephone_organisateur}</div>
+                    </div>
+                    <div className="col-6">
+                      <div className="det-label">{t('event_place')}</div>
+                      <div className="det-value">{evDetail.lieu_type_display} — {evDetail.lieu_details}</div>
+                    </div>
+                    <div className="col-6">
+                      <div className="det-label">{t('event_dates')}</div>
+                      <div className="det-value">{evDetail.date_debut} → {evDetail.date_fin}</div>
+                      <div className="det-value" style={{ fontSize: '.83rem', color: '#777' }}>{evDetail.heure_debut?.slice(0,5)} — {evDetail.heure_fin?.slice(0,5)}</div>
+                    </div>
+                    <div className="col-6">
+                      <div className="det-label">{t('event_participants')}</div>
+                      <div className="det-value">{evDetail.nombre_participants}</div>
+                    </div>
+                    <div className="col-6">
+                      <div className="det-label">{t('event_cin_organizer')}</div>
+                      <div className="det-value">{evDetail.cin_organisateur}</div>
+                    </div>
+                    <div className="col-12">
+                      <div className="det-label">{t('event_description')}</div>
+                      <div className="det-value" style={{ lineHeight: 1.7, fontSize: '.88rem' }}>{evDetail.description}</div>
+                    </div>
+                    {evDetail.has_conflict && (
+                      <div className="col-12">
+                        <div className="p-3 rounded-3 d-flex gap-2 align-items-start" style={{ background: '#fff8e1', border: '1px solid #ffe082', fontSize: '.85rem', color: '#e65100' }}>
+                          <i className="fas fa-exclamation-triangle mt-1"></i>
+                          <div>
+                            <strong>{t('event_conflict_detected')}</strong> — {t('event_conflict_detected_long')}
+                            {evDetail.conflict_with_title && <span> {t('event_conflict_with')} <em>« {evDetail.conflict_with_title} »</em></span>}
+                          </div>
                         </div>
                       </div>
                     )}
+                  </div>
 
-                    <hr />
-                    {/* Agent action — 3-button workflow */}
-                    <div className="mb-3">
-                      <label className="det-label mb-2">{t('event_comment_label')}</label>
-                      <textarea className="form-control mt-1" rows={3} id="ev-detail-comment"
-                        defaultValue={evDetail.commentaire_agent}
-                        placeholder={t('event_comment_placeholder')} />
+                  {/* Documents Section */}
+                  <div className="mb-3">
+                    <div className="det-label mb-2">{t('event_docs')}</div>
+                    <div className="d-flex flex-wrap gap-2">
+                      {[
+                        { key: 'cin_recto', label: 'CIN Recto' },
+                        { key: 'cin_verso', label: 'CIN Verso' },
+                        { key: 'programme_evenement', label: 'Programme' },
+                        { key: 'plan_lieu', label: 'Plan du lieu' },
+                        { key: 'attestation_assurance', label: 'Assurance' },
+                        { key: 'plan_securite', label: 'Plan sécurité' },
+                        { key: 'attestation_association', label: 'Attestation asso.' },
+                      ].filter(doc => evDetail[doc.key]).map(doc => (
+                        <a key={doc.key} href={resolveBackendUrl(evDetail[doc.key])} target="_blank" rel="noopener noreferrer"
+                          className="btn btn-sm btn-outline-primary rounded-pill">
+                          <i className="fas fa-file me-1"></i>{doc.label}
+                        </a>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Current status pill */}
-                    <div className="mb-3 d-flex align-items-center gap-2 flex-wrap">
-                      <span className="text-muted small">{t('event_current_status')} :</span>
-                      {(() => {
-                        const cfg: Record<string, { cls: string; icon: string }> = {
-                          pending:            { cls: 'bg-warning text-dark',  icon: 'fa-hourglass-half' },
-                          in_progress:        { cls: 'bg-info text-white',    icon: 'fa-spinner' },
-                          approved:           { cls: 'bg-success text-white', icon: 'fa-check-circle' },
-                          rejected:           { cls: 'bg-danger text-white',  icon: 'fa-times-circle' },
-                          changes_requested:  { cls: 'bg-warning text-dark',  icon: 'fa-edit' },
-                        }
-                        const c = cfg[evDetail.status] || { cls: 'bg-secondary text-white', icon: 'fa-question' }
-                        return (
-                          <span className={`badge rounded-pill px-3 py-2 ${c.cls}`} style={{ fontSize: '.8rem' }}>
-                            <i className={`fas ${c.icon} me-1`}></i>{evDetail.status_display}
-                          </span>
-                        )
-                      })()}
-                    </div>
+                  <hr />
+                  <div className="mb-3">
+                    <label className="det-label mb-2">{t('event_comment_label')}</label>
+                    <textarea className="form-control mt-1" rows={3} id="ev-detail-comment"
+                      defaultValue={evDetail.commentaire_agent}
+                      placeholder={t('event_comment_placeholder')} />
+                  </div>
 
-                    {/* 3-button decision row */}
-                    <div className="d-flex gap-2 flex-wrap mt-2">
-                      <button className="btn btn-success rounded-pill px-4 fw-bold flex-fill" disabled={evSaving}
-                        onClick={() => {
-                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
-                          handleEvStatus(evDetail.id, 'approved', txt?.value || '')
-                        }}
-                        title={t('event_approve_btn_title')}>
-                        {evSaving
-                          ? <span className="spinner-border spinner-border-sm"></span>
-                          : <><i className="fas fa-check-circle me-2"></i>{t('event_approve_btn')}</>
-                        }
-                      </button>
+                  <div className="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                    <span className="text-muted small">{t('event_current_status')} :</span>
+                    {(() => {
+                      const cfg: Record<string, { cls: string; icon: string }> = {
+                        pending:            { cls: 'bg-warning text-dark',  icon: 'fa-hourglass-half' },
+                        in_progress:        { cls: 'bg-info text-white',    icon: 'fa-spinner' },
+                        approved:           { cls: 'bg-success text-white', icon: 'fa-check-circle' },
+                        rejected:           { cls: 'bg-danger text-white',  icon: 'fa-times-circle' },
+                        changes_requested:  { cls: 'bg-warning text-dark',  icon: 'fa-edit' },
+                      }
+                      const c = cfg[evDetail.status] || { cls: 'bg-secondary text-white', icon: 'fa-question' }
+                      return (
+                        <span className={`badge rounded-pill px-3 py-2 ${c.cls}`} style={{ fontSize: '.8rem' }}>
+                          <i className={`fas ${c.icon} me-1`}></i>{evDetail.status_display}
+                        </span>
+                      )
+                    })()}
+                  </div>
 
-                      <button className="btn btn-warning rounded-pill px-4 fw-bold flex-fill text-dark" disabled={evSaving}
-                        onClick={() => {
-                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
-                          if (!txt?.value?.trim()) {
-                            txt?.focus()
-                            txt?.setCustomValidity('Veuillez indiquer les modifications demandées.')
-                            txt?.reportValidity()
-                            return
-                          }
-                          handleEvStatus(evDetail.id, 'changes_requested', txt.value)
-                        }}
-                        title={t('event_modify_btn_title')}>
-                        {evSaving
-                          ? <span className="spinner-border spinner-border-sm"></span>
-                          : <><i className="fas fa-edit me-2"></i>{t('event_modify_btn')}</>
-                        }
-                      </button>
+                  <div className="d-flex gap-2 flex-wrap mt-2">
+                    <button className="btn btn-success rounded-pill px-4 fw-bold flex-fill" disabled={evSaving}
+                      onClick={() => {
+                        const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                        handleEvStatus(evDetail.id, 'approved', txt?.value || '')
+                      }}
+                      title={t('event_approve_btn_title')}>
+                      {evSaving
+                        ? <span className="spinner-border spinner-border-sm"></span>
+                        : <><i className="fas fa-check-circle me-2"></i>{t('event_approve_btn')}</>
+                      }
+                    </button>
+                    <button className="btn btn-warning rounded-pill px-4 fw-bold flex-fill text-dark" disabled={evSaving}
+                      onClick={() => {
+                        const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                        if (!txt?.value?.trim()) { txt?.focus(); showToast('Merci d\'indiquer une raison.', 'warning'); return; }
+                        handleEvStatus(evDetail.id, 'changes_requested', txt.value)
+                      }}
+                      title={t('event_modify_btn_title')}>
+                      {evSaving
+                        ? <span className="spinner-border spinner-border-sm"></span>
+                        : <><i className="fas fa-edit me-2"></i>{t('event_modify_btn')}</>
+                      }
+                    </button>
+                    <button className="btn btn-danger rounded-pill px-4 fw-bold flex-fill" disabled={evSaving}
+                      onClick={() => {
+                        const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                        handleEvStatus(evDetail.id, 'rejected', txt?.value || '')
+                      }}
+                      title={t('event_reject_btn_title')}>
+                      {evSaving
+                        ? <span className="spinner-border spinner-border-sm"></span>
+                        : <><i className="fas fa-times-circle me-2"></i>{t('event_reject_btn')}</>
+                      }
+                    </button>
+                  </div>
 
-                      <button className="btn btn-danger rounded-pill px-4 fw-bold flex-fill" disabled={evSaving}
-                        onClick={() => {
-                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
-                          handleEvStatus(evDetail.id, 'rejected', txt?.value || '')
-                        }}
-                        title={t('event_reject_btn_title')}>
-                        {evSaving
-                          ? <span className="spinner-border spinner-border-sm"></span>
-                          : <><i className="fas fa-times-circle me-2"></i>{t('event_reject_btn')}</>
-                        }
-                      </button>
-                    </div>
-
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                      <button className="btn btn-outline-secondary rounded-pill px-4"
-                        onClick={() => {
-                          const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
-                          handleEvStatus(evDetail.id, 'in_progress', txt?.value || '')
-                        }}
-                        disabled={evSaving}
-                        title={t('event_process_btn_title')}>
-                        <i className="fas fa-spinner me-2"></i>{t('event_process_btn')}
-                      </button>
-                      <button className="btn btn-link text-muted text-decoration-none" onClick={() => setEvDetail(null)}>
-                        {t('event_close_btn')}
-                      </button>
-                    </div>
+                  <div className="d-flex justify-content-between align-items-center mt-3">
+                    <button className="btn btn-outline-secondary rounded-pill px-4"
+                      onClick={() => {
+                        const txt = document.getElementById('ev-detail-comment') as HTMLTextAreaElement
+                        handleEvStatus(evDetail.id, 'in_progress', txt?.value || '')
+                      }}
+                      disabled={evSaving}
+                      title={t('event_process_btn_title')}>
+                      <i className="fas fa-spinner me-2"></i>{t('event_process_btn')}
+                    </button>
+                    <button className="btn btn-link text-muted text-decoration-none" onClick={() => setEvDetail(null)}>
+                      {t('event_close_btn')}
+                    </button>
                   </div>
                 </div>
               </div>
-            )
-          })()}
-
+            </div>
+          )}
+          </>
         </div>
         <div style={{ width: 240, minWidth: 240, padding: '24px 16px 24px 0', flexShrink: 0 }}>
 
@@ -2828,7 +2856,6 @@ export default function AgentDashboardPage() {
                     <span>Votre réponse sera identifiée comme un commentaire <strong>officiel</strong> de la mairie.</span>
                  </div>
               </div>
-
             </div>
           </div>
         )
@@ -3117,7 +3144,10 @@ function QSSelect({ rec, onUpdate }: { rec: Reclamation; onUpdate: (id: number, 
       <option value="pending">{t('status_pending_full')}</option>
       <option value="in_progress">{t('status_in_progress_full')}</option>
       <option value="resolved">{t('status_resolved_full')}</option>
-      <option value="rejected">{t('status_rejected_full')}</option>
     </select>
   )
 }
+
+
+
+export default AgentDashboardPage;

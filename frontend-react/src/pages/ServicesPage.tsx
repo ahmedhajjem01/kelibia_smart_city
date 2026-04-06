@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' | '/demande-residence' | '/demande-raccordement' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' | '/demande-residence' | '/demande-raccordement' | '/demande-transfert-corps' | '/demande-legalisation' | '/demande-bien' | '/demande-propriete-changement' | '/demande-vocation-changement' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -169,11 +169,23 @@ export default function ServicesPage() {
         label: t('request_online'),
         target: '/demande-mariage',
       }
+    } else if (nameLower.includes('livret') || nameAr.includes('دفتر') || nameAr.includes('عائلي')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
+        target: '/demande-livret-famille',
+      }
     } else if (nameLower.includes('inhumation') || nameAr.includes('دفن')) {
       requestButton = {
         kind: 'declare_death',
         label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
         target: '/demande-inhumation',
+      }
+    } else if (nameLower.includes('transfert') || nameAr.includes('نقل جثة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'طلب رخصة نقل' : 'Demander un permis de transfert',
+        target: '/demande-transfert-corps',
       }
     } else if (nameLower === 'événement public' || nameAr === 'فعالية عمومية') {
       requestButton = {
@@ -196,8 +208,20 @@ export default function ServicesPage() {
     } else if (nameLower.includes('vocation') || nameAr.includes('صبغة') || nameAr.includes('وجهة')) {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-        target: '/demande-certificat-vocation',
+        label: lang === 'ar' ? 'طلب تغيير' : 'Changer la vocation',
+        target: '/demande-vocation-changement',
+      }
+    } else if (nameLower.includes('changement') || nameLower.includes('achat') || nameLower.includes('héritage')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'طلب تحيين' : 'Mise à jour propriétaire',
+        target: '/demande-propriete-changement',
+      }
+    } else if (nameLower.includes('bien') || nameLower.includes('propriété') || nameAr.includes('عقار') || nameAr.includes('بناء')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تسجيل عقار' : 'Enregistrer un bien',
+        target: '/demande-bien',
       }
     } else if (nameLower.includes('construction') || nameLower.includes('construire') || nameAr.includes('بناء') || nameAr.includes('ترخيص بناء')) {
       requestButton = {
@@ -219,8 +243,9 @@ export default function ServicesPage() {
       }
     } else if (nameLower.includes('signature') || nameAr.includes('تعريف') || nameAr.includes('إمضاء')) {
       requestButton = {
-        kind: 'disabled',
-        label: lang === 'ar' ? 'يتطلب حضوراً شخصياً' : 'Présence physique requise',
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
+        target: '/demande-legalisation',
       }
     } else {
       requestButton = {
@@ -343,7 +368,7 @@ export default function ServicesPage() {
             <div className="row g-4">
               {[
                 { id: 't1', title: lang === 'ar' ? 'معلوم على العقارات' : 'Taxe Habitation', amount: '125.000', icon: 'fa-home' },
-                { id: 't2', title: lang === 'ar' ? 'الخطايا المرورية' : 'Amendes', amount: '20.000', icon: 'fa-car' },
+                { id: 't2', title: lang === 'ar' ? 'المعلوم على المؤسسات (TCL)' : 'Taxe Commerciale (TCL)', amount: '250.000', icon: 'fa-store' },
                 { id: 't3', title: lang === 'ar' ? 'معلوم الخدمات' : 'Frais Services', amount: '2.000', icon: 'fa-file-invoice' }
               ].map(pay => (
                 <div key={pay.id} className="col-md-4">
@@ -352,9 +377,13 @@ export default function ServicesPage() {
                       <i className={`fas ${pay.icon} fs-1 text-primary mb-3`}></i>
                       <h5 className="fw-bold">{pay.title}</h5>
                       <h4 className="text-primary fw-bold mb-3">{pay.amount} DT</h4>
-                      <button className="btn btn-primary w-100 rounded-pill" onClick={() => navigate(`/paiement?amount=${pay.amount}`)}>
-                        {lang === 'ar' ? 'دفع الآن' : 'Payer'}
-                      </button>
+                      {localStorage.getItem(`tax_paid_${pay.id}`) === 'true' ? (
+                          <div className="text-success fw-bold p-2 bg-light rounded-pill"><i className="fas fa-check-circle me-1"></i> {lang === 'ar' ? 'خالصة' : 'Payé'}</div>
+                      ) : (
+                          <button className="btn btn-primary w-100 rounded-pill" onClick={() => navigate(`/paiement?amount=${pay.amount}&reason=${encodeURIComponent(pay.title)}&requestId=${pay.id}&requestType=tax&target=/services`)}>
+                            {lang === 'ar' ? 'دفع الآن' : 'Payer'}
+                          </button>
+                      )}
                     </div>
                   </div>
                 </div>

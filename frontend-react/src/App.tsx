@@ -38,6 +38,11 @@ import MesConstructionsPage from './pages/MesConstructionsPage'
 import DemandeGoudronnagePage from './pages/DemandeGoudronnagePage'
 import DemandeCertificatVocationPage from './pages/DemandeCertificatVocationPage'
 import DemandeRaccordementPage from './pages/DemandeRaccordementPage'
+import DemandeTransfertCorpsPage from './pages/DemandeTransfertCorpsPage'
+import DemandeLegalisationPage from './pages/DemandeLegalisationPage'
+import DemandeEnregistrementBienPage from './pages/DemandeEnregistrementBienPage'
+import DemandeChangementProprietePage from './pages/DemandeChangementProprietePage'
+import DemandeChangementVocationBienPage from './pages/DemandeChangementVocationBienPage'
 import NewsPage from './pages/NewsPage'
 
 
@@ -141,6 +146,11 @@ export default function App() {
           <Route path="/demande-goudronnage" element={<DemandeGoudronnagePage />} />
           <Route path="/demande-certificat-vocation" element={<DemandeCertificatVocationPage />} />
           <Route path="/demande-raccordement" element={<DemandeRaccordementPage />} />
+          <Route path="/demande-transfert-corps" element={<DemandeTransfertCorpsPage />} />
+          <Route path="/demande-legalisation" element={<DemandeLegalisationPage />} />
+          <Route path="/demande-bien" element={<DemandeEnregistrementBienPage />} />
+          <Route path="/demande-propriete-changement" element={<DemandeChangementProprietePage />} />
+          <Route path="/demande-vocation-changement" element={<DemandeChangementVocationBienPage />} />
           <Route path="/mes-constructions" element={<MesConstructionsPage />} />
           <Route path="/evenements" element={<EvenementsPublicsPage />} />
 

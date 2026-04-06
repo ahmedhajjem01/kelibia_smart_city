@@ -269,10 +269,16 @@ export default function DashboardPage() {
                 <div className="small fw-bold">{t('news_title')}</div>
               </Link>
             </div>
-            <div className="col-6 col-md-4">
+            <div className="col-6 col-md-4 border-end">
               <Link to="/demande-construction" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
                 <i className="fas fa-hard-hat fa-2x text-warning mb-2"></i>
                 <div className="small fw-bold">Permis de construire</div>
+              </Link>
+            </div>
+            <div className="col-6 col-md-4">
+              <Link to="/demande-livret-famille" className="quick-action-btn p-4 d-block text-decoration-none text-dark">
+                <i className="fas fa-book-open fa-2x text-success mb-2"></i>
+                <div className="small fw-bold">Livret de Famille</div>
               </Link>
             </div>
           </div>

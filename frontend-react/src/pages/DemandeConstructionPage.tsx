@@ -147,7 +147,7 @@ export default function DemandeConstructionPage() {
   }
 
   const canStep1 = !!(form.type_travaux && form.usage_batiment && form.description_travaux.trim().length >= 10)
-  const canStep2 = !!(form.adresse_terrain.trim() && form.surface_terrain && form.surface_construite && form.date_debut_prevue && form.duree_travaux_mois)
+  const canStep2 = !!(form.adresse_terrain.trim() && form.surface_terrain && form.surface_construite && Number(form.surface_terrain) >= Number(form.surface_construite) && form.date_debut_prevue && form.duree_travaux_mois)
   const canStep3 = !!(form.nom_proprietaire.trim() && form.cin_proprietaire.length === 8 && form.telephone_proprietaire.trim())
 
   const handleSubmit = async () => {
@@ -324,6 +324,9 @@ export default function DemandeConstructionPage() {
                   <label className="form-label fw-semibold small">Surface à construire (m²) <span className="text-danger">*</span></label>
                   <input type="number" className="form-control rounded-3" placeholder="Ex: 150" min="1"
                     value={form.surface_construite} onChange={e => update('surface_construite', e.target.value)} />
+                  {form.surface_terrain && form.surface_construite && Number(form.surface_construite) > Number(form.surface_terrain) && (
+                    <small className="text-danger fw-semibold d-block mt-1">⚠️ Ne peut pas dépasser la surface du terrain</small>
+                  )}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold small">Nbre d'étages <span className="text-danger">*</span></label>

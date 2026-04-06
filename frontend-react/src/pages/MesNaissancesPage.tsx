@@ -98,7 +98,7 @@ export default function MesNaissancesPage() {
               {!extrait.is_paid ? (
                 <button
                   className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
-                  onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait de Naissance&requestId=${extrait.id}&requestType=birth_extract`)}
+                  onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Naissance&requestId=${extrait.id}&requestType=birth_extract&file_fr=${encodeURIComponent(resolveBackendUrl(extrait.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(extrait.url_ar))}`)}
                 >
                   <i className="fas fa-lock me-2"></i> Payer 0.500 DT
                 </button>
