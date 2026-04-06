@@ -3144,6 +3144,7 @@ function QSSelect({ rec, onUpdate }: { rec: Reclamation; onUpdate: (id: number, 
       <option value="pending">{t('status_pending_full')}</option>
       <option value="in_progress">{t('status_in_progress_full')}</option>
       <option value="resolved">{t('status_resolved_full')}</option>
+      <option value="rejected">{t('status_rejected_full')}</option>
     </select>
   )
 }
