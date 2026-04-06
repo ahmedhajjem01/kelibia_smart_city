@@ -23,50 +23,44 @@ User = get_user_model()
 MOCK_MODE = True
 
 # Replace these with your real Facebook App information later
-PAGE_ID = "commune.kelibia" # Identifiant de la page de la municipalité
+PAGE_ID = "MunKelibia" # Identifiant de la page de la municipalité
 PAGE_ACCESS_TOKEN = "VOTRE_JETON_D_ACCES_ICI"
 
 def get_facebook_posts():
     if MOCK_MODE:
-        print("Mock mode enabled. Using sample Facebook data...")
+        print("Mock mode enabled. Using sample Facebook data from @MunKelibia...")
         return [
             {
-                "id": "commune_kel_1001",
-                "message": "📢 BLAĞ MUNIĆIPAL : Entretien de l'Éclairage Public 💡\n\nLa municipalité de Kélibia informe tous les citoyens que l'équipe technique municipale a entamé hier soir une campagne d'entretien et de réparation du réseau d'éclairage public au niveau de l'avenue de l'Environnement et la route du Port.\n\nNous invitons les citoyens à signaler toute panne d'éclairage dans leurs quartiers via le portail citoyen.\n\n#Kelibia #TravauxMunicipaux",
-                "created_time": "2026-04-05T09:00:00+0000",
-                "full_picture": "https://picsum.photos/seed/kelibia_light/800/600", 
-                "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1001"
+                "id": "munkel_1001",
+                "message": "🧹 تواصل تدخلات النظافة والعناية بالمحيط 🌿\n\nتواصل الفرق الفنية لبلدية قليبية تدخلاتها الميدانية للنظافة والعناية بالمحيط، حيث شملت التدخلات اليوم الأنهج التالية:\n- نهج الشهداء\n- محيط البرج وقصر البلدية\n- وسط المدينة ونهج طارق ابن زياد\n\nنعمل من أجل مدينة أجمل وأنظف للجميع.\n\n#بلدية_قليبية #نظافة #تونس",
+                "created_time": "2026-04-05T10:00:00+0000",
+                "full_picture": "https://images.unsplash.com/photo-1594911771142-99052026f74a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", 
+                "permalink_url": "https://www.facebook.com/MunKelibia/posts/1001"
             },
             {
-                "id": "commune_kel_1002",
-                "message": "🌳🌿 Campagne Exceptionnelle de Propreté à Kélibia 🌊\n\nEn prévision de la saison estivale, la Municipalité de Kélibia, en collaboration avec l'Association des Amis de l'Environnement, organise une grande campagne de nettoyage de la plage de Mansoura et du circuit touristique menant au Fort.\n\n📍 Rendez-vous : Ce dimanche à 08h00 devant le parking de Mansoura.\nDes sacs et des gants seront fournis sur place. Soyez nombreux pour garder notre ville, la perle du Cap Bon, propre !\n\n#KelibiaVivre #Environnement #Mansoura",
-                "created_time": "2026-04-03T14:30:00+0000",
-                "full_picture": "https://picsum.photos/seed/kelibia_beach/800/600", 
-                "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1002"
+                "id": "munkel_1002",
+                "message": "🌳 حملة نظافة استثنائية بشارع البيئة وحي المنتزه 🌊\n\nقامت مصالح النظافة ببلدية قليبية بتدخلات واسعة شملت شارع البيئة وشارع الجمهورية وحي المنتزه ومحيط المدرسة البحرية.\n\nتأتي هذه التدخلات في إطار برنامج العناية بالفضاءات العامة والمساحات الخضراء.\n\n#قليبية_خضراء #بلدية_قليبية",
+                "created_time": "2026-04-04T15:30:00+0000",
+                "full_picture": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", 
+                "permalink_url": "https://www.facebook.com/MunKelibia/posts/1002"
             },
             {
-                "id": "commune_kel_1003",
-                "message": "⚠️ Avis aux citoyens : Campagne de fumigation (Lutte contre les moustiques) 🦟\n\nDans le cadre du programme de prévention sanitaire, la municipalité de Kélibia annonce qu'une opération de pulvérisation d'insecticides aura lieu durant la nuit (de 22h à 04h du matin) dans les zones suivantes :\n- Oued El Khatfa\n- Cité El Wafa\n- Zone du Vieux Port\n\nNous prions les habitants de ces zones de maintenir leurs fenêtres fermées durant cette période.\nMerci de votre compréhension.",
-                "created_time": "2026-04-01T17:00:00+0000",
-                "full_picture": "https://picsum.photos/seed/kelibia_night/800/600", 
-                "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1003"
+                "id": "munkel_1003",
+                "message": "📢 بلاغ توضيحي إلى الرأي العام ⚠️\n\nتعلم بلدية قليبية كافة المتساكنين والعموم بخصوص سير العمل بمختلف المصالح البلدية وتوضيح جملة من النقاط المتعلقة بالخدمات الرقمية الجديدة.\n\nتجدون التفاصيل الكاملة في الرابط التالي وعلى موقعنا الرسمي.\n\n#بلاغ #بلدية_قليبية #شفافية",
+                "created_time": "2026-04-04T09:00:00+0000",
+                "full_picture": "https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", 
+                "permalink_url": "https://www.facebook.com/MunKelibia/posts/1003"
             },
             {
-                "id": "commune_kel_1004",
-                "message": "🏆 Cérémonie de gratification des élèves excellents 🎓\n\nSous l'égide du Maire de Kélibia, une cérémonie s'est tenue aujourd'hui au Palais Municipal pour honorer les bacheliers lauréats des différents lycées de Kélibia (Lycée Abdelaziz Khouja, Lycée Route de la Plage, etc.).\n\nUn grand bravo à nos brillants élèves qui honorent notre ville. La municipalité s'engage toujours à soutenir le savoir et l'éducation ! 👏🇹🇳",
-                "created_time": "2026-03-25T11:15:00+0000",
-                "full_picture": "https://picsum.photos/seed/kelibia_school/800/600", 
-                "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1004"
-            },
-            {
-                "id": "commune_kel_1005",
-                "message": "🚧 Projet en cours : Réaménagement du centre-ville 🚜\n\nLe Conseil Municipal a le plaisir d'informer les citoyens que les travaux de bitumage de la Rue de la République (près de la Poste) avancent à un rythme soutenu. Ces travaux s'inscrivent dans le Plan d'Investissement Communal (PIC) pour l'année en cours.\n\nNous nous excusons pour le dérangement occasionné par le chantier et vous remercions de votre patience.",
-                "created_time": "2026-03-20T10:00:00+0000",
-                "full_picture": "https://picsum.photos/seed/kelibia_street/800/600",
-                "permalink_url": "https://www.facebook.com/commune.kelibia/posts/1005"
+                "id": "munkel_1004",
+                "message": "💡 صيانة شبكة التنوير العمومي بكافة المناطق ⚡\n\nتواصل المصلحة الفنية للأشغال صيانة وإصلاح أعطاب شبكة التنوير العمومي بمختلف أحياء المدينة ونهج المعتمدية والمدخل الجنوبي.\n\nندعو المواطنين للإبلاغ عن أي عطب عبر بوابة المواطن الرقمية.\n\n#أشغال_بلدية #قليبية #تنوير",
+                "created_time": "2026-03-28T18:00:00+0000",
+                "full_picture": "https://images.unsplash.com/photo-1548543604-a87a9909bfec?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", 
+                "permalink_url": "https://www.facebook.com/MunKelibia/posts/1004"
             }
         ]
     else:
+
         print("Fetching data from Facebook Graph API...")
         url = f"https://graph.facebook.com/v19.0/{PAGE_ID}/posts"
         params = {
