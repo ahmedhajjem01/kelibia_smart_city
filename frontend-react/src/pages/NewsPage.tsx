@@ -389,44 +389,61 @@ export default function NewsPage() {
                   {restArticles.map(article => (
                     <div key={article.id} className="col-12 col-md-6 col-xl-4">
                       <div
-                        className="card border-0 rounded-4 shadow-sm h-100 overflow-hidden"
-                        style={{ cursor: 'pointer', transition: 'transform .2s, box-shadow .2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,.1)' }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '' }}
+                        className="card border-0 rounded-4 h-100 overflow-hidden"
+                        style={{ 
+                          cursor: 'pointer', 
+                          transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                          boxShadow: '0 8px 30px rgba(0,0,0,0.05)',
+                          background: '#ffffff'
+                        }}
+                        onMouseEnter={e => { 
+                          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'; 
+                          e.currentTarget.style.boxShadow = '0 20px 40px rgba(111,66,193,0.15)' 
+                        }}
+                        onMouseLeave={e => { 
+                          e.currentTarget.style.transform = 'translateY(0) scale(1)'; 
+                          e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.05)' 
+                        }}
                         onClick={() => setSelectedArticle(article)}
                       >
-                        <div style={{ height: 160, overflow: 'hidden' }}>
+                        <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
                           {article.image ? (
                             <img src={resolveBackendUrl(article.image)} alt={article.title}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }}
-                              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
+                              onError={(e) => {
+                                // Fallback en cas d'erreur de chargement (ex: cache de navigateur)
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement!.innerHTML = '<div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #1a3a5c 0%, #1565c0 100%)"><i class="fas fa-newspaper fa-3x text-white opacity-50"></i></div>';
+                              }}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease' }}
+                              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
                               onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
                           ) : (
                             <div className="w-100 h-100 d-flex align-items-center justify-content-center"
                               style={{ background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}>
-                              <i className="fas fa-newspaper fa-2x" style={{ color: '#1565c0', opacity: .5 }}></i>
+                              <i className="fas fa-image fa-3x" style={{ color: '#1565c0', opacity: .4 }}></i>
                             </div>
                           )}
+                          <div style={{
+                            position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)'
+                          }}></div>
                         </div>
-                        <div className="p-3 d-flex flex-column flex-grow-1">
-                          <div className="d-flex align-items-center gap-2 mb-2" style={{ fontSize: '.75rem', color: '#aaa' }}>
-                            <span><i className="fas fa-calendar me-1"></i>{formatDate(article.created_at, lang)}</span>
-                            <span>·</span>
-                            <span><i className="fas fa-clock me-1"></i>{readingTime(article.content, lang)}</span>
+                        <div className="p-4 d-flex flex-column flex-grow-1 position-relative" style={{ zIndex: 1, marginTop: '-20px', background: '#fff', borderRadius: '1.5rem 1.5rem 0 0' }}>
+                          <div className="d-flex align-items-center gap-2 mb-3" style={{ fontSize: '.75rem', fontWeight: 600, color: '#6f42c1', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            <span><i className="fas fa-calendar-alt me-1"></i>{formatDate(article.created_at, lang)}</span>
                           </div>
-                          <h6 className="fw-bold mb-2" style={{ color: '#1a1a2e', lineHeight: 1.4 }}>{article.title}</h6>
-                          <p className="text-muted small mb-3 flex-grow-1" style={{ lineHeight: 1.6 }}>{excerpt(article.content, 120)}</p>
-                          <div className="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
-                            <span style={{ fontSize: '.75rem', color: '#888' }}>
-                              <i className="fas fa-user me-1"></i>{article.author_name}
+                          <h5 className="fw-bold mb-2" style={{ color: '#1a1a2e', lineHeight: 1.4, fontSize: '1.1rem' }}>{article.title}</h5>
+                          <p className="text-muted small mb-3 flex-grow-1" style={{ lineHeight: 1.6, fontSize: '0.9rem' }}>{excerpt(article.content, 110)}</p>
+                          <div className="d-flex align-items-center justify-content-between mt-auto pt-3 border-top border-light">
+                            <span style={{ fontSize: '.75rem', color: '#888', fontWeight: 600 }}>
+                              <i className="fas fa-clock me-1 text-primary"></i>{readingTime(article.content, lang)}
                             </span>
-                            <button
-                              className="btn btn-sm btn-outline-primary rounded-pill px-3"
-                              style={{ fontSize: '.76rem' }}
-                              onClick={e => { e.stopPropagation(); setSelectedArticle(article) }}
+                            <span
+                              className="text-primary fw-bold"
+                              style={{ fontSize: '.85rem' }}
                             >
-                              {lang === 'ar' ? 'قراءة' : 'Lire'} <i className="fas fa-arrow-right ms-1"></i>
-                            </button>
+                              {lang === 'ar' ? 'قراءة المزيد' : 'Lire la suite'} <i className="fas fa-arrow-right ms-1"></i>
+                            </span>
                           </div>
                         </div>
                       </div>
