@@ -3149,5 +3149,3 @@ function QSSelect({ rec, onUpdate }: { rec: Reclamation; onUpdate: (id: number, 
 }
 
 
-
-export default AgentDashboardPage;
