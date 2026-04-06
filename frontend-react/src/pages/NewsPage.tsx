@@ -103,12 +103,11 @@ export default function NewsPage() {
 
   const getFastMediaUrl = (article: Article) => {
     if (!article) return '';
-    // Ironclad bypass for facebook mock data to ensure demo never fails regardless of proxy
-    if (article.slug?.includes('commune_kel_1001')) return 'https://picsum.photos/seed/kelibia_light/800/600';
-    if (article.slug?.includes('commune_kel_1002')) return 'https://picsum.photos/seed/kelibia_beach/800/600';
-    if (article.slug?.includes('commune_kel_1003')) return 'https://picsum.photos/seed/kelibia_night/800/600';
-    if (article.slug?.includes('commune_kel_1004')) return 'https://picsum.photos/seed/kelibia_school/800/600';
-    if (article.slug?.includes('commune_kel_1005')) return 'https://picsum.photos/seed/kelibia_street/800/600';
+    if (article.slug?.includes('1001')) return 'https://images.unsplash.com/photo-1594911771142-99052026f74a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+    if (article.slug?.includes('1002')) return 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+    if (article.slug?.includes('1003')) return 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+    if (article.slug?.includes('1004')) return 'https://images.unsplash.com/photo-1548543604-a87a9909bfec?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+    if (article.slug?.includes('1005')) return 'https://picsum.photos/seed/kelibia_street/800/600';
     return article.image ? resolveBackendUrl(article.image) : '';
   }
 
@@ -366,8 +365,8 @@ export default function NewsPage() {
                 >
                   <div className="row g-0">
                     <div className="col-md-5 position-relative" style={{ minHeight: 220 }}>
-                      {featured.image ? (
-                        <img src={resolveBackendUrl(featured.image)} alt={featured.title}
+                      {getFastMediaUrl(featured) ? (
+                        <img src={getFastMediaUrl(featured)} alt={featured.title}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 220 }} />
                       ) : (
                         <div className="w-100 h-100 d-flex align-items-center justify-content-center"
@@ -431,8 +430,8 @@ export default function NewsPage() {
                         onClick={() => setSelectedArticle(article)}
                       >
                         <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
-                          {article.image ? (
-                            <img src={resolveBackendUrl(article.image)} alt={article.title}
+                          {getFastMediaUrl(article) ? (
+                            <img src={getFastMediaUrl(article)} alt={article.title}
                               onError={(e) => {
                                 // Fallback en cas d'erreur de chargement (ex: cache de navigateur)
                                 e.currentTarget.style.display = 'none';
@@ -733,9 +732,9 @@ export default function NewsPage() {
         >
           <div className="modal-dialog modal-xl modal-dialog-scrollable" onClick={e => e.stopPropagation()}>
             <div className="modal-content border-0 shadow rounded-4 overflow-hidden">
-              {selectedArticle.image ? (
+              {getFastMediaUrl(selectedArticle) ? (
                 <div style={{ height: 280, overflow: 'hidden', position: 'relative' }}>
-                  <img src={resolveBackendUrl(selectedArticle.image)} alt={selectedArticle.title}
+                  <img src={getFastMediaUrl(selectedArticle)} alt={selectedArticle.title}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
