@@ -106,7 +106,7 @@ function HighlightedText({
 }
 
 /** Horizontal bar chart row for one word */
-function BarRow({ word, value, maxVal, label }: { word: string; value: number; maxVal: number; label: string }) {
+function BarRow({ word, value, maxVal }: { word: string; value: number; maxVal: number }) {
   const { pct, color } = barProps(value, maxVal)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -368,7 +368,6 @@ export default function PriorityExplanationModal({ reclamationId, reclamationTit
                           word={w.word}
                           value={tab === 'lime' ? (w.score ?? 0) : (w.shap_value ?? 0)}
                           maxVal={maxVal}
-                          label={tab}
                         />
                       ))}
                     </div>
@@ -386,7 +385,6 @@ export default function PriorityExplanationModal({ reclamationId, reclamationTit
                           word={w.word}
                           value={Math.abs(tab === 'lime' ? (w.score ?? 0) : (w.shap_value ?? 0))}
                           maxVal={maxVal}
-                          label={tab}
                         />
                       ))}
                     </div>
