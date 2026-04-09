@@ -1157,6 +1157,10 @@ export default function AgentDashboardPage() {
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
+              {/* DEBUG BANNER — remove after testing */}
+              <div style={{background:'#1a1a2e',color:'#00ff88',padding:'6px 12px',borderRadius:6,fontSize:'.75rem',fontFamily:'monospace',marginBottom:8}}>
+                📐 window.innerWidth = <strong>{window.innerWidth}px</strong> | isMobile = <strong>{String(isMobile)}</strong>
+              </div>
               {/* Stats: React-controlled mobile/desktop split — no Bootstrap classes */}
               {(() => {
                 const stats = [
