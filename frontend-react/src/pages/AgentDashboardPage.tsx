@@ -194,7 +194,12 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile' | 'citizens'>('dashboard')
+  const [agentCitizens, setAgentCitizens] = useState<any[]>([])
+  const [loadingCitizens, setLoadingCitizens] = useState(false)
+  const [citizenSearch, setCitizenSearch] = useState('')
+  const [selectedCitizen, setSelectedCitizen] = useState<any | null>(null)
+  const [enlargedCitizenImage, setEnlargedCitizenImage] = useState<string | null>(null)
   const [allEvenements, setAllEvenements] = useState<any[]>([])
   const [loadingEvenements, setLoadingEvenements] = useState(false)
   const [allConstructions, setAllConstructions] = useState<any[]>([])
@@ -623,6 +628,39 @@ export default function AgentDashboardPage() {
   }
 
 
+  async function fetchAgentCitizens() {
+    setLoadingCitizens(true)
+    try {
+      const res = await fetch('/api/accounts/agent-citizens/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setAgentCitizens(await res.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingCitizens(false) }
+  }
+
+  async function handleAgentCitizenAction(citizenId: number, action: 'verify' | 'toggle_active') {
+    try {
+      const res = await fetch('/api/accounts/agent-citizens/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ user_id: citizenId, action }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        showToast(data.message || 'Action réussie !')
+        if (action === 'verify') {
+          setAgentCitizens(prev => prev.filter(c => c.id !== citizenId))
+          if (selectedCitizen?.id === citizenId) setSelectedCitizen(null)
+        } else {
+          setAgentCitizens(prev => prev.map(c => c.id === citizenId ? { ...c, is_active: data.is_active } : c))
+          if (selectedCitizen?.id === citizenId) setSelectedCitizen((p: any) => p ? { ...p, is_active: data.is_active } : null)
+        }
+      } else {
+        const err = await res.json()
+        showToast(err.error || 'Erreur.', 'error')
+      }
+    } catch { showToast('Erreur réseau.', 'error') }
+  }
+
   async function fetchReclamations() {
     setLoading(true); setRecError(false)
     try {
@@ -920,6 +958,10 @@ export default function AgentDashboardPage() {
           </a>
           <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
             <i className="fas fa-robot"></i> {t('nav_stats_ia')}
+          </a>
+          <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
+            <i className="fas fa-user-check"></i> Vérification Citoyens
+            {agentCitizens.length > 0 && <span className="ag-badge">{agentCitizens.length}</span>}
           </a>
 
           {/* ── Supervisor / Admin only ── */}
@@ -2128,6 +2170,242 @@ export default function AgentDashboardPage() {
                   )
                 })()}
               </div>
+            </div>
+          ) : activeTab === 'citizens' ? (
+            /* ── VÉRIFICATION CITOYENS (agents) ────────────────────────── */
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
+                <span className="fw-bold"><i className="fas fa-user-check me-2"></i>Vérification des Comptes Citoyens</span>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="badge bg-warning text-dark" style={{ fontSize: '11px' }}>{agentCitizens.length} en attente</span>
+                  <button className="btn btn-sm btn-light" onClick={fetchAgentCitizens}><i className="fas fa-sync-alt"></i></button>
+                </div>
+              </div>
+
+              {/* Search bar */}
+              <div className="ag-filter-bar bg-white border-bottom px-3 py-2 d-flex align-items-center gap-3">
+                <div className="ag-search-wrap flex-grow-1" style={{ maxWidth: '400px' }}>
+                  <i className="fas fa-search"></i>
+                  <input
+                    className="ag-search-input"
+                    placeholder="Rechercher par Nom, Email ou CIN..."
+                    value={citizenSearch}
+                    onChange={e => setCitizenSearch(e.target.value)}
+                  />
+                </div>
+                <div className="text-muted small">
+                  {agentCitizens.filter(c => {
+                    const q = citizenSearch.toLowerCase()
+                    return !q || c.full_name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.cin?.toLowerCase().includes(q)
+                  }).length} résultat(s)
+                </div>
+              </div>
+
+              <div className="ag-card-body p-0" style={{ minHeight: '400px' }}>
+                {loadingCitizens ? (
+                  <div className="p-4"><div className="skeleton-box table-skeleton" style={{ height: '350px' }}></div></div>
+                ) : agentCitizens.length === 0 ? (
+                  <div className="text-center p-5 text-muted">
+                    <i className="fas fa-check-circle fa-3x mb-3" style={{ color: '#2e7d32', opacity: .4 }}></i>
+                    <p className="fw-bold">Aucun compte en attente de vérification.</p>
+                    <p className="small">Tous les citoyens inscrits ont été vérifiés.</p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="ag-table shadow-sm">
+                      <thead>
+                        <tr>
+                          <th>Citoyen</th>
+                          <th>CIN / Téléphone</th>
+                          <th>Ville</th>
+                          <th>Inscrit le</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {agentCitizens.filter(c => {
+                          const q = citizenSearch.toLowerCase()
+                          return !q || c.full_name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.cin?.toLowerCase().includes(q)
+                        }).map(c => (
+                          <tr key={c.id}
+                              onClick={() => setSelectedCitizen(c)}
+                              style={{ cursor: 'pointer', borderLeft: '4px solid #ff9800' }}>
+                            <td>
+                              <div className="d-flex align-items-center gap-2">
+                                <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#e8f5e9', color: '#2e7d32', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '.85rem', flexShrink: 0 }}>
+                                  {c.full_name?.charAt(0) || 'C'}
+                                </div>
+                                <div>
+                                  <div className="fw-bold text-dark" style={{ fontSize: '.85rem' }}>{c.full_name}</div>
+                                  <div className="text-muted" style={{ fontSize: '11px' }}>{c.email}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="fw-bold" style={{ fontSize: '.82rem' }}>{c.cin}</div>
+                              <div className="text-muted" style={{ fontSize: '11px' }}>{c.phone}</div>
+                            </td>
+                            <td style={{ fontSize: '.82rem' }}>{c.city}, {c.governorate}</td>
+                            <td style={{ fontSize: '.78rem', color: '#888' }}>{formatDate(c.date_joined)}</td>
+                            <td>
+                              {c.is_active
+                                ? <span className="badge" style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>Actif</span>
+                                : <span className="badge" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>Bloqué</span>
+                              }
+                              {(c.cin_front || c.cin_back) && (
+                                <span className="badge ms-1" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-id-card me-1"></i>CIN disponible</span>
+                              )}
+                            </td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                <button
+                                  className="btn btn-sm btn-success"
+                                  title="Vérifier ce compte"
+                                  onClick={e => { e.stopPropagation(); if(window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
+                                >
+                                  <i className="fas fa-check me-1"></i> Vérifier
+                                </button>
+                                <button
+                                  className={`btn btn-sm ${c.is_active ? 'btn-outline-danger' : 'btn-danger'}`}
+                                  title={c.is_active ? 'Bloquer' : 'Débloquer'}
+                                  onClick={e => { e.stopPropagation(); handleAgentCitizenAction(c.id, 'toggle_active') }}
+                                >
+                                  <i className={`fas ${c.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
+                                </button>
+                                {(c.cin_front || c.cin_back) && (
+                                  <button
+                                    className="btn btn-sm btn-outline-primary"
+                                    title="Voir CIN"
+                                    onClick={e => { e.stopPropagation(); setSelectedCitizen(c) }}
+                                  >
+                                    <i className="fas fa-id-card"></i>
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Citizen Detail / CIN Modal ── */}
+              {selectedCitizen && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,.55)' }} onClick={() => setSelectedCitizen(null)}>
+                  <div className="modal-dialog modal-lg modal-dialog-centered" onClick={e => e.stopPropagation()}>
+                    <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 14, overflow: 'hidden' }}>
+                      <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)' }}>
+                        <span className="title"><i className="fas fa-user-check me-2"></i>Fiche Citoyen — {selectedCitizen.full_name}</span>
+                        <button className="ag-close-btn" onClick={() => setSelectedCitizen(null)}><i className="fas fa-times"></i></button>
+                      </div>
+                      <div className="modal-body p-4">
+                        <div className="row g-3 mb-4">
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Nom complet</div>
+                              <div className="det-value">{selectedCitizen.full_name}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Email</div>
+                              <div className="det-value">{selectedCitizen.email}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">CIN</div>
+                              <div className="det-value fw-bold">{selectedCitizen.cin}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Téléphone</div>
+                              <div className="det-value">{selectedCitizen.phone}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Date de naissance</div>
+                              <div className="det-value">{selectedCitizen.date_of_birth ? formatDate(selectedCitizen.date_of_birth) : '—'}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Ville / Gouvernorat</div>
+                              <div className="det-value">{selectedCitizen.city}, {selectedCitizen.governorate}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Lieu de naissance</div>
+                              <div className="det-value">{selectedCitizen.place_of_birth || '—'}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* CIN Images */}
+                        {(selectedCitizen.cin_front || selectedCitizen.cin_back) && (
+                          <>
+                            <hr />
+                            <div className="fw-bold mb-3" style={{ color: '#1b5e20' }}><i className="fas fa-id-card me-2"></i>Photos du CIN</div>
+                            <div className="row g-3">
+                              {selectedCitizen.cin_front && (
+                                <div className="col-md-6">
+                                  <div className="text-center">
+                                    <div className="text-muted small fw-bold mb-2">RECTO</div>
+                                    <img
+                                      src={selectedCitizen.cin_front}
+                                      alt="CIN Recto"
+                                      style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 8, border: '2px solid #e0e0e0', cursor: 'zoom-in', background: '#f5f5f5' }}
+                                      onClick={() => setEnlargedCitizenImage(selectedCitizen.cin_front)}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                              {selectedCitizen.cin_back && (
+                                <div className="col-md-6">
+                                  <div className="text-center">
+                                    <div className="text-muted small fw-bold mb-2">VERSO</div>
+                                    <img
+                                      src={selectedCitizen.cin_back}
+                                      alt="CIN Verso"
+                                      style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 8, border: '2px solid #e0e0e0', cursor: 'zoom-in', background: '#f5f5f5' }}
+                                      onClick={() => setEnlargedCitizenImage(selectedCitizen.cin_back)}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                        {!selectedCitizen.cin_front && !selectedCitizen.cin_back && (
+                          <div className="alert alert-warning mt-3" style={{ fontSize: '.83rem' }}>
+                            <i className="fas fa-exclamation-triangle me-2"></i>Aucune photo de CIN disponible (déjà vérifiées ou non soumises).
+                          </div>
+                        )}
+                      </div>
+                      <div className="modal-footer border-top bg-light">
+                        <button className="btn btn-success px-4" onClick={() => { if(window.confirm(`Vérifier le compte de "${selectedCitizen.full_name}" ?`)) { handleAgentCitizenAction(selectedCitizen.id, 'verify'); } }}>
+                          <i className="fas fa-check-circle me-2"></i>Confirmer la vérification
+                        </button>
+                        <button className="btn btn-outline-secondary" onClick={() => setSelectedCitizen(null)}>Fermer</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Enlarged image overlay */}
+              {enlargedCitizenImage && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}
+                  onClick={() => setEnlargedCitizenImage(null)}>
+                  <img src={enlargedCitizenImage} alt="CIN agrandi" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 10, boxShadow: '0 8px 40px rgba(0,0,0,.5)' }} />
+                </div>
+              )}
             </div>
           ) : activeTab === 'profile' ? (
              <div className="animate__animated animate__fadeIn">
