@@ -136,89 +136,109 @@ const CSS = `
 .ag-dup-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:22px;overflow:hidden;border-left:4px solid #6a1b9a}
 /* ═══════════════ MOBILE RESPONSIVE ═══════════════ */
 @media(max-width:768px){
-  /* Hide topbar completely on mobile */
+  /* ── Topbar: hide completely ── */
   .ag-topbar{display:none}
 
-  /* Compact navbar */
-  .ag-navbar{height:56px;padding:0 12px}
-  .ag-logo{width:36px;height:36px;font-size:1rem;flex-shrink:0}
-  .ag-title .main{font-size:.78rem;line-height:1.2}
+  /* ── Navbar: compact single line ── */
+  .ag-navbar{height:54px;padding:0 10px;gap:8px}
+  .ag-logo{width:34px;height:34px;font-size:.95rem;flex-shrink:0}
+  .ag-title .main{font-size:.75rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
   .ag-title .sub{display:none}
-  .ag-brand{gap:8px}
+  .ag-brand{gap:7px;min-width:0;flex:1;overflow:hidden}
+  .ag-actions{gap:4px;flex-shrink:0}
 
-  /* Hide name text in pill, show only avatar */
+  /* User pill: avatar only */
+  .ag-user-pill{padding:3px;border-radius:50%;gap:0}
   .ag-user-pill span{display:none}
-  .ag-user-pill{padding:4px;border-radius:50%}
-  .ag-user-pill .av{width:32px;height:32px}
+  .ag-user-pill .av{width:30px;height:30px;font-size:.72rem}
 
-  /* Hide lang buttons text */
-  .ag-lang-btn img{margin:0}
-  .ag-lang-btn{padding:4px 7px;font-size:.7rem}
+  /* Lang buttons: compact */
+  .ag-lang-btn{padding:4px 6px;font-size:.68rem;gap:3px}
 
-  /* Hide logout text, show only icon */
-  .ag-logout{padding:6px 9px;font-size:.8rem}
-  .ag-logout span,.ag-logout .logout-text{display:none}
+  /* Logout: icon only */
+  .ag-logout{padding:5px 8px;font-size:.8rem;gap:0}
+  .ag-logout .logout-text{display:none}
 
-  .ag-actions{gap:5px}
+  /* ── Hero: single line compact ── */
+  .ag-hero{padding:10px 12px;flex-direction:column;align-items:flex-start;gap:4px}
+  .ag-hero .greeting{font-size:.85rem}
+  .ag-hero .sub{font-size:.72rem;opacity:.8}
+  .ag-hero .badge-role{font-size:.65rem;padding:2px 9px}
+  .ag-hero>div:last-child{display:none}
 
-  /* Hero: compact */
-  .ag-hero{padding:12px 14px;gap:6px}
-  .ag-hero .greeting{font-size:.88rem}
-  .ag-hero .sub{font-size:.75rem}
-  .ag-hero .badge-role{font-size:.68rem;padding:3px 10px}
-
-  /* Breadcrumb: hide on mobile */
+  /* ── Breadcrumb: hide ── */
   .ag-breadcrumb{display:none}
 
-  /* Layout: sidebar hidden, main full-width */
-  .ag-body{flex-direction:column}
+  /* ── Layout: full width, no sidebar ── */
+  .ag-body{flex-direction:column;min-height:unset}
   .ag-sidebar{display:none}
-  .ag-main{padding:12px;min-height:unset;gap:14px}
+  .ag-main{padding:10px;min-height:unset;gap:10px}
 
-  /* Stats cards: 2 per row */
-  .ag-stat{padding:12px 10px;gap:10px}
-  .ag-stat .icon-box{width:36px;height:36px;font-size:1rem;flex-shrink:0}
-  .ag-stat .val{font-size:1.1rem}
-  .ag-stat .lbl{font-size:.68rem}
+  /* ── Stats grid: 3 cards per row, very compact ── */
+  .ag-stat{padding:10px 8px;gap:8px;border-radius:8px}
+  .ag-stat .icon-box{width:32px;height:32px;font-size:.9rem;flex-shrink:0;border-radius:8px}
+  .ag-stat .val{font-size:1.05rem;line-height:1}
+  .ag-stat .lbl{font-size:.62rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  /* Tables: horizontal scroll */
-  .ag-table{font-size:.75rem}
-  .ag-table thead th{padding:7px 8px;font-size:.65rem}
-  .ag-table tbody td{padding:7px 8px;font-size:.75rem}
+  /* ── Cards: no horizontal overflow ── */
+  .ag-card{margin-bottom:12px;border-radius:8px}
+  .ag-card-hdr-blue,.ag-card-hdr-green,.ag-card-hdr-orange{font-size:.78rem;padding:8px 12px;flex-wrap:wrap;gap:6px}
 
-  /* Filter bar: wrap and compact */
+  /* ── Filter bar ── */
   .ag-filter-bar{padding:8px 10px;gap:6px}
-  .ag-search-input{width:100%}
-  .ag-search-wrap{flex:1;min-width:120px}
-  .ag-filter-select{font-size:.73rem;padding:4px 6px}
-  .ag-filter-btn{font-size:.73rem;padding:4px 8px}
+  .ag-filter-bar>.ag-search-wrap{flex:1 1 100%;order:-1}
+  .ag-search-input{width:100%;max-width:none}
+  .ag-filter-select,.ag-filter-btn{font-size:.72rem;padding:4px 7px}
 
-  /* Toast: full-width at bottom */
-  .ag-toast-container{right:10px;left:10px;bottom:70px}
+  /* ── Tables ── */
+  .ag-table thead th{padding:6px 8px;font-size:.63rem}
+  .ag-table tbody td{padding:6px 8px;font-size:.75rem}
+
+  /* ── Map ── */
+  #ag-map-card{min-height:unset}
+  #ag-map{height:220px!important}
+
+  /* ── Pagination bar ── */
+  .ag-pag-bar{flex-direction:column;gap:6px;align-items:center;font-size:.72rem}
+
+  /* ── Toast ── */
+  .ag-toast-container{right:8px;left:8px;bottom:66px}
   .ag-toast{min-width:unset;width:100%}
 
-  /* Card headers: smaller */
-  .ag-card-hdr-blue,.ag-card-hdr-green,.ag-card-hdr-orange{font-size:.8rem;padding:10px 12px}
+  /* ── Modals ── */
+  .modal-dialog{margin:6px!important;max-width:calc(100vw - 12px)!important}
+  .modal-body{padding:12px!important}
+  .ag-modal-hdr{padding:12px 14px}
+  .ag-modal-hdr .title{font-size:.88rem}
 
-  /* Map: shorter on mobile */
-  #ag-map-card{min-height:unset}
-  #ag-map{height:240px!important}
+  /* ── Profile ── */
+  .ag-profile-card{margin-bottom:10px}
+  .ag-profile-body{padding:10px 12px}
+  .ag-profile-row{font-size:.75rem}
 
-  /* Bottom navigation bar for mobile */
+  /* ── Show bottom nav ── */
   .ag-mobile-nav{display:flex!important}
-  body{padding-bottom:60px}
+  .agent-page{padding-bottom:60px}
 }
 
-/* Mobile bottom nav (hidden on desktop) */
+@media(max-width:400px){
+  /* Very small phones: 2 stats per row */
+  .ag-stat .lbl{font-size:.58rem}
+  .ag-navbar{height:50px}
+  .ag-title .main{max-width:100px;font-size:.68rem}
+}
+
+/* ── Mobile bottom nav bar (hidden on desktop) ── */
 .ag-mobile-nav{
   display:none;
   position:fixed;
   bottom:0;left:0;right:0;
   background:var(--sidebar-bg);
-  border-top:2px solid rgba(255,255,255,.08);
+  border-top:2px solid rgba(255,255,255,.1);
   z-index:1000;
   height:58px;
   align-items:stretch;
+  box-shadow:0 -4px 20px rgba(0,0,0,.3);
 }
 .ag-mob-btn{
   flex:1;
@@ -227,35 +247,28 @@ const CSS = `
   align-items:center;
   justify-content:center;
   gap:2px;
-  color:rgba(255,255,255,.5);
+  color:rgba(255,255,255,.45);
   cursor:pointer;
   border:none;
   background:none;
-  font-size:.55rem;
-  font-weight:600;
+  font-size:.52rem;
+  font-weight:700;
   text-transform:uppercase;
-  letter-spacing:.3px;
-  padding:6px 2px;
-  transition:all .2s;
+  letter-spacing:.2px;
+  padding:5px 2px;
+  transition:all .15s;
   border-top:2px solid transparent;
   position:relative;
+  -webkit-tap-highlight-color:transparent;
 }
-.ag-mob-btn i{font-size:.95rem}
-.ag-mob-btn.active{color:#fff;border-top-color:#1565c0;background:rgba(255,255,255,.05)}
-.ag-mob-btn .ag-mob-badge{
-  position:absolute;top:4px;right:calc(50% - 14px);
+.ag-mob-btn i{font-size:.9rem;line-height:1}
+.ag-mob-btn.active{color:#fff;border-top-color:#1565c0;background:rgba(21,101,192,.15)}
+.ag-mob-btn:active{opacity:.7}
+.ag-mob-badge{
+  position:absolute;top:3px;right:calc(50% - 16px);
   background:var(--red-tn);color:#fff;
-  border-radius:8px;padding:0 4px;font-size:.55rem;font-weight:700;
+  border-radius:8px;padding:0 4px;font-size:.52rem;font-weight:700;
   min-width:14px;text-align:center;line-height:14px;height:14px;
-}
-
-/* Profile card: responsive */
-@media(max-width:768px){
-  .ag-profile-card{margin-bottom:12px}
-  .ag-profile-body{padding:10px 12px}
-  .ag-profile-row{font-size:.75rem}
-  .modal-dialog{margin:8px}
-  .modal-body{padding:14px}
 }
 /* ML confidence badge */
 .conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;padding:2px 6px;border-radius:10px;font-weight:600;margin-left:4px}
@@ -1116,7 +1129,7 @@ export default function AgentDashboardPage() {
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
-              <div className="row g-3 mb-4">
+              <div className="row g-2 mb-3">
                 {([
                   { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
                   { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
@@ -1125,7 +1138,7 @@ export default function AgentDashboardPage() {
                   { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
                   { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
                 ] as any[]).map((s, i) => (
-                  <div key={i} className="col-6 col-md-2">
+                  <div key={i} className="col-4 col-md-2">
                     <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
                       <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
                       <div>
