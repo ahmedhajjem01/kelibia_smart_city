@@ -283,6 +283,167 @@ def classify(title: str, description: str, category: str = "other") -> dict:
     }
 
 
+# ─── XAI: LIME + SHAP explanations for priority ──────────────────────────────
+
+def explain_priority(title: str, description: str) -> dict:
+    """
+    Returns LIME and SHAP word-level explanations for the PRIORITY prediction only.
+
+    Parameters
+    ----------
+    title       : reclamation title
+    description : reclamation full description
+
+    Returns
+    -------
+    dict with keys:
+      - predicted_priority   : str  ('faible' | 'normale' | 'urgente')
+      - confidence           : float
+      - probabilities        : dict  {class: prob}
+      - lime                 : list of {word, score, direction} sorted by |score| desc
+      - shap                 : list of {word, shap_value, direction} sorted by |shap_value| desc
+      - text_used            : the raw text that was classified
+      - errors               : list of error strings (empty if all OK)
+    """
+    _, prio_model = _load_models()
+
+    # Build the same text the classifier uses (title doubled for weight)
+    text_raw  = title + " " + title + " " + description
+    text_norm = _normalize(text_raw)
+
+    errors = []
+
+    import numpy as np
+
+    # ── Base prediction ──────────────────────────────────────────────────────
+    prio_proba   = prio_model.predict_proba([text_norm])[0]
+    prio_classes = list(prio_model.classes_)
+    prio_idx     = int(np.argmax(prio_proba))
+    predicted    = prio_classes[prio_idx]
+    confidence   = float(prio_proba[prio_idx])
+    probabilities = {cls: round(float(p), 4) for cls, p in zip(prio_classes, prio_proba)}
+
+    lime_results = []
+    shap_results = []
+
+    # ── LIME ─────────────────────────────────────────────────────────────────
+    try:
+        from lime.lime_text import LimeTextExplainer
+
+        # predict_proba wrapper that accepts raw (normalised) strings
+        def _lime_predict(texts):
+            return prio_model.predict_proba(texts)
+
+        explainer = LimeTextExplainer(
+            class_names=prio_classes,
+            random_state=42,
+        )
+        exp = explainer.explain_instance(
+            text_norm,
+            _lime_predict,
+            num_features=15,
+            num_samples=500,
+            labels=[prio_idx],        # explain only the predicted class
+        )
+
+        raw_lime = exp.as_list(label=prio_idx)   # [(word, score), ...]
+        for word, score in raw_lime:
+            lime_results.append({
+                "word":      word,
+                "score":     round(float(score), 4),
+                "direction": "for" if score > 0 else "against",
+            })
+        # Sort by absolute contribution (biggest first)
+        lime_results.sort(key=lambda x: abs(x["score"]), reverse=True)
+
+    except ImportError:
+        errors.append("lime not installed — run: pip install lime")
+    except Exception as exc:
+        errors.append(f"LIME error: {exc}")
+
+    # ── SHAP ─────────────────────────────────────────────────────────────────
+    try:
+        import shap
+        import numpy as np
+
+        # Extract TF-IDF step and classifier step from the pipeline
+        tfidf   = prio_model.named_steps['tfidf']
+        clf     = prio_model.named_steps['clf']          # CalibratedClassifierCV
+
+        # Transform the text to a TF-IDF vector
+        X             = tfidf.transform([text_norm])     # sparse (1, n_features)
+        feature_names = tfidf.get_feature_names_out()    # array of vocab words
+
+        # Get the base LinearSVC from the first calibrated fold
+        base_svc = clf.calibrated_classifiers_[0].estimator  # LinearSVC
+
+        # Build a small dense background dataset from training data
+        from .training_data import TRAINING_DATA
+        bg_texts = [_normalize(t) for t, _, _ in TRAINING_DATA[:50]]
+        X_bg = tfidf.transform(bg_texts)
+
+        # Use LinearExplainer (maskers.Independent is the modern API)
+        masker         = shap.maskers.Independent(X_bg)
+        shap_explainer = shap.LinearExplainer(base_svc, masker)
+        shap_values    = shap_explainer.shap_values(X)  # ndarray or list
+
+        # shap_values shape varies by shap version and n_classes:
+        #   - multi-class: list of length n_classes, each (1, n_features)  [older]
+        #   - multi-class: ndarray (1, n_features, n_classes)               [newer 0.4x+]
+        #   - binary:      ndarray (1, n_features)
+        sv = None
+        if isinstance(shap_values, list):
+            # Older API: list[class_idx] → (1, n_features)
+            arr = shap_values[prio_idx]
+            sv  = np.array(arr).flatten()
+        elif isinstance(shap_values, np.ndarray):
+            if shap_values.ndim == 3:
+                # (1, n_features, n_classes)
+                sv = shap_values[0, :, prio_idx]
+            elif shap_values.ndim == 2:
+                # (1, n_features)  — binary or already class-specific
+                sv = shap_values[0]
+            else:
+                # (n_features,)
+                sv = shap_values
+
+        if sv is None:
+            raise ValueError(f"Unexpected shap_values type/shape: {type(shap_values)}")
+
+        sv = np.asarray(sv, dtype=float).flatten()
+
+        # Only report features that are non-zero in the input
+        nonzero_indices = X.nonzero()[1]
+        for idx in nonzero_indices:
+            val = float(sv[idx])
+            if abs(val) < 1e-6:
+                continue
+            shap_results.append({
+                "word":       feature_names[idx],
+                "shap_value": round(val, 4),
+                "direction":  "for" if val > 0 else "against",
+            })
+
+        # Sort by absolute SHAP value (biggest first), keep top 15
+        shap_results.sort(key=lambda x: abs(x["shap_value"]), reverse=True)
+        shap_results = shap_results[:15]
+
+    except ImportError:
+        errors.append("shap not installed — run: pip install shap")
+    except Exception as exc:
+        errors.append(f"SHAP error: {exc}")
+
+    return {
+        "predicted_priority": predicted,
+        "confidence":         round(confidence, 4),
+        "probabilities":      probabilities,
+        "lime":               lime_results,
+        "shap":               shap_results,
+        "text_used":          text_raw,
+        "errors":             errors,
+    }
+
+
 # ─── Duplicate detection ──────────────────────────────────────────────────────
 
 

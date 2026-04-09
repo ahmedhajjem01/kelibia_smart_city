@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import PriorityExplanationModal from '../components/PriorityExplanationModal'
 
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
@@ -189,6 +190,7 @@ export default function AgentDashboardPage() {
   const [detailStatus, setDetailStatus] = useState('')
   const [detailSaving, setDetailSaving] = useState(false)
   const [showDupPanel, setShowDupPanel] = useState(false)
+  const [showExplainModal, setShowExplainModal] = useState(false)
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
@@ -2482,13 +2484,26 @@ export default function AgentDashboardPage() {
                   <div className="row g-2 mb-3">
                     <div className="col-6">
                       <div className="det-label">{t('reclamation_priority_label')}</div>
-                      <div className="det-value">
+                      <div className="det-value" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <span className={`priority-badge ${(PRIORITY[detailRec.priority] || PRIORITY.normale).cls}`}>{(PRIORITY[detailRec.priority] || PRIORITY.normale).label}</span>
                         {detailRec.confidence?.priority !== undefined && (
                           <span className={`conf-badge ${detailRec.confidence.priority >= 0.80 ? 'conf-high' : detailRec.confidence.priority >= 0.60 ? 'conf-med' : 'conf-low'}`}>
                             🤖 {Math.round(detailRec.confidence.priority * 100)}%
                           </span>
                         )}
+                        <button
+                          onClick={() => setShowExplainModal(true)}
+                          title="Voir l'explication LIME + SHAP de la priorité IA"
+                          style={{
+                            background: 'linear-gradient(135deg,#1565c0,#1a3a5c)',
+                            color: '#fff', border: 'none', borderRadius: '6px',
+                            padding: '3px 10px', fontSize: '0.72rem', cursor: 'pointer',
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            fontWeight: 600, whiteSpace: 'nowrap',
+                          }}
+                        >
+                          🔍 Expliquer l'IA
+                        </button>
                       </div>
                     </div>
                     <div className="col-6"><div className="det-label">Service responsable</div><div className="det-value" style={{ fontSize: '.82rem' }}>{detailRec.service_responsable || '—'}</div></div>
@@ -2551,6 +2566,16 @@ export default function AgentDashboardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── PRIORITY EXPLANATION MODAL (LIME + SHAP) ── */}
+      {showExplainModal && detailRec && (
+        <PriorityExplanationModal
+          reclamationId={detailRec.id}
+          reclamationTitle={detailRec.title}
+          token={getAccessToken() || ''}
+          onClose={() => setShowExplainModal(false)}
+        />
       )}
 
       {/* ── CITIZEN VERIFICATION MODAL ── */}

@@ -284,6 +284,42 @@ class ReclamationViewSet(viewsets.ModelViewSet):
 
 
 
+    # ── explain_priority (LIME + SHAP for agents) ────────────────────────────
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def explain_priority(self, request, pk=None):
+        """
+        GET /api/reclamations/{id}/explain_priority/
+
+        Returns LIME + SHAP word-level explanations for why the AI assigned
+        a specific priority (faible / normale / urgente) to this reclamation.
+        Accessible to agents, staff, and superusers only.
+        """
+        user = request.user
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent'):
+            return Response({"detail": "Non autorisé. Réservé aux agents municipaux."}, status=status.HTTP_403_FORBIDDEN)
+
+        rec = self.get_object()
+
+        try:
+            from .classifier import explain_priority
+        except ImportError as e:
+            return Response({"error": f"ML packages not available: {e}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        try:
+            result = explain_priority(rec.title, rec.description or '')
+            return Response({
+                "reclamation_id":     rec.id,
+                "reclamation_title":  rec.title,
+                "stored_priority":    rec.priority,   # what is saved in DB
+                **result,             # predicted_priority, confidence, probabilities, lime, shap, errors
+            })
+        except Exception as exc:
+            import traceback
+            return Response(
+                {"error": f"Explanation failed: {exc}", "traceback": traceback.format_exc()},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     # ── nearby (PostGIS optimized) ───────────────────────────────────────────
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def nearby(self, request):
