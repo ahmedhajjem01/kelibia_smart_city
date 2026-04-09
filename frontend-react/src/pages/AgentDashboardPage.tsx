@@ -425,6 +425,12 @@ export default function AgentDashboardPage() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
@@ -1151,48 +1157,55 @@ export default function AgentDashboardPage() {
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
-              {/* Desktop: Bootstrap row — Mobile: CSS Grid via .ag-stats-grid */}
-              <div className="d-none d-md-block">
-                <div className="row g-3 mb-4">
-                  {([
-                    { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
-                    { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
-                    { val: inprog,   lbl: t('total_in_progress'), color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
-                    { val: resolved, lbl: t('total_resolved'), color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
-                    { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
-                    { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
-                  ] as any[]).map((s, i) => (
-                    <div key={i} className="col-md-2">
-                      <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
-                        <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                        <div>
-                          <div className="val">{loading ? '—' : s.val}</div>
-                          <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
+              {/* Stats: React-controlled mobile/desktop split — no Bootstrap classes */}
+              {(() => {
+                const stats = [
+                  { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
+                  { val: pending,  lbl: t('total_pending'),            color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
+                  { val: inprog,   lbl: t('total_in_progress'),        color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
+                  { val: resolved, lbl: t('total_resolved'),           color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
+                  { val: rejected, lbl: t('total_rejected'),           color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
+                  { val: dupCount, lbl: t('total_duplicates'),         color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
+                    onClick: () => setShowDupPanel(p => !p) },
+                ] as any[]
+
+                if (isMobile) {
+                  // Pure CSS Grid — no Bootstrap involved, fixed height, no reflow
+                  return (
+                    <div className="ag-stats-grid">
+                      {stats.map((s, i) => (
+                        <div key={i} className="ag-stat"
+                          style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }}
+                          onClick={s.onClick}>
+                          <div className="icon-box" style={{ background: s.bg }}>
+                            <i className={`fas ${s.icon}`} style={{ color: s.color }}></i>
+                          </div>
+                          <div style={{ minWidth: 0, overflow: 'hidden', flex: 1 }}>
+                            <div className="val">{loading ? '—' : s.val}</div>
+                            <div className="lbl">{s.lbl}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                }
+                // Desktop: Bootstrap row
+                return (
+                  <div className="row g-3 mb-4">
+                    {stats.map((s, i) => (
+                      <div key={i} className="col-6 col-md-2">
+                        <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                          <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
+                          <div>
+                            <div className="val">{loading ? '—' : s.val}</div>
+                            <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Mobile: pure CSS grid, 3 columns, fixed height, no reflow */}
-              <div className="d-md-none ag-stats-grid">
-                {([
-                  { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
-                  { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
-                  { val: inprog,   lbl: t('total_in_progress'), color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
-                  { val: resolved, lbl: t('total_resolved'), color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
-                  { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
-                  { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
-                ] as any[]).map((s, i) => (
-                  <div key={i} className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
-                    <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                    <div>
-                      <div className="val">{loading ? '—' : s.val}</div>
-                      <div className="lbl">{s.lbl}</div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )
+              })()}
               {showDupPanel && (
                 <div className="ag-dup-card">
                   <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4a148c,#6a1b9a)' }}>
