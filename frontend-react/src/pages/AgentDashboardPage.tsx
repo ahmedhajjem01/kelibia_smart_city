@@ -135,7 +135,7 @@ const CSS = `
 .ag-footer span{color:#43a047}
 .ag-dup-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:22px;overflow:hidden;border-left:4px solid #6a1b9a}
 /* ═══════════════ MOBILE RESPONSIVE ═══════════════ */
-@media(max-width:768px){
+@media(max-width:1023px){
   /* ── Topbar: hide completely ── */
   .ag-topbar{display:none}
 
@@ -243,7 +243,7 @@ const CSS = `
   .agent-page{padding-bottom:60px}
 }
 
-@media(max-width:400px){
+@media(max-width:480px){
   /* Very small phones: 2 stats per row */
   .ag-stat .lbl{font-size:.58rem}
   .ag-navbar{height:50px}
@@ -425,9 +425,9 @@ export default function AgentDashboardPage() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768)
+    const handler = () => setIsMobile(window.innerWidth < 1024)
     window.addEventListener('resize', handler)
     return () => window.removeEventListener('resize', handler)
   }, [])
@@ -1170,19 +1170,47 @@ export default function AgentDashboardPage() {
                 ] as any[]
 
                 if (isMobile) {
-                  // Pure CSS Grid — no Bootstrap involved, fixed height, no reflow
+                  // Pure CSS Grid — ALL styles inline so nothing can override them
                   return (
-                    <div className="ag-stats-grid">
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3,1fr)',
+                      gap: '6px',
+                      marginBottom: '12px',
+                    }}>
                       {stats.map((s, i) => (
-                        <div key={i} className="ag-stat"
-                          style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }}
-                          onClick={s.onClick}>
-                          <div className="icon-box" style={{ background: s.bg }}>
+                        <div key={i}
+                          onClick={s.onClick}
+                          style={{
+                            background: '#fff',
+                            borderRadius: '8px',
+                            borderLeft: `4px solid ${s.color}`,
+                            boxShadow: '0 2px 8px rgba(0,0,0,.07)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 6px',
+                            height: '62px',
+                            overflow: 'hidden',
+                            cursor: s.onClick ? 'pointer' : 'default',
+                            boxSizing: 'border-box' as const,
+                          }}>
+                          <div style={{
+                            width: 28, height: 28, minWidth: 28,
+                            borderRadius: '7px',
+                            background: s.bg,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '.8rem', flexShrink: 0,
+                          }}>
                             <i className={`fas ${s.icon}`} style={{ color: s.color }}></i>
                           </div>
                           <div style={{ minWidth: 0, overflow: 'hidden', flex: 1 }}>
-                            <div className="val">{loading ? '—' : s.val}</div>
-                            <div className="lbl">{s.lbl}</div>
+                            <div style={{ fontSize: '.92rem', fontWeight: 700, lineHeight: 1, color: '#1a1a2e', whiteSpace: 'nowrap' }}>
+                              {loading ? '—' : s.val}
+                            </div>
+                            <div style={{ fontSize: '.56rem', color: '#888', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {s.lbl}
+                            </div>
                           </div>
                         </div>
                       ))}
