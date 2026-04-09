@@ -173,13 +173,32 @@ const CSS = `
   .ag-sidebar{display:none}
   .ag-main{padding:10px;min-height:unset;gap:10px}
 
-  /* ── Stats grid: force 3 cards per row ── */
-  .ag-stat{padding:8px 6px;gap:6px;border-radius:8px;min-width:0}
-  .ag-stat .icon-box{width:28px;height:28px;font-size:.8rem;flex-shrink:0;border-radius:7px;min-width:28px}
-  .ag-stat .val{font-size:.95rem;line-height:1}
-  .ag-stat .lbl{font-size:.58rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  /* ── Stats grid: FIXED height so loading data never causes reflow ── */
+  .ag-stat{
+    padding:8px 6px;gap:5px;border-radius:8px;
+    min-width:0;overflow:hidden;
+    height:62px;          /* fixed height — never grows */
+    align-items:center;
+    flex-wrap:nowrap;
+  }
+  .ag-stat .icon-box{
+    width:26px;height:26px;font-size:.75rem;
+    flex-shrink:0;border-radius:6px;min-width:26px;
+  }
+  .ag-stat>div:last-child{min-width:0;overflow:hidden;flex:1}
+  .ag-stat .val{font-size:.9rem;line-height:1;white-space:nowrap}
+  .ag-stat .lbl{
+    font-size:.55rem;margin-top:1px;
+    white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;max-width:100%;display:block;
+  }
   /* Force exactly 3 columns regardless of Bootstrap */
-  .ag-stats-row>.col-4{width:33.333%!important;max-width:33.333%!important;flex:0 0 33.333%!important;padding-left:4px!important;padding-right:4px!important}
+  .ag-stats-row{--bs-gutter-x:6px}
+  .ag-stats-row>.col-4{
+    width:33.333%!important;max-width:33.333%!important;
+    flex:0 0 33.333%!important;
+    padding-left:3px!important;padding-right:3px!important;
+  }
 
   /* ── Cards: no horizontal overflow ── */
   .ag-card{margin-bottom:12px;border-radius:8px}
