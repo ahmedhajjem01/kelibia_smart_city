@@ -159,12 +159,11 @@ const CSS = `
   .ag-logout{padding:5px 8px;font-size:.8rem;gap:0}
   .ag-logout .logout-text{display:none}
 
-  /* ── Hero: single line compact ── */
-  .ag-hero{padding:10px 12px;flex-direction:column;align-items:flex-start;gap:4px}
+  /* ── Hero: compact, hide right side (flag + badge) ── */
+  .ag-hero{padding:10px 12px;gap:4px}
   .ag-hero .greeting{font-size:.85rem}
   .ag-hero .sub{font-size:.72rem;opacity:.8}
-  .ag-hero .badge-role{font-size:.65rem;padding:2px 9px}
-  .ag-hero>div:last-child{display:none}
+  .ag-hero-right{display:none!important}
 
   /* ── Breadcrumb: hide ── */
   .ag-breadcrumb{display:none}
@@ -174,11 +173,13 @@ const CSS = `
   .ag-sidebar{display:none}
   .ag-main{padding:10px;min-height:unset;gap:10px}
 
-  /* ── Stats grid: 3 cards per row, very compact ── */
-  .ag-stat{padding:10px 8px;gap:8px;border-radius:8px}
-  .ag-stat .icon-box{width:32px;height:32px;font-size:.9rem;flex-shrink:0;border-radius:8px}
-  .ag-stat .val{font-size:1.05rem;line-height:1}
-  .ag-stat .lbl{font-size:.62rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* ── Stats grid: force 3 cards per row ── */
+  .ag-stat{padding:8px 6px;gap:6px;border-radius:8px;min-width:0}
+  .ag-stat .icon-box{width:28px;height:28px;font-size:.8rem;flex-shrink:0;border-radius:7px;min-width:28px}
+  .ag-stat .val{font-size:.95rem;line-height:1}
+  .ag-stat .lbl{font-size:.58rem;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  /* Force exactly 3 columns regardless of Bootstrap */
+  .ag-stats-row>.col-4{width:33.333%!important;max-width:33.333%!important;flex:0 0 33.333%!important;padding-left:4px!important;padding-right:4px!important}
 
   /* ── Cards: no horizontal overflow ── */
   .ag-card{margin-bottom:12px;border-radius:8px}
@@ -194,9 +195,12 @@ const CSS = `
   .ag-table thead th{padding:6px 8px;font-size:.63rem}
   .ag-table tbody td{padding:6px 8px;font-size:.75rem}
 
-  /* ── Map ── */
+  /* ── Map: hide legend on mobile (too large), shorter height ── */
   #ag-map-card{min-height:unset}
   #ag-map{height:220px!important}
+  /* Hide Leaflet legend and layer control on mobile */
+  .leaflet-control-layers{display:none!important}
+  .leaflet-bottom.leaflet-left{display:none!important}
 
   /* ── Pagination bar ── */
   .ag-pag-bar{flex-direction:column;gap:6px;align-items:center;font-size:.72rem}
@@ -1055,7 +1059,7 @@ export default function AgentDashboardPage() {
           <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
           <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
         </div>
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 ag-hero-right">
           <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user, t)}</span>
           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
         </div>
@@ -1129,7 +1133,7 @@ export default function AgentDashboardPage() {
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
-              <div className="row g-2 mb-3">
+              <div className="row g-2 mb-3 ag-stats-row">
                 {([
                   { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
                   { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
