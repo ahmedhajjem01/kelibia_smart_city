@@ -134,6 +134,19 @@ const CSS = `
 .ag-footer{background:var(--sidebar-bg);color:rgba(255,255,255,.5);text-align:center;font-size:.75rem;padding:14px}
 .ag-footer span{color:#43a047}
 .ag-dup-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:22px;overflow:hidden;border-left:4px solid #6a1b9a}
+/* ── Stats grid (desktop default: 6 equal columns) ── */
+.ag-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:16px;
+  margin-bottom:24px;
+}
+.ag-stats-grid .ag-stat{
+  padding:18px 16px;gap:12px;
+  align-items:center;flex-wrap:nowrap;
+  min-width:0;overflow:hidden;
+  box-sizing:border-box;
+}
 /* ═══════════════ MOBILE RESPONSIVE ═══════════════ */
 @media(max-width:1023px){
   /* ── Topbar: hide completely ── */
@@ -173,30 +186,29 @@ const CSS = `
   .ag-sidebar{display:none}
   .ag-main{padding:10px;min-height:unset;gap:10px}
 
-  /* ── Stats grid: pure CSS Grid, no Bootstrap, no reflow ── */
+  /* ── Stats grid: 3-per-row on mobile, fixed height ── */
   .ag-stats-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:6px;
-    margin-bottom:12px;
+    grid-template-columns:repeat(3,1fr)!important;
+    gap:6px!important;
+    margin-bottom:12px!important;
   }
   .ag-stats-grid .ag-stat{
-    padding:8px 6px;gap:5px;border-radius:8px;
-    height:62px;min-height:62px;max-height:62px;
-    align-items:center;flex-wrap:nowrap;
-    min-width:0;overflow:hidden;
-    box-sizing:border-box;
+    padding:8px 6px!important;gap:5px!important;border-radius:8px!important;
+    height:62px!important;min-height:62px!important;max-height:62px!important;
+    align-items:center!important;flex-wrap:nowrap!important;
+    min-width:0!important;overflow:hidden!important;
+    box-sizing:border-box!important;
   }
   .ag-stats-grid .ag-stat .icon-box{
-    width:26px;height:26px;min-width:26px;
-    font-size:.75rem;flex-shrink:0;border-radius:6px;
+    width:26px!important;height:26px!important;min-width:26px!important;
+    font-size:.75rem!important;flex-shrink:0!important;border-radius:6px!important;
   }
   .ag-stats-grid .ag-stat>div:last-child{min-width:0;overflow:hidden;flex:1}
-  .ag-stats-grid .ag-stat .val{font-size:.9rem;line-height:1;white-space:nowrap}
+  .ag-stats-grid .ag-stat .val{font-size:.9rem!important;line-height:1!important;white-space:nowrap!important}
   .ag-stats-grid .ag-stat .lbl{
-    font-size:.54rem;margin-top:1px;
-    white-space:nowrap;overflow:hidden;
-    text-overflow:ellipsis;display:block;
+    font-size:.54rem!important;margin-top:1px!important;
+    white-space:nowrap!important;overflow:hidden!important;
+    text-overflow:ellipsis!important;display:block!important;
   }
 
   /* ── Cards: no horizontal overflow ── */
@@ -425,12 +437,6 @@ export default function AgentDashboardPage() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024)
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 1024)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [])
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
@@ -1157,87 +1163,26 @@ export default function AgentDashboardPage() {
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
-              {/* DEBUG BANNER — remove after testing */}
-              <div style={{background:'#1a1a2e',color:'#00ff88',padding:'6px 12px',borderRadius:6,fontSize:'.75rem',fontFamily:'monospace',marginBottom:8}}>
-                📐 window.innerWidth = <strong>{window.innerWidth}px</strong> | isMobile = <strong>{String(isMobile)}</strong>
-              </div>
-              {/* Stats: React-controlled mobile/desktop split — no Bootstrap classes */}
-              {(() => {
-                const stats = [
-                  { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
-                  { val: pending,  lbl: t('total_pending'),            color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
-                  { val: inprog,   lbl: t('total_in_progress'),        color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
-                  { val: resolved, lbl: t('total_resolved'),           color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
-                  { val: rejected, lbl: t('total_rejected'),           color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
+              {/* Stats grid — CSS handles desktop (6-col) vs mobile (3-col) automatically */}
+              <div className="ag-stats-grid">
+                {[
+                  { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check',   onClick: undefined },
+                  { val: pending,  lbl: t('total_pending'),            color: '#e65100', bg: '#fff3e0', icon: 'fa-clock',        onClick: undefined },
+                  { val: inprog,   lbl: t('total_in_progress'),        color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools',        onClick: undefined },
+                  { val: resolved, lbl: t('total_resolved'),           color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
+                  { val: rejected, lbl: t('total_rejected'),           color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
                   { val: dupCount, lbl: t('total_duplicates'),         color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
                     onClick: () => setShowDupPanel(p => !p) },
-                ] as any[]
-
-                if (isMobile) {
-                  // Pure CSS Grid — ALL styles inline so nothing can override them
-                  return (
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3,1fr)',
-                      gap: '6px',
-                      marginBottom: '12px',
-                    }}>
-                      {stats.map((s, i) => (
-                        <div key={i}
-                          onClick={s.onClick}
-                          style={{
-                            background: '#fff',
-                            borderRadius: '8px',
-                            borderLeft: `4px solid ${s.color}`,
-                            boxShadow: '0 2px 8px rgba(0,0,0,.07)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '8px 6px',
-                            height: '62px',
-                            overflow: 'hidden',
-                            cursor: s.onClick ? 'pointer' : 'default',
-                            boxSizing: 'border-box' as const,
-                          }}>
-                          <div style={{
-                            width: 28, height: 28, minWidth: 28,
-                            borderRadius: '7px',
-                            background: s.bg,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '.8rem', flexShrink: 0,
-                          }}>
-                            <i className={`fas ${s.icon}`} style={{ color: s.color }}></i>
-                          </div>
-                          <div style={{ minWidth: 0, overflow: 'hidden', flex: 1 }}>
-                            <div style={{ fontSize: '.92rem', fontWeight: 700, lineHeight: 1, color: '#1a1a2e', whiteSpace: 'nowrap' }}>
-                              {loading ? '—' : s.val}
-                            </div>
-                            <div style={{ fontSize: '.56rem', color: '#888', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {s.lbl}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                ].map((s, i) => (
+                  <div key={i} className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                    <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
+                    <div>
+                      <div className="val">{loading ? '—' : s.val}</div>
+                      <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
                     </div>
-                  )
-                }
-                // Desktop: Bootstrap row
-                return (
-                  <div className="row g-3 mb-4">
-                    {stats.map((s, i) => (
-                      <div key={i} className="col-6 col-md-2">
-                        <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
-                          <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                          <div>
-                            <div className="val">{loading ? '—' : s.val}</div>
-                            <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
                   </div>
-                )
-              })()}
+                ))}
+              </div>
               {showDupPanel && (
                 <div className="ag-dup-card">
                   <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4a148c,#6a1b9a)' }}>
