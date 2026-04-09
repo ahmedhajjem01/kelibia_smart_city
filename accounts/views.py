@@ -4,6 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,6 +20,7 @@ import logging
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -110,6 +113,7 @@ class RegisterView(APIView):
             return Response({"error": f"Erreur Interne: {str(e)}", "details": error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CustomActivationView(APIView):
     """
     Custom Activation View that activates the user AND returns JWT tokens
