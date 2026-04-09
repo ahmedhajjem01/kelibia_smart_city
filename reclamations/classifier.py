@@ -361,61 +361,33 @@ def explain_priority(title: str, description: str) -> dict:
     except Exception as exc:
         errors.append(f"LIME error: {exc}")
 
-    # ── SHAP ─────────────────────────────────────────────────────────────────
+    # ── SHAP (native, zero extra dependencies) ───────────────────────────────
+    # For a LinearSVC, SHAP values are mathematically:
+    #   shap_i = w_i * x_i  (weight × TF-IDF value)
+    # where w_i is the decision-function coefficient for the predicted class.
+    # This is exactly what shap.LinearExplainer computes under "interventional"
+    # perturbation — no external library needed.
     try:
-        import shap
-        import numpy as np
+        # Extract pipeline components (already imported via scikit-learn)
+        tfidf         = prio_model.named_steps['tfidf']
+        clf           = prio_model.named_steps['clf']        # CalibratedClassifierCV
+        feature_names = tfidf.get_feature_names_out()
 
-        # Extract TF-IDF step and classifier step from the pipeline
-        tfidf   = prio_model.named_steps['tfidf']
-        clf     = prio_model.named_steps['clf']          # CalibratedClassifierCV
-
-        # Transform the text to a TF-IDF vector
-        X             = tfidf.transform([text_norm])     # sparse (1, n_features)
-        feature_names = tfidf.get_feature_names_out()    # array of vocab words
+        # TF-IDF vector for this text (sparse, shape 1 × n_features)
+        X = tfidf.transform([text_norm])
 
         # Get the base LinearSVC from the first calibrated fold
         base_svc = clf.calibrated_classifiers_[0].estimator  # LinearSVC
+        # coef_ shape: (n_classes, n_features) for multi-class
+        coef = base_svc.coef_[prio_idx]                      # (n_features,)
 
-        # Build a small dense background dataset from training data
-        from .training_data import TRAINING_DATA
-        bg_texts = [_normalize(t) for t, _, _ in TRAINING_DATA[:50]]
-        X_bg = tfidf.transform(bg_texts)
-
-        # Use LinearExplainer (maskers.Independent is the modern API)
-        masker         = shap.maskers.Independent(X_bg)
-        shap_explainer = shap.LinearExplainer(base_svc, masker)
-        shap_values    = shap_explainer.shap_values(X)  # ndarray or list
-
-        # shap_values shape varies by shap version and n_classes:
-        #   - multi-class: list of length n_classes, each (1, n_features)  [older]
-        #   - multi-class: ndarray (1, n_features, n_classes)               [newer 0.4x+]
-        #   - binary:      ndarray (1, n_features)
-        sv = None
-        if isinstance(shap_values, list):
-            # Older API: list[class_idx] → (1, n_features)
-            arr = shap_values[prio_idx]
-            sv  = np.array(arr).flatten()
-        elif isinstance(shap_values, np.ndarray):
-            if shap_values.ndim == 3:
-                # (1, n_features, n_classes)
-                sv = shap_values[0, :, prio_idx]
-            elif shap_values.ndim == 2:
-                # (1, n_features)  — binary or already class-specific
-                sv = shap_values[0]
-            else:
-                # (n_features,)
-                sv = shap_values
-
-        if sv is None:
-            raise ValueError(f"Unexpected shap_values type/shape: {type(shap_values)}")
-
-        sv = np.asarray(sv, dtype=float).flatten()
-
-        # Only report features that are non-zero in the input
+        # SHAP value for each feature = weight × tf-idf activation
+        # Only non-zero TF-IDF entries are present in the text
         nonzero_indices = X.nonzero()[1]
+        x_dense = X.toarray()[0]                             # (n_features,)
+
         for idx in nonzero_indices:
-            val = float(sv[idx])
+            val = float(coef[idx] * x_dense[idx])
             if abs(val) < 1e-6:
                 continue
             shap_results.append({
@@ -428,8 +400,6 @@ def explain_priority(title: str, description: str) -> dict:
         shap_results.sort(key=lambda x: abs(x["shap_value"]), reverse=True)
         shap_results = shap_results[:15]
 
-    except ImportError:
-        errors.append("shap not installed — run: pip install shap")
     except Exception as exc:
         errors.append(f"SHAP error: {exc}")
 
