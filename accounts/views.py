@@ -19,6 +19,8 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         try:
             payload = request.data
@@ -113,6 +115,7 @@ class CustomActivationView(APIView):
     Custom Activation View that activates the user AND returns JWT tokens
     to allow auto-login on the frontend.
     """
+    permission_classes = [permissions.AllowAny]
     token_generator = default_token_generator
 
     def post(self, request, *args, **kwargs):
