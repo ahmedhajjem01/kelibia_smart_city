@@ -441,15 +441,6 @@ export default function AgentDashboardPage() {
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
   const markersLayer = useRef<any>(null)
-  const styleInjected = useRef(false)
-
-  useEffect(() => {
-    if (styleInjected.current) return
-    styleInjected.current = true
-    const s = document.createElement('style')
-    s.textContent = CSS
-    document.head.appendChild(s)
-  }, [])
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
@@ -1068,6 +1059,8 @@ export default function AgentDashboardPage() {
 
   return (
     <div className="agent-page">
+      {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
+      <style>{CSS}</style>
       <div className="ag-topbar">
         <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
         <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 295 XXX</a><a href="#"><i className="fas fa-envelope me-1"></i>contact@kelibia.tn</a></div>
