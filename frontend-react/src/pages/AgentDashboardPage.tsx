@@ -173,31 +173,30 @@ const CSS = `
   .ag-sidebar{display:none}
   .ag-main{padding:10px;min-height:unset;gap:10px}
 
-  /* ── Stats grid: FIXED height so loading data never causes reflow ── */
-  .ag-stat{
+  /* ── Stats grid: pure CSS Grid, no Bootstrap, no reflow ── */
+  .ag-stats-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    margin-bottom:12px;
+  }
+  .ag-stats-grid .ag-stat{
     padding:8px 6px;gap:5px;border-radius:8px;
+    height:62px;min-height:62px;max-height:62px;
+    align-items:center;flex-wrap:nowrap;
     min-width:0;overflow:hidden;
-    height:62px;          /* fixed height — never grows */
-    align-items:center;
-    flex-wrap:nowrap;
+    box-sizing:border-box;
   }
-  .ag-stat .icon-box{
-    width:26px;height:26px;font-size:.75rem;
-    flex-shrink:0;border-radius:6px;min-width:26px;
+  .ag-stats-grid .ag-stat .icon-box{
+    width:26px;height:26px;min-width:26px;
+    font-size:.75rem;flex-shrink:0;border-radius:6px;
   }
-  .ag-stat>div:last-child{min-width:0;overflow:hidden;flex:1}
-  .ag-stat .val{font-size:.9rem;line-height:1;white-space:nowrap}
-  .ag-stat .lbl{
-    font-size:.55rem;margin-top:1px;
+  .ag-stats-grid .ag-stat>div:last-child{min-width:0;overflow:hidden;flex:1}
+  .ag-stats-grid .ag-stat .val{font-size:.9rem;line-height:1;white-space:nowrap}
+  .ag-stats-grid .ag-stat .lbl{
+    font-size:.54rem;margin-top:1px;
     white-space:nowrap;overflow:hidden;
-    text-overflow:ellipsis;max-width:100%;display:block;
-  }
-  /* Force exactly 3 columns regardless of Bootstrap */
-  .ag-stats-row{--bs-gutter-x:6px}
-  .ag-stats-row>.col-4{
-    width:33.333%!important;max-width:33.333%!important;
-    flex:0 0 33.333%!important;
-    padding-left:3px!important;padding-right:3px!important;
+    text-overflow:ellipsis;display:block;
   }
 
   /* ── Cards: no horizontal overflow ── */
@@ -1152,7 +1151,31 @@ export default function AgentDashboardPage() {
         <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
-              <div className="row g-2 mb-3 ag-stats-row">
+              {/* Desktop: Bootstrap row — Mobile: CSS Grid via .ag-stats-grid */}
+              <div className="d-none d-md-block">
+                <div className="row g-3 mb-4">
+                  {([
+                    { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
+                    { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
+                    { val: inprog,   lbl: t('total_in_progress'), color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
+                    { val: resolved, lbl: t('total_resolved'), color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
+                    { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
+                    { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
+                  ] as any[]).map((s, i) => (
+                    <div key={i} className="col-md-2">
+                      <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                        <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
+                        <div>
+                          <div className="val">{loading ? '—' : s.val}</div>
+                          <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Mobile: pure CSS grid, 3 columns, fixed height, no reflow */}
+              <div className="d-md-none ag-stats-grid">
                 {([
                   { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
                   { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
@@ -1161,13 +1184,11 @@ export default function AgentDashboardPage() {
                   { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
                   { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
                 ] as any[]).map((s, i) => (
-                  <div key={i} className="col-4 col-md-2">
-                    <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
-                      <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                      <div>
-                        <div className="val">{loading ? '—' : s.val}</div>
-                        <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
-                      </div>
+                  <div key={i} className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                    <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
+                    <div>
+                      <div className="val">{loading ? '—' : s.val}</div>
+                      <div className="lbl">{s.lbl}</div>
                     </div>
                   </div>
                 ))}
