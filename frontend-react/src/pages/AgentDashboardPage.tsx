@@ -134,7 +134,129 @@ const CSS = `
 .ag-footer{background:var(--sidebar-bg);color:rgba(255,255,255,.5);text-align:center;font-size:.75rem;padding:14px}
 .ag-footer span{color:#43a047}
 .ag-dup-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:22px;overflow:hidden;border-left:4px solid #6a1b9a}
-@media(max-width:768px){.ag-sidebar{display:none}.ag-main{padding:16px}}
+/* ═══════════════ MOBILE RESPONSIVE ═══════════════ */
+@media(max-width:768px){
+  /* Hide topbar completely on mobile */
+  .ag-topbar{display:none}
+
+  /* Compact navbar */
+  .ag-navbar{height:56px;padding:0 12px}
+  .ag-logo{width:36px;height:36px;font-size:1rem;flex-shrink:0}
+  .ag-title .main{font-size:.78rem;line-height:1.2}
+  .ag-title .sub{display:none}
+  .ag-brand{gap:8px}
+
+  /* Hide name text in pill, show only avatar */
+  .ag-user-pill span{display:none}
+  .ag-user-pill{padding:4px;border-radius:50%}
+  .ag-user-pill .av{width:32px;height:32px}
+
+  /* Hide lang buttons text */
+  .ag-lang-btn img{margin:0}
+  .ag-lang-btn{padding:4px 7px;font-size:.7rem}
+
+  /* Hide logout text, show only icon */
+  .ag-logout{padding:6px 9px;font-size:.8rem}
+  .ag-logout span,.ag-logout .logout-text{display:none}
+
+  .ag-actions{gap:5px}
+
+  /* Hero: compact */
+  .ag-hero{padding:12px 14px;gap:6px}
+  .ag-hero .greeting{font-size:.88rem}
+  .ag-hero .sub{font-size:.75rem}
+  .ag-hero .badge-role{font-size:.68rem;padding:3px 10px}
+
+  /* Breadcrumb: hide on mobile */
+  .ag-breadcrumb{display:none}
+
+  /* Layout: sidebar hidden, main full-width */
+  .ag-body{flex-direction:column}
+  .ag-sidebar{display:none}
+  .ag-main{padding:12px;min-height:unset;gap:14px}
+
+  /* Stats cards: 2 per row */
+  .ag-stat{padding:12px 10px;gap:10px}
+  .ag-stat .icon-box{width:36px;height:36px;font-size:1rem;flex-shrink:0}
+  .ag-stat .val{font-size:1.1rem}
+  .ag-stat .lbl{font-size:.68rem}
+
+  /* Tables: horizontal scroll */
+  .ag-table{font-size:.75rem}
+  .ag-table thead th{padding:7px 8px;font-size:.65rem}
+  .ag-table tbody td{padding:7px 8px;font-size:.75rem}
+
+  /* Filter bar: wrap and compact */
+  .ag-filter-bar{padding:8px 10px;gap:6px}
+  .ag-search-input{width:100%}
+  .ag-search-wrap{flex:1;min-width:120px}
+  .ag-filter-select{font-size:.73rem;padding:4px 6px}
+  .ag-filter-btn{font-size:.73rem;padding:4px 8px}
+
+  /* Toast: full-width at bottom */
+  .ag-toast-container{right:10px;left:10px;bottom:70px}
+  .ag-toast{min-width:unset;width:100%}
+
+  /* Card headers: smaller */
+  .ag-card-hdr-blue,.ag-card-hdr-green,.ag-card-hdr-orange{font-size:.8rem;padding:10px 12px}
+
+  /* Map: shorter on mobile */
+  #ag-map-card{min-height:unset}
+  #ag-map{height:240px!important}
+
+  /* Bottom navigation bar for mobile */
+  .ag-mobile-nav{display:flex!important}
+  body{padding-bottom:60px}
+}
+
+/* Mobile bottom nav (hidden on desktop) */
+.ag-mobile-nav{
+  display:none;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:var(--sidebar-bg);
+  border-top:2px solid rgba(255,255,255,.08);
+  z-index:1000;
+  height:58px;
+  align-items:stretch;
+}
+.ag-mob-btn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  color:rgba(255,255,255,.5);
+  cursor:pointer;
+  border:none;
+  background:none;
+  font-size:.55rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  padding:6px 2px;
+  transition:all .2s;
+  border-top:2px solid transparent;
+  position:relative;
+}
+.ag-mob-btn i{font-size:.95rem}
+.ag-mob-btn.active{color:#fff;border-top-color:#1565c0;background:rgba(255,255,255,.05)}
+.ag-mob-btn .ag-mob-badge{
+  position:absolute;top:4px;right:calc(50% - 14px);
+  background:var(--red-tn);color:#fff;
+  border-radius:8px;padding:0 4px;font-size:.55rem;font-weight:700;
+  min-width:14px;text-align:center;line-height:14px;height:14px;
+}
+
+/* Profile card: responsive */
+@media(max-width:768px){
+  .ag-profile-card{margin-bottom:12px}
+  .ag-profile-body{padding:10px 12px}
+  .ag-profile-row{font-size:.75rem}
+  .modal-dialog{margin:8px}
+  .modal-body{padding:14px}
+}
 /* ML confidence badge */
 .conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;padding:2px 6px;border-radius:10px;font-weight:600;margin-left:4px}
 .conf-high{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
@@ -266,6 +388,8 @@ export default function AgentDashboardPage() {
   const [profileForm, setProfileForm] = useState({
     first_name: '', last_name: '', phone: '', address: '', city: '', governorate: '', place_of_birth: ''
   })
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
@@ -910,7 +1034,7 @@ export default function AgentDashboardPage() {
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
           <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
           <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</button>
+          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i><span className="logout-text ms-1"> {t('logout')}</span></button>
         </div>
       </nav>
       <div className="ag-hero">
@@ -2742,6 +2866,76 @@ export default function AgentDashboardPage() {
         </div>
       </div>
       <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
+
+      {/* ── MOBILE BOTTOM NAVIGATION BAR ── */}
+      <nav className="ag-mobile-nav">
+        <button className={`ag-mob-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
+          <i className="fas fa-exclamation-circle"></i>
+          <span>Signalements</span>
+          {pending > 0 && <span className="ag-mob-badge">{pending}</span>}
+        </button>
+        <button className={`ag-mob-btn${activeTab === 'evenements' ? ' active' : ''}`} onClick={() => { setActiveTab('evenements'); fetchEvenements() }}>
+          <i className="fas fa-calendar-alt"></i>
+          <span>Événements</span>
+          {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
+            <span className="ag-mob-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
+          )}
+        </button>
+        <button className={`ag-mob-btn${activeTab === 'citizens' ? ' active' : ''}`} onClick={() => { setActiveTab('citizens'); fetchAgentCitizens() }}>
+          <i className="fas fa-user-check"></i>
+          <span>Citoyens</span>
+          {agentCitizens.length > 0 && <span className="ag-mob-badge">{agentCitizens.length}</span>}
+        </button>
+        <button className={`ag-mob-btn${activeTab === 'construction' ? ' active' : ''}`} onClick={() => { setActiveTab('construction'); fetchConstructions() }}>
+          <i className="fas fa-hard-hat"></i>
+          <span>Permis</span>
+          {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && (
+            <span className="ag-mob-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>
+          )}
+        </button>
+        <button className={`ag-mob-btn${mobileMenuOpen ? ' active' : ''}`} onClick={() => setMobileMenuOpen(o => !o)}>
+          <i className={`fas fa-${mobileMenuOpen ? 'times' : 'bars'}`}></i>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+      {/* ── MOBILE SLIDE-UP MENU DRAWER ── */}
+      {mobileMenuOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+          onClick={() => setMobileMenuOpen(false)}>
+          <div style={{ background: 'var(--sidebar-bg)', borderRadius: '18px 18px 0 0', padding: '8px 0 70px', maxHeight: '70vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}>
+            {/* Handle */}
+            <div style={{ width: 40, height: 4, background: 'rgba(255,255,255,.2)', borderRadius: 2, margin: '8px auto 16px' }}></div>
+            <div style={{ padding: '0 8px', fontSize: '.7rem', textTransform: 'uppercase', letterSpacing: 1, color: 'rgba(255,255,255,.35)', paddingLeft: 20, marginBottom: 4 }}>Navigation</div>
+            {[
+              { tab: 'profile' as const, icon: 'fa-user-circle', label: t('nav_profile'), badge: 0 },
+              { tab: 'stats' as const, icon: 'fa-robot', label: t('nav_stats_ia'), badge: 0 },
+              ...(user?.user_type === 'supervisor' || user?.is_staff || user?.is_superuser ? [
+                { tab: 'users' as const, icon: 'fa-users-cog', label: t('nav_managed_users'), badge: managedUsers.filter(u => !u.is_verified).length },
+                { tab: 'services' as const, icon: 'fa-file-invoice', label: t('nav_services_villes'), badge: 0 },
+                { tab: 'demandes' as const, icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length },
+                { tab: 'forum' as const, icon: 'fa-comments', label: t('nav_forum_moderation'), badge: 0 },
+              ] : []),
+            ].map(item => (
+              <a key={item.tab}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', color: activeTab === item.tab ? '#fff' : '#c8d6e5', background: activeTab === item.tab ? 'rgba(255,255,255,.08)' : 'none', cursor: 'pointer', borderLeft: `3px solid ${activeTab === item.tab ? '#1565c0' : 'transparent'}`, fontSize: '.88rem', textDecoration: 'none' }}
+                href="#"
+                onClick={e => { e.preventDefault(); setActiveTab(item.tab); setMobileMenuOpen(false); if (item.tab === 'users') fetchManagedUsers(usersMode); if (item.tab === 'demandes') fetchDemandes(); if (item.tab === 'forum') { fetchTopics(); fetchMlStats(); } if (item.tab === 'stats') { if (!mlStats && !mlLoading) fetchMlStats() } }}>
+                <i className={`fas ${item.icon}`} style={{ width: 18, textAlign: 'center' }}></i>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {item.badge > 0 && <span style={{ background: '#c62828', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: '.68rem', fontWeight: 700 }}>{item.badge}</span>}
+              </a>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,.06)', margin: '10px 0' }}></div>
+            <a style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', color: '#ef9a9a', cursor: 'pointer', fontSize: '.88rem', textDecoration: 'none' }}
+              href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
+              <i className="fas fa-sign-out-alt" style={{ width: 18, textAlign: 'center' }}></i>
+              <span>{t('logout')}</span>
+            </a>
+          </div>
+        </div>
+      )}
       <div className="ag-toast-container">
         {toasts.map(t => <div key={t.id} className={`ag-toast ${t.type}`}><i className={`fas fa-${t.type === 'success' ? 'check-circle' : 'exclamation-circle'} ticon`}></i><span>{t.msg}</span></div>)}
       </div>
