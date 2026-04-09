@@ -297,6 +297,7 @@ export default function SignupPage() {
   const [cinFront, setCinFront] = useState<File | null>(null)
   const [cinBack, setCinBack] = useState<File | null>(null)
   const [showCamera, setShowCamera] = useState<'front' | 'back' | null>(null)
+  const [mirrored, setMirrored] = useState(true)
 
   const [message, setMessage] = useState<string | null>(null)
   const [messageType, setMessageType] = useState<'success' | 'danger'>('success')
@@ -773,7 +774,7 @@ export default function SignupPage() {
                     audio={false}
                     ref={webcamRef}
                     screenshotFormat="image/jpeg"
-                    mirrored={true}
+                    mirrored={mirrored}
                     videoConstraints={videoConstraints}
                     onUserMedia={() => console.log("Camera access granted")}
                     onUserMediaError={(err) => {
@@ -783,8 +784,17 @@ export default function SignupPage() {
                     }}
                     className="img-fluid rounded"
                   />
-                  <div className="mt-2 text-muted small">
-                    {t('camera_troubleshoot')}
+                  <div className="mt-2 d-flex align-items-center justify-content-center gap-2">
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${mirrored ? 'btn-light' : 'btn-outline-light'}`}
+                      onClick={() => setMirrored(m => !m)}
+                      title="Miroir / Mirror"
+                    >
+                      <i className="bi bi-symmetry-horizontal me-1"></i>
+                      {mirrored ? 'Miroir ON' : 'Miroir OFF'}
+                    </button>
+                    <span className="text-muted small">{t('camera_troubleshoot')}</span>
                   </div>
                </div>
                <div className="modal-footer border-0 justify-content-center">
