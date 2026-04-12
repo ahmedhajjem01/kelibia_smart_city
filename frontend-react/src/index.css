@@ -26,14 +26,14 @@
   --primary-navy: #0d1b2e;
   --municipal-blue: #1e88e5;
   --tunisian-red: #c62828;
-  --body-bg: #f5f8fa;
-  --sidebar-bg: #0d1b2e;
-  --sidebar-hover: #1a2f4a;
+  --body-bg: #f1f5f9;
+  --sidebar-bg: #f8fafc;
+  --sidebar-hover: #f1f5f9;
   --card-shadow: 0 4px 15px rgba(0,0,0,0.06);
   --top-nav-height: 70px;
   --footer-height: 60px;
-  
-  --sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  --sans: 'Public Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --arabic: 'Cairo', 'Tajawal', sans-serif;
 }
 
