@@ -1,4 +1,26 @@
+/* Google Fonts — must be first */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Tajawal:wght@300;400;500;700&display=swap');
+
+/* Tailwind v4 */
+@import "tailwindcss";
+
+/* Design tokens for Tailwind */
+@theme {
+  --color-primary: #F18221;
+  --color-primary-container: #fed7aa;
+  --color-on-primary: #ffffff;
+  --color-secondary: #004786;
+  --color-secondary-container: #dbeafe;
+  --color-on-secondary: #ffffff;
+  --color-tertiary: #0093af;
+  --color-surface: #f8fafc;
+  --color-on-surface: #0f172a;
+  --color-surface-container: #f1f5f9;
+  --color-surface-container-lowest: #ffffff;
+  --color-outline: #cbd5e1;
+  --font-family-headline: "Public Sans", sans-serif;
+  --font-family-body: "Public Sans", sans-serif;
+}
 
 :root {
   --primary-navy: #0d1b2e;
