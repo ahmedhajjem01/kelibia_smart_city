@@ -4,6 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,7 +20,10 @@ import logging
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         try:
             payload = request.data
@@ -108,11 +113,13 @@ class RegisterView(APIView):
             return Response({"error": f"Erreur Interne: {str(e)}", "details": error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CustomActivationView(APIView):
     """
     Custom Activation View that activates the user AND returns JWT tokens
     to allow auto-login on the frontend.
     """
+    permission_classes = [permissions.AllowAny]
     token_generator = default_token_generator
 
     def post(self, request, *args, **kwargs):
@@ -357,6 +364,89 @@ class AdminUserCreateView(APIView):
             return Response({"message": f"Nouvel utilisateur '{user.username}' créé avec succès."}, status=201)
         except Exception as e:
             return Response({"error": f"Erreur lors de la création: {str(e)}"}, status=400)
+
+class AgentCitizenVerificationView(APIView):
+    """
+    Agent-accessible endpoint to list and verify unverified CITIZENS only.
+    Agents can only see citizen accounts (not agents or admins).
+    Supervisors use the full UserVerificationView instead.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _is_agent_or_above(self, user):
+        return (
+            getattr(user, 'user_type', '') in ('agent', 'supervisor')
+            or user.is_staff
+            or user.is_superuser
+        )
+
+    def get(self, request):
+        if not self._is_agent_or_above(request.user):
+            return Response({"error": "Accès refusé. Réservé aux agents."}, status=403)
+
+        # Agents can only see unverified citizens
+        users = User.objects.filter(
+            is_verified=False,
+            user_type='citizen',
+        ).order_by('date_joined')
+
+        data = [{
+            "id": u.id,
+            "full_name": f"{u.first_name} {u.last_name}".strip() or u.username,
+            "email": u.email,
+            "cin": u.cin,
+            "phone": u.phone,
+            "governorate": u.governorate,
+            "city": u.city,
+            "date_of_birth": u.date_of_birth,
+            "place_of_birth": u.place_of_birth,
+            "date_joined": u.date_joined,
+            "is_active": u.is_active,
+            "cin_front": u.cin_front_utf if u.cin_front_utf else (u.cin_front_image if u.cin_front_image else None),
+            "cin_back": u.cin_back_utf if u.cin_back_utf else (u.cin_back_image if u.cin_back_image else None),
+        } for u in users]
+
+        return Response(data)
+
+    def post(self, request):
+        if not self._is_agent_or_above(request.user):
+            return Response({"error": "Accès refusé. Réservé aux agents."}, status=403)
+
+        user_id = request.data.get('user_id')
+        action  = request.data.get('action')
+
+        # Agents can only verify or reject (toggle_active) citizens
+        allowed_actions = ('verify', 'toggle_active')
+        if action not in allowed_actions:
+            return Response({"error": f"Action non autorisée pour les agents. Actions permises: {allowed_actions}"}, status=403)
+
+        try:
+            target = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable."}, status=404)
+
+        # Agents cannot act on agents/supervisors/admins
+        if target.user_type != 'citizen':
+            return Response({"error": "Les agents ne peuvent gérer que les comptes citoyens."}, status=403)
+
+        if action == 'verify':
+            target.is_verified = True
+            # Clear CIN images after verification (privacy)
+            target.cin_front_utf   = None
+            target.cin_back_utf    = None
+            target.cin_front_image = None
+            target.cin_back_image  = None
+            target.save()
+            return Response({"message": "Compte citoyen vérifié avec succès. Images CIN supprimées."})
+
+        elif action == 'toggle_active':
+            target.is_active = not target.is_active
+            target.save()
+            return Response({
+                "message": f"Compte {'activé' if target.is_active else 'bloqué'}.",
+                "is_active": target.is_active,
+            })
+
 
 def admin_logout(request):
 

@@ -10,41 +10,55 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
   const { t, lang } = useI18n();
 
   return (
-    <div className="hero-strip">
-      <div className="hero-top">
-        <div>
-          <div className="greeting">
-            <i className="fas fa-hand-wave me-2"></i>
-            <span>{t('welcome')}, </span>
-            <strong>{user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar : user.first_name) : t('citoyen_role')}</strong> !
-          </div>
-          <div className="sub">{t('welcome_msg')}</div>
-        </div>
-        <div className="d-flex align-items-center gap-2">
-          <span className="badge-role">
-            <i className="fas fa-user-check me-1"></i>
-            <span>{t('citoyen_role')}</span>
-          </span>
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png"
-            height="22"
-            style={{ borderRadius: '3px' }}
-            alt="Tunisie"
-          />
-        </div>
+    <div className="relative w-full overflow-hidden" style={{ height: '420px' }}>
+      {/* Background image */}
+      <img
+        src={fortImg}
+        alt="Fort de Kélibia"
+        className="w-full h-full object-cover"
+      />
+      {/* Dark gradient overlay */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(to bottom, rgba(0,28,58,0.25), rgba(0,28,58,0.72))' }}
+      ></div>
+
+      {/* Content */}
+      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+        {/* Icon */}
+        <i className="fas fa-castle text-white mb-4" style={{ fontSize: '3rem', opacity: 0.9 }}></i>
+
+        {/* Bilingual title */}
+        <h1
+          className="font-black text-white uppercase tracking-tighter mb-2"
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
+        >
+          Ville de Kélibia
+        </h1>
+        <h2
+          className="font-bold text-white mb-6"
+          dir="rtl"
+          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(2rem, 5vw, 3.5rem)', opacity: 0.92 }}
+        >
+          بلدية قليبية
+        </h2>
+
+        {/* Welcome message */}
+        <p className="text-white font-medium uppercase tracking-[0.2em] text-sm mb-3" style={{ opacity: 0.85 }}>
+          {t('welcome')}, <strong>{user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar : user.first_name) : t('citoyen_role')}</strong>
+        </p>
+        <p className="text-white text-xs uppercase tracking-widest" style={{ opacity: 0.65 }}>
+          {t('welcome_msg')}
+        </p>
       </div>
 
-      <div className="fort-banner">
-        <img
-          src={fortImg}
-          alt="Fort de Kélibia"
-          style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-        <div className="fort-overlay" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.15)', zIndex: 2 }}></div>
-        <span className="fort-caption" style={{ zIndex: 3, position: 'absolute', bottom: '1rem', right: '2rem', color: 'white', background: 'rgba(0,0,0,0.3)', padding: '4px 12px', borderRadius: '4px', fontSize: '0.75rem', backdropFilter: 'blur(4px)' }}>
-          {t('fort_caption')}
-        </span>
-      </div>
+      {/* Fort caption */}
+      <span
+        className="absolute bottom-4 right-6 text-white text-xs py-1 px-3 rounded"
+        style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)', zIndex: 3 }}
+      >
+        {t('fort_caption')}
+      </span>
     </div>
   );
 };

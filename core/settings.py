@@ -134,10 +134,15 @@ CSRF_TRUSTED_ORIGINS = list(CORS_ALLOWED_ORIGINS)
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in local dev
 
 # REST Framework Configuration
+# SessionAuthentication is intentionally excluded: it triggers Django's CSRF
+# enforcement on every POST (even AllowAny views), blocking FormData requests
+# from the React SPA. This is a pure JWT app — session auth is not needed.
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
     ),
 }
 

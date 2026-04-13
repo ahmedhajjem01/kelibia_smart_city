@@ -283,6 +283,137 @@ def classify(title: str, description: str, category: str = "other") -> dict:
     }
 
 
+# ─── XAI: LIME + SHAP explanations for priority ──────────────────────────────
+
+def explain_priority(title: str, description: str) -> dict:
+    """
+    Returns LIME and SHAP word-level explanations for the PRIORITY prediction only.
+
+    Parameters
+    ----------
+    title       : reclamation title
+    description : reclamation full description
+
+    Returns
+    -------
+    dict with keys:
+      - predicted_priority   : str  ('faible' | 'normale' | 'urgente')
+      - confidence           : float
+      - probabilities        : dict  {class: prob}
+      - lime                 : list of {word, score, direction} sorted by |score| desc
+      - shap                 : list of {word, shap_value, direction} sorted by |shap_value| desc
+      - text_used            : the raw text that was classified
+      - errors               : list of error strings (empty if all OK)
+    """
+    _, prio_model = _load_models()
+
+    # Build the same text the classifier uses (title doubled for weight)
+    text_raw  = title + " " + title + " " + description
+    text_norm = _normalize(text_raw)
+
+    errors = []
+
+    import numpy as np
+
+    # ── Base prediction ──────────────────────────────────────────────────────
+    prio_proba   = prio_model.predict_proba([text_norm])[0]
+    prio_classes = list(prio_model.classes_)
+    prio_idx     = int(np.argmax(prio_proba))
+    predicted    = prio_classes[prio_idx]
+    confidence   = float(prio_proba[prio_idx])
+    probabilities = {cls: round(float(p), 4) for cls, p in zip(prio_classes, prio_proba)}
+
+    lime_results = []
+    shap_results = []
+
+    # ── LIME ─────────────────────────────────────────────────────────────────
+    try:
+        from lime.lime_text import LimeTextExplainer
+
+        # predict_proba wrapper that accepts raw (normalised) strings
+        def _lime_predict(texts):
+            return prio_model.predict_proba(texts)
+
+        explainer = LimeTextExplainer(
+            class_names=prio_classes,
+            random_state=42,
+        )
+        exp = explainer.explain_instance(
+            text_norm,
+            _lime_predict,
+            num_features=15,
+            num_samples=500,
+            labels=[prio_idx],        # explain only the predicted class
+        )
+
+        raw_lime = exp.as_list(label=prio_idx)   # [(word, score), ...]
+        for word, score in raw_lime:
+            lime_results.append({
+                "word":      word,
+                "score":     round(float(score), 4),
+                "direction": "for" if score > 0 else "against",
+            })
+        # Sort by absolute contribution (biggest first)
+        lime_results.sort(key=lambda x: abs(x["score"]), reverse=True)
+
+    except ImportError:
+        errors.append("lime not installed — run: pip install lime")
+    except Exception as exc:
+        errors.append(f"LIME error: {exc}")
+
+    # ── SHAP (native, zero extra dependencies) ───────────────────────────────
+    # For a LinearSVC, SHAP values are mathematically:
+    #   shap_i = w_i * x_i  (weight × TF-IDF value)
+    # where w_i is the decision-function coefficient for the predicted class.
+    # This is exactly what shap.LinearExplainer computes under "interventional"
+    # perturbation — no external library needed.
+    try:
+        # Extract pipeline components (already imported via scikit-learn)
+        tfidf         = prio_model.named_steps['tfidf']
+        clf           = prio_model.named_steps['clf']        # CalibratedClassifierCV
+        feature_names = tfidf.get_feature_names_out()
+
+        # TF-IDF vector for this text (sparse, shape 1 × n_features)
+        X = tfidf.transform([text_norm])
+
+        # Get the base LinearSVC from the first calibrated fold
+        base_svc = clf.calibrated_classifiers_[0].estimator  # LinearSVC
+        # coef_ shape: (n_classes, n_features) for multi-class
+        coef = base_svc.coef_[prio_idx]                      # (n_features,)
+
+        # SHAP value for each feature = weight × tf-idf activation
+        # Only non-zero TF-IDF entries are present in the text
+        nonzero_indices = X.nonzero()[1]
+        x_dense = X.toarray()[0]                             # (n_features,)
+
+        for idx in nonzero_indices:
+            val = float(coef[idx] * x_dense[idx])
+            if abs(val) < 1e-6:
+                continue
+            shap_results.append({
+                "word":       feature_names[idx],
+                "shap_value": round(val, 4),
+                "direction":  "for" if val > 0 else "against",
+            })
+
+        # Sort by absolute SHAP value (biggest first), keep top 15
+        shap_results.sort(key=lambda x: abs(x["shap_value"]), reverse=True)
+        shap_results = shap_results[:15]
+
+    except Exception as exc:
+        errors.append(f"SHAP error: {exc}")
+
+    return {
+        "predicted_priority": predicted,
+        "confidence":         round(confidence, 4),
+        "probabilities":      probabilities,
+        "lime":               lime_results,
+        "shap":               shap_results,
+        "text_used":          text_raw,
+        "errors":             errors,
+    }
+
+
 # ─── Duplicate detection ──────────────────────────────────────────────────────
 
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import PriorityExplanationModal from '../components/PriorityExplanationModal'
 
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
@@ -45,109 +46,508 @@ function getRoleLabel(u: UserInfo | null, t: any) {
 }
 
 const CSS = `
-:root{--green-dark:#1a5c2a;--green-mid:#2e7d32;--green-light:#43a047;--red-tn:#c62828;--blue:#1565c0;--sidebar-bg:#1e2a3a;--sidebar-hover:#2d3f54;--body-bg:#eef2f7;--card-shadow:0 2px 12px rgba(0,0,0,.08)}
-.agent-page{font-family:"Segoe UI",sans-serif;background:var(--body-bg);min-height:100vh}
-.ag-topbar{background:var(--green-dark);color:#fff;font-size:.8rem;padding:4px 20px;display:flex;justify-content:space-between;align-items:center}
-.ag-topbar a{color:rgba(255,255,255,.75);text-decoration:none;margin:0 6px}.ag-topbar a:hover{color:#fff}
-.ag-navbar{background:#fff;border-bottom:3px solid var(--green-mid);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:68px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.ag-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
-.ag-logo{width:52px;height:52px;background:var(--green-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem}
-.ag-title .main{font-size:1.05rem;font-weight:700;color:var(--green-dark);display:block}.ag-title .sub{font-size:.75rem;color:#777}
+/* ── New Design System ── */
+:root{
+  --primary:#F18221;
+  --primary-hover:#e0731a;
+  --secondary:#004786;
+  --tertiary:#0093af;
+  --sidebar-bg:#f8fafc;
+  --sidebar-border:#e2e8f0;
+  --sidebar-hover:#f1f5f9;
+  --sidebar-active-bg:#dbeafe;
+  --sidebar-active-text:#1e40af;
+  --body-bg:#f1f5f9;
+  --card-shadow:0 2px 12px rgba(0,0,0,.06);
+  --red-tn:#c62828;
+  --blue:#004786;
+}
+
+/* ── Page shell ── */
+.agent-page{
+  font-family:'Public Sans','Segoe UI',sans-serif;
+  background:var(--body-bg);
+  min-height:100vh;
+}
+
+/* ── Top info bar (hidden on mobile) ── */
+.ag-topbar{
+  background:var(--secondary);
+  color:rgba(255,255,255,.8);
+  font-size:.78rem;
+  padding:4px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.ag-topbar a{color:rgba(255,255,255,.7);text-decoration:none;margin:0 6px}
+.ag-topbar a:hover{color:#fff}
+
+/* ── Glassmorphism navbar ── */
+.ag-navbar{
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid #e2e8f0;
+  padding:0 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  height:68px;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.ag-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.ag-logo{
+  width:42px;height:42px;
+  background:var(--primary);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:1.2rem;
+}
+.ag-title .main{
+  font-size:1rem;font-weight:800;
+  color:var(--primary);display:block;
+  font-family:'Public Sans',sans-serif;
+  letter-spacing:-0.3px;
+}
+.ag-title .sub{font-size:.7rem;color:#94a3b8;font-weight:500}
 .ag-actions{display:flex;align-items:center;gap:10px}
-.ag-lang-btn{background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:.82rem;color:#444;transition:all .2s}
-.ag-lang-btn:hover{border-color:var(--green-mid);color:var(--green-mid)}.ag-lang-btn.active{background:var(--green-mid);color:#fff;border-color:var(--green-mid)}
-.ag-user-pill{background:var(--green-mid);color:#fff;border-radius:50px;padding:5px 14px 5px 5px;display:flex;align-items:center;gap:8px;font-size:.85rem}
-.ag-user-pill .av{width:28px;height:28px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--green-mid);font-size:.75rem;font-weight:700}
-.ag-logout{background:var(--red-tn);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:5px}
-.ag-logout:hover{background:#b71c1c}
-.ag-hero{background:linear-gradient(135deg,#1a3a5c 0%,#1565c0 100%);color:#fff;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.ag-hero .greeting{font-size:1.15rem;font-weight:600}.ag-hero .sub{font-size:.85rem;opacity:.85}
-.ag-hero .badge-role{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:20px;padding:4px 14px;font-size:.78rem}
-.ag-breadcrumb{background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 28px;font-size:.8rem;color:#666}
-.ag-breadcrumb a{color:var(--green-mid);text-decoration:none}
-.ag-body{display:flex;min-height:calc(100vh - 200px);align-items:flex-start}
-.ag-sidebar{width:240px;min-width:240px;background:var(--sidebar-bg);color:#c8d6e5;padding:20px 0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.ag-sec-title{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);padding:14px 20px 4px}
-.ag-nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;font-size:.88rem;text-decoration:none;color:#c8d6e5}
-.ag-nav-item:hover,.ag-nav-item.active{background:var(--sidebar-hover);color:#fff;border-left-color:#1565c0}
-.ag-nav-item i{width:18px;text-align:center;font-size:.9rem}
-.ag-divider{border-top:1px solid rgba(255,255,255,.06);margin:10px 0}
-.ag-badge{margin-left:auto;background:var(--red-tn);color:#fff;border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:700}
-.ag-main{flex:1;padding:24px 28px;overflow-x:hidden}
-.ag-stat{background:#fff;border-radius:10px;padding:18px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:16px;border-left:4px solid var(--green-mid);transition:transform .2s}
-.ag-stat:hover{transform:translateY(-2px)}
-.ag-stat .icon-box{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
-.ag-stat .val{font-size:1.5rem;font-weight:700;line-height:1;color:#1a1a2e}.ag-stat .lbl{font-size:.78rem;color:#888;margin-top:2px}
-.ag-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:22px;overflow:hidden}
-.ag-card-hdr-blue{background:linear-gradient(90deg,#1a3a5c,#1565c0);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;font-size:.9rem;font-weight:600}
-.ag-card-hdr-green{background:linear-gradient(90deg,var(--green-dark),var(--green-light));color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;font-size:.9rem;font-weight:600}
-.ag-card-hdr-orange{background:linear-gradient(90deg,#bf360c,#ff6d00);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;font-size:.9rem;font-weight:600}
+.ag-lang-btn{
+  background:transparent;border:0;
+  padding:2px 6px;
+  cursor:pointer;
+  font-size:.75rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.1em;
+  color:#94a3b8;transition:color .2s;
+}
+.ag-lang-btn:hover,.ag-lang-btn.active{color:#0f172a}
+.ag-user-pill{
+  display:flex;align-items:center;gap:10px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  padding:6px 14px 6px 6px;
+}
+.ag-user-pill .av{
+  width:30px;height:30px;
+  background:var(--primary);
+  color:#fff;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;
+}
+.ag-user-pill .name-block .main-name{font-size:.8rem;font-weight:700;color:#0f172a;display:block}
+.ag-user-pill .name-block .role{font-size:.65rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+.ag-logout{
+  background:transparent;color:#64748b;
+  border:0;
+  border-radius:50%;
+  width:36px;height:36px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;
+  transition:background .2s,color .2s;
+}
+.ag-logout:hover{background:#f1f5f9;color:var(--red-tn)}
+
+/* ── Small user avatar (used in users table) ── */
+.ag-user-av-sm{
+  width:32px;height:32px;
+  background:var(--primary);
+  color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:700;flex-shrink:0;
+}
+
+/* ── Hero / welcome strip ── */
+.ag-hero{
+  background:linear-gradient(135deg,#0d1b2e 0%,#1565c0 100%);
+  color:#fff;
+  padding:20px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.ag-hero .greeting{font-size:1.1rem;font-weight:700;font-family:'Public Sans',sans-serif}
+.ag-hero .sub{font-size:.83rem;opacity:.8;margin-top:3px}
+.ag-hero .badge-role{
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:4px 14px;font-size:.75rem;
+}
+
+/* ── Breadcrumb ── */
+.ag-breadcrumb{
+  background:#fff;
+  border-bottom:1px solid #e2e8f0;
+  padding:8px 28px;
+  font-size:.78rem;color:#64748b;
+}
+.ag-breadcrumb a{color:var(--primary);text-decoration:none}
+
+/* ── Layout body ── */
+.ag-body{display:flex;min-height:calc(100vh - 160px);align-items:flex-start}
+
+/* ── Sidebar ── */
+.ag-sidebar{
+  width:240px;min-width:240px;
+  background:var(--sidebar-bg);
+  border-right:1px solid var(--sidebar-border);
+  padding:16px 12px;
+  flex-shrink:0;
+  position:sticky;
+  top:68px;
+  height:calc(100vh - 68px);
+  overflow-y:auto;
+}
+.ag-sec-title{
+  font-size:.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.2px;
+  color:#94a3b8;
+  padding:12px 8px 4px;
+}
+.ag-nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  cursor:pointer;
+  border-radius:8px;
+  transition:all .15s;
+  font-size:.85rem;font-weight:500;
+  text-decoration:none;
+  color:#64748b;
+  margin-bottom:2px;
+}
+.ag-nav-item:hover{background:var(--sidebar-hover);color:#0f172a;transform:translateX(2px)}
+.ag-nav-item.active{
+  background:var(--sidebar-active-bg);
+  color:var(--sidebar-active-text);
+  font-weight:700;
+}
+.ag-nav-item i{width:18px;text-align:center;font-size:.88rem}
+.ag-divider{border-top:1px solid #e2e8f0;margin:10px 0}
+.ag-badge{
+  margin-left:auto;
+  background:var(--red-tn);color:#fff;
+  border-radius:10px;padding:1px 7px;
+  font-size:.65rem;font-weight:700;
+}
+
+/* ── Main content ── */
+.ag-main{
+  flex:1;
+  padding:24px 28px;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  min-height:800px;
+}
+
+/* ── Stats Cards ── */
+.ag-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:14px;
+  margin-bottom:4px;
+}
+.ag-stat{
+  background:#fff;
+  border-radius:10px;
+  padding:16px;
+  box-shadow:var(--card-shadow);
+  display:flex;align-items:flex-start;
+  gap:0;
+  flex-direction:column;
+  border:1px solid #f1f5f9;
+  transition:transform .2s,box-shadow .2s;
+  position:relative;
+  overflow:hidden;
+}
+.ag-stat:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.ag-stat .stat-top{display:flex;justify-content:space-between;align-items:flex-start;width:100%;margin-bottom:12px}
+.ag-stat .icon-box{
+  width:40px;height:40px;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.ag-stat .chip{
+  font-size:.6rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.05em;
+  opacity:.7;
+}
+.ag-stat .val{font-size:1.8rem;font-weight:900;line-height:1;color:#0f172a;font-family:'Public Sans',sans-serif}
+.ag-stat .lbl{font-size:.7rem;color:#94a3b8;margin-top:4px;font-weight:500}
+
+/* ── Content cards ── */
+.ag-card{
+  background:#fff;border-radius:12px;
+  box-shadow:var(--card-shadow);
+  margin-bottom:0;
+  overflow:hidden;
+  border:1px solid #f1f5f9;
+}
+.ag-card-hdr-blue{
+  background:linear-gradient(90deg,#0d1b2e,#1565c0);
+  color:#fff;padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.88rem;font-weight:600;
+}
+.ag-card-hdr-green{
+  background:linear-gradient(90deg,#064e3b,#059669);
+  color:#fff;padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.88rem;font-weight:600;
+}
+.ag-card-hdr-orange{
+  background:linear-gradient(90deg,#7c2d12,#F18221);
+  color:#fff;padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.88rem;font-weight:600;
+}
 .ag-card-body{padding:18px}
-.ag-filter-bar{padding:12px 18px;background:#f8f9fa;border-bottom:1px solid #e8e8e8;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.ag-filter-select{border:1.5px solid #dde3ec;border-radius:7px;padding:5px 10px;font-size:.8rem;color:#444;background:#fff;cursor:pointer}
-.ag-filter-btn{border:1.5px solid #dde3ec;border-radius:7px;padding:5px 12px;font-size:.8rem;color:#444;background:#fff;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
-.ag-filter-btn:hover,.ag-filter-btn.active{background:#1565c0;color:#fff;border-color:#1565c0}
+
+/* ── Filter bar ── */
+.ag-filter-bar{
+  padding:10px 16px;
+  background:#f8fafc;
+  border-bottom:1px solid #e8e8e8;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+}
+.ag-filter-select{
+  border:1px solid #e2e8f0;border-radius:8px;
+  padding:5px 10px;font-size:.78rem;color:#475569;
+  background:#fff;cursor:pointer;
+}
+.ag-filter-btn{
+  border:1px solid #e2e8f0;border-radius:8px;
+  padding:5px 12px;font-size:.78rem;color:#475569;
+  background:#fff;cursor:pointer;
+  transition:all .2s;
+  display:flex;align-items:center;gap:5px;
+}
+.ag-filter-btn:hover,.ag-filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .ag-search-wrap{position:relative}
-.ag-search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#aaa;font-size:.8rem}
-.ag-search-input{border:1.5px solid #dde3ec;border-radius:7px;padding:5px 10px 5px 30px;font-size:.8rem;width:200px;background:#fff}
+.ag-search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.78rem}
+.ag-search-input{
+  border:1px solid #e2e8f0;border-radius:8px;
+  padding:5px 10px 5px 30px;font-size:.78rem;width:200px;background:#fff;
+}
+
+/* ── Table ── */
 .ag-table{width:100%;border-collapse:separate;border-spacing:0}
-.ag-table thead th{background:#f4f6f8;color:#555;font-size:.75rem;font-weight:600;padding:10px 12px;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #e0e0e0;white-space:nowrap}
-.ag-table tbody tr{transition:background .15s}.ag-table tbody tr:hover{background:#f0f7ff}
-.ag-table tbody td{padding:11px 12px;font-size:.83rem;color:#333;border-bottom:1px solid #f0f0f0;vertical-align:middle}
-.cat-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:600;white-space:nowrap}
-.cat-lighting{background:#fff8e1;color:#f57f17}.cat-trash{background:#e8f5e9;color:#2e7d32}.cat-roads{background:#ede7f6;color:#4527a0}.cat-noise{background:#fce4ec;color:#880e4f}.cat-other{background:#eceff1;color:#37474f}
-.status-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:600}
-.status-pending{background:#fff3e0;color:#e65100}.status-in_progress{background:#e3f2fd;color:#1565c0}.status-resolved{background:#e8f5e9;color:#1b5e20}.status-rejected{background:#ffebee;color:#b71c1c}
-.priority-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap}
-.priority-urgente{background:#ffebee;color:#b71c1c;border:1px solid #ffcdd2}.priority-normale{background:#e3f2fd;color:#1565c0;border:1px solid #bbdefb}.priority-faible{background:#f3e5f5;color:#6a1b9a;border:1px solid #e1bee7}
-.service-badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.68rem;font-weight:600;background:#e8eaf6;color:#283593;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
-.ag-status-select{border:1.5px solid #dde3ec;border-radius:6px;padding:3px 8px;font-size:.75rem;cursor:pointer;background:#fff}
-.ag-action-btn{background:none;border:1px solid #dde3ec;border-radius:6px;padding:4px 8px;font-size:.75rem;cursor:pointer;color:#555;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
-.ag-action-btn:hover{background:#1565c0;color:#fff;border-color:#1565c0}
-.ag-empty{text-align:center;padding:40px 20px;color:#aaa}.ag-empty i{font-size:2.5rem;margin-bottom:10px;opacity:.4}
-.ag-spinner-wrap{text-align:center;padding:30px;color:#1565c0}
-.ag-profile-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:16px}
-.ag-profile-hdr{background:linear-gradient(135deg,#1a3a5c,#1565c0);padding:24px;text-align:center;color:#fff}
-.ag-profile-av{width:64px;height:64px;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;margin:0 auto 10px;color:#fff}
-.ag-profile-name{font-size:.95rem;font-weight:700}.ag-profile-email{font-size:.75rem;opacity:.8;margin-top:2px}
+.ag-table thead th{
+  background:#f8fafc;color:#64748b;
+  font-size:.68rem;font-weight:700;
+  padding:10px 14px;
+  text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:1px solid #e2e8f0;
+  white-space:nowrap;
+}
+.ag-table tbody tr{transition:background .12s}
+.ag-table tbody tr:hover{background:#f8fafc}
+.ag-table tbody td{
+  padding:11px 14px;font-size:.82rem;color:#334155;
+  border-bottom:1px solid #f1f5f9;vertical-align:middle;
+}
+
+/* ── Badges ── */
+.cat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.cat-lighting{background:#fffbeb;color:#b45309}.cat-trash{background:#f0fdf4;color:#166534}
+.cat-roads{background:#f5f3ff;color:#5b21b6}.cat-noise{background:#fdf2f8;color:#9d174d}
+.cat-other{background:#f1f5f9;color:#475569}
+
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
+.status-pending{background:#fff7ed;color:#c2410c}.status-in_progress{background:#eff6ff;color:#1d4ed8}
+.status-resolved{background:#f0fdf4;color:#166534}.status-rejected{background:#fff1f2;color:#be123c}
+
+.priority-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.priority-urgente{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
+.priority-normale{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.priority-faible{background:#f5f3ff;color:#5b21b6;border:1px solid #ddd6fe}
+
+.service-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:600;background:#eff6ff;color:#1d4ed8;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+
+.ag-status-select{border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;font-size:.73rem;cursor:pointer;background:#fff}
+
+.ag-action-btn{
+  background:none;border:1px solid #e2e8f0;border-radius:8px;
+  padding:5px 9px;font-size:.73rem;cursor:pointer;
+  color:#64748b;transition:all .15s;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.ag-action-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+.ag-empty{text-align:center;padding:40px 20px;color:#94a3b8}
+.ag-empty i{font-size:2.5rem;margin-bottom:10px;opacity:.3}
+
+/* ── Profile card ── */
+.ag-profile-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:16px}
+.ag-profile-hdr{background:linear-gradient(135deg,#0d1b2e,#1565c0);padding:24px;text-align:center;color:#fff}
+.ag-profile-av{
+  width:64px;height:64px;
+  background:rgba(255,255,255,.2);
+  border:3px solid rgba(255,255,255,.5);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;font-weight:700;
+  margin:0 auto 10px;color:#fff;
+}
+.ag-profile-name{font-size:.92rem;font-weight:700}
+.ag-profile-email{font-size:.72rem;opacity:.75;margin-top:2px}
 .ag-profile-body{padding:14px 16px}
-.ag-profile-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f5f5;font-size:.8rem}
-.ag-profile-row:last-child{border-bottom:none}.ag-profile-row .lbl{color:#888}.ag-profile-row .val{color:#333;font-weight:600}
-.mini-progress{height:6px;border-radius:3px;background:#eee;margin-top:4px;overflow:hidden}
+.ag-profile-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.78rem}
+.ag-profile-row:last-child{border-bottom:none}
+.ag-profile-row .lbl{color:#94a3b8}.ag-profile-row .val{color:#1e293b;font-weight:600}
+
+/* ── Mini progress bar ── */
+.mini-progress{height:5px;border-radius:3px;background:#e2e8f0;margin-top:4px;overflow:hidden}
 .mini-progress .bar{height:100%;border-radius:3px;transition:width .6s}
-.ag-pag-bar{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f0f0f0;font-size:.78rem;color:#888}
-.ag-page-btn{background:#fff;border:1px solid #dde3ec;border-radius:5px;padding:3px 9px;font-size:.78rem;cursor:pointer;transition:all .2s}
-.ag-page-btn:hover:not(:disabled){background:#1565c0;color:#fff;border-color:#1565c0}
-.ag-page-btn:disabled{opacity:.4;cursor:not-allowed}.ag-page-btn.active{background:#1565c0;color:#fff;border-color:#1565c0}
+
+/* ── Pagination ── */
+.ag-pag-bar{
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid #f1f5f9;
+  font-size:.75rem;color:#94a3b8;
+  background:#fafafa;
+}
+.ag-page-btn{
+  background:#fff;border:1px solid #e2e8f0;border-radius:7px;
+  padding:4px 10px;font-size:.75rem;cursor:pointer;transition:all .2s;
+}
+.ag-page-btn:hover:not(:disabled){background:var(--primary);color:#fff;border-color:var(--primary)}
+.ag-page-btn:disabled{opacity:.4;cursor:not-allowed}
+.ag-page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── Toast notifications ── */
 .ag-toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.ag-toast{background:#fff;border-radius:10px;padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:.84rem;display:flex;align-items:center;gap:10px;min-width:280px;animation:ag-slide .3s ease}
-.ag-toast.success{border-left:4px solid var(--green-mid)}.ag-toast.error{border-left:4px solid var(--red-tn)}
-.ag-toast .ticon{font-size:1rem}.ag-toast.success .ticon{color:var(--green-mid)}.ag-toast.error .ticon{color:var(--red-tn)}
+.ag-toast{
+  background:#fff;border-radius:12px;
+  padding:12px 16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.12);
+  font-size:.82rem;
+  display:flex;align-items:center;gap:10px;
+  min-width:280px;
+  animation:ag-slide .3s ease;
+}
+.ag-toast.success{border-left:4px solid #22c55e}
+.ag-toast.error{border-left:4px solid var(--red-tn)}
+.ag-toast .ticon{font-size:1rem}
+.ag-toast.success .ticon{color:#22c55e}
+.ag-toast.error .ticon{color:var(--red-tn)}
 @keyframes ag-slide{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}
-.ag-modal-hdr{background:linear-gradient(90deg,#1a3a5c,#1565c0);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.ag-modal-hdr .title{font-size:1rem;font-weight:700}
-.ag-close-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem}
-.ag-close-btn:hover{background:rgba(255,255,255,.4)}
-.det-label{font-size:.75rem;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
-.det-value{font-size:.9rem;color:#222;font-weight:500}
-.ag-footer{background:var(--sidebar-bg);color:rgba(255,255,255,.5);text-align:center;font-size:.75rem;padding:14px}
-.ag-footer span{color:#43a047}
-.ag-dup-card{background:#fff;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:22px;overflow:hidden;border-left:4px solid #6a1b9a}
-@media(max-width:768px){.ag-sidebar{display:none}.ag-main{padding:16px}}
-/* ML confidence badge */
-.conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;padding:2px 6px;border-radius:10px;font-weight:600;margin-left:4px}
-.conf-high{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
-.conf-med{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
-.conf-low{background:#fce4ec;color:#c62828;border:1px solid #ef9a9a}
-/* reclassify box */
-.reclassify-box{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 14px;margin-top:12px}
-.reclassify-box .rc-title{font-size:.8rem;font-weight:700;color:#f57f17;margin-bottom:8px}
-.ag-main{flex:1;padding:24px;min-height:800px;display:flex;flex-direction:column;gap:24px}
-.skeleton-box{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px;width:100%}
+
+/* ── Modals ── */
+.ag-modal-hdr{
+  background:linear-gradient(90deg,#0d1b2e,#1565c0);
+  color:#fff;padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ag-modal-hdr .title{font-size:.96rem;font-weight:700}
+.ag-close-btn{
+  background:rgba(255,255,255,.15);border:none;color:#fff;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+}
+.ag-close-btn:hover{background:rgba(255,255,255,.3)}
+.det-label{font-size:.72rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.det-value{font-size:.88rem;color:#1e293b;font-weight:500}
+.ag-footer{background:#0d1b2e;color:rgba(255,255,255,.5);text-align:center;font-size:.72rem;padding:14px}
+
+/* ── Duplicate card ── */
+.ag-dup-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);margin-bottom:0;overflow:hidden;border-left:4px solid #7c3aed}
+
+/* ── ML confidence badges ── */
+.conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:2px}
+.conf-high{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.conf-med{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.conf-low{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
+
+/* ── Reclassify box ── */
+.reclassify-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-top:12px}
+.reclassify-box .rc-title{font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:8px}
+
+/* ── Skeleton loader ── */
+.skeleton-box{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:10px;width:100%}
 @keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .table-skeleton{height:400px;margin-bottom:20px}
 #ag-map-card{min-height:430px}
 #ag-recs-card{min-height:500px}
+
+/* ══════════════════════ MOBILE ══════════════════════ */
+@media(max-width:1023px){
+  .ag-topbar{display:none}
+  .ag-navbar{height:54px;padding:0 10px}
+  .ag-logo{width:34px;height:34px;font-size:.9rem}
+  .ag-title .main{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+  .ag-title .sub{display:none}
+  .ag-brand{gap:7px;min-width:0;flex:1;overflow:hidden}
+  .ag-actions{gap:5px;flex-shrink:0}
+  .ag-user-pill{padding:4px;border-radius:50%;gap:0;border:0;background:transparent}
+  .ag-user-pill .name-block{display:none}
+  .ag-user-pill .av{width:30px;height:30px}
+  .ag-logout{width:30px;height:30px;font-size:.85rem}
+  .ag-hero{padding:10px 14px}
+  .ag-hero .greeting{font-size:.85rem}
+  .ag-hero .sub{font-size:.72rem}
+  .ag-hero-right{display:none!important}
+  .ag-breadcrumb{display:none}
+  .ag-body{flex-direction:column}
+  .ag-sidebar{display:none}
+  .ag-main{padding:10px;gap:12px}
+  .ag-stats-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin-bottom:0!important}
+  .ag-stats-grid .ag-stat{padding:10px 8px!important;height:70px!important;min-height:70px!important}
+  .ag-stats-grid .ag-stat .icon-box{width:28px!important;height:28px!important;font-size:.8rem!important}
+  .ag-stats-grid .ag-stat .val{font-size:1rem!important}
+  .ag-stats-grid .ag-stat .lbl{font-size:.55rem!important;overflow:hidden;text-overflow:ellipsis}
+  .ag-card{border-radius:10px}
+  .ag-filter-bar{padding:8px 10px}
+  .ag-search-input{width:100%;max-width:none}
+  .ag-table thead th{padding:6px 8px;font-size:.62rem}
+  .ag-table tbody td{padding:7px 8px;font-size:.75rem}
+  #ag-map{height:220px!important}
+  .leaflet-control-layers,.leaflet-bottom.leaflet-left{display:none!important}
+  .ag-pag-bar{flex-direction:column;gap:6px;align-items:center}
+  .ag-toast-container{right:8px;left:8px;bottom:66px}
+  .ag-toast{min-width:unset;width:100%}
+  .modal-dialog{margin:6px!important;max-width:calc(100vw - 12px)!important}
+  .ag-mobile-nav{display:flex!important}
+  .agent-page{padding-bottom:60px}
+}
+
+@media(max-width:480px){
+  .ag-stat .lbl{font-size:.52rem}
+  .ag-navbar{height:50px}
+}
+
+/* ── Mobile bottom nav ── */
+.ag-mobile-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;
+  border-top:1px solid #e2e8f0;
+  z-index:1000;height:58px;
+  align-items:stretch;
+  box-shadow:0 -2px 12px rgba(0,0,0,.08);
+}
+.ag-mob-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:#94a3b8;cursor:pointer;border:none;background:none;
+  font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.2px;padding:5px 2px;
+  transition:all .15s;border-top:2px solid transparent;position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.ag-mob-btn i{font-size:.9rem;line-height:1}
+.ag-mob-btn.active{color:var(--primary);border-top-color:var(--primary);background:rgba(241,130,33,.06)}
+.ag-mob-btn:active{opacity:.7}
+.ag-mob-badge{
+  position:absolute;top:3px;right:calc(50% - 16px);
+  background:var(--red-tn);color:#fff;border-radius:8px;padding:0 4px;
+  font-size:.52rem;font-weight:700;min-width:14px;text-align:center;line-height:14px;height:14px;
+}
 `
 
 export default function AgentDashboardPage() {
@@ -189,10 +589,16 @@ export default function AgentDashboardPage() {
   const [detailStatus, setDetailStatus] = useState('')
   const [detailSaving, setDetailSaving] = useState(false)
   const [showDupPanel, setShowDupPanel] = useState(false)
+  const [showExplainModal, setShowExplainModal] = useState(false)
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile' | 'citizens'>('dashboard')
+  const [agentCitizens, setAgentCitizens] = useState<any[]>([])
+  const [loadingCitizens, setLoadingCitizens] = useState(false)
+  const [citizenSearch, setCitizenSearch] = useState('')
+  const [selectedCitizen, setSelectedCitizen] = useState<any | null>(null)
+  const [enlargedCitizenImage, setEnlargedCitizenImage] = useState<string | null>(null)
   const [allEvenements, setAllEvenements] = useState<any[]>([])
   const [loadingEvenements, setLoadingEvenements] = useState(false)
   const [allConstructions, setAllConstructions] = useState<any[]>([])
@@ -260,18 +666,11 @@ export default function AgentDashboardPage() {
     first_name: '', last_name: '', phone: '', address: '', city: '', governorate: '', place_of_birth: ''
   })
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
   const markersLayer = useRef<any>(null)
-  const styleInjected = useRef(false)
-
-  useEffect(() => {
-    if (styleInjected.current) return
-    styleInjected.current = true
-    const s = document.createElement('style')
-    s.textContent = CSS
-    document.head.appendChild(s)
-  }, [])
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
@@ -621,6 +1020,39 @@ export default function AgentDashboardPage() {
   }
 
 
+  async function fetchAgentCitizens() {
+    setLoadingCitizens(true)
+    try {
+      const res = await fetch('/api/accounts/agent-citizens/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setAgentCitizens(await res.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingCitizens(false) }
+  }
+
+  async function handleAgentCitizenAction(citizenId: number, action: 'verify' | 'toggle_active') {
+    try {
+      const res = await fetch('/api/accounts/agent-citizens/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ user_id: citizenId, action }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        showToast(data.message || 'Action réussie !')
+        if (action === 'verify') {
+          setAgentCitizens(prev => prev.filter(c => c.id !== citizenId))
+          if (selectedCitizen?.id === citizenId) setSelectedCitizen(null)
+        } else {
+          setAgentCitizens(prev => prev.map(c => c.id === citizenId ? { ...c, is_active: data.is_active } : c))
+          if (selectedCitizen?.id === citizenId) setSelectedCitizen((p: any) => p ? { ...p, is_active: data.is_active } : null)
+        }
+      } else {
+        const err = await res.json()
+        showToast(err.error || 'Erreur.', 'error')
+      }
+    } catch { showToast('Erreur réseau.', 'error') }
+  }
+
   async function fetchReclamations() {
     setLoading(true); setRecError(false)
     try {
@@ -859,6 +1291,8 @@ export default function AgentDashboardPage() {
 
   return (
     <div className="agent-page">
+      {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
+      <style>{CSS}</style>
       <div className="ag-topbar">
         <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
         <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 296 239</a><a href="#"><i className="fas fa-envelope me-1"></i>webmaster.commune-kelibia@topnet.tn</a></div>
@@ -872,7 +1306,7 @@ export default function AgentDashboardPage() {
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
           <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
           <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</button>
+          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i><span className="logout-text ms-1"> {t('logout')}</span></button>
         </div>
       </nav>
       <div className="ag-hero">
@@ -880,7 +1314,7 @@ export default function AgentDashboardPage() {
           <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
           <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
         </div>
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 ag-hero-right">
           <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user, t)}</span>
           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
         </div>
@@ -921,6 +1355,10 @@ export default function AgentDashboardPage() {
           <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
             <i className="fas fa-robot"></i> {t('nav_stats_ia')}
           </a>
+          <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
+            <i className="fas fa-user-check"></i> Vérification Citoyens
+            {agentCitizens.length > 0 && <span className="ag-badge">{agentCitizens.length}</span>}
+          </a>
 
           {/* ── Supervisor / Admin only ── */}
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
@@ -953,23 +1391,24 @@ export default function AgentDashboardPage() {
           <>
           {activeTab === 'dashboard' ? (
             <>
-              <div className="row g-3 mb-4">
-                {([
-                  { val: total,    lbl: t('total_reclamations_short'), color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check'   },
-                  { val: pending,  lbl: t('total_pending'), color: '#e65100', bg: '#fff3e0', icon: 'fa-clock'        },
-                  { val: inprog,   lbl: t('total_in_progress'), color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools'        },
-                  { val: resolved, lbl: t('total_resolved'), color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle' },
-                  { val: rejected, lbl: t('total_rejected'), color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle' },
-                  { val: dupCount, lbl: t('total_duplicates'), color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy', onClick: () => setShowDupPanel(p => !p) },
-                ] as any[]).map((s, i) => (
-                  <div key={i} className="col-6 col-md-2">
-                    <div className="ag-stat" style={{ borderLeftColor: s.color, cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+              {/* Stats grid — CSS handles desktop (6-col) vs mobile (3-col) automatically */}
+              <div className="ag-stats-grid">
+                {[
+                  { val: total,    lbl: t('total_reclamations_short'), chipLabel: 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check',   onClick: undefined },
+                  { val: pending,  lbl: t('total_pending'),            chipLabel: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock',        onClick: undefined },
+                  { val: inprog,   lbl: t('total_in_progress'),        chipLabel: 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools',        onClick: undefined },
+                  { val: resolved, lbl: t('total_resolved'),           chipLabel: 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
+                  { val: rejected, lbl: t('total_rejected'),           chipLabel: 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
+                  { val: dupCount, lbl: t('total_duplicates'),         chipLabel: 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
+                    onClick: () => setShowDupPanel(p => !p) },
+                ].map((s, i) => (
+                  <div key={i} className="ag-stat" style={{ cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                    <div className="stat-top">
                       <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                      <div>
-                        <div className="val">{loading ? '—' : s.val}</div>
-                        <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
-                      </div>
+                      <span className="chip" style={{ color: s.color }}>{s.chipLabel}</span>
                     </div>
+                    <div className="val">{loading ? '—' : s.val}</div>
+                    <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
                   </div>
                 ))}
               </div>
@@ -2179,6 +2618,242 @@ export default function AgentDashboardPage() {
                 })()}
               </div>
             </div>
+          ) : activeTab === 'citizens' ? (
+            /* ── VÉRIFICATION CITOYENS (agents) ────────────────────────── */
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
+                <span className="fw-bold"><i className="fas fa-user-check me-2"></i>Vérification des Comptes Citoyens</span>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="badge bg-warning text-dark" style={{ fontSize: '11px' }}>{agentCitizens.length} en attente</span>
+                  <button className="btn btn-sm btn-light" onClick={fetchAgentCitizens}><i className="fas fa-sync-alt"></i></button>
+                </div>
+              </div>
+
+              {/* Search bar */}
+              <div className="ag-filter-bar bg-white border-bottom px-3 py-2 d-flex align-items-center gap-3">
+                <div className="ag-search-wrap flex-grow-1" style={{ maxWidth: '400px' }}>
+                  <i className="fas fa-search"></i>
+                  <input
+                    className="ag-search-input"
+                    placeholder="Rechercher par Nom, Email ou CIN..."
+                    value={citizenSearch}
+                    onChange={e => setCitizenSearch(e.target.value)}
+                  />
+                </div>
+                <div className="text-muted small">
+                  {agentCitizens.filter(c => {
+                    const q = citizenSearch.toLowerCase()
+                    return !q || c.full_name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.cin?.toLowerCase().includes(q)
+                  }).length} résultat(s)
+                </div>
+              </div>
+
+              <div className="ag-card-body p-0" style={{ minHeight: '400px' }}>
+                {loadingCitizens ? (
+                  <div className="p-4"><div className="skeleton-box table-skeleton" style={{ height: '350px' }}></div></div>
+                ) : agentCitizens.length === 0 ? (
+                  <div className="text-center p-5 text-muted">
+                    <i className="fas fa-check-circle fa-3x mb-3" style={{ color: '#2e7d32', opacity: .4 }}></i>
+                    <p className="fw-bold">Aucun compte en attente de vérification.</p>
+                    <p className="small">Tous les citoyens inscrits ont été vérifiés.</p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="ag-table shadow-sm">
+                      <thead>
+                        <tr>
+                          <th>Citoyen</th>
+                          <th>CIN / Téléphone</th>
+                          <th>Ville</th>
+                          <th>Inscrit le</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {agentCitizens.filter(c => {
+                          const q = citizenSearch.toLowerCase()
+                          return !q || c.full_name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.cin?.toLowerCase().includes(q)
+                        }).map(c => (
+                          <tr key={c.id}
+                              onClick={() => setSelectedCitizen(c)}
+                              style={{ cursor: 'pointer', borderLeft: '4px solid #ff9800' }}>
+                            <td>
+                              <div className="d-flex align-items-center gap-2">
+                                <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#e8f5e9', color: '#2e7d32', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '.85rem', flexShrink: 0 }}>
+                                  {c.full_name?.charAt(0) || 'C'}
+                                </div>
+                                <div>
+                                  <div className="fw-bold text-dark" style={{ fontSize: '.85rem' }}>{c.full_name}</div>
+                                  <div className="text-muted" style={{ fontSize: '11px' }}>{c.email}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="fw-bold" style={{ fontSize: '.82rem' }}>{c.cin}</div>
+                              <div className="text-muted" style={{ fontSize: '11px' }}>{c.phone}</div>
+                            </td>
+                            <td style={{ fontSize: '.82rem' }}>{c.city}, {c.governorate}</td>
+                            <td style={{ fontSize: '.78rem', color: '#888' }}>{formatDate(c.date_joined)}</td>
+                            <td>
+                              {c.is_active
+                                ? <span className="badge" style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>Actif</span>
+                                : <span className="badge" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>Bloqué</span>
+                              }
+                              {(c.cin_front || c.cin_back) && (
+                                <span className="badge ms-1" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-id-card me-1"></i>CIN disponible</span>
+                              )}
+                            </td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                <button
+                                  className="btn btn-sm btn-success"
+                                  title="Vérifier ce compte"
+                                  onClick={e => { e.stopPropagation(); if(window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
+                                >
+                                  <i className="fas fa-check me-1"></i> Vérifier
+                                </button>
+                                <button
+                                  className={`btn btn-sm ${c.is_active ? 'btn-outline-danger' : 'btn-danger'}`}
+                                  title={c.is_active ? 'Bloquer' : 'Débloquer'}
+                                  onClick={e => { e.stopPropagation(); handleAgentCitizenAction(c.id, 'toggle_active') }}
+                                >
+                                  <i className={`fas ${c.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
+                                </button>
+                                {(c.cin_front || c.cin_back) && (
+                                  <button
+                                    className="btn btn-sm btn-outline-primary"
+                                    title="Voir CIN"
+                                    onClick={e => { e.stopPropagation(); setSelectedCitizen(c) }}
+                                  >
+                                    <i className="fas fa-id-card"></i>
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Citizen Detail / CIN Modal ── */}
+              {selectedCitizen && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,.55)' }} onClick={() => setSelectedCitizen(null)}>
+                  <div className="modal-dialog modal-lg modal-dialog-centered" onClick={e => e.stopPropagation()}>
+                    <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 14, overflow: 'hidden' }}>
+                      <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)' }}>
+                        <span className="title"><i className="fas fa-user-check me-2"></i>Fiche Citoyen — {selectedCitizen.full_name}</span>
+                        <button className="ag-close-btn" onClick={() => setSelectedCitizen(null)}><i className="fas fa-times"></i></button>
+                      </div>
+                      <div className="modal-body p-4">
+                        <div className="row g-3 mb-4">
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Nom complet</div>
+                              <div className="det-value">{selectedCitizen.full_name}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Email</div>
+                              <div className="det-value">{selectedCitizen.email}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">CIN</div>
+                              <div className="det-value fw-bold">{selectedCitizen.cin}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Téléphone</div>
+                              <div className="det-value">{selectedCitizen.phone}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Date de naissance</div>
+                              <div className="det-value">{selectedCitizen.date_of_birth ? formatDate(selectedCitizen.date_of_birth) : '—'}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Ville / Gouvernorat</div>
+                              <div className="det-value">{selectedCitizen.city}, {selectedCitizen.governorate}</div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="p-3 border rounded bg-light">
+                              <div className="det-label">Lieu de naissance</div>
+                              <div className="det-value">{selectedCitizen.place_of_birth || '—'}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* CIN Images */}
+                        {(selectedCitizen.cin_front || selectedCitizen.cin_back) && (
+                          <>
+                            <hr />
+                            <div className="fw-bold mb-3" style={{ color: '#1b5e20' }}><i className="fas fa-id-card me-2"></i>Photos du CIN</div>
+                            <div className="row g-3">
+                              {selectedCitizen.cin_front && (
+                                <div className="col-md-6">
+                                  <div className="text-center">
+                                    <div className="text-muted small fw-bold mb-2">RECTO</div>
+                                    <img
+                                      src={selectedCitizen.cin_front}
+                                      alt="CIN Recto"
+                                      style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 8, border: '2px solid #e0e0e0', cursor: 'zoom-in', background: '#f5f5f5' }}
+                                      onClick={() => setEnlargedCitizenImage(selectedCitizen.cin_front)}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                              {selectedCitizen.cin_back && (
+                                <div className="col-md-6">
+                                  <div className="text-center">
+                                    <div className="text-muted small fw-bold mb-2">VERSO</div>
+                                    <img
+                                      src={selectedCitizen.cin_back}
+                                      alt="CIN Verso"
+                                      style={{ width: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 8, border: '2px solid #e0e0e0', cursor: 'zoom-in', background: '#f5f5f5' }}
+                                      onClick={() => setEnlargedCitizenImage(selectedCitizen.cin_back)}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                        {!selectedCitizen.cin_front && !selectedCitizen.cin_back && (
+                          <div className="alert alert-warning mt-3" style={{ fontSize: '.83rem' }}>
+                            <i className="fas fa-exclamation-triangle me-2"></i>Aucune photo de CIN disponible (déjà vérifiées ou non soumises).
+                          </div>
+                        )}
+                      </div>
+                      <div className="modal-footer border-top bg-light">
+                        <button className="btn btn-success px-4" onClick={() => { if(window.confirm(`Vérifier le compte de "${selectedCitizen.full_name}" ?`)) { handleAgentCitizenAction(selectedCitizen.id, 'verify'); } }}>
+                          <i className="fas fa-check-circle me-2"></i>Confirmer la vérification
+                        </button>
+                        <button className="btn btn-outline-secondary" onClick={() => setSelectedCitizen(null)}>Fermer</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Enlarged image overlay */}
+              {enlargedCitizenImage && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}
+                  onClick={() => setEnlargedCitizenImage(null)}>
+                  <img src={enlargedCitizenImage} alt="CIN agrandi" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 10, boxShadow: '0 8px 40px rgba(0,0,0,.5)' }} />
+                </div>
+              )}
+            </div>
           ) : activeTab === 'profile' ? (
              <div className="animate__animated animate__fadeIn">
                 {/* ── PROFILE CONTENT ── */}
@@ -2490,6 +3165,76 @@ export default function AgentDashboardPage() {
         </div>
       </div>
       <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
+
+      {/* ── MOBILE BOTTOM NAVIGATION BAR ── */}
+      <nav className="ag-mobile-nav">
+        <button className={`ag-mob-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
+          <i className="fas fa-exclamation-circle"></i>
+          <span>Signalements</span>
+          {pending > 0 && <span className="ag-mob-badge">{pending}</span>}
+        </button>
+        <button className={`ag-mob-btn${activeTab === 'evenements' ? ' active' : ''}`} onClick={() => { setActiveTab('evenements'); fetchEvenements() }}>
+          <i className="fas fa-calendar-alt"></i>
+          <span>Événements</span>
+          {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
+            <span className="ag-mob-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
+          )}
+        </button>
+        <button className={`ag-mob-btn${activeTab === 'citizens' ? ' active' : ''}`} onClick={() => { setActiveTab('citizens'); fetchAgentCitizens() }}>
+          <i className="fas fa-user-check"></i>
+          <span>Citoyens</span>
+          {agentCitizens.length > 0 && <span className="ag-mob-badge">{agentCitizens.length}</span>}
+        </button>
+        <button className={`ag-mob-btn${activeTab === 'construction' ? ' active' : ''}`} onClick={() => { setActiveTab('construction'); fetchConstructions() }}>
+          <i className="fas fa-hard-hat"></i>
+          <span>Permis</span>
+          {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && (
+            <span className="ag-mob-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>
+          )}
+        </button>
+        <button className={`ag-mob-btn${mobileMenuOpen ? ' active' : ''}`} onClick={() => setMobileMenuOpen(o => !o)}>
+          <i className={`fas fa-${mobileMenuOpen ? 'times' : 'bars'}`}></i>
+          <span>Menu</span>
+        </button>
+      </nav>
+
+      {/* ── MOBILE SLIDE-UP MENU DRAWER ── */}
+      {mobileMenuOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+          onClick={() => setMobileMenuOpen(false)}>
+          <div style={{ background: '#fff', borderRadius: '18px 18px 0 0', padding: '8px 0 70px', maxHeight: '70vh', overflowY: 'auto', boxShadow: '0 -4px 20px rgba(0,0,0,.12)' }}
+            onClick={e => e.stopPropagation()}>
+            {/* Handle */}
+            <div style={{ width: 40, height: 4, background: '#e2e8f0', borderRadius: 2, margin: '8px auto 16px' }}></div>
+            <div style={{ padding: '0 8px', fontSize: '.65rem', textTransform: 'uppercase', letterSpacing: 1.2, color: '#94a3b8', paddingLeft: 20, marginBottom: 4, fontWeight: 700 }}>Navigation</div>
+            {[
+              { tab: 'profile' as const, icon: 'fa-user-circle', label: t('nav_profile'), badge: 0 },
+              { tab: 'stats' as const, icon: 'fa-robot', label: t('nav_stats_ia'), badge: 0 },
+              ...(user?.user_type === 'supervisor' || user?.is_staff || user?.is_superuser ? [
+                { tab: 'users' as const, icon: 'fa-users-cog', label: t('nav_managed_users'), badge: managedUsers.filter(u => !u.is_verified).length },
+                { tab: 'services' as const, icon: 'fa-file-invoice', label: t('nav_services_villes'), badge: 0 },
+                { tab: 'demandes' as const, icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length },
+                { tab: 'forum' as const, icon: 'fa-comments', label: t('nav_forum_moderation'), badge: 0 },
+              ] : []),
+            ].map(item => (
+              <a key={item.tab}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', color: activeTab === item.tab ? '#1e40af' : '#64748b', background: activeTab === item.tab ? '#dbeafe' : 'none', cursor: 'pointer', borderLeft: `3px solid ${activeTab === item.tab ? '#1e40af' : 'transparent'}`, fontSize: '.88rem', textDecoration: 'none', fontWeight: activeTab === item.tab ? 700 : 500 }}
+                href="#"
+                onClick={e => { e.preventDefault(); setActiveTab(item.tab); setMobileMenuOpen(false); if (item.tab === 'users') fetchManagedUsers(usersMode); if (item.tab === 'demandes') fetchDemandes(); if (item.tab === 'forum') { fetchTopics(); fetchMlStats(); } if (item.tab === 'stats') { if (!mlStats && !mlLoading) fetchMlStats() } }}>
+                <i className={`fas ${item.icon}`} style={{ width: 18, textAlign: 'center' }}></i>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {item.badge > 0 && <span style={{ background: '#c62828', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: '.68rem', fontWeight: 700 }}>{item.badge}</span>}
+              </a>
+            ))}
+            <div style={{ borderTop: '1px solid #f1f5f9', margin: '10px 0' }}></div>
+            <a style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', color: '#c62828', cursor: 'pointer', fontSize: '.88rem', textDecoration: 'none' }}
+              href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
+              <i className="fas fa-sign-out-alt" style={{ width: 18, textAlign: 'center' }}></i>
+              <span>{t('logout')}</span>
+            </a>
+          </div>
+        </div>
+      )}
       <div className="ag-toast-container">
         {toasts.map(t => <div key={t.id} className={`ag-toast ${t.type}`}><i className={`fas fa-${t.type === 'success' ? 'check-circle' : 'exclamation-circle'} ticon`}></i><span>{t.msg}</span></div>)}
       </div>
@@ -2510,13 +3255,26 @@ export default function AgentDashboardPage() {
                   <div className="row g-2 mb-3">
                     <div className="col-6">
                       <div className="det-label">{t('reclamation_priority_label')}</div>
-                      <div className="det-value">
+                      <div className="det-value" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <span className={`priority-badge ${(PRIORITY[detailRec.priority] || PRIORITY.normale).cls}`}>{(PRIORITY[detailRec.priority] || PRIORITY.normale).label}</span>
                         {detailRec.confidence?.priority !== undefined && (
                           <span className={`conf-badge ${detailRec.confidence.priority >= 0.80 ? 'conf-high' : detailRec.confidence.priority >= 0.60 ? 'conf-med' : 'conf-low'}`}>
                             🤖 {Math.round(detailRec.confidence.priority * 100)}%
                           </span>
                         )}
+                        <button
+                          onClick={() => setShowExplainModal(true)}
+                          title="Voir l'explication LIME + SHAP de la priorité IA"
+                          style={{
+                            background: 'linear-gradient(135deg,#1565c0,#1a3a5c)',
+                            color: '#fff', border: 'none', borderRadius: '6px',
+                            padding: '3px 10px', fontSize: '0.72rem', cursor: 'pointer',
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            fontWeight: 600, whiteSpace: 'nowrap',
+                          }}
+                        >
+                          🔍 Expliquer l'IA
+                        </button>
                       </div>
                     </div>
                     <div className="col-6"><div className="det-label">Service responsable</div><div className="det-value" style={{ fontSize: '.82rem' }}>{detailRec.service_responsable || '—'}</div></div>
@@ -2579,6 +3337,16 @@ export default function AgentDashboardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── PRIORITY EXPLANATION MODAL (LIME + SHAP) ── */}
+      {showExplainModal && detailRec && (
+        <PriorityExplanationModal
+          reclamationId={detailRec.id}
+          reclamationTitle={detailRec.title}
+          token={getAccessToken() || ''}
+          onClose={() => setShowExplainModal(false)}
+        />
       )}
 
       {/* ── CITIZEN VERIFICATION MODAL ── */}

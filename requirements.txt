@@ -43,3 +43,8 @@ scikit-learn==1.8.0
 nltk==3.9.4
 joblib==1.5.3
 numpy==2.4.4
+
+# XAI — Explainable AI (LIME + native SHAP for priority explanations)
+# shap library NOT used — LinearSVC SHAP values computed natively (w_i × x_i)
+# This avoids the llvmlite/numba build dependency that breaks on Vercel.
+lime==0.2.0.1
