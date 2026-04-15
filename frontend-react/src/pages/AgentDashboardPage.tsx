@@ -2685,11 +2685,8 @@ export default function AgentDashboardPage() {
 
         </div>
         </div>
-        </div>
-      <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
-
-      {/* ── MOBILE BOTTOM NAVIGATION BAR ── */}
-      <nav className="ag-mobile-nav">
+        <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
+        <nav className="ag-mobile-nav">
         <button className={`ag-mob-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
           <i className="fas fa-exclamation-circle"></i>
           <span>Signalements</span>
@@ -2719,6 +2716,7 @@ export default function AgentDashboardPage() {
           <span>Menu</span>
         </button>
       </nav>
+      </div>
 
       {/* ── MOBILE SLIDE-UP MENU DRAWER ── */}
       {mobileMenuOpen && (
