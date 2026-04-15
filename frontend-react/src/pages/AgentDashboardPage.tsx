@@ -52,11 +52,11 @@ const CSS = `
   --primary-hover:#a91622;
   --secondary:#111827;
   --tertiary:#0093af;
-  --sidebar-bg:#f8fafc;
-  --sidebar-border:#e2e8f0;
-  --sidebar-hover:#f1f5f9;
-  --sidebar-active-bg:#dbeafe;
-  --sidebar-active-text:#1e40af;
+  --sidebar-bg:#0d1b2e;
+  --sidebar-border:rgba(255,255,255,0.08);
+  --sidebar-hover:rgba(255,255,255,0.08);
+  --sidebar-active-bg:rgba(255,255,255,0.12);
+  --sidebar-active-text:#fff;
   --body-bg:#f1f5f9;
   --card-shadow:0 2px 12px rgba(0,0,0,.06);
   --red-tn:#c62828;
@@ -69,19 +69,6 @@ const CSS = `
   background:var(--body-bg);
   min-height:100vh;
 }
-
-/* ── Top info bar (hidden on mobile) ── */
-.ag-topbar{
-  background:var(--secondary);
-  color:rgba(255,255,255,.8);
-  font-size:.78rem;
-  padding:4px 24px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.ag-topbar a{color:rgba(255,255,255,.7);text-decoration:none;margin:0 6px}
-.ag-topbar a:hover{color:#fff}
 
 /* ── Glassmorphism navbar ── */
 .ag-navbar{
@@ -162,22 +149,6 @@ const CSS = `
   font-size:.78rem;font-weight:700;flex-shrink:0;
 }
 
-/* ── Hero / welcome strip ── */
-.ag-hero{
-  background:linear-gradient(135deg,#0d1b2e 0%,#1565c0 100%);
-  color:#fff;
-  padding:20px 28px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:12px;
-}
-.ag-hero .greeting{font-size:1.1rem;font-weight:700;font-family:'Public Sans',sans-serif}
-.ag-hero .sub{font-size:.83rem;opacity:.8;margin-top:3px}
-.ag-hero .badge-role{
-  background:rgba(255,255,255,.15);
-  border:1px solid rgba(255,255,255,.3);
-  border-radius:20px;padding:4px 14px;font-size:.75rem;
-}
-
 /* ── Breadcrumb ── */
 .ag-breadcrumb{
   background:#fff;
@@ -205,7 +176,7 @@ const CSS = `
 .ag-sec-title{
   font-size:.65rem;font-weight:700;
   text-transform:uppercase;letter-spacing:1.2px;
-  color:#94a3b8;
+  color:rgba(255,255,255,0.35);
   padding:12px 8px 4px;
 }
 .ag-nav-item{
@@ -216,17 +187,17 @@ const CSS = `
   transition:all .15s;
   font-size:.85rem;font-weight:500;
   text-decoration:none;
-  color:#64748b;
+  color:rgba(255,255,255,0.65);
   margin-bottom:2px;
 }
-.ag-nav-item:hover{background:var(--sidebar-hover);color:#0f172a;transform:translateX(2px)}
+.ag-nav-item:hover{background:var(--sidebar-hover);color:#fff;transform:translateX(2px)}
 .ag-nav-item.active{
   background:var(--sidebar-active-bg);
   color:var(--sidebar-active-text);
   font-weight:700;
 }
 .ag-nav-item i{width:18px;text-align:center;font-size:.88rem}
-.ag-divider{border-top:1px solid #e2e8f0;margin:10px 0}
+.ag-divider{border-top:1px solid rgba(255,255,255,0.1);margin:10px 0}
 .ag-badge{
   margin-left:auto;
   background:var(--red-tn);color:#fff;
@@ -290,22 +261,25 @@ const CSS = `
   border:1px solid #f1f5f9;
 }
 .ag-card-hdr-blue{
-  background:linear-gradient(90deg,#0d1b2e,#1565c0);
-  color:#fff;padding:12px 18px;
+  background:#fff;
+  color:#0f172a;padding:14px 18px;
   display:flex;align-items:center;justify-content:space-between;
-  font-size:.88rem;font-weight:600;
+  font-size:.88rem;font-weight:700;
+  border-bottom:1px solid #f1f5f9;
 }
 .ag-card-hdr-green{
-  background:linear-gradient(90deg,#064e3b,#059669);
-  color:#fff;padding:12px 18px;
+  background:#fff;
+  color:#0f172a;padding:14px 18px;
   display:flex;align-items:center;justify-content:space-between;
-  font-size:.88rem;font-weight:600;
+  font-size:.88rem;font-weight:700;
+  border-bottom:1px solid #f1f5f9;
 }
 .ag-card-hdr-orange{
-  background:linear-gradient(90deg,#7f1d1d,#c61f2c);
-  color:#fff;padding:12px 18px;
+  background:#fff;
+  color:#0f172a;padding:14px 18px;
   display:flex;align-items:center;justify-content:space-between;
-  font-size:.88rem;font-weight:600;
+  font-size:.88rem;font-weight:700;
+  border-bottom:1px solid #f1f5f9;
 }
 .ag-card-body{padding:18px}
 
@@ -385,7 +359,7 @@ const CSS = `
 
 /* ── Profile card ── */
 .ag-profile-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:16px}
-.ag-profile-hdr{background:linear-gradient(135deg,#0d1b2e,#1565c0);padding:24px;text-align:center;color:#fff}
+.ag-profile-hdr{background:var(--primary);padding:24px;text-align:center;color:#fff}
 .ag-profile-av{
   width:64px;height:64px;
   background:rgba(255,255,255,.2);
@@ -442,7 +416,7 @@ const CSS = `
 
 /* ── Modals ── */
 .ag-modal-hdr{
-  background:linear-gradient(90deg,#0d1b2e,#1565c0);
+  background:var(--primary);
   color:#fff;padding:16px 20px;
   display:flex;align-items:center;justify-content:space-between;
 }
@@ -479,7 +453,6 @@ const CSS = `
 
 /* ══════════════════════ MOBILE ══════════════════════ */
 @media(max-width:1023px){
-  .ag-topbar{display:none}
   .ag-navbar{height:54px;padding:0 10px}
   .ag-logo{width:34px;height:34px;font-size:.9rem}
   .ag-title .main{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
@@ -490,10 +463,6 @@ const CSS = `
   .ag-user-pill .name-block{display:none}
   .ag-user-pill .av{width:30px;height:30px}
   .ag-logout{width:30px;height:30px;font-size:.85rem}
-  .ag-hero{padding:10px 14px}
-  .ag-hero .greeting{font-size:.85rem}
-  .ag-hero .sub{font-size:.72rem}
-  .ag-hero-right{display:none!important}
   .ag-breadcrumb{display:none}
   .ag-body{flex-direction:column}
   .ag-sidebar{display:none}
@@ -520,7 +489,7 @@ const CSS = `
 
 @media(max-width:480px){
   .ag-stat .lbl{font-size:.52rem}
-  .ag-navbar{height:50px}
+  .ag-navbar{height:50px;padding:0 8px}
 }
 
 /* ── Mobile bottom nav ── */
@@ -1291,32 +1260,25 @@ export default function AgentDashboardPage() {
     <div className="agent-page">
       {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
       <style>{CSS}</style>
-      <div className="ag-topbar">
-        <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
-        <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 295 XXX</a><a href="#"><i className="fas fa-envelope me-1"></i>contact@kelibia.tn</a></div>
-      </div>
       <nav className="ag-navbar">
         <a className="ag-brand" href="#">
           <div className="ag-logo"><i className="fas fa-city"></i></div>
           <div className="ag-title"><span className="main">بلدية قليبية — Commune de Kélibia</span><span className="sub">Espace Agent — Kelibia Smart City</span></div>
         </a>
         <div className="ag-actions">
-          <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
-          <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
-          <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i><span className="logout-text ms-1"> {t('logout')}</span></button>
+          <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>FR</button>
+          <span style={{color:'#cbd5e1',fontSize:'.75rem'}}>|</span>
+          <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>AR</button>
+          <div className="ag-user-pill">
+            <div className="av">{inits}</div>
+            <div className="name-block">
+              <span className="main-name">{fullName}</span>
+              <span className="role">{getRoleLabel(user, t)}</span>
+            </div>
+          </div>
+          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }} title={t('logout')}><i className="fas fa-sign-out-alt"></i></button>
         </div>
       </nav>
-      <div className="ag-hero">
-        <div>
-          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
-          <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
-        </div>
-        <div className="d-flex align-items-center gap-2 ag-hero-right">
-          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user, t)}</span>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
-        </div>
-      </div>
       <div className="ag-breadcrumb">
         <a href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard'); }}><i className="fas fa-home me-1"></i>{t('nav_home')}</a>
         <span className="mx-2 text-muted">/</span>
