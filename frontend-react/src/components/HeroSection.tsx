@@ -10,7 +10,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
   const { t, lang } = useI18n();
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: '420px' }}>
+    <div className="relative w-full overflow-hidden" style={{ height: '420px', marginTop: '56px' }}>
       {/* Background image */}
       <img
         src={fortImg}
