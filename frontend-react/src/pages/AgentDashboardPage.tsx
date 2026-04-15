@@ -2684,49 +2684,6 @@ export default function AgentDashboardPage() {
           })()}
 
         </div>
-        <div style={{ width: 240, minWidth: 240, padding: '24px 16px 24px 0', flexShrink: 0 }}>
-
-          <div className="ag-profile-card">
-            <div className="ag-profile-hdr"><div className="ag-profile-av">{inits}</div><div className="ag-profile-name">{fullName}</div><div className="ag-profile-email">{user?.email || '...'}</div></div>
-            <div className="ag-profile-body">
-              <div className="ag-profile-row"><span className="lbl">{t('role')}</span><span className="val" style={{ color: '#1565c0' }}>{getRoleLabel(user, t)}</span></div>
-              <div className="ag-profile-row"><span className="lbl">{t('city_label')}</span><span className="val">{user?.city || 'Kélibia'}</span></div>
-              <div className="ag-profile-row"><span className="lbl">{t('profile_dossiers_title')}</span><span className="val">{inprog}</span></div>
-            </div>
-          </div>
-          <div className="ag-card">
-            <div className="ag-card-hdr-green"><span><i className="fas fa-chart-pie me-2"></i>{t('progress_title')}</span></div>
-            <div className="ag-card-body">
-              {[
-                { lbl: t('status_pending'), val: pct(pending),  color: '#e65100' },
-                { lbl: t('status_in_progress'),   val: pct(inprog),   color: '#1565c0' },
-                { lbl: t('forum_resolved'),    val: pct(resolved), color: '#1b5e20' },
-              ].map(b => (
-                <div key={b.lbl} className="mb-3">
-                  <div className="d-flex justify-content-between" style={{ fontSize: '.78rem', marginBottom: 3 }}><span style={{ color: b.color }}>{b.lbl}</span><span style={{ fontWeight: 600 }}>{b.val}%</span></div>
-                  <div className="mini-progress"><div className="bar" style={{ background: b.color, width: `${b.val}%` }}></div></div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="ag-card">
-            <div className="ag-card-hdr-orange"><span><i className="fas fa-layer-group me-2"></i>{t('cat_title')}</span></div>
-            <div className="ag-card-body">
-              {Object.keys(catCounts).length === 0
-                ? <div style={{ color: '#aaa', fontSize: '.8rem', textAlign: 'center' }}>{t('loading_short')}</div>
-                : Object.entries(catCounts).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([k, v]) => {
-                  const cat = CAT[k] || CAT.other
-                  const p = total > 0 ? Math.round((v as number) / total * 100) : 0
-                  return (
-                    <div key={k} className="mb-2">
-                      <div className="d-flex justify-content-between" style={{ fontSize: '.76rem', marginBottom: 2 }}><span>{cat.label}</span><span style={{ fontWeight: 600 }}>{v as number}</span></div>
-                      <div className="mini-progress"><div className="bar" style={{ background: '#1565c0', width: `${p}%` }}></div></div>
-                    </div>
-                  )
-                })}
-            </div>
-          </div>
-        </div>
         </div>
         </div>
       <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
