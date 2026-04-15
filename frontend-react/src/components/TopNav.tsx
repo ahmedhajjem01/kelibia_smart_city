@@ -22,7 +22,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="flex justify-between items-center px-8 py-4 max-w-full mx-auto">
+      <div className="flex justify-between items-center px-8 py-2 max-w-full mx-auto">
 
         {/* Left: Logo + Nav Links */}
         <div className="flex items-center gap-8">
