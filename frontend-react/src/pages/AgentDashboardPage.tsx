@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
+import '../styles/agent-dashboard.css'
 
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
@@ -45,479 +46,8 @@ function getRoleLabel(u: UserInfo | null, t: any) {
   return t('citizen')
 }
 
-const CSS = `
-/* ── New Design System ── */
-:root{
-  --primary:#c61f2c;
-  --primary-hover:#a91622;
-  --secondary:#111827;
-  --tertiary:#0093af;
-  --sidebar-bg:#0d1b2e;
-  --sidebar-border:rgba(255,255,255,0.08);
-  --sidebar-hover:rgba(255,255,255,0.08);
-  --sidebar-active-bg:rgba(255,255,255,0.12);
-  --sidebar-active-text:#fff;
-  --body-bg:#f1f5f9;
-  --card-shadow:0 2px 12px rgba(0,0,0,.06);
-  --red-tn:#c62828;
-  --blue:#004786;
-}
+// CSS is in src/styles/agent-dashboard.css (imported at top)
 
-/* ── Page shell ── */
-.agent-page{
-  font-family:'Public Sans','Segoe UI',sans-serif;
-  background:var(--body-bg);
-  min-height:100vh;
-}
-
-/* ── Glassmorphism navbar ── */
-.ag-navbar{
-  background:rgba(255,255,255,0.88);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid #e2e8f0;
-  padding:0 28px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  height:68px;
-  box-shadow:0 1px 6px rgba(0,0,0,.06);
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-.ag-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.ag-logo{
-  width:42px;height:42px;
-  background:var(--primary);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:1.2rem;
-}
-.ag-title .main{
-  font-size:1rem;font-weight:800;
-  color:var(--primary);display:block;
-  font-family:'Public Sans',sans-serif;
-  letter-spacing:-0.3px;
-}
-.ag-title .sub{font-size:.7rem;color:#94a3b8;font-weight:500}
-.ag-actions{display:flex;align-items:center;gap:10px}
-.ag-lang-btn{
-  background:transparent;border:0;
-  padding:2px 6px;
-  cursor:pointer;
-  font-size:.75rem;font-weight:800;
-  text-transform:uppercase;letter-spacing:.1em;
-  color:#94a3b8;transition:color .2s;
-}
-.ag-lang-btn:hover,.ag-lang-btn.active{color:#0f172a}
-.ag-user-pill{
-  display:flex;align-items:center;gap:10px;
-  background:#f8fafc;
-  border:1px solid #e2e8f0;
-  border-radius:10px;
-  padding:6px 14px 6px 6px;
-}
-.ag-user-pill .av{
-  width:30px;height:30px;
-  background:var(--primary);
-  color:#fff;
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.75rem;font-weight:700;
-}
-.ag-user-pill .name-block .main-name{font-size:.8rem;font-weight:700;color:#0f172a;display:block}
-.ag-user-pill .name-block .role{font-size:.65rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
-.ag-logout{
-  background:transparent;color:#64748b;
-  border:0;
-  border-radius:50%;
-  width:36px;height:36px;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.9rem;
-  transition:background .2s,color .2s;
-}
-.ag-logout:hover{background:#f1f5f9;color:var(--red-tn)}
-
-/* ── Small user avatar (used in users table) ── */
-.ag-user-av-sm{
-  width:32px;height:32px;
-  background:var(--primary);
-  color:#fff;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.78rem;font-weight:700;flex-shrink:0;
-}
-
-/* ── Breadcrumb ── */
-.ag-breadcrumb{
-  background:#fff;
-  border-bottom:1px solid #e2e8f0;
-  padding:8px 28px;
-  font-size:.78rem;color:#64748b;
-}
-.ag-breadcrumb a{color:var(--primary);text-decoration:none}
-
-/* ── Layout body ── */
-.ag-body{display:flex;min-height:calc(100vh - 160px);align-items:flex-start}
-
-/* ── Sidebar ── */
-.ag-sidebar{
-  width:240px;min-width:240px;
-  background:var(--sidebar-bg);
-  border-right:1px solid var(--sidebar-border);
-  padding:16px 12px;
-  flex-shrink:0;
-  position:sticky;
-  top:68px;
-  height:calc(100vh - 68px);
-  overflow-y:auto;
-}
-.ag-sec-title{
-  font-size:.65rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:1.2px;
-  color:rgba(255,255,255,0.35);
-  padding:12px 8px 4px;
-}
-.ag-nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;
-  cursor:pointer;
-  border-radius:8px;
-  transition:all .15s;
-  font-size:.85rem;font-weight:500;
-  text-decoration:none;
-  color:rgba(255,255,255,0.65);
-  margin-bottom:2px;
-}
-.ag-nav-item:hover{background:var(--sidebar-hover);color:#fff;transform:translateX(2px)}
-.ag-nav-item.active{
-  background:var(--sidebar-active-bg);
-  color:var(--sidebar-active-text);
-  font-weight:700;
-}
-.ag-nav-item i{width:18px;text-align:center;font-size:.88rem}
-.ag-divider{border-top:1px solid rgba(255,255,255,0.1);margin:10px 0}
-.ag-badge{
-  margin-left:auto;
-  background:var(--red-tn);color:#fff;
-  border-radius:10px;padding:1px 7px;
-  font-size:.65rem;font-weight:700;
-}
-
-/* ── Main content ── */
-.ag-main{
-  flex:1;
-  padding:24px 28px;
-  overflow-x:hidden;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-  min-height:800px;
-}
-
-/* ── Stats Cards ── */
-.ag-stats-grid{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:14px;
-  margin-bottom:4px;
-}
-.ag-stat{
-  background:#fff;
-  border-radius:10px;
-  padding:16px;
-  box-shadow:var(--card-shadow);
-  display:flex;align-items:flex-start;
-  gap:0;
-  flex-direction:column;
-  border:1px solid #f1f5f9;
-  transition:transform .2s,box-shadow .2s;
-  position:relative;
-  overflow:hidden;
-}
-.ag-stat:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
-.ag-stat .stat-top{display:flex;justify-content:space-between;align-items:flex-start;width:100%;margin-bottom:12px}
-.ag-stat .icon-box{
-  width:40px;height:40px;
-  border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;flex-shrink:0;
-}
-.ag-stat .chip{
-  font-size:.6rem;font-weight:800;
-  text-transform:uppercase;letter-spacing:.05em;
-  opacity:.7;
-}
-.ag-stat .val{font-size:1.8rem;font-weight:900;line-height:1;color:#0f172a;font-family:'Public Sans',sans-serif}
-.ag-stat .lbl{font-size:.7rem;color:#94a3b8;margin-top:4px;font-weight:500}
-
-/* ── Content cards ── */
-.ag-card{
-  background:#fff;border-radius:12px;
-  box-shadow:var(--card-shadow);
-  margin-bottom:0;
-  overflow:hidden;
-  border:1px solid #f1f5f9;
-}
-.ag-card-hdr-blue{
-  background:#fff;
-  color:#0f172a;padding:14px 18px;
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:.88rem;font-weight:700;
-  border-bottom:1px solid #f1f5f9;
-}
-.ag-card-hdr-green{
-  background:#fff;
-  color:#0f172a;padding:14px 18px;
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:.88rem;font-weight:700;
-  border-bottom:1px solid #f1f5f9;
-}
-.ag-card-hdr-orange{
-  background:#fff;
-  color:#0f172a;padding:14px 18px;
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:.88rem;font-weight:700;
-  border-bottom:1px solid #f1f5f9;
-}
-.ag-card-body{padding:18px}
-
-/* ── Filter bar ── */
-.ag-filter-bar{
-  padding:10px 16px;
-  background:#f8fafc;
-  border-bottom:1px solid #e8e8e8;
-  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-}
-.ag-filter-select{
-  border:1px solid #e2e8f0;border-radius:8px;
-  padding:5px 10px;font-size:.78rem;color:#475569;
-  background:#fff;cursor:pointer;
-}
-.ag-filter-btn{
-  border:1px solid #e2e8f0;border-radius:8px;
-  padding:5px 12px;font-size:.78rem;color:#475569;
-  background:#fff;cursor:pointer;
-  transition:all .2s;
-  display:flex;align-items:center;gap:5px;
-}
-.ag-filter-btn:hover,.ag-filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.ag-search-wrap{position:relative}
-.ag-search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.78rem}
-.ag-search-input{
-  border:1px solid #e2e8f0;border-radius:8px;
-  padding:5px 10px 5px 30px;font-size:.78rem;width:200px;background:#fff;
-}
-
-/* ── Table ── */
-.ag-table{width:100%;border-collapse:separate;border-spacing:0}
-.ag-table thead th{
-  background:#f8fafc;color:#64748b;
-  font-size:.68rem;font-weight:700;
-  padding:10px 14px;
-  text-transform:uppercase;letter-spacing:.05em;
-  border-bottom:1px solid #e2e8f0;
-  white-space:nowrap;
-}
-.ag-table tbody tr{transition:background .12s}
-.ag-table tbody tr:hover{background:#f8fafc}
-.ag-table tbody td{
-  padding:11px 14px;font-size:.82rem;color:#334155;
-  border-bottom:1px solid #f1f5f9;vertical-align:middle;
-}
-
-/* ── Badges ── */
-.cat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap}
-.cat-lighting{background:#fffbeb;color:#b45309}.cat-trash{background:#f0fdf4;color:#166534}
-.cat-roads{background:#f5f3ff;color:#5b21b6}.cat-noise{background:#fdf2f8;color:#9d174d}
-.cat-other{background:#f1f5f9;color:#475569}
-
-.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
-.status-pending{background:#fff7ed;color:#c2410c}.status-in_progress{background:#eff6ff;color:#1d4ed8}
-.status-resolved{background:#f0fdf4;color:#166534}.status-rejected{background:#fff1f2;color:#be123c}
-
-.priority-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.66rem;font-weight:700;white-space:nowrap}
-.priority-urgente{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
-.priority-normale{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-.priority-faible{background:#f5f3ff;color:#5b21b6;border:1px solid #ddd6fe}
-
-.service-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:600;background:#eff6ff;color:#1d4ed8;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
-
-.ag-status-select{border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;font-size:.73rem;cursor:pointer;background:#fff}
-
-.ag-action-btn{
-  background:none;border:1px solid #e2e8f0;border-radius:8px;
-  padding:5px 9px;font-size:.73rem;cursor:pointer;
-  color:#64748b;transition:all .15s;
-  display:inline-flex;align-items:center;gap:4px;
-}
-.ag-action-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-.ag-empty{text-align:center;padding:40px 20px;color:#94a3b8}
-.ag-empty i{font-size:2.5rem;margin-bottom:10px;opacity:.3}
-
-/* ── Profile card ── */
-.ag-profile-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:16px}
-.ag-profile-hdr{background:var(--primary);padding:24px;text-align:center;color:#fff}
-.ag-profile-av{
-  width:64px;height:64px;
-  background:rgba(255,255,255,.2);
-  border:3px solid rgba(255,255,255,.5);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.5rem;font-weight:700;
-  margin:0 auto 10px;color:#fff;
-}
-.ag-profile-name{font-size:.92rem;font-weight:700}
-.ag-profile-email{font-size:.72rem;opacity:.75;margin-top:2px}
-.ag-profile-body{padding:14px 16px}
-.ag-profile-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.78rem}
-.ag-profile-row:last-child{border-bottom:none}
-.ag-profile-row .lbl{color:#94a3b8}.ag-profile-row .val{color:#1e293b;font-weight:600}
-
-/* ── Mini progress bar ── */
-.mini-progress{height:5px;border-radius:3px;background:#e2e8f0;margin-top:4px;overflow:hidden}
-.mini-progress .bar{height:100%;border-radius:3px;transition:width .6s}
-
-/* ── Pagination ── */
-.ag-pag-bar{
-  padding:10px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-top:1px solid #f1f5f9;
-  font-size:.75rem;color:#94a3b8;
-  background:#fafafa;
-}
-.ag-page-btn{
-  background:#fff;border:1px solid #e2e8f0;border-radius:7px;
-  padding:4px 10px;font-size:.75rem;cursor:pointer;transition:all .2s;
-}
-.ag-page-btn:hover:not(:disabled){background:var(--primary);color:#fff;border-color:var(--primary)}
-.ag-page-btn:disabled{opacity:.4;cursor:not-allowed}
-.ag-page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-/* ── Toast notifications ── */
-.ag-toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.ag-toast{
-  background:#fff;border-radius:12px;
-  padding:12px 16px;
-  box-shadow:0 8px 30px rgba(0,0,0,.12);
-  font-size:.82rem;
-  display:flex;align-items:center;gap:10px;
-  min-width:280px;
-  animation:ag-slide .3s ease;
-}
-.ag-toast.success{border-left:4px solid #22c55e}
-.ag-toast.error{border-left:4px solid var(--red-tn)}
-.ag-toast .ticon{font-size:1rem}
-.ag-toast.success .ticon{color:#22c55e}
-.ag-toast.error .ticon{color:var(--red-tn)}
-@keyframes ag-slide{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* ── Modals ── */
-.ag-modal-hdr{
-  background:var(--primary);
-  color:#fff;padding:16px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.ag-modal-hdr .title{font-size:.96rem;font-weight:700}
-.ag-close-btn{
-  background:rgba(255,255,255,.15);border:none;color:#fff;
-  width:28px;height:28px;border-radius:50%;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:.9rem;
-}
-.ag-close-btn:hover{background:rgba(255,255,255,.3)}
-.det-label{font-size:.72rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-.det-value{font-size:.88rem;color:#1e293b;font-weight:500}
-.ag-footer{background:#0d1b2e;color:rgba(255,255,255,.5);text-align:center;font-size:.72rem;padding:14px}
-
-/* ── Duplicate card ── */
-.ag-dup-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);margin-bottom:0;overflow:hidden;border-left:4px solid #7c3aed}
-
-/* ── ML confidence badges ── */
-.conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:2px}
-.conf-high{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
-.conf-med{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
-.conf-low{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
-
-/* ── Reclassify box ── */
-.reclassify-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-top:12px}
-.reclassify-box .rc-title{font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:8px}
-
-/* ── Skeleton loader ── */
-.skeleton-box{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:10px;width:100%}
-@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.table-skeleton{height:400px;margin-bottom:20px}
-#ag-map-card{min-height:430px}
-#ag-recs-card{min-height:500px}
-
-/* ══════════════════════ MOBILE ══════════════════════ */
-@media(max-width:1023px){
-  .ag-navbar{height:54px;padding:0 10px}
-  .ag-logo{width:34px;height:34px;font-size:.9rem}
-  .ag-title .main{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
-  .ag-title .sub{display:none}
-  .ag-brand{gap:7px;min-width:0;flex:1;overflow:hidden}
-  .ag-actions{gap:5px;flex-shrink:0}
-  .ag-user-pill{padding:4px;border-radius:50%;gap:0;border:0;background:transparent}
-  .ag-user-pill .name-block{display:none}
-  .ag-user-pill .av{width:30px;height:30px}
-  .ag-logout{width:30px;height:30px;font-size:.85rem}
-  .ag-breadcrumb{display:none}
-  .ag-body{flex-direction:column}
-  .ag-sidebar{display:none}
-  .ag-main{padding:10px;gap:12px}
-  .ag-stats-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin-bottom:0!important}
-  .ag-stats-grid .ag-stat{padding:10px 8px!important;height:70px!important;min-height:70px!important}
-  .ag-stats-grid .ag-stat .icon-box{width:28px!important;height:28px!important;font-size:.8rem!important}
-  .ag-stats-grid .ag-stat .val{font-size:1rem!important}
-  .ag-stats-grid .ag-stat .lbl{font-size:.55rem!important;overflow:hidden;text-overflow:ellipsis}
-  .ag-card{border-radius:10px}
-  .ag-filter-bar{padding:8px 10px}
-  .ag-search-input{width:100%;max-width:none}
-  .ag-table thead th{padding:6px 8px;font-size:.62rem}
-  .ag-table tbody td{padding:7px 8px;font-size:.75rem}
-  #ag-map{height:220px!important}
-  .leaflet-control-layers,.leaflet-bottom.leaflet-left{display:none!important}
-  .ag-pag-bar{flex-direction:column;gap:6px;align-items:center}
-  .ag-toast-container{right:8px;left:8px;bottom:66px}
-  .ag-toast{min-width:unset;width:100%}
-  .modal-dialog{margin:6px!important;max-width:calc(100vw - 12px)!important}
-  .ag-mobile-nav{display:flex!important}
-  .agent-page{padding-bottom:60px}
-}
-
-@media(max-width:480px){
-  .ag-stat .lbl{font-size:.52rem}
-  .ag-navbar{height:50px;padding:0 8px}
-}
-
-/* ── Mobile bottom nav ── */
-.ag-mobile-nav{
-  display:none;
-  position:fixed;bottom:0;left:0;right:0;
-  background:#fff;
-  border-top:1px solid #e2e8f0;
-  z-index:1000;height:58px;
-  align-items:stretch;
-  box-shadow:0 -2px 12px rgba(0,0,0,.08);
-}
-.ag-mob-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  color:#94a3b8;cursor:pointer;border:none;background:none;
-  font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.2px;padding:5px 2px;
-  transition:all .15s;border-top:2px solid transparent;position:relative;
-  -webkit-tap-highlight-color:transparent;
-}
-.ag-mob-btn i{font-size:.9rem;line-height:1}
-.ag-mob-btn.active{color:var(--primary);border-top-color:var(--primary);background:rgba(241,130,33,.06)}
-.ag-mob-btn:active{opacity:.7}
-.ag-mob-badge{
-  position:absolute;top:3px;right:calc(50% - 16px);
-  background:var(--red-tn);color:#fff;border-radius:8px;padding:0 4px;
-  font-size:.52rem;font-weight:700;min-width:14px;text-align:center;line-height:14px;height:14px;
-}
-`
 
 export default function AgentDashboardPage() {
   const { t, lang, setLang } = useI18n()
@@ -1072,6 +602,8 @@ export default function AgentDashboardPage() {
   const inprog   = allRecs.filter(r => r.status === 'in_progress').length
   const resolved = allRecs.filter(r => r.status === 'resolved').length
   const rejected = allRecs.filter(r => r.status === 'rejected').length
+  const radialOffset = Math.round(502 - (502 * resolved) / Math.max(total, 1))
+  const radialPct = total > 0 ? Math.round((resolved * 100) / total) : 0
 
   function detectDuplicates() {
     const groups: Record<string, Reclamation[]> = {}
@@ -1258,48 +790,30 @@ export default function AgentDashboardPage() {
 
   return (
     <div className="agent-page">
-      {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
-      <style>{CSS}</style>
-      <nav className="ag-navbar">
-        <a className="ag-brand" href="#">
-          <div className="ag-logo"><i className="fas fa-city"></i></div>
-          <div className="ag-title"><span className="main">بلدية قليبية — Commune de Kélibia</span><span className="sub">Espace Agent — Kelibia Smart City</span></div>
-        </a>
-        <div className="ag-actions">
-          <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>FR</button>
-          <span style={{color:'#cbd5e1',fontSize:'.75rem'}}>|</span>
-          <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>AR</button>
-          <div className="ag-user-pill">
-            <div className="av">{inits}</div>
-            <div className="name-block">
-              <span className="main-name">{fullName}</span>
-              <span className="role">{getRoleLabel(user, t)}</span>
-            </div>
+      {/* ── Fixed Sidebar ── */}
+      <aside className="ag-sidebar">
+        <div className="ag-sidebar-brand">
+          <i className="fas fa-city" style={{fontSize:'1.5rem',color:'var(--primary)'}}></i>
+          <div>
+            <div className="brand-name">Kelibia Smart City</div>
+            <div className="brand-sub">Municipal Agent Portal</div>
           </div>
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }} title={t('logout')}><i className="fas fa-sign-out-alt"></i></button>
         </div>
-      </nav>
-      <div className="ag-breadcrumb">
-        <a href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard'); }}><i className="fas fa-home me-1"></i>{t('nav_home')}</a>
-        <span className="mx-2 text-muted">/</span>
-        <span>{t('nav_agent_space_title')}</span>
-        <span className="mx-2 text-muted">/</span>
-        <span>{t('nav_manage_signalements')}</span>
-      </div>
-      <div className="ag-body">
-        <div className="ag-sidebar">
+        <nav style={{flex:1}}>
           <div className="ag-sec-title">{t('nav_navigation')}</div>
-          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); if(user?.user_type === 'supervisor' || user?.is_staff || user?.is_superuser) { fetchDemandes(); fetchTopics(); } }}>
-            <i className="fas fa-user-circle"></i> {t('nav_profile')}
-          </a>
-
-          {/* ── Visible to ALL agents ── */}
-          <div className="ag-divider"></div>
-          <div className="ag-sec-title">{t('nav_agent_space')}</div>
           <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
-            <i className="fas fa-exclamation-circle"></i> {t('my_reclamations')}
+            <i className="fas fa-tachometer-alt"></i> Dashboard
             {pending > 0 && <span className="ag-badge">{pending}</span>}
           </a>
+          <a className={`ag-nav-item`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
+            <i className="fas fa-map-marked-alt"></i> Carte
+          </a>
+          <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
+            <i className="fas fa-chart-bar"></i> {t('nav_stats_ia')}
+          </a>
+
+          <div className="ag-divider"></div>
+          <div className="ag-sec-title">{t('nav_agent_space')}</div>
           <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
             <i className="fas fa-calendar-alt"></i> {t('nav_events_mgmt')}
             {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
@@ -1311,9 +825,6 @@ export default function AgentDashboardPage() {
             {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && (
               <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>
             )}
-          </a>
-          <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
-            <i className="fas fa-robot"></i> {t('nav_stats_ia')}
           </a>
           <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
             <i className="fas fa-user-check"></i> Vérification Citoyens
@@ -1341,31 +852,105 @@ export default function AgentDashboardPage() {
               </a>
             </>
           )}
+        </nav>
 
-          <div className="ag-divider"></div>
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</a>
+        <div className="ag-sidebar-bottom">
+          <button className="ag-nav-item" style={{width:'100%',background:'linear-gradient(135deg,var(--primary),var(--primary-container))',color:'#fff',border:'none',marginBottom:'8px',fontWeight:700,justifyContent:'center',gap:8,borderRadius:8,padding:'10px 14px',cursor:'pointer',fontSize:'.85rem'}}
+            onClick={() => { setActiveTab('dashboard') }}>
+            <i className="fas fa-plus"></i> Nouveau Rapport
+          </button>
+          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); }}>
+            <i className="fas fa-cog"></i> {t('nav_profile')}
+          </a>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
+            <i className="fas fa-sign-out-alt"></i> {t('logout')}
+          </a>
         </div>
-        <div className="ag-main">
+      </aside>
+
+      {/* ── Main content wrapper ── */}
+      <div className="ag-main-wrapper">
+        {/* ── Fixed Top Header ── */}
+        <header className="ag-navbar">
+          <div className="ag-search-bar">
+            <i className="fas fa-search search-icon"></i>
+            <input placeholder="Rechercher des rapports ou agents..." type="text" />
+          </div>
+          <div className="ag-actions">
+            <button className="ag-icon-btn" title="Notifications"><i className="fas fa-bell"></i></button>
+            <button className="ag-icon-btn" title="Historique"><i className="fas fa-history"></i></button>
+            <div className="ag-divider-v"></div>
+            <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>FR</button>
+            <span style={{color:'#d5d3d1',fontSize:'.75rem'}}>|</span>
+            <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>AR</button>
+            <div className="ag-divider-v"></div>
+            <div className="ag-user-pill">
+              <div className="name-block">
+                <span className="main-name">{fullName}</span>
+                <span className="role">{getRoleLabel(user, t)}</span>
+              </div>
+              <div className="av">{inits}</div>
+            </div>
+            <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }} title={t('logout')}><i className="fas fa-sign-out-alt"></i></button>
+          </div>
+        </header>
+
+        <div className="ag-body">
+          <div className="ag-main">
           {activeTab === 'dashboard' ? (
             <>
-              {/* Stats grid — CSS handles desktop (6-col) vs mobile (3-col) automatically */}
+              {/* ── Page Header ── */}
+              <div className="ag-page-header">
+                <div>
+                  <h2 className="ag-page-title">Tableau de Bord <span style={{color:'#d5d3d1',fontWeight:300,margin:'0 8px'}}>|</span> <span style={{fontWeight:400}} dir="rtl">لوحة القيادة</span></h2>
+                  <p className="ag-page-subtitle">Surveillance en temps réel de l'infrastructure urbaine.</p>
+                </div>
+                <div className="ag-online-badge">
+                  <span className="ag-online-dot"></span>
+                  <span className="ag-online-label">Système En Ligne</span>
+                </div>
+              </div>
+
+              {/* ── KPI Stats (4 cards) ── */}
               <div className="ag-stats-grid">
                 {[
-                  { val: total,    lbl: t('total_reclamations_short'), chipLabel: 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check',   onClick: undefined },
-                  { val: pending,  lbl: t('total_pending'),            chipLabel: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock',        onClick: undefined },
-                  { val: inprog,   lbl: t('total_in_progress'),        chipLabel: 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools',        onClick: undefined },
-                  { val: resolved, lbl: t('total_resolved'),           chipLabel: 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
-                  { val: rejected, lbl: t('total_rejected'),           chipLabel: 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
-                  { val: dupCount, lbl: t('total_duplicates'),         chipLabel: 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
-                    onClick: () => setShowDupPanel(p => !p) },
+                  {
+                    val: loading ? '—' : total,
+                    lbl: 'Total Reports',
+                    chipLabel: `+12%`, chipClass: 'ag-chip-green',
+                    icon: 'fa-analytics', iconColor: 'var(--primary)', iconBg: '#f5f5f4',
+                    barColor: 'var(--primary)', barWidth: '70%',
+                  },
+                  {
+                    val: loading ? '—' : pending,
+                    lbl: 'En Attente',
+                    chipLabel: '-5%', chipClass: 'ag-chip-red',
+                    icon: 'fa-clock', iconColor: '#f97316', iconBg: '#fff7ed',
+                    barColor: '#f97316', barWidth: `${pct(pending)}%`,
+                  },
+                  {
+                    val: loading ? '—' : inprog,
+                    lbl: 'En Cours',
+                    chipLabel: 'Stable', chipClass: 'ag-chip-stone',
+                    icon: 'fa-tools', iconColor: '#3b82f6', iconBg: '#eff6ff',
+                    barColor: '#3b82f6', barWidth: `${pct(inprog)}%`,
+                  },
+                  {
+                    val: loading ? '—' : resolved,
+                    lbl: "Résolus Aujourd'hui",
+                    chipLabel: '+24%', chipClass: 'ag-chip-green',
+                    icon: 'fa-check-circle', iconColor: '#16a34a', iconBg: '#f0fdf4',
+                    barColor: '#16a34a', barWidth: `${pct(resolved)}%`,
+                  },
                 ].map((s, i) => (
-                  <div key={i} className="ag-stat" style={{ cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
+                  <div key={i} className="ag-stat">
                     <div className="stat-top">
-                      <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-                      <span className="chip" style={{ color: s.color }}>{s.chipLabel}</span>
+                      <div className="icon-box" style={{background: s.iconBg, color: s.iconColor}}><i className={`fas ${s.icon}`}></i></div>
+                      <span className={`chip ${s.chipClass}`}>{s.chipLabel}</span>
                     </div>
-                    <div className="val">{loading ? '—' : s.val}</div>
-                    <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
+                    <div className="lbl">{s.lbl}</div>
+                    <div className="val">{s.val}</div>
+                    <div className="ag-stat-bar"><div className="bar" style={{background: s.barColor, width: s.barWidth}}></div></div>
                   </div>
                 ))}
               </div>
@@ -1391,17 +976,62 @@ export default function AgentDashboardPage() {
                   </div>
                 </div>
               )}
-              <div className="ag-card" id="ag-map-card">
-                <div className="ag-card-hdr-blue">
-                  <span><i className="fas fa-map-marked-alt me-2"></i>{t('map_title_realtime')}</span>
-                  <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} {t('signalements_short')}</span>
+              {/* ── Middle section: Map + Performance ── */}
+              <div className="ag-mid-grid">
+                {/* Map Card */}
+                <div className="ag-card" id="ag-map-card" style={{overflow:'hidden',display:'flex',flexDirection:'column'}}>
+                  <div className="ag-card-hdr-blue">
+                    <span><i className="fas fa-map-marked-alt me-2"></i>{t('map_title_realtime')}</span>
+                    <span style={{ fontSize: '.75rem', color:'#a8a29e' }}>{allRecs.length} {t('signalements_short')}</span>
+                  </div>
+                  <div id="ag-map" ref={mapRef} style={{ flex:1, width: '100%' }}></div>
                 </div>
-                <div id="ag-map" ref={mapRef} style={{ height: 380, width: '100%', borderRadius: '0 0 10px 10px' }}></div>
+
+                {/* Performance Card */}
+                <div className="ag-perf-card">
+                  <div>
+                    <div className="ag-perf-title">Performance de Résolution</div>
+                    <p className="ag-perf-subtitle">Efficacité moyenne des interventions par secteur.</p>
+                    <div className="ag-radial-wrap">
+                      <svg width="192" height="192" viewBox="0 0 192 192" style={{transform:'rotate(-90deg)'}}>
+                        <circle cx="96" cy="96" r="80" fill="transparent" stroke="#f5f5f4" strokeWidth="12"/>
+                        <circle cx="96" cy="96" r="80" fill="transparent" stroke="var(--primary)" strokeWidth="12"
+                          strokeDasharray="502" strokeDashoffset={radialOffset}
+                          strokeLinecap="round"/>
+                      </svg>
+                      <div className="ag-radial-center">
+                        <span className="ag-radial-val">{radialPct}%</span>
+                        <span className="ag-radial-lbl">Score Global</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    {[
+                      { name: 'Secteur Nord (Plage)', pct: 94 },
+                      { name: 'Centre Ville (Médina)', pct: 76 },
+                    ].map((s, i) => (
+                      <div key={i} className="ag-sector-row">
+                        <div className="ag-sector-header">
+                          <span className="ag-sector-name">{s.name}</span>
+                          <span className="ag-sector-pct">{s.pct}%</span>
+                        </div>
+                        <div className="ag-sector-bar"><div className="fill" style={{width:`${s.pct}%`}}></div></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="ag-card" id="ag-recs-card">
                 <div className="ag-card-hdr-blue">
-                  <span><i className="fas fa-bullhorn me-2"></i>{t('nav_manage_signalements')}</span>
-                  <button onClick={fetchReclamations} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-sync-alt me-1"></i> {t('refresh')}</button>
+                  <span>Signalements Récents <span style={{color:'#d5d3d1',fontWeight:300,margin:'0 6px'}}>|</span> <span style={{fontWeight:400}} dir="rtl">البلاغات الأخيرة</span></span>
+                  <div style={{display:'flex',gap:8}}>
+                    <button style={{padding:'6px 12px',fontSize:'.72rem',fontWeight:700,border:'1px solid #e7e5e4',borderRadius:8,background:'#fff',cursor:'pointer',color:'#78716c'}} onClick={fetchReclamations}>
+                      <i className="fas fa-sync-alt me-1"></i> {t('refresh')}
+                    </button>
+                    <button style={{padding:'6px 12px',fontSize:'.72rem',fontWeight:700,border:'none',borderRadius:8,background:'#1c1917',color:'#fff',cursor:'pointer'}}>
+                      <i className="fas fa-filter me-1"></i> Filtrer
+                    </button>
+                  </div>
                 </div>
                 <div className="ag-filter-bar">
                   <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} /></div>
@@ -3097,7 +2727,8 @@ export default function AgentDashboardPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+        </div>
       <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
 
       {/* ── MOBILE BOTTOM NAVIGATION BAR ── */}
@@ -3830,6 +3461,13 @@ export default function AgentDashboardPage() {
            </div>
          </div>
        )}
+
+      {/* ── Floating Action Button ── */}
+      <button className="ag-fab" title="Urgence Immédiate">
+        <i className="fas fa-exclamation-triangle"></i>
+        <span className="ag-fab-label">Urgence Immédiate</span>
+      </button>
+
     </div>
   )
 }
