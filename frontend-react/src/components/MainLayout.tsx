@@ -1,6 +1,5 @@
 import React from 'react';
 import { useI18n } from '../i18n/LanguageProvider';
-import TopNav from './TopNav';
 import Sidebar from './Sidebar';
 import HeroSection from './HeroSection';
 
@@ -31,8 +30,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
       style={{ fontFamily: 'Public Sans, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}
     >
-      <TopNav user={user} onLogout={onLogout} />
-
       {/* Sidebar */}
       <Sidebar onLogout={onLogout} user={user} />
 
@@ -42,7 +39,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         {showHero && <HeroSection user={user} />}
 
         {/* Breadcrumb */}
-        <div className="bg-white border-b border-slate-100 px-8 py-3 flex items-center text-sm text-slate-500" style={{ paddingTop: showHero ? '12px' : '68px' }}>
+        <div className="bg-white border-b border-slate-100 px-8 py-3 flex items-center text-sm text-slate-500" style={{ paddingTop: '12px' }}>
           <i className="fas fa-home me-2" style={{ color: '#c61f2c' }}></i>
           <a href="/dashboard" className="no-underline" style={{ color: '#c61f2c' }}>{t('home')}</a>
           {breadcrumbs.length > 0 ? (

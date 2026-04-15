@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
       style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '0.875rem', fontWeight: 500, background: '#0d1b2e', color: '#fff' }}>
 
       {/* Logo header */}
-      <div className="mb-8 flex items-center gap-3 px-2 pt-16">
+      <div className="mb-8 flex items-center gap-3 px-2 pt-6">
         <i className="fas fa-city text-2xl" style={{ color: '#F18221' }}></i>
         <div>
           <h2 className="text-base font-black tracking-tight mb-0" style={{ color: '#fff' }}>
