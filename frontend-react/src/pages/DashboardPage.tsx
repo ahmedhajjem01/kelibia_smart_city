@@ -148,12 +148,12 @@ export default function DashboardPage() {
     <div className="space-y-4 pt-4">
       {/* Profile Card */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 text-center relative overflow-hidden">
-        <div className="h-2 w-full" style={{ background: 'linear-gradient(135deg, #F18221, #ff9a44)' }}></div>
+        <div className="h-2 w-full" style={{ background: 'linear-gradient(135deg, #c61f2c, #dc2626)' }}></div>
         <div className="p-6">
           <div className="relative inline-block mb-4">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto border-4 border-white shadow-lg"
-              style={{ backgroundColor: '#F18221' }}
+              style={{ backgroundColor: '#c61f2c' }}
             >
               {user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar[0] : user.first_name[0]).toUpperCase() : '?'}
             </div>
@@ -162,7 +162,7 @@ export default function DashboardPage() {
           <h4 className="text-lg font-bold text-slate-900 mb-1">
             {user ? (lang === 'ar' && user.first_name_ar ? `${user.first_name_ar} ${user.last_name_ar ?? ''}` : `${user.first_name} ${user.last_name}`) : t('loading')}
           </h4>
-          <p className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: '#F18221' }}>
+          <p className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: '#c61f2c' }}>
             {user?.is_verified ? t('citoyen_role') : t('account_waiting_verification')}
           </p>
           <div className="grid grid-cols-2 gap-3 border-t border-slate-50 pt-4 text-left">
@@ -180,7 +180,7 @@ export default function DashboardPage() {
           <Link
             to="/profile"
             className="w-full mt-5 block py-2 rounded-lg text-center text-sm font-bold no-underline transition-colors"
-            style={{ border: '1px solid #fed7aa', color: '#F18221' }}
+            style={{ border: '1px solid #fecaca', color: '#c61f2c' }}
           >
             {t('edit_profile') || 'Éditer mon profil'}
           </Link>
@@ -197,10 +197,10 @@ export default function DashboardPage() {
       </Link>
       <Link
         to="/nouvelle-reclamation"
-        className="w-full block py-3 rounded-lg text-center text-sm font-bold no-underline bg-white border border-slate-200 hover:bg-orange-50 transition-colors"
+        className="w-full block py-3 rounded-lg text-center text-sm font-bold no-underline bg-white border border-slate-200 hover:bg-red-50 transition-colors"
         style={{ color: '#0d1b2e' }}
       >
-        <i className="fas fa-plus-circle me-2" style={{ color: '#F18221' }}></i>{t('new_signalement')}
+        <i className="fas fa-plus-circle me-2" style={{ color: '#c61f2c' }}></i>{t('new_signalement')}
       </Link>
     </div>
   )
@@ -257,7 +257,7 @@ export default function DashboardPage() {
             <h3 className="text-xl font-bold text-slate-900 mb-1">{lang === 'ar' ? 'الخدمات الإدارية' : 'Services Administratifs'}</h3>
             <p className="text-slate-500 text-sm mb-0">{t('quick_actions')}</p>
           </div>
-          <span className="text-xs font-black uppercase tracking-widest" style={{ color: '#F18221' }}>E-Services</span>
+          <span className="text-xs font-black uppercase tracking-widest" style={{ color: '#c61f2c' }}>E-Services</span>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -274,12 +274,12 @@ export default function DashboardPage() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex flex-col items-center p-5 rounded-xl no-underline transition-all duration-300 group border border-transparent hover:border-orange-100"
+                className="flex flex-col items-center p-5 rounded-xl no-underline transition-all duration-300 group border border-transparent hover:border-red-100"
                 style={{ backgroundColor: '#f8fafc' }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fff7ed')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
               >
-                <i className={`${item.icon} text-3xl mb-3 group-hover:scale-110 transition-transform`} style={{ color: '#F18221' }}></i>
+                <i className={`${item.icon} text-3xl mb-3 group-hover:scale-110 transition-transform`} style={{ color: '#c61f2c' }}></i>
                 <span className="font-bold text-sm text-slate-800 text-center">{item.label}</span>
                 <span className="text-xs text-slate-400 mt-1 text-center" dir="rtl">{item.ar}</span>
               </Link>
@@ -352,7 +352,7 @@ export default function DashboardPage() {
           <Link
             to="/nouvelle-reclamation"
             className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white no-underline shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #F18221, #ff9a44)' }}
+            style={{ background: 'linear-gradient(135deg, #c61f2c, #dc2626)' }}
           >
             <i className="fas fa-plus-circle text-xs"></i>
             {lang === 'ar' ? 'بلاغ جديد' : 'Nouveau Signalement'}
@@ -364,7 +364,7 @@ export default function DashboardPage() {
           ) : (
             reclamations.slice(0, 3).map((rec: any) => {
               const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-                pending: { bg: 'bg-orange-100', text: 'text-orange-800', label: t('status_pending') },
+                pending: { bg: 'bg-red-100', text: 'text-red-800', label: t('status_pending') },
                 in_progress: { bg: 'bg-blue-100', text: 'text-blue-800', label: t('status_in_progress') },
                 resolved: { bg: 'bg-green-100', text: 'text-green-800', label: t('status_resolved') },
                 rejected: { bg: 'bg-red-100', text: 'text-red-800', label: t('status_rejected') },
@@ -378,9 +378,9 @@ export default function DashboardPage() {
                 other: 'fas fa-exclamation-circle',
               }
               return (
-                <div key={rec.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-100 hover:border-orange-200 transition-colors" style={{ backgroundColor: '#f8fafc' }}>
+                <div key={rec.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-100 hover:border-red-200 transition-colors" style={{ backgroundColor: '#f8fafc' }}>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-orange-700 bg-orange-100">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-red-700 bg-red-100">
                       <i className={catIcons[rec.category] || 'fas fa-exclamation-circle'}></i>
                     </div>
                     <div>
@@ -398,7 +398,7 @@ export default function DashboardPage() {
             })
           )}
           {reclamations.length > 3 && (
-            <Link to="/mes-reclamations" className="block text-center text-sm font-bold no-underline py-2 hover:underline" style={{ color: '#F18221' }}>
+            <Link to="/mes-reclamations" className="block text-center text-sm font-bold no-underline py-2 hover:underline" style={{ color: '#c61f2c' }}>
               {t('view_all') || 'Voir tout'} ({reclamations.length})
             </Link>
           )}
@@ -450,7 +450,7 @@ export default function DashboardPage() {
             <>
               {[t('news_item_1'), t('news_item_2')].map((text, i) => (
                 <div key={i} className="flex items-start gap-3 py-2">
-                  <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#F18221' }}></span>
+                  <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#c61f2c' }}></span>
                   <div>
                     <p className="text-sm font-medium text-slate-700 mb-0">{text}</p>
                     <p className="text-xs text-slate-400 mt-1 mb-0">{i === 0 ? t('news_date_1') : t('news_date_2')}</p>
@@ -461,7 +461,7 @@ export default function DashboardPage() {
           ) : (
             newsItems.map(item => (
               <Link key={item.id} to="/news" className="flex items-start gap-3 py-2 no-underline" style={{ color: 'inherit' }}>
-                <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#F18221' }}></span>
+                <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#c61f2c' }}></span>
                 <div>
                   <p className="text-sm font-medium text-slate-700 mb-0">{item.title}</p>
                   <p className="text-xs text-slate-400 mt-1 mb-0">

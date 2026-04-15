@@ -6,11 +6,11 @@
 
 /* Design tokens for Tailwind */
 @theme {
-  --color-primary: #F18221;
-  --color-primary-container: #fed7aa;
+  --color-primary: #c61f2c;
+  --color-primary-container: #fee2e2;
   --color-on-primary: #ffffff;
-  --color-secondary: #004786;
-  --color-secondary-container: #dbeafe;
+  --color-secondary: #111827;
+  --color-secondary-container: #e5e7eb;
   --color-on-secondary: #ffffff;
   --color-tertiary: #0093af;
   --color-surface: #f8fafc;
@@ -23,12 +23,12 @@
 }
 
 :root {
-  --primary-navy: #0d1b2e;
-  --municipal-blue: #1e88e5;
-  --tunisian-red: #c62828;
+  --primary-navy: #111827;
+  --municipal-blue: #c61f2c;
+  --tunisian-red: #c61f2c;
   --body-bg: #f1f5f9;
   --sidebar-bg: #f8fafc;
-  --sidebar-hover: #f1f5f9;
+  --sidebar-hover: #fee2e2;
   --card-shadow: 0 4px 15px rgba(0,0,0,0.06);
   --top-nav-height: 70px;
   --footer-height: 60px;
@@ -171,7 +171,7 @@ body {
   transition: all 0.15s;
 }
 .sidebar-item i { width: 18px; text-align: center; }
-.sidebar-item:hover { color: white; background: var(--sidebar-hover); }
+.sidebar-item:hover { color: var(--tunisian-red); background: var(--sidebar-hover); }
 .sidebar-item.active { background: var(--municipal-blue); color: white; }
 .sidebar-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 1.5rem 0; }
 

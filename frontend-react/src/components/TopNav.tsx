@@ -30,8 +30,8 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
             to={isAgentOrAdmin ? '/agent-dashboard' : '/dashboard'}
             className="flex items-center gap-3 no-underline"
           >
-            <i className="fas fa-city text-2xl" style={{ color: '#F18221' }}></i>
-            <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#F18221', fontFamily: 'Public Sans, sans-serif' }}>
+            <i className="fas fa-city text-2xl" style={{ color: '#c61f2c' }}></i>
+            <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#c61f2c', fontFamily: 'Public Sans, sans-serif' }}>
               {lang === 'ar' ? 'بلدية قليبية' : 'Ville de Kélibia'}
             </span>
           </Link>
@@ -42,7 +42,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
               <NavLink
                 to="/dashboard"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-slate-600 hover:text-orange-500'}`
+                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
                 }
               >
                 {lang === 'ar' ? 'الرئيسية' : 'Accueil'}
@@ -50,7 +50,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
               <NavLink
                 to="/services"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-slate-600 hover:text-orange-500'}`
+                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
                 }
               >
                 {t('admin_services')}
@@ -58,7 +58,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
               <NavLink
                 to="/news"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-slate-600 hover:text-orange-500'}`
+                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
                 }
               >
                 {t('news_title')}
@@ -66,7 +66,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
               <NavLink
                 to="/forum"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-slate-600 hover:text-orange-500'}`
+                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
                 }
               >
                 Forum
@@ -75,7 +75,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
                 to="/dashboard"
                 end={false}
                 className="text-sm font-bold no-underline"
-                style={{ color: '#F18221' }}
+                style={{ color: '#c61f2c' }}
               >
                 Mon Espace
               </NavLink>
@@ -88,14 +88,14 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setLang('fr')}
-              className={`text-xs font-black uppercase tracking-widest cursor-pointer transition-colors border-0 bg-transparent px-1 ${lang === 'fr' ? 'text-slate-900' : 'text-slate-400 hover:text-orange-500'}`}
+              className={`text-xs font-black uppercase tracking-widest cursor-pointer transition-colors border-0 bg-transparent px-1 ${lang === 'fr' ? 'text-slate-900' : 'text-slate-400 hover:text-red-600'}`}
             >
               FR
             </button>
             <span className="text-slate-300 text-xs">|</span>
             <button
               onClick={() => setLang('ar')}
-              className={`text-xs font-black uppercase tracking-widest cursor-pointer transition-colors border-0 bg-transparent px-1 ${lang === 'ar' ? 'text-slate-900' : 'text-slate-400 hover:text-orange-500'}`}
+              className={`text-xs font-black uppercase tracking-widest cursor-pointer transition-colors border-0 bg-transparent px-1 ${lang === 'ar' ? 'text-slate-900' : 'text-slate-400 hover:text-red-600'}`}
             >
               AR
             </button>
@@ -113,7 +113,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
             </div>
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: '#F18221' }}
+              style={{ backgroundColor: '#c61f2c' }}
             >
               {initials}
             </div>

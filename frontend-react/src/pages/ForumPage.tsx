@@ -159,7 +159,7 @@ export default function ForumPage() {
       <button
         onClick={() => setShowModal(true)}
         className="w-full py-5 text-white font-black text-base tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer"
-        style={{ background: 'linear-gradient(135deg, #F18221, #ff9a44)', boxShadow: '0 10px 30px rgba(241,130,33,0.3)' }}
+        style={{ background: 'linear-gradient(135deg, #c61f2c, #dc2626)', boxShadow: '0 10px 30px rgba(198,31,44,0.3)' }}
       >
         <span>{lang === 'ar' ? 'ابدأ نقاشاً' : 'Lancer une discussion'}</span>
         {lang !== 'ar' && <span className="text-sm opacity-80" dir="rtl">ابدأ نقاشاً</span>}
@@ -182,7 +182,7 @@ export default function ForumPage() {
               onClick={() => setCategory(category === cat.key ? '' : cat.key)}
             >
               <div className={`flex items-center gap-3 text-sm transition-colors ${category === cat.key ? 'font-bold' : 'text-slate-600'}`}
-                style={{ color: category === cat.key ? '#F18221' : undefined }}>
+                style={{ color: category === cat.key ? '#c61f2c' : undefined }}>
                 <i className={`${cat.icon} w-5 text-center text-slate-400`}></i>
                 <span>{cat.label}</span>
               </div>
@@ -205,7 +205,7 @@ export default function ForumPage() {
               { val: stats.total_replies, label: lang === 'ar' ? 'الردود' : 'Réponses', wide: true },
             ].map(s => (
               <div key={s.label} className={`rounded-xl p-3 ${s.wide ? 'col-span-2' : ''}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <span className="text-2xl font-black" style={{ color: '#F18221' }}>{s.val}</span>
+                <span className="text-2xl font-black" style={{ color: '#c61f2c' }}>{s.val}</span>
                 <span className="block text-[10px] uppercase tracking-widest text-slate-300 font-bold mt-1">{s.label}</span>
               </div>
             ))}
@@ -276,7 +276,7 @@ export default function ForumPage() {
               className="px-5 py-2 rounded-lg text-sm font-bold transition-colors border-0 cursor-pointer"
               style={
                 (btn.isSortBtn ? sortBy === btn.sortVal : category === btn.key)
-                  ? { backgroundColor: '#F18221', color: 'white' }
+                  ? { backgroundColor: '#c61f2c', color: 'white' }
                   : { backgroundColor: '#f1f5f9', color: '#475569' }
               }
             >
@@ -319,7 +319,7 @@ export default function ForumPage() {
               key={s.key}
               onClick={() => setSortBy(s.key)}
               className="px-3 py-1 rounded-lg text-xs font-bold border-0 cursor-pointer"
-              style={sortBy === s.key ? { backgroundColor: '#F18221', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
+              style={sortBy === s.key ? { backgroundColor: '#c61f2c', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
             >
               {s.label}
             </button>
@@ -337,7 +337,7 @@ export default function ForumPage() {
               className="px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-colors"
               style={
                 activeTag === tag.name
-                  ? { backgroundColor: '#F18221', color: 'white' }
+                  ? { backgroundColor: '#c61f2c', color: 'white' }
                   : { backgroundColor: '#dbeafe', color: '#1e40af' }
               }
             >
@@ -369,7 +369,7 @@ export default function ForumPage() {
                 className="block no-underline"
               >
                 <div
-                  className="bg-white p-6 rounded-xl shadow-sm border border-transparent hover:border-orange-200 transition-all group"
+                  className="bg-white p-6 rounded-xl shadow-sm border border-transparent hover:border-red-200 transition-all group"
                   style={{ borderLeft: `4px solid ${catColor.text}` }}
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -396,7 +396,7 @@ export default function ForumPage() {
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-orange-600 transition-colors mb-1">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-red-700 transition-colors mb-1">
                         {topic.title}
                       </h3>
 
@@ -432,8 +432,8 @@ export default function ForumPage() {
                         onClick={e => voteTopic(topic.id, e)}
                         className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
                         style={topic.has_voted
-                          ? { backgroundColor: '#F18221', color: 'white' }
-                          : { backgroundColor: '#fff7ed', color: '#F18221' }
+                          ? { backgroundColor: '#c61f2c', color: 'white' }
+                          : { backgroundColor: '#fef2f2', color: '#c61f2c' }
                         }
                       >
                         <i className="fas fa-thumbs-up"></i>{topic.votes_count}
@@ -442,7 +442,7 @@ export default function ForumPage() {
                         <i className="fas fa-comment"></i>{topic.replies_count}
                       </div>
                       <span className="text-xs font-bold uppercase tracking-tighter hover:underline"
-                        style={{ color: '#F18221', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
+                        style={{ color: '#c61f2c', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
                         {lang === 'ar' ? 'انضم' : 'Rejoindre'}
                       </span>
                     </div>
@@ -540,7 +540,7 @@ export default function ForumPage() {
               </button>
               <button
                 className="px-6 py-2 rounded-xl text-sm font-bold text-white border-0 cursor-pointer flex items-center gap-2 transition-opacity"
-                style={{ backgroundColor: '#F18221', opacity: creating ? 0.7 : 1 }}
+                style={{ backgroundColor: '#c61f2c', opacity: creating ? 0.7 : 1 }}
                 onClick={createTopic}
                 disabled={creating}
               >

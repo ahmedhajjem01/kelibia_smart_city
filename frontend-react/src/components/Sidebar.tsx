@@ -21,8 +21,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
   const navItemClass = (isActive: boolean) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all no-underline hover:translate-x-1 ${
       isActive
-        ? 'bg-blue-100 text-blue-800 font-bold'
-        : 'text-slate-500 hover:bg-slate-200'
+        ? 'bg-red-100 text-red-800 font-bold'
+        : 'text-slate-500 hover:bg-red-50 hover:text-red-700'
     }`;
 
   return (
@@ -31,9 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
 
       {/* Logo header */}
       <div className="mb-8 flex items-center gap-3 px-2 pt-16">
-        <i className="fas fa-city text-2xl" style={{ color: '#F18221' }}></i>
+        <i className="fas fa-city text-2xl" style={{ color: '#c61f2c' }}></i>
         <div>
-          <h2 className="text-base font-black text-blue-800 tracking-tight mb-0">
+          <h2 className="text-base font-black text-red-800 tracking-tight mb-0">
             {isAgentOrAdmin ? 'Portail Agent' : 'Espace Citoyen'}
           </h2>
           <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-0">Kelibia Smart City</p>

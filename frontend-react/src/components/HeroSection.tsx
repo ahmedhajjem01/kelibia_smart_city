@@ -20,7 +20,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
       {/* Dark gradient overlay */}
       <div
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(to bottom, rgba(0,28,58,0.25), rgba(0,28,58,0.72))' }}
+        style={{ background: 'linear-gradient(to bottom, rgba(30,19,19,0.25), rgba(30,19,19,0.72))' }}
       ></div>
 
       {/* Content */}

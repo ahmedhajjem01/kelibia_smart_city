@@ -48,9 +48,9 @@ function getRoleLabel(u: UserInfo | null, t: any) {
 const CSS = `
 /* ── New Design System ── */
 :root{
-  --primary:#F18221;
-  --primary-hover:#e0731a;
-  --secondary:#004786;
+  --primary:#c61f2c;
+  --primary-hover:#a91622;
+  --secondary:#111827;
   --tertiary:#0093af;
   --sidebar-bg:#f8fafc;
   --sidebar-border:#e2e8f0;
@@ -302,7 +302,7 @@ const CSS = `
   font-size:.88rem;font-weight:600;
 }
 .ag-card-hdr-orange{
-  background:linear-gradient(90deg,#7c2d12,#F18221);
+  background:linear-gradient(90deg,#7f1d1d,#c61f2c);
   color:#fff;padding:12px 18px;
   display:flex;align-items:center;justify-content:space-between;
   font-size:.88rem;font-weight:600;
