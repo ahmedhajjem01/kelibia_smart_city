@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
     [
       'flex items-center gap-3 px-4 py-1.5 no-underline transition-all duration-150',
       isActive
-        ? 'border-r-4 border-[#e4c7b8] bg-white/10 font-bold'
+        ? 'border-r-4 border-[#d4aa8d] bg-white/10 font-bold'
         : 'hover:bg-white/10',
     ].join(' ');
 
@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
           <div style={{ color: '#fff', fontWeight: 900, fontSize: '.78rem', letterSpacing: '.3px', lineHeight: 1.15, textTransform: 'uppercase' }}>
             Ville de Kélibia
           </div>
-          <div style={{ color: '#e4c7b8', fontSize: '.65rem', fontWeight: 700, marginTop: 3 }}>بلدية قليبية</div>
+          <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, marginTop: 3 }}>بلدية قليبية</div>
         </div>
       </div>
 
