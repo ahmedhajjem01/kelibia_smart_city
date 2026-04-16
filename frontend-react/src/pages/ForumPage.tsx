@@ -159,7 +159,7 @@ export default function ForumPage() {
       <button
         onClick={() => setShowModal(true)}
         className="w-full py-5 text-white font-black text-base tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer"
-        style={{ background: 'linear-gradient(135deg, #1D6FA3, #155D8A)', boxShadow: '0 10px 30px rgba(29,111,163,0.3)' }}
+        style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', boxShadow: '0 10px 30px rgba(180,122,80,0.3)' }}
       >
         <span>{lang === 'ar' ? 'ابدأ نقاشاً' : 'Lancer une discussion'}</span>
         {lang !== 'ar' && <span className="text-sm opacity-80" dir="rtl">ابدأ نقاشاً</span>}
@@ -182,7 +182,7 @@ export default function ForumPage() {
               onClick={() => setCategory(category === cat.key ? '' : cat.key)}
             >
               <div className={`flex items-center gap-3 text-sm transition-colors ${category === cat.key ? 'font-bold' : 'text-slate-600'}`}
-                style={{ color: category === cat.key ? '#1D6FA3' : undefined }}>
+                style={{ color: category === cat.key ? '#d4aa8d' : undefined }}>
                 <i className={`${cat.icon} w-5 text-center text-slate-400`}></i>
                 <span>{cat.label}</span>
               </div>
@@ -205,7 +205,7 @@ export default function ForumPage() {
               { val: stats.total_replies, label: lang === 'ar' ? 'الردود' : 'Réponses', wide: true },
             ].map(s => (
               <div key={s.label} className={`rounded-xl p-3 ${s.wide ? 'col-span-2' : ''}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <span className="text-2xl font-black" style={{ color: '#1D6FA3' }}>{s.val}</span>
+                <span className="text-2xl font-black" style={{ color: '#d4aa8d' }}>{s.val}</span>
                 <span className="block text-[10px] uppercase tracking-widest text-slate-300 font-bold mt-1">{s.label}</span>
               </div>
             ))}
@@ -216,8 +216,8 @@ export default function ForumPage() {
       {/* Notification badge */}
       {notifCount > 0 && (
         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3">
-          <i className="fas fa-bell" style={{ color: '#1D6FA3' }}></i>
-          <span className="text-sm font-bold" style={{ color: '#155D8A' }}>{notifCount} notification{notifCount > 1 ? 's' : ''} non lue{notifCount > 1 ? 's' : ''}</span>
+          <i className="fas fa-bell" style={{ color: '#d4aa8d' }}></i>
+          <span className="text-sm font-bold" style={{ color: '#b87a50' }}>{notifCount} notification{notifCount > 1 ? 's' : ''} non lue{notifCount > 1 ? 's' : ''}</span>
         </div>
       )}
     </div>
@@ -276,7 +276,7 @@ export default function ForumPage() {
               className="px-5 py-2 rounded-lg text-sm font-bold transition-colors border-0 cursor-pointer"
               style={
                 (btn.isSortBtn ? sortBy === btn.sortVal : category === btn.key)
-                  ? { backgroundColor: '#1D6FA3', color: 'white' }
+                  ? { backgroundColor: '#d4aa8d', color: 'white' }
                   : { backgroundColor: '#f1f5f9', color: '#475569' }
               }
             >
@@ -319,7 +319,7 @@ export default function ForumPage() {
               key={s.key}
               onClick={() => setSortBy(s.key)}
               className="px-3 py-1 rounded-lg text-xs font-bold border-0 cursor-pointer"
-              style={sortBy === s.key ? { backgroundColor: '#1D6FA3', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
+              style={sortBy === s.key ? { backgroundColor: '#d4aa8d', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
             >
               {s.label}
             </button>
@@ -337,7 +337,7 @@ export default function ForumPage() {
               className="px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-colors"
               style={
                 activeTag === tag.name
-                  ? { backgroundColor: '#1D6FA3', color: 'white' }
+                  ? { backgroundColor: '#d4aa8d', color: 'white' }
                   : { backgroundColor: '#dbeafe', color: '#1e40af' }
               }
             >
@@ -432,8 +432,8 @@ export default function ForumPage() {
                         onClick={e => voteTopic(topic.id, e)}
                         className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
                         style={topic.has_voted
-                          ? { backgroundColor: '#1D6FA3', color: 'white' }
-                          : { backgroundColor: '#E6F4F7', color: '#1D6FA3' }
+                          ? { backgroundColor: '#d4aa8d', color: 'white' }
+                          : { backgroundColor: 'rgba(212,170,141,.1)', color: '#d4aa8d' }
                         }
                       >
                         <i className="fas fa-thumbs-up"></i>{topic.votes_count}
@@ -442,7 +442,7 @@ export default function ForumPage() {
                         <i className="fas fa-comment"></i>{topic.replies_count}
                       </div>
                       <span className="text-xs font-bold uppercase tracking-tighter hover:underline"
-                        style={{ color: '#1D6FA3', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
+                        style={{ color: '#d4aa8d', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
                         {lang === 'ar' ? 'انضم' : 'Rejoindre'}
                       </span>
                     </div>
@@ -463,7 +463,7 @@ export default function ForumPage() {
         >
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" style={{ maxHeight: '90vh' }}>
             {/* Modal header */}
-            <div className="px-6 py-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg,#1D6FA3,#155D8A)' }}>
+            <div className="px-6 py-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)' }}>
               <h5 className="font-bold text-white mb-0 flex items-center gap-2">
                 <i className="fas fa-plus-circle"></i>
                 {lang === 'ar' ? 'موضوع جديد' : 'Nouveau sujet'}
@@ -540,7 +540,7 @@ export default function ForumPage() {
               </button>
               <button
                 className="px-6 py-2 rounded-xl text-sm font-bold text-white border-0 cursor-pointer flex items-center gap-2 transition-opacity"
-                style={{ backgroundColor: '#1D6FA3', opacity: creating ? 0.7 : 1 }}
+                style={{ backgroundColor: '#d4aa8d', opacity: creating ? 0.7 : 1 }}
                 onClick={createTopic}
                 disabled={creating}
               >

@@ -53,10 +53,10 @@ function formatDate(iso?: string) {
 const CSS = `
 .pf-wrap { max-width:900px; margin:0 auto; }
 .pf-card { background:#fff; border:1px solid #eeeeee; margin-bottom:16px; }
-.pf-card-top { background:linear-gradient(135deg,#1D6FA3 0%,#045b7e 100%); height:72px; }
+.pf-card-top { background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); height:72px; }
 .pf-card-body { padding:0 24px 24px; }
 .pf-avatar-row { display:flex; align-items:flex-end; gap:18px; margin-top:-40px; margin-bottom:18px; }
-.pf-avatar { width:76px; height:76px; border-radius:50%; background:#1D6FA3; color:#fff; font-size:1.7rem; font-weight:900; display:flex; align-items:center; justify-content:center; border:4px solid #fff; flex-shrink:0; font-family:'Public Sans',sans-serif; }
+.pf-avatar { width:76px; height:76px; border-radius:50%; background:#d4aa8d; color:#fff; font-size:1.7rem; font-weight:900; display:flex; align-items:center; justify-content:center; border:4px solid #fff; flex-shrink:0; font-family:'Public Sans',sans-serif; }
 .pf-name { font-size:1rem; font-weight:900; color:#1a1c1c; font-family:'Public Sans',sans-serif; margin-bottom:4px; }
 .pf-name-ar { font-size:.85rem; color:#6b7280; font-family:'Cairo',sans-serif; direction:rtl; }
 .pf-badges { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
@@ -67,7 +67,7 @@ const CSS = `
 .pf-badge-agent      { background:#ede9fe; color:#5b21b6; }
 .pf-edit-btn { margin-left:auto; padding-bottom:4px; }
 .pf-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; border:none; cursor:pointer; font-family:'Public Sans',sans-serif; transition:filter .15s; }
-.pf-btn-primary { background:linear-gradient(135deg,#1D6FA3 0%,#155D8A 100%); color:#fff; }
+.pf-btn-primary { background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); color:#fff; }
 .pf-btn-primary:hover { filter:brightness(1.1); }
 .pf-btn-secondary { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; }
 .pf-btn-secondary:hover { background:#e5e7eb; }
@@ -80,23 +80,23 @@ const CSS = `
 .pf-label { font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#9ca3af; display:flex; align-items:center; gap:5px; }
 .pf-value { font-size:.85rem; color:#1a1c1c; padding:9px 12px; background:#f9fafb; border:1px solid #f3f4f6; }
 .pf-input { font-size:.85rem; color:#1a1c1c; padding:9px 12px; background:#fff; border:1px solid #e5e7eb; outline:none; font-family:inherit; transition:border .15s; width:100%; }
-.pf-input:focus { border-color:#1D6FA3; }
+.pf-input:focus { border-color:#d4aa8d; }
 .pf-readonly { opacity:.6; cursor:default; display:flex; align-items:center; gap:8px; }
 .pf-feedback-ok  { background:#d1fae5; color:#065f46; padding:10px 14px; font-size:.8rem; font-weight:600; margin-bottom:14px; border-left:3px solid #065f46; }
 .pf-feedback-err { background:#fee2e2; color:#991b1b; padding:10px 14px; font-size:.8rem; font-weight:600; margin-bottom:14px; border-left:3px solid #C44536; }
 .pf-section-hdr { display:flex; align-items:center; gap:10px; margin-bottom:14px; margin-top:8px; }
-.pf-section-hdr-bar { width:4px; height:20px; background:#1D6FA3; }
+.pf-section-hdr-bar { width:4px; height:20px; background:#d4aa8d; }
 .pf-section-hdr-title { font-size:.85rem; font-weight:900; color:#1a1c1c; font-family:'Public Sans',sans-serif; text-transform:uppercase; letter-spacing:.5px; }
 .pf-stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; margin-bottom:16px; }
-.pf-stat-card { background:#fff; border:1px solid #eeeeee; border-left:3px solid #1D6FA3; display:flex; align-items:center; gap:14px; padding:14px 16px; transition:box-shadow .2s; }
+.pf-stat-card { background:#fff; border:1px solid #eeeeee; border-left:3px solid #d4aa8d; display:flex; align-items:center; gap:14px; padding:14px 16px; transition:box-shadow .2s; }
 .pf-stat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.07); }
 .pf-stat-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
 .pf-stat-label { font-size:.75rem; font-weight:800; color:#1a1c1c; font-family:'Public Sans',sans-serif; }
 .pf-stat-label-ar { font-size:.65rem; color:#9ca3af; font-family:'Cairo',sans-serif; direction:rtl; }
-.pf-stat-count { font-size:1.4rem; font-weight:900; color:#1D6FA3; font-family:'Public Sans',sans-serif; margin-left:auto; }
+.pf-stat-count { font-size:1.4rem; font-weight:900; color:#d4aa8d; font-family:'Public Sans',sans-serif; margin-left:auto; }
 .pf-stat-sub { font-size:.62rem; color:#9ca3af; margin-top:2px; }
-.pf-stat-link { display:inline-flex; align-items:center; gap:4px; font-size:.68rem; font-weight:700; color:#1D6FA3; text-decoration:none; text-transform:uppercase; letter-spacing:.3px; margin-top:4px; }
-.pf-stat-link:hover { color:#155D8A; }
+.pf-stat-link { display:inline-flex; align-items:center; gap:4px; font-size:.68rem; font-weight:700; color:#d4aa8d; text-decoration:none; text-transform:uppercase; letter-spacing:.3px; margin-top:4px; }
+.pf-stat-link:hover { color:#b87a50; }
 .pf-quick { background:#fff; border:1px solid #eeeeee; padding:16px 20px; }
 .pf-quick-title { font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#9ca3af; margin-bottom:10px; }
 .pf-quick-btns { display:flex; gap:8px; flex-wrap:wrap; }
@@ -104,9 +104,9 @@ const CSS = `
 .pf-quick-btn:hover { background:#B5DDE5; color:#0F4C5C; }
 .pf-footer-links { display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; }
 .pf-footer-link { font-size:.72rem; color:#9ca3af; text-decoration:none; display:flex; align-items:center; gap:5px; }
-.pf-footer-link:hover { color:#1D6FA3; }
+.pf-footer-link:hover { color:#d4aa8d; }
 .pf-loading { display:flex; align-items:center; justify-content:center; gap:12px; padding:60px 0; }
-.pf-spinner { width:28px; height:28px; border:3px solid #e5e7eb; border-top-color:#1D6FA3; border-radius:50%; animation:spin .7s linear infinite; }
+.pf-spinner { width:28px; height:28px; border:3px solid #e5e7eb; border-top-color:#d4aa8d; border-radius:50%; animation:spin .7s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 @media(max-width:600px){ .pf-grid { grid-template-columns:1fr; } .pf-avatar-row { flex-wrap:wrap; } }
 `
@@ -123,8 +123,8 @@ export default function ProfilePage() {
   const [editForm, setEditForm] = useState({ first_name: '', last_name: '', phone: '', address: '', city: '', governorate: '', place_of_birth: '' })
   const [stats, setStats] = useState<StatCard[]>([
     { key: 'reclamations', icon: 'fa-bullhorn',        color: '#C44536', label: 'Signalements',           labelAr: 'الشكاوى',        route: '/mes-reclamations', total: null, pending: null, approved: null },
-    { key: 'evenements',   icon: 'fa-calendar-check',  color: '#1D6FA3', label: 'Événements',              labelAr: 'التظاهرات',      route: '/mes-evenements',   total: null, pending: null, approved: null },
-    { key: 'residences',   icon: 'fa-home',             color: '#1D6FA3', label: 'Attestations résidence',  labelAr: 'شهادات الإقامة', route: '/mes-residences',   total: null, pending: null, approved: null },
+    { key: 'evenements',   icon: 'fa-calendar-check',  color: '#d4aa8d', label: 'Événements',              labelAr: 'التظاهرات',      route: '/mes-evenements',   total: null, pending: null, approved: null },
+    { key: 'residences',   icon: 'fa-home',             color: '#d4aa8d', label: 'Attestations résidence',  labelAr: 'شهادات الإقامة', route: '/mes-residences',   total: null, pending: null, approved: null },
     { key: 'naissances',   icon: 'fa-baby',             color: '#065f46', label: 'Déclarations naissance',  labelAr: 'تصاريح الولادة', route: '/mes-naissances',   total: null, pending: null, approved: null },
     { key: 'deces',        icon: 'fa-cross',            color: '#6b7280', label: 'Déclarations décès',      labelAr: 'تصاريح الوفاة',  route: '/mes-deces',        total: null, pending: null, approved: null },
     { key: 'mariages',     icon: 'fa-ring',             color: '#d4aa8d', label: 'Demandes mariage',         labelAr: 'طلبات الزواج',   route: '/mes-mariages',     total: null, pending: null, approved: null },

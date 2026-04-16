@@ -20,12 +20,12 @@ interface Reclamation {
 const CSS = `
 .mrs-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; }
 .mrs-title { font-size:1.15rem; font-weight:900; color:#1a1c1c; font-family:'Public Sans',sans-serif; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:10px; }
-.mrs-title::before { content:''; display:inline-block; width:4px; height:20px; background:#1D6FA3; border-radius:2px; }
+.mrs-title::before { content:''; display:inline-block; width:4px; height:20px; background:#d4aa8d; border-radius:2px; }
 .mrs-subtitle { font-size:.75rem; color:#6b7280; margin-top:4px; margin-left:14px; }
-.mrs-new-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:linear-gradient(135deg,#1D6FA3 0%,#155D8A 100%); color:#fff; font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.8px; border:none; cursor:pointer; text-decoration:none; transition:filter .2s; }
+.mrs-new-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); color:#fff; font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.8px; border:none; cursor:pointer; text-decoration:none; transition:filter .2s; }
 .mrs-new-btn:hover { filter:brightness(1.1); color:#fff; }
 .mrs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:16px; }
-.mrs-card { background:#fff; border:1px solid #eeeeee; border-top:3px solid #1D6FA3; display:flex; flex-direction:column; transition:box-shadow .2s; }
+.mrs-card { background:#fff; border:1px solid #eeeeee; border-top:3px solid #d4aa8d; display:flex; flex-direction:column; transition:box-shadow .2s; }
 .mrs-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.08); }
 .mrs-card-body { padding:18px 18px 12px; flex:1; }
 .mrs-card-meta { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
@@ -34,8 +34,8 @@ const CSS = `
 .mrs-card-desc { font-size:.75rem; color:#6b7280; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.5rem; }
 .mrs-card-cat { font-size:.68rem; color:#9ca3af; font-weight:600; display:flex; align-items:center; gap:5px; margin-top:10px; padding-top:10px; border-top:1px solid #f3f4f6; }
 .mrs-card-footer { padding:10px 18px; border-top:1px solid #f3f4f6; }
-.mrs-detail-btn { background:none; border:none; cursor:pointer; font-size:.75rem; font-weight:700; color:#1D6FA3; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:5px; padding:0; font-family:'Public Sans',sans-serif; }
-.mrs-detail-btn:hover { color:#155D8A; }
+.mrs-detail-btn { background:none; border:none; cursor:pointer; font-size:.75rem; font-weight:700; color:#d4aa8d; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:5px; padding:0; font-family:'Public Sans',sans-serif; }
+.mrs-detail-btn:hover { color:#b87a50; }
 .mrs-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:2px; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.3px; }
 .mrs-badge-pending   { background:#fef3c7; color:#92400e; }
 .mrs-badge-progress  { background:#dbeafe; color:#1e40af; }
@@ -51,11 +51,11 @@ const CSS = `
 .mrs-empty-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; background:#E6F4F7; color:#0F4C5C; border:1px solid #B5DDE5; font-weight:700; font-size:.78rem; text-decoration:none; text-transform:uppercase; letter-spacing:.5px; transition:background .2s; }
 .mrs-empty-btn:hover { background:#B5DDE5; color:#0F4C5C; }
 .mrs-loading { text-align:center; padding:60px 20px; }
-.mrs-spinner { width:32px; height:32px; border:3px solid #e5e7eb; border-top-color:#1D6FA3; border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 14px; }
+.mrs-spinner { width:32px; height:32px; border:3px solid #e5e7eb; border-top-color:#d4aa8d; border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 14px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 .mrs-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1050; display:flex; align-items:center; justify-content:center; padding:16px; }
 .mrs-modal { background:#fff; width:100%; max-width:480px; }
-.mrs-modal-hdr { background:linear-gradient(135deg,#1D6FA3 0%,#155D8A 100%); color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; }
+.mrs-modal-hdr { background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; }
 .mrs-modal-hdr-title { font-size:.9rem; font-weight:800; font-family:'Public Sans',sans-serif; }
 .mrs-modal-close { background:none; border:none; color:#fff; cursor:pointer; font-size:1rem; opacity:.8; }
 .mrs-modal-close:hover { opacity:1; }

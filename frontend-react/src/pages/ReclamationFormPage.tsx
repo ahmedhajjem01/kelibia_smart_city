@@ -33,14 +33,14 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 
 const CSS = `
 .rf-wrap { max-width: 720px; margin: 0 auto; }
-.rf-card { background:#fff; border:1px solid #eeeeee; border-top:3px solid #1D6FA3; }
+.rf-card { background:#fff; border:1px solid #eeeeee; border-top:3px solid #d4aa8d; }
 .rf-card-body { padding:28px 28px 24px; }
 .rf-section-title { font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#9ca3af; margin-bottom:10px; }
 .rf-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#6b7280; margin-bottom:6px; display:block; }
 .rf-input { width:100%; padding:10px 14px; border:1px solid #e5e7eb; background:#f9fafb; font-size:.85rem; color:#1a1c1c; outline:none; transition:border .15s; font-family:inherit; }
-.rf-input:focus { border-color:#1D6FA3; background:#fff; }
+.rf-input:focus { border-color:#d4aa8d; background:#fff; }
 .rf-input-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.rf-submit-btn { width:100%; padding:14px; background:linear-gradient(135deg,#1D6FA3 0%,#155D8A 100%); color:#fff; border:none; cursor:pointer; font-weight:800; font-size:.85rem; text-transform:uppercase; letter-spacing:1px; font-family:'Public Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:10px; transition:filter .2s; margin-top:24px; }
+.rf-submit-btn { width:100%; padding:14px; background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); color:#fff; border:none; cursor:pointer; font-weight:800; font-size:.85rem; text-transform:uppercase; letter-spacing:1px; font-family:'Public Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:10px; transition:filter .2s; margin-top:24px; }
 .rf-submit-btn:hover:not(:disabled) { filter:brightness(1.1); }
 .rf-submit-btn:disabled { opacity:.6; cursor:not-allowed; }
 .rf-gps-box { border:1px solid #e5e7eb; background:#f9fafb; padding:14px 16px; margin-bottom:12px; }
@@ -66,7 +66,7 @@ export default function ReclamationFormPage() {
 
   const gpsStatusConfig = {
     none:    { color: '#9ca3af', icon: 'fa-map-marker-alt',      text: t('gps_no_selection') },
-    manual:  { color: '#1D6FA3', icon: 'fa-map-pin',             text: t('gps_manual_pos') },
+    manual:  { color: '#d4aa8d', icon: 'fa-map-pin',             text: t('gps_manual_pos') },
     gps:     { color: '#065f46', icon: 'fa-location-arrow',      text: t('gps_detected') },
     loading: { color: '#d97706', icon: 'fa-circle-notch fa-spin', text: t('gps_fetching') },
   }

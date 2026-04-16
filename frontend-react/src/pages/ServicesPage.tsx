@@ -276,7 +276,7 @@ export default function ServicesPage() {
                     <button
                       className="w-100 d-flex align-items-center justify-content-between px-4 py-3 border-0 text-start"
                       style={{
-                        background: isOpen ? 'linear-gradient(135deg,#155D8A 0%,#1D6FA3 100%)' : '#fff',
+                        background: isOpen ? 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)' : '#fff',
                         color: isOpen ? '#fff' : '#1a1a2e',
                         cursor: 'pointer',
                         transition: 'all .25s',
@@ -285,7 +285,7 @@ export default function ServicesPage() {
                     >
                       <div className="d-flex align-items-center gap-3">
                         <div className="rounded-3 d-flex align-items-center justify-content-center"
-                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : '#E6F4F7', color: isOpen ? '#fff' : '#1D6FA3' }}>
+                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : 'rgba(212,170,141,.1)', color: isOpen ? '#fff' : '#d4aa8d' }}>
                           <i className={`fas ${cat.icon || 'fa-folder-open'}`} />
                         </div>
                         <div>
