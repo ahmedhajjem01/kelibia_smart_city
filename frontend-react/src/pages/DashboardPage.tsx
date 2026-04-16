@@ -82,13 +82,13 @@ const CSS = `
   font-weight:800; padding:2px 8px; border-radius:3px; font-size:.78rem;
 }
 .db-signalement-btn {
-  width:100%; padding:16px; background:#1D6FA3; color:#fff;
+  width:100%; padding:16px; background:linear-gradient(135deg, #1D6FA3 0%, #155D8A 100%); color:#fff;
   font-weight:700; font-size:.82rem; letter-spacing:1.5px; text-transform:uppercase;
   border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:10px; transition:background .2s; font-family:'Public Sans',sans-serif;
+  gap:10px; transition:filter .2s; font-family:'Public Sans',sans-serif;
   text-decoration:none;
 }
-.db-signalement-btn:hover { background:#155D8A; color:#fff; }
+.db-signalement-btn:hover { filter:brightness(1.12); color:#fff; }
 .db-news-item { cursor:pointer; }
 .db-news-item:hover .db-news-headline { color:#d4aa8d; }
 .db-news-time { font-size:.68rem; font-weight:700; color:#d4aa8d; display:block; margin-bottom:3px; }
@@ -433,7 +433,7 @@ export default function DashboardPage() {
           </h3>
           <Link
             to="/nouvelle-reclamation"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'linear-gradient(135deg, #b87a50 0%, #d4aa8d 100%)', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'linear-gradient(135deg, #1D6FA3 0%, #155D8A 100%)', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
           >
             <i className="fas fa-plus-circle"></i>
             {t('new_signalement')}
