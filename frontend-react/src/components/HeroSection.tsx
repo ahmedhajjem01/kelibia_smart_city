@@ -1,64 +1,50 @@
 import React from 'react';
 import { useI18n } from '../i18n/LanguageProvider';
+import { Link } from 'react-router-dom';
 import fortImg from '../assets/fort.webp';
 
 interface HeroSectionProps {
   user: { first_name: string; first_name_ar?: string } | null;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
-  const { t, lang } = useI18n();
+const HeroSection: React.FC<HeroSectionProps> = () => {
+  const { t } = useI18n();
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: '420px' }}>
-      {/* Background image */}
-      <img
-        src={fortImg}
-        alt="Fort de Kélibia"
-        className="w-full h-full object-cover"
-      />
-      {/* Dark gradient overlay */}
+    <div className="relative w-full overflow-hidden" style={{ height: '384px' }}>
+      {/* Background */}
+      <img src={fortImg} alt="Fort de Kélibia" className="w-full h-full object-cover" />
       <div
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(to bottom, rgba(30,19,19,0.25), rgba(30,19,19,0.72))' }}
-      ></div>
+        style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.15) 70%, transparent 100%)' }}
+      />
 
-      {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-        {/* Icon */}
-        <i className="fas fa-castle text-white mb-4" style={{ fontSize: '3rem', opacity: 0.9 }}></i>
-
-        {/* Bilingual title */}
+      {/* Content — bottom-left aligned like the mockup */}
+      <div className="absolute inset-0 flex flex-col justify-end px-12 pb-14">
         <h1
-          className="font-black text-white uppercase tracking-tighter mb-2"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
+          className="font-extrabold text-white uppercase tracking-tighter leading-none mb-2"
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.4rem, 5vw, 3.8rem)' }}
         >
-          Ville de Kélibia
+          VILLE DE KÉLIBIA
         </h1>
         <h2
-          className="font-bold text-white mb-6"
+          className="font-medium text-white mb-6 leading-none"
           dir="rtl"
-          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(2rem, 5vw, 3.5rem)', opacity: 0.92 }}
+          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(1.8rem, 4vw, 3rem)', opacity: 0.9 }}
         >
           بلدية قليبية
         </h2>
-
-        {/* Welcome message */}
-        <p className="text-white font-medium uppercase tracking-[0.2em] text-sm mb-3" style={{ opacity: 0.85 }}>
-          {t('welcome')}, <strong>{user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar : user.first_name) : t('citoyen_role')}</strong>
-        </p>
-        <p className="text-white text-xs uppercase tracking-widest" style={{ opacity: 0.65 }}>
-          {t('welcome_msg')}
-        </p>
+        <div>
+          <Link
+            to="/services"
+            className="inline-flex items-center gap-2 px-8 py-3 text-sm font-bold uppercase tracking-wider text-white no-underline transition-transform active:scale-95 shadow-xl"
+            style={{ background: 'linear-gradient(135deg, #ae131a, #d2312f)', borderRadius: '2px' }}
+          >
+            <i className="fas fa-compass"></i>
+            {t('discover_city') || 'Découvrir la Ville'}
+          </Link>
+        </div>
       </div>
-
-      {/* Fort caption */}
-      <span
-        className="absolute bottom-4 right-6 text-white text-xs py-1 px-3 rounded"
-        style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)', zIndex: 3 }}
-      >
-        {t('fort_caption')}
-      </span>
     </div>
   );
 };

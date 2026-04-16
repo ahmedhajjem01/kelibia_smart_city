@@ -18,112 +18,88 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
 
   const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
 
-  const navItemClass = (isActive: boolean) =>
-    `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all no-underline hover:translate-x-1 ${
+  const navItem = (isActive: boolean) =>
+    [
+      'flex items-center gap-4 px-4 py-3 text-sm font-medium transition-all no-underline duration-150',
       isActive
-        ? 'font-bold'
-        : 'hover:bg-white/10'
-    }`;
+        ? 'font-bold text-[#ae131a] border-r-4 border-[#ae131a] bg-[#fef2f2]'
+        : 'text-[#1a1c1c] opacity-70 hover:bg-[#e8e8e8]',
+    ].join(' ');
 
   return (
-    <aside className="sidebar fixed left-0 top-0 h-full w-60 flex flex-col p-4 z-40 d-none d-md-flex"
-      style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '0.875rem', fontWeight: 500, background: '#0d1b2e', color: '#fff' }}>
-
-      {/* Logo header */}
-      <div className="mb-8 flex items-center gap-3 px-2 pt-6">
-        <i className="fas fa-city text-2xl" style={{ color: '#F18221' }}></i>
+    <aside
+      className="sidebar fixed left-0 top-0 h-full w-64 flex flex-col py-8 z-50 d-none d-md-flex border-r"
+      style={{ background: '#f9f9f9', boxShadow: '12px 0 32px -4px rgba(26,28,28,0.06)', fontFamily: 'Public Sans, sans-serif' }}
+    >
+      {/* Brand */}
+      <div className="px-6 mb-10 flex items-center gap-3">
+        <i className="fas fa-landmark text-3xl" style={{ color: '#ae131a' }}></i>
         <div>
-          <h2 className="text-base font-black tracking-tight mb-0" style={{ color: '#fff' }}>
-            {isAgentOrAdmin ? 'Portail Agent' : 'Citoyen'}
-          </h2>
-          <p className="text-[10px] uppercase tracking-widest mb-0" style={{ color: 'rgba(255,255,255,0.45)' }}>Kelibia Smart City</p>
+          <h1 className="text-base font-extrabold tracking-tight leading-none mb-0" style={{ color: '#ae131a' }}>
+            VILLE DE KÉLIBIA
+          </h1>
+          <p className="text-[10px] font-bold mt-1 mb-0" style={{ color: '#ae131a' }}>بلدية قليبية</p>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1">
-        <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          {isAgentOrAdmin ? t('nav_agent_space') : t('nav_title')}
-        </p>
-
+      {/* Main nav */}
+      <nav className="flex-1 px-4 space-y-1">
         {isAgentOrAdmin ? (
-          <NavLink to="/agent-dashboard"
-            className={({ isActive }) => navItemClass(isActive)}
-            style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-            <i className="fas fa-shield-alt w-4 text-center"></i>
+          <NavLink to="/agent-dashboard" className={({ isActive }) => navItem(isActive)}>
+            <i className="fas fa-shield-alt w-5 text-center"></i>
             <span>{t('back_to_agent_space')}</span>
           </NavLink>
         ) : (
           <>
-            <NavLink to="/dashboard"
-              className={({ isActive }) => navItemClass(isActive)}
-              style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-              <i className="fas fa-tachometer-alt w-4 text-center"></i>
-              <span>{t('dashboard')}</span>
+            <NavLink to="/dashboard" end className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-tachometer-alt w-5 text-center"></i>
+              <span>Tableau de bord / لوحة القيادة</span>
             </NavLink>
-            <a className={navItemClass(false)} href="#mapCard" onClick={scrollToMap}
-              style={{ color: 'rgba(255,255,255,0.65)' }}>
-              <i className="fas fa-map-marked-alt w-4 text-center"></i>
-              <span>{t('gis_map')}</span>
+            <NavLink to="/services" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-landmark w-5 text-center"></i>
+              <span>Services / الخدمات</span>
+            </NavLink>
+            <NavLink to="/mes-reclamations" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-bullhorn w-5 text-center"></i>
+              <span>Plaintes / الشكاوي</span>
+            </NavLink>
+            <NavLink to="/news" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-newspaper w-5 text-center"></i>
+              <span>Actualités / الأخبار</span>
+            </NavLink>
+            <a className={navItem(false)} href="#mapCard" onClick={scrollToMap}>
+              <i className="fas fa-map-marked-alt w-5 text-center"></i>
+              <span>Patrimoine / التراث</span>
             </a>
-            <NavLink to="/mes-reclamations"
-              className={({ isActive }) => navItemClass(isActive)}
-              style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-              <i className="fas fa-bullhorn w-4 text-center"></i>
-              <span>{t('my_reclamations')}</span>
+            <NavLink to="/mes-demandes" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-tasks w-5 text-center"></i>
+              <span>Mes demandes / طلباتي</span>
             </NavLink>
-            <NavLink to="/mes-demandes"
-              className={({ isActive }) => navItemClass(isActive)}
-              style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-              <i className="fas fa-tasks w-4 text-center"></i>
-              <span>{t('my_requests')}</span>
+            <NavLink to="/mes-extraits" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-file-contract w-5 text-center"></i>
+              <span>État Civil / الحالة المدنية</span>
             </NavLink>
-            <NavLink to="/mes-extraits"
-              className={({ isActive }) => navItemClass(isActive)}
-              style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-              <i className="fas fa-file-contract w-4 text-center"></i>
-              <span>{t('extraits_hub_title')}</span>
+            <NavLink to="/forum" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-comments w-5 text-center"></i>
+              <span>Forum / المنتدى</span>
             </NavLink>
           </>
         )}
-
-        <NavLink to="/services"
-          className={({ isActive }) => navItemClass(isActive)}
-          style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-          <i className="fas fa-file-alt w-4 text-center"></i>
-          <span>{t('admin_services')}</span>
-        </NavLink>
-        <NavLink to="/news"
-          className={({ isActive }) => navItemClass(isActive)}
-          style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-          <i className="fas fa-newspaper w-4 text-center"></i>
-          <span>{t('news_title')}</span>
-        </NavLink>
-        <NavLink to="/forum"
-          className={({ isActive }) => navItemClass(isActive)}
-          style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-          <i className="fas fa-comments w-4 text-center"></i>
-          <span>{t('forum') || 'Forum'}</span>
-        </NavLink>
       </nav>
 
-      {/* Bottom section */}
-      <div className="mt-auto space-y-1 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-        <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{t('account_title')}</p>
-        <NavLink to="/profile"
-          className={({ isActive }) => navItemClass(isActive)}
-          style={({ isActive }) => ({ color: isActive ? '#fff' : 'rgba(255,255,255,0.65)', background: isActive ? 'rgba(255,255,255,0.12)' : undefined })}>
-          <i className="fas fa-user-circle w-4 text-center"></i>
-          <span>{t('profile')}</span>
+      {/* Bottom */}
+      <div className="px-4 mt-auto space-y-1 pt-6" style={{ borderTop: '1px solid #e8e8e8' }}>
+        <NavLink to="/profile" className={({ isActive }) => navItem(isActive)}>
+          <i className="fas fa-cog w-5 text-center"></i>
+          <span>Paramètres</span>
         </NavLink>
         <a
-          className={navItemClass(false)}
+          className={navItem(false)}
           href="#"
-          style={{ color: '#fca5a5' }}
           onClick={(e) => { e.preventDefault(); onLogout(); }}
         >
-          <i className="fas fa-sign-out-alt w-4 text-center"></i>
-          <span>{t('logout')}</span>
+          <i className="fas fa-sign-out-alt w-5 text-center"></i>
+          <span>Déconnexion</span>
         </a>
       </div>
     </aside>

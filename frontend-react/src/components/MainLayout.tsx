@@ -28,13 +28,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     <div
       className={lang === 'ar' ? 'arabic-font' : ''}
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
-      style={{ fontFamily: 'Public Sans, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}
+      style={{ fontFamily: 'Public Sans, sans-serif', backgroundColor: '#f9f9f9', minHeight: '100vh' }}
     >
       {/* Sidebar */}
       <Sidebar onLogout={onLogout} user={user} />
 
       {/* Main area offset from fixed sidebar */}
-      <div className="md:ml-60">
+      <div className="md:ml-64">
         {/* Hero */}
         {showHero && <HeroSection user={user} />}
 
@@ -70,8 +70,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
           {rightSidebar && (
             <div
-              className="d-none d-lg-block"
-              style={{ width: '280px', minWidth: '280px', padding: '24px 16px 24px 0', flexShrink: 0 }}
+              style={{ width: '320px', minWidth: '320px', padding: '24px 24px 24px 0', flexShrink: 0 }}
             >
               {rightSidebar}
             </div>

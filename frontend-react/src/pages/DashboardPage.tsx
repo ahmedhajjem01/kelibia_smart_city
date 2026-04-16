@@ -7,16 +7,10 @@ import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import MainLayout from '../components/MainLayout'
 
-// Fix for Leaflet marker icons
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 
-let DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-})
+const DefaultIcon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow, iconSize: [25, 41], iconAnchor: [12, 41] })
 L.Marker.prototype.options.icon = DefaultIcon
 
 const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
@@ -36,10 +30,140 @@ type UserInfo = {
   is_superuser?: boolean
 }
 
-type ForumNotif = {
-  id: number
-  is_read: boolean
+type ForumNotif = { id: number; is_read: boolean }
+
+/* ── Styling ── */
+const CSS = `
+.db-section-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.db-section-title {
+  font-size:1.25rem; font-weight:800; color:#1a1c1c;
+  display:flex; align-items:center; gap:12px;
+  font-family:'Public Sans',sans-serif;
 }
+.db-section-title::before {
+  content:''; display:inline-block; width:5px; height:28px;
+  background:#ae131a; border-radius:3px; flex-shrink:0;
+}
+.db-action-card {
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  padding:22px 12px; background:#fff; border:1px solid transparent;
+  transition:all .2s; cursor:pointer; text-decoration:none; color:inherit;
+}
+.db-action-card:hover {
+  background:#fff; border-color:rgba(228,190,186,.4);
+  box-shadow:0 12px 32px -4px rgba(26,28,28,.07);
+}
+.db-action-icon {
+  width:48px; height:48px; border-radius:50%;
+  background:rgba(210,49,47,.08); display:flex; align-items:center;
+  justify-content:center; margin-bottom:12px; transition:transform .2s;
+  color:#ae131a; font-size:1.3rem;
+}
+.db-action-card:hover .db-action-icon { transform:scale(1.12); }
+.db-action-label { font-size:.72rem; font-weight:700; color:#1a1c1c; text-transform:uppercase; letter-spacing:.5px; line-height:1.3; }
+.db-action-ar { font-size:.65rem; color:#5b403d; margin-top:3px; }
+
+/* Right sidebar */
+.db-profile-card { background:#fff; padding:28px; box-shadow:0 12px 32px -4px rgba(26,28,28,.06); }
+.db-profile-avatar {
+  width:58px; height:58px; border-radius:50%; background:#e8e8e8;
+  overflow:hidden; border:2px solid rgba(210,49,47,.18);
+}
+.db-profile-avatar-inner {
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; font-weight:800; color:#ae131a; background:#fef2f2;
+}
+.db-stat-row {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.85rem; padding:8px 0;
+  border-bottom:1px solid #e8e8e8;
+}
+.db-stat-badge {
+  background:rgba(174,19,26,.1); color:#ae131a;
+  font-weight:800; padding:2px 8px; border-radius:3px; font-size:.78rem;
+}
+.db-signalement-btn {
+  width:100%; padding:16px; background:#ae131a; color:#fff;
+  font-weight:700; font-size:.82rem; letter-spacing:1.5px; text-transform:uppercase;
+  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:10px; transition:opacity .2s; font-family:'Public Sans',sans-serif;
+  text-decoration:none;
+}
+.db-signalement-btn:hover { opacity:.9; color:#fff; }
+.db-news-item { cursor:pointer; }
+.db-news-item:hover .db-news-headline { color:#ae131a; }
+.db-news-time { font-size:.68rem; font-weight:700; color:#ae131a; display:block; margin-bottom:3px; }
+.db-news-headline { font-size:.82rem; font-weight:700; color:#1a1c1c; line-height:1.35; transition:color .15s; }
+.db-news-ar { font-size:.68rem; color:#5b403d; margin-top:2px; }
+.db-urgence { background:#ae131a; padding:28px; color:#fff; }
+.db-urgence-title { font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; font-family:'Public Sans',sans-serif; }
+.db-urgence-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.db-urgence-label { font-size:.75rem; font-weight:500; opacity:.9; }
+.db-urgence-number { font-size:1.4rem; font-weight:800; letter-spacing:-.5px; }
+
+/* Bento news grid */
+.db-bento { display:grid; grid-template-columns:1fr 1fr; gap:14px; height:340px; }
+.db-bento-main { position:relative; overflow:hidden; }
+.db-bento-right { display:grid; grid-template-rows:1fr 1fr; gap:14px; }
+.db-bento-img { width:100%; height:100%; object-fit:cover; transition:transform .7s; }
+.db-bento-main:hover .db-bento-img,
+.db-bento-small:hover .db-bento-img { transform:scale(1.07); }
+.db-bento-overlay {
+  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end;
+  padding:20px; background:linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.12) 60%, transparent 100%);
+}
+.db-bento-tag {
+  background:#ae131a; color:#fff; font-size:.62rem; font-weight:800;
+  text-transform:uppercase; padding:2px 10px; width:max-content; margin-bottom:10px; letter-spacing:.8px;
+}
+.db-bento-title { font-size:1.05rem; font-weight:800; color:#fff; line-height:1.25; font-family:'Public Sans',sans-serif; }
+.db-bento-title-ar { font-size:.72rem; color:rgba(255,255,255,.65); margin-top:4px; }
+.db-bento-small { position:relative; overflow:hidden; }
+.db-bento-event {
+  background:#fff; border-left:4px solid #ae131a; padding:18px;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.db-bento-event-tag { font-size:.65rem; font-weight:800; color:#ae131a; text-transform:uppercase; letter-spacing:.8px; }
+.db-bento-event-title { font-size:.95rem; font-weight:800; color:#1a1c1c; margin-top:6px; font-family:'Public Sans',sans-serif; line-height:1.25; }
+.db-bento-event-ar { font-size:.72rem; color:#5b403d; margin-top:4px; }
+.db-bento-event-date { display:flex; align-items:center; gap:6px; margin-top:12px; font-size:.72rem; font-weight:700; color:#ae131a; }
+
+/* Reclamation rows */
+.db-rec-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; border:1px solid #eeeeee;
+  background:#f9f9f9; transition:border-color .15s;
+}
+.db-rec-row:hover { border-color:#e4beba; }
+.db-rec-icon { width:44px; height:44px; border-radius:50%; background:rgba(174,19,26,.08); display:flex; align-items:center; justify-content:center; color:#ae131a; flex-shrink:0; }
+.db-status-badge { font-size:.65rem; font-weight:800; padding:4px 10px; text-transform:uppercase; letter-spacing:.5px; border-radius:2px; }
+
+/* Footer */
+.db-footer { background:#e8e8e8; padding:40px 48px; margin-top:0; border-top:1px solid transparent; }
+.db-footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:32px; }
+.db-footer-brand { font-size:1.05rem; font-weight:900; color:#ae131a; text-transform:uppercase; letter-spacing:-.3px; font-family:'Public Sans',sans-serif; }
+.db-footer-copy { font-size:.72rem; color:#5b403d; margin-top:4px; }
+.db-footer-heading { font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; color:#1a1c1c; }
+.db-footer-link { display:block; font-size:.75rem; color:#5b403d; text-decoration:none; margin-bottom:6px; }
+.db-footer-link:hover { color:#ae131a; }
+.db-footer-social { display:flex; gap:10px; margin-top:4px; }
+.db-footer-social-btn {
+  width:32px; height:32px; border-radius:50%; background:#dadada;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.8rem; color:#1a1c1c; transition:all .2s; text-decoration:none;
+}
+.db-footer-social-btn:hover { background:#ae131a; color:#fff; }
+.db-footer-bottom { margin-top:32px; padding-top:20px; border-top:1px solid rgba(26,28,28,.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+.db-footer-legal { font-size:.65rem; color:#5b403d; font-weight:500; text-transform:uppercase; letter-spacing:1px; }
+.db-footer-legal a { color:#5b403d; text-decoration:none; margin-left:20px; }
+.db-footer-legal a:hover { color:#ae131a; }
+
+@media (max-width:900px) {
+  .db-bento { grid-template-columns:1fr; height:auto; }
+  .db-bento-right { grid-template-rows:auto; }
+  .db-footer-grid { grid-template-columns:1fr; }
+}
+`
 
 export default function DashboardPage() {
   const { t, lang } = useI18n()
@@ -55,263 +179,307 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const access = getAccessToken()
-    if (!access) {
-      navigate('/login')
-      return
-    }
+    if (!access) { navigate('/login'); return }
     ;(async () => {
       try {
-        const res = await fetch('/api/accounts/me/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
+        const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
         if (res.ok) {
           const data = (await res.json()) as UserInfo
           setUser(data)
-          if (data.user_type === 'agent' || data.is_staff || data.is_superuser) {
-            navigate('/agent-dashboard')
-            return
-          }
+          if (data.user_type === 'agent' || data.is_staff || data.is_superuser) { navigate('/agent-dashboard'); return }
         }
+        const rRes = await fetch('/api/reclamations/', { headers: { Authorization: `Bearer ${access}` } })
+        if (rRes.ok) setReclamations(await rRes.json())
 
-        const rRes = await fetch('/api/reclamations/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
-        if (rRes.ok) {
-          const rData = await rRes.json()
-          setReclamations(rData)
-        }
+        const mRes = await fetch('/extrait-mariage/demandes/', { headers: { Authorization: `Bearer ${access}` } })
+        if (mRes.ok) { const d = await mRes.json(); setMarriageNotifications(d.filter((x: any) => x.status === 'signed')) }
 
-        const mRes = await fetch('/extrait-mariage/demandes/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
-        if (mRes.ok) {
-          const mData = await mRes.json()
-          const signed = mData.filter((d: any) => d.status === 'signed')
-          setMarriageNotifications(signed)
-        }
-
-        const nRes = await fetch('/api/forum/notifications/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
-        if (nRes.ok) {
-          const nData = (await nRes.json()) as ForumNotif[]
-          const unread = nData.filter((n) => !n.is_read).length
-          setForumUnread(unread)
-        }
+        const nRes = await fetch('/api/forum/notifications/', { headers: { Authorization: `Bearer ${access}` } })
+        if (nRes.ok) { const d = (await nRes.json()) as ForumNotif[]; setForumUnread(d.filter(n => !n.is_read).length) }
 
         const newsRes = await fetch('/api/news/')
         if (newsRes.ok) {
-          const newsData = await newsRes.json()
-          const list = Array.isArray(newsData) ? newsData : (newsData.results || [])
-          setNewsItems(list.slice(0, 3))
+          const d = await newsRes.json()
+          setNewsItems((Array.isArray(d) ? d : (d.results || [])).slice(0, 3))
         }
 
-        const lRes = await fetch('/livret-famille/demandes/', {
-          headers: { Authorization: `Bearer ${access}` },
-        })
-        if (lRes.ok) {
-          const lData = await lRes.json()
-          const ready = lData.filter((d: any) => d.status === 'ready')
-          setLivretNotifications(ready)
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setLoadingMap(false)
-      }
+        const lRes = await fetch('/livret-famille/demandes/', { headers: { Authorization: `Bearer ${access}` } })
+        if (lRes.ok) { const d = await lRes.json(); setLivretNotifications(d.filter((x: any) => x.status === 'ready')) }
+      } catch (e) { console.error(e) }
+      finally { setLoadingMap(false) }
     })()
   }, [navigate])
 
-  function logout() {
-    clearTokens()
-    navigate('/login')
-  }
+  function logout() { clearTokens(); navigate('/login') }
 
   const getMarkerIcon = (status: string) => {
-    const colorMap: Record<string, string> = {
-      pending: '#f57f17',
-      in_progress: '#1565c0',
-      resolved: '#2e7d32',
-      rejected: '#c62828',
-    }
-    const color = colorMap[status] || '#1565c0'
+    const colors: Record<string, string> = { pending: '#f57f17', in_progress: '#1565c0', resolved: '#2e7d32', rejected: '#c62828' }
+    const color = colors[status] || '#1565c0'
     return L.divIcon({
       className: 'custom-div-icon',
-      html: `<div style="background-color:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [14, 14],
-      iconAnchor: [7, 7]
+      html: `<div style="background:${color};width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 5px rgba(0,0,0,.3)"></div>`,
+      iconSize: [13, 13], iconAnchor: [6, 6],
     })
   }
 
-  /* ── Right sidebar: profile card ── */
-  const rightSidebarContent = (
-    <div className="space-y-4 pt-4">
-      {/* Profile Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 text-center relative overflow-hidden">
-        <div className="h-2 w-full" style={{ background: 'linear-gradient(135deg, #c61f2c, #dc2626)' }}></div>
-        <div className="p-6">
-          <div className="relative inline-block mb-4">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto border-4 border-white shadow-lg"
-              style={{ backgroundColor: '#c61f2c' }}
-            >
-              {user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar[0] : user.first_name[0]).toUpperCase() : '?'}
-            </div>
-            <span className="absolute bottom-1 right-1 w-5 h-5 bg-teal-500 border-4 border-white rounded-full block"></span>
+  const statusConfig: Record<string, { bg: string; color: string; label: string }> = {
+    pending:     { bg: '#fef2f2', color: '#ae131a', label: t('status_pending') },
+    in_progress: { bg: '#eff6ff', color: '#1565c0', label: t('status_in_progress') },
+    resolved:    { bg: '#f0fdf4', color: '#166534', label: t('status_resolved') },
+    rejected:    { bg: '#fef2f2', color: '#ae131a', label: t('status_rejected') },
+  }
+
+  const catIcons: Record<string, string> = {
+    lighting: 'fas fa-lightbulb', trash: 'fas fa-trash-alt',
+    roads: 'fas fa-road', noise: 'fas fa-volume-up', other: 'fas fa-exclamation-circle',
+  }
+
+  const userName = user
+    ? (lang === 'ar' && user.first_name_ar ? `${user.first_name_ar} ${user.last_name_ar ?? ''}` : `${user.first_name} ${user.last_name}`)
+    : t('loading')
+
+  const userInitial = user
+    ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar[0] : user.first_name[0]).toUpperCase()
+    : '?'
+
+  /* ── Right sidebar ── */
+  const rightSidebar = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 8 }}>
+      <style>{CSS}</style>
+
+      {/* Profile card */}
+      <div className="db-profile-card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+          <div className="db-profile-avatar">
+            <div className="db-profile-avatar-inner">{userInitial}</div>
           </div>
-          <h4 className="text-lg font-bold text-slate-900 mb-1">
-            {user ? (lang === 'ar' && user.first_name_ar ? `${user.first_name_ar} ${user.last_name_ar ?? ''}` : `${user.first_name} ${user.last_name}`) : t('loading')}
-          </h4>
-          <p className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: '#c61f2c' }}>
-            {user?.is_verified ? t('citoyen_role') : t('account_waiting_verification')}
-          </p>
-          <div className="grid grid-cols-2 gap-3 border-t border-slate-50 pt-4 text-left">
-            <div>
-              <p className="text-[10px] text-slate-400 uppercase font-black">{t('cin_label') || 'ID'}</p>
-              <p className="font-bold text-sm text-slate-700">
-                {user?.cin ? `****${user.cin.slice(-4)}` : '—'}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-400 uppercase font-black">{t('city_label') || 'Ville'}</p>
-              <p className="font-bold text-sm text-slate-700">{user?.city || 'Kélibia'}</p>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: '.95rem', color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>{userName}</div>
+            <div style={{ fontSize: '.72rem', color: '#5b403d', marginTop: 2 }}>
+              {user?.is_verified ? 'Citoyenne de Kélibia / مواطنة' : t('account_waiting_verification')}
             </div>
           </div>
-          <Link
-            to="/profile"
-            className="w-full mt-5 block py-2 rounded-lg text-center text-sm font-bold no-underline transition-colors"
-            style={{ border: '1px solid #fecaca', color: '#c61f2c' }}
-          >
-            {t('edit_profile') || 'Éditer mon profil'}
-          </Link>
         </div>
+        <div>
+          <div className="db-stat-row">
+            <span style={{ color: '#5b403d' }}>Mes Dossiers</span>
+            <span className="db-stat-badge">{String(reclamations.length).padStart(2, '0')}</span>
+          </div>
+          <div className="db-stat-row" style={{ borderBottom: 'none' }}>
+            <span style={{ color: '#5b403d' }}>Points Fidélité</span>
+            <span style={{ fontWeight: 800, color: '#1a1c1c' }}>1 240 pts</span>
+          </div>
+        </div>
+        <Link
+          to="/profile"
+          style={{ display: 'block', width: '100%', marginTop: 18, padding: '10px', textAlign: 'center', background: '#e8e8e8', color: '#1a1c1c', fontWeight: 800, fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', transition: 'background .2s' }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#dadada')}
+          onMouseLeave={e => (e.currentTarget.style.background = '#e8e8e8')}
+        >
+          Mon Compte
+        </Link>
       </div>
 
-      {/* Quick action buttons */}
-      <Link
-        to="/mes-reclamations"
-        className="w-full block py-3 rounded-lg text-center text-sm font-bold text-white no-underline shadow-sm"
-        style={{ backgroundColor: '#0d1b2e' }}
-      >
-        <i className="fas fa-list-check me-2"></i>{t('view_my_reclamations')}
+      {/* Big red CTA */}
+      <Link to="/nouvelle-reclamation" className="db-signalement-btn">
+        <i className="fas fa-plus-circle"></i>
+        NOUVEAU SIGNALEMENT
       </Link>
-      <Link
-        to="/nouvelle-reclamation"
-        className="w-full block py-3 rounded-lg text-center text-sm font-bold no-underline bg-white border border-slate-200 hover:bg-red-50 transition-colors"
-        style={{ color: '#0d1b2e' }}
-      >
-        <i className="fas fa-plus-circle me-2" style={{ color: '#c61f2c' }}></i>{t('new_signalement')}
-      </Link>
+
+      {/* Recent news list */}
+      <div style={{ background: '#fff', padding: '24px' }}>
+        <div style={{ fontWeight: 800, fontSize: '.9rem', color: '#1a1c1c', textTransform: 'uppercase', letterSpacing: '.5px', paddingBottom: 8, borderBottom: '2px solid #ae131a', display: 'inline-block', marginBottom: 20, fontFamily: 'Public Sans,sans-serif' }}>
+          Actualités Récentes
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {newsItems.length > 0 ? newsItems.map(item => (
+            <Link key={item.id} to="/news" className="db-news-item" style={{ textDecoration: 'none' }}>
+              <span className="db-news-time">
+                {new Date(item.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
+              </span>
+              <div className="db-news-headline">{item.title}</div>
+            </Link>
+          )) : (
+            <>
+              <div className="db-news-item">
+                <span className="db-news-time">IL Y A 2 HEURES</span>
+                <div className="db-news-headline">Coupure d'eau programmée — Quartier El-Frin</div>
+                <div className="db-news-ar">انقطاع مبرمج للمياه - حي الفرين</div>
+              </div>
+              <div className="db-news-item">
+                <span className="db-news-time">HIER</span>
+                <div className="db-news-headline">Collecte des ordures ménagères (Horaires Été)</div>
+                <div className="db-news-ar">جمع الفضلات المنزلية (توقيت صيفي)</div>
+              </div>
+              <div className="db-news-item">
+                <span className="db-news-time">15 MAI</span>
+                <div className="db-news-headline">Travaux de voirie : Avenue Bourguiba</div>
+                <div className="db-news-ar">أشغال صيانة الطرقات: شارع بورقيبة</div>
+              </div>
+            </>
+          )}
+        </div>
+        <Link
+          to="/news"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 20, fontSize: '.72rem', fontWeight: 800, color: '#ae131a', textDecoration: 'none', textTransform: 'uppercase', borderBottom: '2px solid rgba(174,19,26,.2)', paddingBottom: 2 }}
+        >
+          Voir tout le flux <i className="fas fa-arrow-right" style={{ fontSize: '.7rem' }}></i>
+        </Link>
+      </div>
+
+      {/* Urgence panel */}
+      <div className="db-urgence">
+        <div className="db-urgence-title">Urgence / طوارئ</div>
+        <div className="db-urgence-row">
+          <span className="db-urgence-label">Protection Civile</span>
+          <span className="db-urgence-number">198</span>
+        </div>
+        <div className="db-urgence-row" style={{ marginBottom: 0 }}>
+          <span className="db-urgence-label">S.O.S Municipalité</span>
+          <span className="db-urgence-number">72 295 034</span>
+        </div>
+      </div>
     </div>
   )
 
   return (
-    <MainLayout
-      user={user}
-      onLogout={logout}
-      showHero={true}
-      rightSidebar={rightSidebarContent}
-    >
-      {/* ── ALERTS ── */}
+    <MainLayout user={user} onLogout={logout} showHero={true} rightSidebar={rightSidebar}>
+      <style>{CSS}</style>
+
+      {/* ── Alerts ── */}
       {user && !user.is_verified && (
-        <div className="flex items-start gap-3 p-4 mb-4 rounded-xl border-l-4 border-yellow-400 bg-yellow-50">
-          <i className="fas fa-exclamation-triangle text-2xl text-yellow-500 mt-1"></i>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 18px', marginBottom: 18, borderLeft: '4px solid #f59e0b', background: '#fffbeb', borderRadius: 2 }}>
+          <i className="fas fa-exclamation-triangle" style={{ color: '#d97706', marginTop: 2 }}></i>
           <div>
-            <h5 className="font-bold text-yellow-800 mb-1">{t('account_waiting_verification')}</h5>
-            <p className="text-sm text-yellow-700 mb-0">{t('unverified_msg')}</p>
+            <div style={{ fontWeight: 700, color: '#92400e', marginBottom: 2 }}>{t('account_waiting_verification')}</div>
+            <div style={{ fontSize: '.82rem', color: '#b45309' }}>{t('unverified_msg')}</div>
           </div>
         </div>
       )}
 
       {marriageNotifications.length > 0 && (
-        <div className="flex items-center gap-3 p-4 mb-4 rounded-xl bg-blue-50 border border-blue-100">
-          <i className="fas fa-ring text-blue-500 text-lg"></i>
-          <div className="flex-1">
-            <h6 className="font-bold text-blue-800 mb-0">{t('notification_mariage_signed')}</h6>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', marginBottom: 16, background: '#eff6ff', borderLeft: '4px solid #2563eb', borderRadius: 2 }}>
+          <i className="fas fa-ring" style={{ color: '#2563eb' }}></i>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, color: '#1e40af' }}>{t('notification_mariage_signed')}</div>
           </div>
-          <Link to="/mes-mariages" className="px-4 py-2 rounded-full text-sm font-bold text-white no-underline" style={{ backgroundColor: '#1565c0' }}>
+          <Link to="/mes-mariages" style={{ padding: '6px 16px', background: '#1565c0', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', borderRadius: 999 }}>
             {t('view_mariage_cert')}
           </Link>
         </div>
       )}
 
-      {livretNotifications.length > 0 && livretNotifications.map((notif: any) => (
-        <div key={notif.id} className="flex items-center gap-3 p-4 mb-4 rounded-xl bg-green-50 border border-green-100">
-          <i className="fas fa-book-open text-green-600 text-lg"></i>
-          <div className="flex-1">
-            <h6 className="font-bold text-green-800 mb-1">{t('livret_famille_ready')}</h6>
-            <p className="text-sm text-green-700 mb-0">
-              {t('livret_famille_ready_msg').replace('{guichet}', notif.guichet_recuperation || '..')}
-            </p>
+      {livretNotifications.map((notif: any) => (
+        <div key={notif.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', marginBottom: 16, background: '#f0fdf4', borderLeft: '4px solid #22c55e', borderRadius: 2 }}>
+          <i className="fas fa-book-open" style={{ color: '#16a34a' }}></i>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, color: '#166534' }}>{t('livret_famille_ready')}</div>
+            <div style={{ fontSize: '.78rem', color: '#15803d' }}>{t('livret_famille_ready_msg').replace('{guichet}', notif.guichet_recuperation || '..')}</div>
           </div>
-          <Link to="/mes-demandes" className="px-4 py-2 rounded-full text-sm font-bold text-white no-underline" style={{ backgroundColor: '#2e7d32' }}>
+          <Link to="/mes-demandes" style={{ padding: '6px 16px', background: '#166534', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', borderRadius: 999 }}>
             {t('view_requests')}
           </Link>
         </div>
       ))}
 
-      {/* ── QUICK ACTIONS ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-6 overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-end">
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 mb-1">{lang === 'ar' ? 'الخدمات الإدارية' : 'Services Administratifs'}</h3>
-            <p className="text-slate-500 text-sm mb-0">{t('quick_actions')}</p>
-          </div>
-          <span className="text-xs font-black uppercase tracking-widest" style={{ color: '#c61f2c' }}>E-Services</span>
+      {/* ── Quick Actions ── */}
+      <div style={{ marginBottom: 36 }}>
+        <div className="db-section-bar">
+          <h3 className="db-section-title">Actions Rapides / إجراءات سريعة</h3>
         </div>
-        <div className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle', label: t('new_reclamation'), ar: 'بلاغ جديد' },
-              { to: '/mes-extraits', icon: 'fas fa-file-contract', label: t('extraits_hub_title'), ar: 'وثائق الحالة المدنية' },
-              { to: '/mes-reclamations', icon: 'fas fa-bullhorn', label: t('my_reclamations'), ar: 'بلاغاتي' },
-              { to: '/mes-demandes', icon: 'fas fa-tasks', label: t('my_requests'), ar: 'طلباتي' },
-              { to: '/services', icon: 'fas fa-file-invoice', label: t('admin_services'), ar: 'الخدمات' },
-              { to: '/news', icon: 'fas fa-newspaper', label: t('news_title'), ar: 'الأخبار' },
-              { to: '/demande-construction', icon: 'fas fa-hard-hat', label: 'Permis de construire', ar: 'رخصة البناء' },
-              { to: '/forum', icon: 'fas fa-comments', label: t('forum') || 'Forum', ar: 'المنتدى' },
-            ].map(item => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex flex-col items-center p-5 rounded-xl no-underline transition-all duration-300 group border border-transparent hover:border-red-100"
-                style={{ backgroundColor: '#f8fafc' }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fff7ed')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-              >
-                <i className={`${item.icon} text-3xl mb-3 group-hover:scale-110 transition-transform`} style={{ color: '#c61f2c' }}></i>
-                <span className="font-bold text-sm text-slate-800 text-center">{item.label}</span>
-                <span className="text-xs text-slate-400 mt-1 text-center" dir="rtl">{item.ar}</span>
-              </Link>
-            ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {[
+            { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle',   label: 'Nouvelle Réclamation', ar: 'بلاغ جديد' },
+            { to: '/mes-extraits',         icon: 'fas fa-file-contract', label: 'Extraits de Naissance', ar: 'مضمون ولادة' },
+            { to: '/services',             icon: 'fas fa-receipt',       label: 'Payer mes Taxes',       ar: 'دفع الأداءات' },
+            { to: '/mes-demandes',         icon: 'fas fa-calendar-alt',  label: 'Prendre RDV',           ar: 'موعد إداري' },
+            { to: '/demande-construction', icon: 'fas fa-hard-hat',      label: 'Permis Construire',     ar: 'رخصة بناء' },
+            { to: '/news',                 icon: 'fas fa-leaf',          label: 'Déchets Verts',         ar: 'نفايات خضراء' },
+            { to: '/nouvelle-reclamation', icon: 'fas fa-traffic-light', label: 'Signalisation',         ar: 'إشارات المرور' },
+            { to: '/dashboard',            icon: 'fas fa-map',           label: 'Plan de la Ville',      ar: 'خارطة المدينة' },
+          ].map(item => (
+            <Link key={item.to + item.label} to={item.to} className="db-action-card">
+              <div className="db-action-icon"><i className={item.icon}></i></div>
+              <span className="db-action-label">{item.label}</span>
+              <span className="db-action-ar" dir="rtl">{item.ar}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── À la une bento ── */}
+      <div style={{ marginBottom: 36 }}>
+        <div className="db-section-bar">
+          <h3 className="db-section-title">À la une / في الواجهة</h3>
+        </div>
+        <div className="db-bento">
+          {/* Main big card */}
+          <div className="db-bento-main">
+            <img
+              className="db-bento-img"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnjCa6-dmd3BLgi5E0T_2-4TuU3EovbMFAP5U8hdFsOAG_ef4RxyBiSVmO2eYsjjM7EgTO8ZSQGWIqzsrq4_bGzK4RuswVoPTl4Tl_ZlaYQe7Hwj3hGvq0ygaykpry3zA74ORn0yBReZ_dJPX41Erk-Mmgz7TQBAC7FPHJjLMxcNXZc8FkclQPVy1KOMC_3BgG1uveNIi8LKf6CXq4JWubyq_KHsIbJqR-jj01cPuzgrVdOgoeXOCDyLDx3zW4wK7bIvLUo5EtLRFC"
+              alt="News"
+            />
+            <div className="db-bento-overlay">
+              <span className="db-bento-tag">Actualité</span>
+              <div className="db-bento-title">Inauguration du nouveau complexe sportif de Mansoura</div>
+              <div className="db-bento-title-ar" dir="rtl">افتتاح المجمع الرياضي الجديد بالمنصورة</div>
+            </div>
+          </div>
+
+          {/* Right column */}
+          <div className="db-bento-right">
+            {/* Small image */}
+            <div className="db-bento-small">
+              <img
+                className="db-bento-img"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrsOubuvyfq-huir9vWevBAFEdCYz8vgBvgwY4AYvPXAnr-ocRj8bRXSMGMMuGeiILsBHRS1YyiimHsIm0waV7vBO69A3I7dPUDWRD-Z0uYyXaMtF0sehIshPnJjdEmaXmEQL1WTA41SDW04p46dUjFxry3wls7r-4frR8pX9DzvKTW0uSx_8V-MtT8VflVWOEUWKicPXVNQFNkx8ivU1mihilQd6Gs6qaGdGaTpc08iei0-Dhh8hE-hczfdaPxiaCeUbrf7LOaucZ"
+                alt="News"
+              />
+              <div className="db-bento-overlay">
+                <div style={{ fontSize: '.88rem', fontWeight: 800, color: '#fff', fontFamily: 'Public Sans,sans-serif' }}>Aménagement du marché central</div>
+                <div style={{ fontSize: '.68rem', color: 'rgba(255,255,255,.65)', marginTop: 3 }} dir="rtl">تهيئة السوق المركزي</div>
+              </div>
+            </div>
+
+            {/* Event card */}
+            <div className="db-bento-event">
+              <span className="db-bento-event-tag">Prochain Événement</span>
+              <div className="db-bento-event-title">Festival de la Pêche au Jarret</div>
+              <div className="db-bento-event-ar" dir="rtl">مهرجان صيد القرنيط بقليبية</div>
+              <div className="db-bento-event-date">
+                <i className="fas fa-calendar-alt"></i>
+                <span>24 JUILLET 2024</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── MAP CARD ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-6 overflow-hidden" id="mapCard">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+      {/* ── Map ── */}
+      <div style={{ background: '#fff', marginBottom: 36, border: '1px solid #eeeeee' }} id="mapCard">
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h3 className="font-bold text-lg text-slate-900 mb-0">{t('map_title_realtime')}</h3>
-            <p className="text-xs text-slate-500 mb-0">{lang === 'ar' ? 'تحديث فوري على البلدية' : 'Mise à jour en temps réel sur la commune'}</p>
+            <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>{t('map_title_realtime')}</div>
+            <div style={{ fontSize: '.72rem', color: '#5b403d' }}>{lang === 'ar' ? 'تحديث فوري على البلدية' : 'Mise à jour en temps réel sur la commune'}</div>
           </div>
-          <div className="flex gap-4">
+          <div style={{ display: 'flex', gap: 14 }}>
             {[
               { color: '#f57f17', label: lang === 'ar' ? 'بانتظار' : 'En attente' },
               { color: '#1565c0', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours' },
               { color: '#2e7d32', label: lang === 'ar' ? 'محلول' : 'Résolu' },
               { color: '#c62828', label: lang === 'ar' ? 'مرفوض' : 'Rejeté' },
-            ].map(item => (
-              <div key={item.label} className="flex items-center gap-1 text-xs text-slate-600">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
-                {item.label}
+            ].map(i => (
+              <div key={i.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '.72rem', color: '#5b403d' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: i.color, display: 'inline-block' }}></span>
+                {i.label}
               </div>
             ))}
           </div>
         </div>
-        <div style={{ height: '400px', position: 'relative' }}>
+        <div style={{ height: 360, position: 'relative' }}>
           {loadingMap ? (
-            <div className="w-full h-full flex items-center justify-center bg-slate-50">
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9f9f9' }}>
               <div className="spinner-border text-primary" role="status"></div>
             </div>
           ) : (
@@ -329,11 +497,11 @@ export default function DashboardPage() {
                 rec.latitude && rec.longitude && (
                   <Marker key={rec.id} position={[rec.latitude, rec.longitude]} icon={getMarkerIcon(rec.status)}>
                     <Popup>
-                      <div className="p-1">
-                        <div className="fw-bold text-primary mb-1">{rec.title}</div>
-                        <div className="small text-muted mb-2">{rec.description}</div>
-                        <span className={`badge bg-${rec.status === 'resolved' ? 'success' : rec.status === 'rejected' ? 'danger' : rec.status === 'in_progress' ? 'primary' : 'warning'} small`}>
-                          {t('status_' + rec.status)}
+                      <div style={{ padding: 4 }}>
+                        <div style={{ fontWeight: 700, marginBottom: 4 }}>{rec.title}</div>
+                        <div style={{ fontSize: '.78rem', color: '#5b403d', marginBottom: 6 }}>{rec.description}</div>
+                        <span style={{ ...statusConfig[rec.status], padding: '2px 8px', fontSize: '.65rem', fontWeight: 800, borderRadius: 2 }}>
+                          {statusConfig[rec.status]?.label}
                         </span>
                       </div>
                     </Popup>
@@ -345,132 +513,112 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── MES SIGNALEMENTS ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-6">
-        <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-lg text-slate-900 mb-0">{lang === 'ar' ? 'بلاغاتي' : 'Mes Signalements'}</h3>
+      {/* ── Mes signalements ── */}
+      <div style={{ background: '#fff', border: '1px solid #eeeeee', marginBottom: 36 }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontWeight: 800, fontSize: '1rem', margin: 0, fontFamily: 'Public Sans,sans-serif', color: '#1a1c1c' }}>
+            {lang === 'ar' ? 'بلاغاتي' : 'Mes Signalements'}
+          </h3>
           <Link
             to="/nouvelle-reclamation"
-            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white no-underline shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #c61f2c, #dc2626)' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: '#ae131a', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
           >
-            <i className="fas fa-plus-circle text-xs"></i>
+            <i className="fas fa-plus-circle"></i>
             {lang === 'ar' ? 'بلاغ جديد' : 'Nouveau Signalement'}
           </Link>
         </div>
-        <div className="p-4 space-y-3">
+        <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {reclamations.slice(0, 3).length === 0 ? (
-            <p className="text-center text-slate-400 py-6 text-sm">{t('no_reclamations') || 'Aucun signalement pour l\'instant'}</p>
+            <p style={{ textAlign: 'center', color: '#9ca3af', padding: '24px 0', fontSize: '.85rem' }}>
+              {t('no_reclamations') || "Aucun signalement pour l'instant"}
+            </p>
           ) : (
             reclamations.slice(0, 3).map((rec: any) => {
-              const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-                pending: { bg: 'bg-red-100', text: 'text-red-800', label: t('status_pending') },
-                in_progress: { bg: 'bg-blue-100', text: 'text-blue-800', label: t('status_in_progress') },
-                resolved: { bg: 'bg-green-100', text: 'text-green-800', label: t('status_resolved') },
-                rejected: { bg: 'bg-red-100', text: 'text-red-800', label: t('status_rejected') },
-              }
-              const sc = statusColors[rec.status] || statusColors['pending']
-              const catIcons: Record<string, string> = {
-                lighting: 'fas fa-lightbulb',
-                trash: 'fas fa-trash-alt',
-                roads: 'fas fa-road',
-                noise: 'fas fa-volume-up',
-                other: 'fas fa-exclamation-circle',
-              }
+              const sc = statusConfig[rec.status] || statusConfig['pending']
               return (
-                <div key={rec.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-100 hover:border-red-200 transition-colors" style={{ backgroundColor: '#f8fafc' }}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-red-700 bg-red-100">
+                <div key={rec.id} className="db-rec-row">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div className="db-rec-icon">
                       <i className={catIcons[rec.category] || 'fas fa-exclamation-circle'}></i>
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-slate-800 mb-0">{rec.title}</p>
-                      <p className="text-xs text-slate-400 mb-0">
+                      <div style={{ fontWeight: 700, fontSize: '.85rem', color: '#1a1c1c' }}>{rec.title}</div>
+                      <div style={{ fontSize: '.7rem', color: '#5b403d', marginTop: 2 }}>
                         {new Date(rec.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long' })}
-                      </p>
+                      </div>
                     </div>
                   </div>
-                  <span className={`${sc.bg} ${sc.text} text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter`}>
-                    {sc.label}
-                  </span>
+                  <span className="db-status-badge" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
                 </div>
               )
             })
           )}
           {reclamations.length > 3 && (
-            <Link to="/mes-reclamations" className="block text-center text-sm font-bold no-underline py-2 hover:underline" style={{ color: '#c61f2c' }}>
+            <Link to="/mes-reclamations" style={{ textAlign: 'center', display: 'block', fontSize: '.78rem', fontWeight: 700, color: '#ae131a', textDecoration: 'none', padding: '10px 0' }}>
               {t('view_all') || 'Voir tout'} ({reclamations.length})
             </Link>
           )}
         </div>
       </div>
 
-      {/* ── FORUM CARD ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-6" style={{ borderLeft: '4px solid #7c3aed' }}>
-        <div className="px-6 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-              <i className="fas fa-comments text-purple-600"></i>
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 mb-0">
-                {t('forum')}
-                {forumUnread > 0 && (
-                  <span className="ms-2 badge rounded-pill bg-danger" style={{ fontSize: '0.65rem' }}>{forumUnread}</span>
-                )}
-              </h3>
-              <p className="text-xs text-slate-500 mb-0">{t('forum_desc')}</p>
-            </div>
+      {/* ── Forum card ── */}
+      <div style={{ background: '#fff', border: '1px solid #eeeeee', borderLeft: '4px solid #7c3aed', padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(124,58,237,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', fontSize: '1rem' }}>
+            <i className="fas fa-comments"></i>
           </div>
-          <Link
-            to="/forum"
-            className="px-5 py-2 rounded-lg text-sm font-bold no-underline transition-colors border"
-            style={{ borderColor: '#7c3aed', color: '#7c3aed' }}
-          >
-            <i className="fas fa-arrow-right me-2"></i>{t('forum')}
-          </Link>
+          <div>
+            <div style={{ fontWeight: 800, color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>
+              {t('forum')}
+              {forumUnread > 0 && (
+                <span style={{ marginLeft: 8, background: '#ae131a', color: '#fff', fontSize: '.62rem', fontWeight: 800, padding: '1px 7px', borderRadius: 999 }}>{forumUnread}</span>
+              )}
+            </div>
+            <div style={{ fontSize: '.75rem', color: '#5b403d', marginTop: 2 }}>{t('forum_desc')}</div>
+          </div>
         </div>
+        <Link
+          to="/forum"
+          style={{ padding: '8px 18px', border: '1.5px solid #7c3aed', color: '#7c3aed', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          <i className="fas fa-arrow-right"></i> {t('forum')}
+        </Link>
       </div>
 
-      {/* ── NEWS ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-lg text-slate-900 mb-0">{t('news_title')}</h3>
-          <div className="flex gap-2">
-            <Link to="/evenements" className="px-4 py-2 rounded-lg text-xs font-bold text-white no-underline" style={{ backgroundColor: '#7c3aed' }}>
-              <i className="fas fa-calendar-star me-1"></i>{t('events_public')}
-            </Link>
-            <Link to="/news" className="px-4 py-2 rounded-lg text-xs font-bold text-white no-underline" style={{ backgroundColor: '#1565c0' }}>
-              <i className="fas fa-arrow-right me-1"></i>{t('see_all_news')}
-            </Link>
+      {/* ── Footer ── */}
+      <div className="db-footer" style={{ marginLeft: -32, marginRight: -32, marginBottom: -24 }}>
+        <div className="db-footer-grid">
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <i className="fas fa-landmark" style={{ color: '#ae131a', fontSize: '1.1rem' }}></i>
+              <span className="db-footer-brand">VILLE DE KÉLIBIA</span>
+            </div>
+            <p style={{ fontSize: '.75rem', color: '#5b403d', lineHeight: 1.65, maxWidth: 340, margin: 0 }}>
+              Portail citoyen officiel de la ville de Kélibia. Un service de proximité moderne pour faciliter vos démarches administratives.
+            </p>
+          </div>
+          <div>
+            <div className="db-footer-heading">Liens Utiles</div>
+            <a href="#" className="db-footer-link">Mairie &amp; Conseil</a>
+            <a href="#" className="db-footer-link">Culture &amp; Patrimoine</a>
+            <a href="#" className="db-footer-link">Tourisme</a>
+            <a href="#" className="db-footer-link">Plan de ville</a>
+          </div>
+          <div>
+            <div className="db-footer-heading">Suivez-nous</div>
+            <div className="db-footer-social">
+              <a href="#" className="db-footer-social-btn"><i className="fas fa-globe"></i></a>
+              <a href="#" className="db-footer-social-btn"><i className="fas fa-share-alt"></i></a>
+              <a href="#" className="db-footer-social-btn"><i className="fas fa-envelope"></i></a>
+            </div>
           </div>
         </div>
-        <div className="p-4 space-y-3">
-          {newsItems.length === 0 ? (
-            <>
-              {[t('news_item_1'), t('news_item_2')].map((text, i) => (
-                <div key={i} className="flex items-start gap-3 py-2">
-                  <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#c61f2c' }}></span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-700 mb-0">{text}</p>
-                    <p className="text-xs text-slate-400 mt-1 mb-0">{i === 0 ? t('news_date_1') : t('news_date_2')}</p>
-                  </div>
-                </div>
-              ))}
-            </>
-          ) : (
-            newsItems.map(item => (
-              <Link key={item.id} to="/news" className="flex items-start gap-3 py-2 no-underline" style={{ color: 'inherit' }}>
-                <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#c61f2c' }}></span>
-                <div>
-                  <p className="text-sm font-medium text-slate-700 mb-0">{item.title}</p>
-                  <p className="text-xs text-slate-400 mt-1 mb-0">
-                    {new Date(item.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-              </Link>
-            ))
-          )}
+        <div className="db-footer-bottom">
+          <span className="db-footer-legal">© 2024 Commune de Kélibia — Tous droits réservés</span>
+          <div>
+            <a href="#" className="db-footer-legal" style={{ marginLeft: 0 }}>Mentions Légales</a>
+            <a href="#" className="db-footer-legal">Confidentialité</a>
+          </div>
         </div>
       </div>
     </MainLayout>
