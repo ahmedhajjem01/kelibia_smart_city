@@ -36,8 +36,8 @@ type ForumNotif = { id: number; is_read: boolean }
 const CSS = `
 .db-section-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
 .db-section-title {
-  font-size:1.25rem; font-weight:800; color:#1a1c1c;
-  display:flex; align-items:center; gap:12px;
+  font-size:1rem; font-weight:800; color:#1a1c1c;
+  display:flex; align-items:center; gap:10px;
   font-family:'Public Sans',sans-serif;
 }
 .db-section-title::before {
@@ -46,7 +46,7 @@ const CSS = `
 }
 .db-action-card {
   display:flex; flex-direction:column; align-items:center; text-align:center;
-  padding:22px 12px; background:#fff; border:1px solid transparent;
+  padding:14px 8px; background:#fff; border:1px solid transparent;
   transition:all .2s; cursor:pointer; text-decoration:none; color:inherit;
 }
 .db-action-card:hover {
@@ -54,14 +54,13 @@ const CSS = `
   box-shadow:0 12px 32px -4px rgba(26,28,28,.07);
 }
 .db-action-icon {
-  width:48px; height:48px; border-radius:50%;
+  width:38px; height:38px; border-radius:50%;
   background:rgba(210,49,47,.08); display:flex; align-items:center;
-  justify-content:center; margin-bottom:12px; transition:transform .2s;
-  color:#ae131a; font-size:1.3rem;
+  justify-content:center; margin-bottom:8px; transition:transform .2s;
+  color:#ae131a; font-size:1rem;
 }
-.db-action-card:hover .db-action-icon { transform:scale(1.12); }
-.db-action-label { font-size:.72rem; font-weight:700; color:#1a1c1c; text-transform:uppercase; letter-spacing:.5px; line-height:1.3; }
-.db-action-ar { font-size:.65rem; color:#5b403d; margin-top:3px; }
+.db-action-card:hover .db-action-icon { transform:scale(1.1); }
+.db-action-label { font-size:.65rem; font-weight:700; color:#1a1c1c; text-transform:uppercase; letter-spacing:.4px; line-height:1.3; }
 
 /* Right sidebar */
 .db-profile-card { background:#fff; padding:28px; box-shadow:0 12px 32px -4px rgba(26,28,28,.06); }
@@ -254,9 +253,9 @@ export default function DashboardPage() {
             <div className="db-profile-avatar-inner">{userInitial}</div>
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '.95rem', color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>{userName}</div>
-            <div style={{ fontSize: '.72rem', color: '#5b403d', marginTop: 2 }}>
-              {user?.is_verified ? 'Citoyenne de Kélibia / مواطنة' : t('account_waiting_verification')}
+            <div style={{ fontWeight: 800, fontSize: '.88rem', color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>{userName}</div>
+            <div style={{ fontSize: '.7rem', color: '#5b403d', marginTop: 2 }}>
+              {user?.is_verified ? t('citoyen_role') : t('account_waiting_verification')}
             </div>
           </div>
         </div>
@@ -288,8 +287,8 @@ export default function DashboardPage() {
 
       {/* Recent news list */}
       <div style={{ background: '#fff', padding: '24px' }}>
-        <div style={{ fontWeight: 800, fontSize: '.9rem', color: '#1a1c1c', textTransform: 'uppercase', letterSpacing: '.5px', paddingBottom: 8, borderBottom: '2px solid #ae131a', display: 'inline-block', marginBottom: 20, fontFamily: 'Public Sans,sans-serif' }}>
-          Actualités Récentes
+        <div style={{ fontWeight: 800, fontSize: '.82rem', color: '#1a1c1c', textTransform: 'uppercase', letterSpacing: '.5px', paddingBottom: 6, borderBottom: '2px solid #ae131a', display: 'inline-block', marginBottom: 16, fontFamily: 'Public Sans,sans-serif' }}>
+          {t('news_title')}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {newsItems.length > 0 ? newsItems.map(item => (
@@ -302,19 +301,12 @@ export default function DashboardPage() {
           )) : (
             <>
               <div className="db-news-item">
-                <span className="db-news-time">IL Y A 2 HEURES</span>
-                <div className="db-news-headline">Coupure d'eau programmée — Quartier El-Frin</div>
-                <div className="db-news-ar">انقطاع مبرمج للمياه - حي الفرين</div>
+                <span className="db-news-time">{t('news_date_1')}</span>
+                <div className="db-news-headline">{t('news_item_1')}</div>
               </div>
               <div className="db-news-item">
-                <span className="db-news-time">HIER</span>
-                <div className="db-news-headline">Collecte des ordures ménagères (Horaires Été)</div>
-                <div className="db-news-ar">جمع الفضلات المنزلية (توقيت صيفي)</div>
-              </div>
-              <div className="db-news-item">
-                <span className="db-news-time">15 MAI</span>
-                <div className="db-news-headline">Travaux de voirie : Avenue Bourguiba</div>
-                <div className="db-news-ar">أشغال صيانة الطرقات: شارع بورقيبة</div>
+                <span className="db-news-time">{t('news_date_2')}</span>
+                <div className="db-news-headline">{t('news_item_2')}</div>
               </div>
             </>
           )}
@@ -329,13 +321,13 @@ export default function DashboardPage() {
 
       {/* Urgence panel */}
       <div className="db-urgence">
-        <div className="db-urgence-title">Urgence / طوارئ</div>
+        <div className="db-urgence-title">{lang === 'ar' ? 'طوارئ' : 'Urgence'}</div>
         <div className="db-urgence-row">
-          <span className="db-urgence-label">Protection Civile</span>
+          <span className="db-urgence-label">{lang === 'ar' ? 'الحماية المدنية' : 'Protection Civile'}</span>
           <span className="db-urgence-number">198</span>
         </div>
         <div className="db-urgence-row" style={{ marginBottom: 0 }}>
-          <span className="db-urgence-label">S.O.S Municipalité</span>
+          <span className="db-urgence-label">{lang === 'ar' ? 'طوارئ البلدية' : 'S.O.S Municipalité'}</span>
           <span className="db-urgence-number">72 295 034</span>
         </div>
       </div>
@@ -383,34 +375,33 @@ export default function DashboardPage() {
       ))}
 
       {/* ── Quick Actions ── */}
-      <div style={{ marginBottom: 36 }}>
+      <div style={{ marginBottom: 28 }}>
         <div className="db-section-bar">
-          <h3 className="db-section-title">Actions Rapides / إجراءات سريعة</h3>
+          <h3 className="db-section-title">{t('quick_actions')}</h3>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
           {[
-            { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle',   label: 'Nouvelle Réclamation', ar: 'بلاغ جديد' },
-            { to: '/mes-extraits',         icon: 'fas fa-file-contract', label: 'Extraits de Naissance', ar: 'مضمون ولادة' },
-            { to: '/services',             icon: 'fas fa-receipt',       label: 'Payer mes Taxes',       ar: 'دفع الأداءات' },
-            { to: '/mes-demandes',         icon: 'fas fa-calendar-alt',  label: 'Prendre RDV',           ar: 'موعد إداري' },
-            { to: '/demande-construction', icon: 'fas fa-hard-hat',      label: 'Permis Construire',     ar: 'رخصة بناء' },
-            { to: '/news',                 icon: 'fas fa-leaf',          label: 'Déchets Verts',         ar: 'نفايات خضراء' },
-            { to: '/nouvelle-reclamation', icon: 'fas fa-traffic-light', label: 'Signalisation',         ar: 'إشارات المرور' },
-            { to: '/dashboard',            icon: 'fas fa-map',           label: 'Plan de la Ville',      ar: 'خارطة المدينة' },
+            { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle',   labelKey: 'new_reclamation' },
+            { to: '/mes-extraits',         icon: 'fas fa-file-contract', labelKey: 'extraits_hub_title' },
+            { to: '/services',             icon: 'fas fa-receipt',       labelKey: 'admin_services' },
+            { to: '/mes-demandes',         icon: 'fas fa-calendar-alt',  labelKey: 'my_requests' },
+            { to: '/demande-construction', icon: 'fas fa-hard-hat',      labelKey: 'permis_construire' },
+            { to: '/news',                 icon: 'fas fa-leaf',          labelKey: 'news_title' },
+            { to: '/nouvelle-reclamation', icon: 'fas fa-traffic-light', labelKey: 'new_signalement' },
+            { to: '/forum',                icon: 'fas fa-comments',      labelKey: 'forum' },
           ].map(item => (
-            <Link key={item.to + item.label} to={item.to} className="db-action-card">
+            <Link key={item.to + item.labelKey} to={item.to} className="db-action-card">
               <div className="db-action-icon"><i className={item.icon}></i></div>
-              <span className="db-action-label">{item.label}</span>
-              <span className="db-action-ar" dir="rtl">{item.ar}</span>
+              <span className="db-action-label">{t(item.labelKey)}</span>
             </Link>
           ))}
         </div>
       </div>
 
       {/* ── À la une bento ── */}
-      <div style={{ marginBottom: 36 }}>
+      <div style={{ marginBottom: 28 }}>
         <div className="db-section-bar">
-          <h3 className="db-section-title">À la une / في الواجهة</h3>
+          <h3 className="db-section-title">{t('news_title')}</h3>
         </div>
         <div className="db-bento">
           {/* Main big card */}
@@ -421,9 +412,8 @@ export default function DashboardPage() {
               alt="News"
             />
             <div className="db-bento-overlay">
-              <span className="db-bento-tag">Actualité</span>
-              <div className="db-bento-title">Inauguration du nouveau complexe sportif de Mansoura</div>
-              <div className="db-bento-title-ar" dir="rtl">افتتاح المجمع الرياضي الجديد بالمنصورة</div>
+              <span className="db-bento-tag">{lang === 'ar' ? 'خبر' : 'Actualité'}</span>
+              <div className="db-bento-title">{lang === 'ar' ? 'افتتاح المجمع الرياضي الجديد بالمنصورة' : 'Inauguration du nouveau complexe sportif de Mansoura'}</div>
             </div>
           </div>
 
@@ -437,16 +427,14 @@ export default function DashboardPage() {
                 alt="News"
               />
               <div className="db-bento-overlay">
-                <div style={{ fontSize: '.88rem', fontWeight: 800, color: '#fff', fontFamily: 'Public Sans,sans-serif' }}>Aménagement du marché central</div>
-                <div style={{ fontSize: '.68rem', color: 'rgba(255,255,255,.65)', marginTop: 3 }} dir="rtl">تهيئة السوق المركزي</div>
+                <div style={{ fontSize: '.88rem', fontWeight: 800, color: '#fff', fontFamily: 'Public Sans,sans-serif' }}>{lang === 'ar' ? 'تهيئة السوق المركزي' : 'Aménagement du marché central'}</div>
               </div>
             </div>
 
             {/* Event card */}
             <div className="db-bento-event">
-              <span className="db-bento-event-tag">Prochain Événement</span>
-              <div className="db-bento-event-title">Festival de la Pêche au Jarret</div>
-              <div className="db-bento-event-ar" dir="rtl">مهرجان صيد القرنيط بقليبية</div>
+              <span className="db-bento-event-tag">{lang === 'ar' ? 'الحدث القادم' : 'Prochain Événement'}</span>
+              <div className="db-bento-event-title">{lang === 'ar' ? 'مهرجان صيد القرنيط بقليبية' : 'Festival de la Pêche au Jarret'}</div>
               <div className="db-bento-event-date">
                 <i className="fas fa-calendar-alt"></i>
                 <span>24 JUILLET 2024</span>
@@ -457,11 +445,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Map ── */}
-      <div style={{ background: '#fff', marginBottom: 36, border: '1px solid #eeeeee' }} id="mapCard">
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ background: '#fff', marginBottom: 28, border: '1px solid #eeeeee' }} id="mapCard">
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>{t('map_title_realtime')}</div>
-            <div style={{ fontSize: '.72rem', color: '#5b403d' }}>{lang === 'ar' ? 'تحديث فوري على البلدية' : 'Mise à jour en temps réel sur la commune'}</div>
+            <div style={{ fontWeight: 800, fontSize: '.88rem', color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>{t('map_title_realtime')}</div>
           </div>
           <div style={{ display: 'flex', gap: 14 }}>
             {[
@@ -514,17 +501,17 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Mes signalements ── */}
-      <div style={{ background: '#fff', border: '1px solid #eeeeee', marginBottom: 36 }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontWeight: 800, fontSize: '1rem', margin: 0, fontFamily: 'Public Sans,sans-serif', color: '#1a1c1c' }}>
-            {lang === 'ar' ? 'بلاغاتي' : 'Mes Signalements'}
+      <div style={{ background: '#fff', border: '1px solid #eeeeee', marginBottom: 28 }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontWeight: 800, fontSize: '.88rem', margin: 0, fontFamily: 'Public Sans,sans-serif', color: '#1a1c1c' }}>
+            {t('my_reclamations')}
           </h3>
           <Link
             to="/nouvelle-reclamation"
             style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: '#ae131a', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
           >
             <i className="fas fa-plus-circle"></i>
-            {lang === 'ar' ? 'بلاغ جديد' : 'Nouveau Signalement'}
+            {t('new_signalement')}
           </Link>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -591,10 +578,10 @@ export default function DashboardPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <i className="fas fa-landmark" style={{ color: '#ae131a', fontSize: '1.1rem' }}></i>
-              <span className="db-footer-brand">VILLE DE KÉLIBIA</span>
+              <span className="db-footer-brand">{lang === 'ar' ? 'بلدية قليبية' : 'VILLE DE KÉLIBIA'}</span>
             </div>
             <p style={{ fontSize: '.75rem', color: '#5b403d', lineHeight: 1.65, maxWidth: 340, margin: 0 }}>
-              Portail citoyen officiel de la ville de Kélibia. Un service de proximité moderne pour faciliter vos démarches administratives.
+              {t('footer_text')}
             </p>
           </div>
           <div>

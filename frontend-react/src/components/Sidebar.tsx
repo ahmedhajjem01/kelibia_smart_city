@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
       {/* ── Main nav ── */}
       <nav className="flex-1 px-3 py-4" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <p style={{ fontSize: '.6rem', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', padding: '0 8px', marginBottom: 6 }}>
-          {isAgentOrAdmin ? t('nav_agent_space') : t('nav_title')}
+          {t('nav_title')}
         </p>
 
         {isAgentOrAdmin ? (
@@ -70,35 +70,35 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
           <>
             <NavLink to="/dashboard" end className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-tachometer-alt" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Tableau de bord</span>
+              <span style={{ fontSize: '.78rem' }}>{t('dashboard')}</span>
             </NavLink>
             <NavLink to="/services" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-landmark" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Services / الخدمات</span>
+              <span style={{ fontSize: '.78rem' }}>{t('admin_services')}</span>
             </NavLink>
             <NavLink to="/mes-reclamations" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-bullhorn" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Plaintes / الشكاوي</span>
+              <span style={{ fontSize: '.78rem' }}>{t('my_reclamations')}</span>
             </NavLink>
             <NavLink to="/news" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-newspaper" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Actualités / الأخبار</span>
+              <span style={{ fontSize: '.78rem' }}>{t('news_title')}</span>
             </NavLink>
             <a className={navItem(false)} href="#mapCard" onClick={scrollToMap}>
               <i className="fas fa-map-marked-alt" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Patrimoine / التراث</span>
+              <span style={{ fontSize: '.78rem' }}>{t('gis_map')}</span>
             </a>
             <NavLink to="/mes-demandes" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-tasks" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Mes demandes / طلباتي</span>
+              <span style={{ fontSize: '.78rem' }}>{t('my_requests')}</span>
             </NavLink>
             <NavLink to="/mes-extraits" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-file-contract" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>État Civil / الحالة المدنية</span>
+              <span style={{ fontSize: '.78rem' }}>{t('extraits_hub_title')}</span>
             </NavLink>
             <NavLink to="/forum" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-comments" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-              <span style={{ fontSize: '.78rem' }}>Forum / المنتدى</span>
+              <span style={{ fontSize: '.78rem' }}>{t('forum')}</span>
             </NavLink>
           </>
         )}
@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
         </p>
         <NavLink to="/profile" className={({ isActive }) => navItem(isActive)}>
           <i className="fas fa-cog" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-          <span style={{ fontSize: '.78rem' }}>Paramètres</span>
+          <span style={{ fontSize: '.78rem' }}>{t('nav_profile')}</span>
         </NavLink>
         <a
           className={navItem(false)}
@@ -120,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
           onClick={(e) => { e.preventDefault(); onLogout(); }}
         >
           <i className="fas fa-sign-out-alt" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
-          <span style={{ fontSize: '.78rem' }}>Déconnexion</span>
+          <span style={{ fontSize: '.78rem' }}>{t('logout')}</span>
         </a>
       </div>
     </aside>
