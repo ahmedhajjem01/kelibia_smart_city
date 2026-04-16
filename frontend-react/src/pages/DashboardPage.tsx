@@ -474,9 +474,9 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Forum card ── */}
-      <div style={{ background: '#fff', border: '1px solid #eeeeee', borderLeft: '4px solid #7c3aed', padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
+      <div style={{ background: '#fff', border: '1px solid #eeeeee', borderLeft: '4px solid #1D6FA3', padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(124,58,237,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', fontSize: '1rem' }}>
+          <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(29,111,163,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1D6FA3', fontSize: '1rem' }}>
             <i className="fas fa-comments"></i>
           </div>
           <div>
@@ -491,7 +491,7 @@ export default function DashboardPage() {
         </div>
         <Link
           to="/forum"
-          style={{ padding: '8px 18px', border: '1.5px solid #7c3aed', color: '#7c3aed', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}
+          style={{ padding: '8px 18px', border: '1.5px solid #1D6FA3', color: '#1D6FA3', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}
         >
           <i className="fas fa-arrow-right"></i> {t('forum')}
         </Link>
