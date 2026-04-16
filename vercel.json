@@ -4,7 +4,7 @@
     {
       "src": "core/wsgi.py",
       "use": "@vercel/python",
-      "config": { "runtime": "python3.12", "maxLambdaSize": "50mb" }
+      "config": { "runtime": "python3.12", "maxLambdaSize": "250mb" }
     },
     {
       "src": "frontend-react/package.json",
