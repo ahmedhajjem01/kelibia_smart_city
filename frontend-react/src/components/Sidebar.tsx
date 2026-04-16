@@ -25,8 +25,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
     [
       'flex items-center gap-3 px-4 py-2 no-underline transition-all duration-150',
       isActive
-        ? 'border-r-4 border-[#ae131a] bg-white/10 text-white font-bold'
-        : 'text-white/60 hover:text-white hover:bg-white/8',
+        ? 'border-r-4 border-[#ae131a] bg-white/10 font-bold'
+        : 'hover:bg-white/10',
     ].join(' ');
 
   return (
@@ -39,6 +39,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
         overflowY: 'auto',
       }}
     >
+      <style>{`
+        .sidebar a { color: rgba(255,255,255,0.55) !important; text-decoration: none !important; }
+        .sidebar a:hover { color: #fff !important; }
+        .sidebar a.active-nav, .sidebar a[aria-current="page"] { color: #fff !important; font-weight: 700; }
+      `}</style>
       {/* ── Brand ── */}
       <div className="px-5 pt-6 pb-5 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.08)' }}>
         <i className="fas fa-landmark" style={{ color: '#ae131a', fontSize: '1.4rem', flexShrink: 0 }}></i>
@@ -111,7 +116,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
         <a
           className={navItem(false)}
           href="#"
-          style={{ color: '#fca5a5' }}
+          style={{ color: 'rgba(252,165,165,0.85)' }}
           onClick={(e) => { e.preventDefault(); onLogout(); }}
         >
           <i className="fas fa-sign-out-alt" style={{ width: 16, textAlign: 'center', fontSize: '.85rem', flexShrink: 0 }}></i>
