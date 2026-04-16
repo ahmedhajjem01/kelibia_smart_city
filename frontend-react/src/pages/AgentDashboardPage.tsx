@@ -2090,37 +2090,46 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
 
-                      {/* SHAP — Global Feature Importance */}
+                      {/* SHAP — Global Feature Importance (Priority) */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#5c6bc0', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-chart-bar"></i> SHAP — Importance Globale des Mots par Catégorie
+                        <i className="fas fa-chart-bar"></i> SHAP — Importance Globale des Mots par Priorité
                       </div>
                       <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 16, lineHeight: 1.6 }}>
-                        Pour les modèles linéaires (TF-IDF + LinearSVC), les <strong>valeurs SHAP</strong> correspondent aux coefficients du classifieur.
-                        Une barre <span style={{ display:'inline-block', width:10, height:10, background:'#5c6bc0', borderRadius:2, verticalAlign:'middle' }}></span> <strong style={{color:'#5c6bc0'}}>bleue</strong> signifie que le mot <em>pousse vers cette catégorie</em> ; <span style={{ display:'inline-block', width:10, height:10, background:'#ef5350', borderRadius:2, verticalAlign:'middle' }}></span> <strong style={{color:'#ef5350'}}>rouge</strong> = pousse ailleurs.
+                        Pour les modèles linéaires (TF-IDF + LinearSVC), les <strong>valeurs SHAP</strong> correspondent aux coefficients du classifieur de priorité.
+                        Une barre <span style={{ display:'inline-block', width:10, height:10, background:'#5c6bc0', borderRadius:2, verticalAlign:'middle' }}></span> <strong style={{color:'#5c6bc0'}}>bleue</strong> signifie que le mot <em>pousse vers cette priorité</em> ; <span style={{ display:'inline-block', width:10, height:10, background:'#ef5350', borderRadius:2, verticalAlign:'middle' }}></span> <strong style={{color:'#ef5350'}}>rouge</strong> = pousse ailleurs.
                       </p>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14, marginBottom: 28 }}>
-                        {Object.entries(mlStats.category.top_features).map(([cat, words]: [string, any]) => {
-                          const maxScore = Math.max(...words.map((w: any) => Math.abs(w.score)), 0.001)
-                          const catColors: Record<string,string> = { lighting:'#f57f17', trash:'#2e7d32', roads:'#6a1b9a', noise:'#b71c1c', other:'#0277bd' }
-                          const catBg: Record<string,string> = { lighting:'#fff8e1', trash:'#e8f5e9', roads:'#f3e5f5', noise:'#fce4ec', other:'#e3f2fd' }
-                          return (
-                            <div key={cat} style={{ background: catBg[cat] || '#f8fafc', borderRadius: 10, border: `1px solid ${catColors[cat] || '#e0e0e0'}22`, padding: '14px 16px' }}>
-                              <div style={{ fontWeight: 700, fontSize: '.82rem', color: catColors[cat] || '#333', marginBottom: 10 }}>{CAT_LABELS[cat] || cat}</div>
-                              {words.slice(0, 7).map((w: any, i: number) => (
-                                <div key={i} style={{ marginBottom: 7 }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.72rem', marginBottom: 3 }}>
-                                    <span style={{ color: '#444', fontWeight: 500 }}>{w.word}</span>
-                                    <span style={{ color: '#999', fontFamily: 'monospace' }}>{w.score > 0 ? '+' : ''}{w.score.toFixed(3)}</span>
-                                  </div>
-                                  <div style={{ height: 6, background: '#e0e0e0', borderRadius: 3, overflow: 'hidden' }}>
-                                    <div style={{ height: '100%', width: `${(Math.abs(w.score) / maxScore * 100).toFixed(0)}%`, background: w.score >= 0 ? '#5c6bc0' : '#ef5350', borderRadius: 3, transition: 'width .4s' }} />
-                                  </div>
+                      {mlStats.priority.top_features && Object.keys(mlStats.priority.top_features).length > 0 ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14, marginBottom: 28 }}>
+                          {Object.entries(mlStats.priority.top_features).map(([prio, words]: [string, any]) => {
+                            const maxScore = Math.max(...words.map((w: any) => Math.abs(w.score)), 0.001)
+                            const prioColors: Record<string,string> = { urgente:'#be123c', normale:'#1d4ed8', faible:'#166534' }
+                            const prioBg: Record<string,string> = { urgente:'#fff1f2', normale:'#eff6ff', faible:'#f0fdf4' }
+                            const barColor: Record<string,string> = { urgente:'#f43f5e', normale:'#3b82f6', faible:'#22c55e' }
+                            return (
+                              <div key={prio} style={{ background: prioBg[prio] || '#f8fafc', borderRadius: 10, border: `1px solid ${prioColors[prio] || '#e0e0e0'}33`, padding: '14px 16px' }}>
+                                <div style={{ fontWeight: 700, fontSize: '.82rem', color: prioColors[prio] || '#333', marginBottom: 10 }}>
+                                  {prio === 'urgente' ? '🔴' : prio === 'normale' ? '🔵' : '🟣'} {PRI_LABELS[prio] || prio}
                                 </div>
-                              ))}
-                            </div>
-                          )
-                        })}
-                      </div>
+                                {words.slice(0, 7).map((w: any, i: number) => (
+                                  <div key={i} style={{ marginBottom: 7 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.72rem', marginBottom: 3 }}>
+                                      <span style={{ color: '#444', fontWeight: 500 }}>{w.word}</span>
+                                      <span style={{ color: '#999', fontFamily: 'monospace' }}>{w.score > 0 ? '+' : ''}{w.score.toFixed(3)}</span>
+                                    </div>
+                                    <div style={{ height: 6, background: '#e0e0e0', borderRadius: 3, overflow: 'hidden' }}>
+                                      <div style={{ height: '100%', width: `${(Math.abs(w.score) / maxScore * 100).toFixed(0)}%`, background: w.score >= 0 ? barColor[prio] || '#5c6bc0' : '#ef5350', borderRadius: 3, transition: 'width .4s' }} />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ color: '#aaa', fontSize: '.82rem', padding: '12px 0 28px' }}>
+                          <i className="fas fa-info-circle me-2"></i>Données SHAP priorité non disponibles — recalculez les stats.
+                        </div>
+                      )}
 
                       {/* TABLE 4 — Priority Classification Report */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>

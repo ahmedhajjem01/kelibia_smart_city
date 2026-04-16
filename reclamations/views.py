@@ -258,6 +258,23 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             except Exception:
                 top_features = {}
 
+            # ── 3b. Top features per priority (SHAP for priority model) ──────
+            prio_top_features = {}
+            try:
+                tfidf_p    = prio_model.named_steps['tfidf']
+                clf_p      = prio_model.named_steps['clf']
+                base_clf_p = clf_p.calibrated_classifiers_[0].estimator
+                feat_names_p = tfidf_p.get_feature_names_out()
+                for i, cls in enumerate(base_clf_p.classes_):
+                    coef = base_clf_p.coef_[i]
+                    top_idx = np.argsort(coef)[::-1][:8]
+                    prio_top_features[cls] = [
+                        {"word": feat_names_p[j], "score": round(float(coef[j]), 3)}
+                        for j in top_idx
+                    ]
+            except Exception:
+                prio_top_features = {}
+
             # ── 4. Overall accuracy ──────────────────────────────────────────
             correct_cat  = sum(1 for a, b in zip(categories, cat_pred)  if a == b)
             correct_prio = sum(1 for a, b in zip(priorities, prio_pred) if a == b)
@@ -277,6 +294,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                     "accuracy":         round(correct_prio / n, 3),
                     "confusion_matrix": cm_prio,
                     "report":           prio_report,
+                    "top_features":     prio_top_features,
                 },
             })
         except Exception as e:
