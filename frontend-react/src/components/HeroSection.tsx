@@ -38,7 +38,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
           <Link
             to="/services"
             className="inline-flex items-center gap-2 px-8 py-3 text-sm font-bold uppercase tracking-wider text-white no-underline transition-transform active:scale-95 shadow-xl"
-            style={{ background: 'linear-gradient(135deg, #e8893a 0%, #ffb785 100%)', borderRadius: '2px' }}
+            style={{ background: 'linear-gradient(135deg, #b8936a 0%, #d5b599 100%)', borderRadius: '2px' }}
           >
             <i className="fas fa-compass"></i>
             {t('discover_city') || 'Découvrir la Ville'}
