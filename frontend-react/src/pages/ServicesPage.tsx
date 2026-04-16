@@ -276,7 +276,7 @@ export default function ServicesPage() {
                     <button
                       className="w-100 d-flex align-items-center justify-content-between px-4 py-3 border-0 text-start"
                       style={{
-                        background: isOpen ? 'linear-gradient(135deg,#1a3a5c 0%,#1565c0 100%)' : '#fff',
+                        background: isOpen ? 'linear-gradient(135deg,#155D8A 0%,#1D6FA3 100%)' : '#fff',
                         color: isOpen ? '#fff' : '#1a1a2e',
                         cursor: 'pointer',
                         transition: 'all .25s',
@@ -285,7 +285,7 @@ export default function ServicesPage() {
                     >
                       <div className="d-flex align-items-center gap-3">
                         <div className="rounded-3 d-flex align-items-center justify-content-center"
-                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : '#e3f2fd', color: isOpen ? '#fff' : '#1565c0' }}>
+                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : '#E6F4F7', color: isOpen ? '#fff' : '#1D6FA3' }}>
                           <i className={`fas ${cat.icon || 'fa-folder-open'}`} />
                         </div>
                         <div>
@@ -296,7 +296,7 @@ export default function ServicesPage() {
                       <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'}`} />
                     </button>
                     {isOpen && (
-                      <div className="p-4" style={{ background: '#f8faff', borderTop: '1px solid #e3f2fd' }}>
+                      <div className="p-4" style={{ background: '#f8faff', borderTop: '1px solid #E6F4F7' }}>
                         <div className="row g-3">
                           {visibleServices.map(service => (
                             <div key={service.id} className="col-md-4">
