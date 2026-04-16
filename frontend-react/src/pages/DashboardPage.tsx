@@ -82,19 +82,19 @@ const CSS = `
   font-weight:800; padding:2px 8px; border-radius:3px; font-size:.78rem;
 }
 .db-signalement-btn {
-  width:100%; padding:16px; background:linear-gradient(135deg, #b87a50 0%, #d4aa8d 100%); color:#fff;
+  width:100%; padding:16px; background:#1D6FA3; color:#fff;
   font-weight:700; font-size:.82rem; letter-spacing:1.5px; text-transform:uppercase;
   border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:10px; transition:opacity .2s; font-family:'Public Sans',sans-serif;
+  gap:10px; transition:background .2s; font-family:'Public Sans',sans-serif;
   text-decoration:none;
 }
-.db-signalement-btn:hover { opacity:.9; color:#fff; }
+.db-signalement-btn:hover { background:#155D8A; color:#fff; }
 .db-news-item { cursor:pointer; }
 .db-news-item:hover .db-news-headline { color:#d4aa8d; }
 .db-news-time { font-size:.68rem; font-weight:700; color:#d4aa8d; display:block; margin-bottom:3px; }
 .db-news-headline { font-size:.82rem; font-weight:700; color:#1a1c1c; line-height:1.35; transition:color .15s; }
 .db-news-ar { font-size:.68rem; color:#5b403d; margin-top:2px; }
-.db-urgence { background:linear-gradient(135deg, #b87a50 0%, #d4aa8d 100%); padding:28px; color:#fff; }
+.db-urgence { background:#144E75; padding:28px; color:#fff; }
 .db-urgence-title { font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; font-family:'Public Sans',sans-serif; }
 .db-urgence-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .db-urgence-label { font-size:.75rem; font-weight:500; opacity:.9; }
