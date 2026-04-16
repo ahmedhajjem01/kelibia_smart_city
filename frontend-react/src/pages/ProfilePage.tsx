@@ -81,7 +81,7 @@ export default function ProfilePage() {
   })
 
   const [stats, setStats] = useState<StatCard[]>([
-    { key: 'reclamations', icon: 'fa-exclamation-circle', color: '#dc3545', bg: '#fff5f5', label: 'Réclamations',         labelAr: 'الشكاوى',          route: '/mes-reclamations', total: null, pending: null, approved: null },
+    { key: 'reclamations', icon: 'fa-exclamation-circle', color: '#dc3545', bg: '#fff5f5', label: 'Signalements',         labelAr: 'الشكاوى',          route: '/mes-reclamations', total: null, pending: null, approved: null },
     { key: 'evenements',   icon: 'fa-calendar-check',    color: '#6f42c1', bg: '#f5f0ff', label: 'Événements',            labelAr: 'التظاهرات',        route: '/mes-evenements',   total: null, pending: null, approved: null },
     { key: 'residences',   icon: 'fa-home',              color: '#0d6efd', bg: '#f0f5ff', label: 'Attestations résidence', labelAr: 'شهادات الإقامة',   route: '/mes-residences',   total: null, pending: null, approved: null },
     { key: 'naissances',   icon: 'fa-baby',              color: '#198754', bg: '#f0fff5', label: 'Déclarations naissance', labelAr: 'تصاريح الولادة',   route: '/mes-naissances',   total: null, pending: null, approved: null },
@@ -517,7 +517,7 @@ export default function ProfilePage() {
             </p>
             <div className="d-flex gap-2 flex-wrap">
               <Link to="/nouvelle-reclamation" className="btn btn-sm btn-outline-danger rounded-pill px-3">
-                <i className="fas fa-exclamation-circle me-1"></i>Réclamation
+                <i className="fas fa-exclamation-circle me-1"></i>Signalement
               </Link>
               <Link to="/demande-evenement" className="btn btn-sm btn-outline-secondary rounded-pill px-3" style={{ color: '#6f42c1', borderColor: '#6f42c1' }}>
                 <i className="fas fa-calendar-plus me-1"></i>Événement
