@@ -284,6 +284,37 @@ class ReclamationViewSet(viewsets.ModelViewSet):
 
 
 
+    # ── explain_text (LIME + SHAP for free text — AI stats page demo) ──────────
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def explain_text(self, request):
+        """
+        POST /api/reclamations/explain_text/
+        Body: { "title": "...", "description": "..." }
+
+        Returns LIME + SHAP word-level explanations for free text input.
+        Used by the AI stats page live demo. Agents/staff only.
+        """
+        user = request.user
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
+            return Response({"detail": "Non autorisé."}, status=status.HTTP_403_FORBIDDEN)
+
+        title       = request.data.get('title', '')
+        description = request.data.get('description', '')
+        if not title and not description:
+            return Response({"detail": "title or description is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from .classifier import explain_priority
+        except ImportError as e:
+            return Response({"error": f"ML packages not available: {e}"}, status=503)
+
+        try:
+            result = explain_priority(title, description)
+            return Response(result)
+        except Exception as exc:
+            import traceback
+            return Response({"error": str(exc), "traceback": traceback.format_exc()}, status=500)
+
     # ── explain_priority (LIME + SHAP for agents) ────────────────────────────
     @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def explain_priority(self, request, pk=None):

@@ -155,6 +155,10 @@ export default function AgentDashboardPage() {
   const [mlStats, setMlStats] = useState<any | null>(null)
   const [mlLoading, setMlLoading] = useState(false)
   const [mlError, setMlError] = useState<string | null>(null)
+  const [explainText, setExplainText] = useState('')
+  const [explainResult, setExplainResult] = useState<any | null>(null)
+  const [explainLoading, setExplainLoading] = useState(false)
+  const [explainError, setExplainError] = useState('')
 
   // ── Profile Tab State ──
   const [editingProfile, setEditingProfile] = useState(false)
@@ -236,6 +240,22 @@ export default function AgentDashboardPage() {
       setMlStats(await res.json())
     } catch { setMlError('Erreur réseau — Stats IA indisponibles.') }
     finally { setMlLoading(false) }
+  }
+
+  async function fetchExplain() {
+    if (!explainText.trim()) return
+    setExplainLoading(true); setExplainError(''); setExplainResult(null)
+    try {
+      const res = await fetch('/api/reclamations/explain_text/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ title: '', description: explainText }),
+      })
+      const data = await res.json()
+      if (!res.ok) setExplainError(data.error || `Erreur ${res.status}`)
+      else setExplainResult(data)
+    } catch { setExplainError('Erreur réseau') }
+    finally { setExplainLoading(false) }
   }
 
   async function handleProfileSave() {
@@ -1943,7 +1963,7 @@ export default function AgentDashboardPage() {
           ) : activeTab === 'stats' ? (
             /* ── STATISTIQUES IA TAB ──────────────────────────────────────── */
             <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
-              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#1a237e,#283593)' }}>
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#5c6bc0,#7986cb)' }}>
                 <span><i className="fas fa-brain me-2"></i>{t('stats_ia_title')} — {t('stats_ia_subtitle')}</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchMlStats}>
                   <i className="fas fa-sync-alt me-1"></i>{t('stats_ia_recalculate')}
@@ -2070,25 +2090,36 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
 
-                      {/* TABLE 3 — Top NLP features */}
-                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
-                        <i className="fas fa-star"></i>{t('stats_ia_table3')}
+                      {/* SHAP — Global Feature Importance */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#5c6bc0', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-chart-bar"></i> SHAP — Importance Globale des Mots par Catégorie
                       </div>
-                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 12, lineHeight: 1.5 }}>{t('ml_stats_feat_desc')}</p>
-                      <div className="ag-card" style={{ marginBottom: 22 }}>
-                        <div style={{ overflowX: 'auto', padding: '4px 0' }}>
-                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
-                            <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('category_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_mots_cles')}</th></tr></thead>
-                            <tbody>
-                              {Object.entries(mlStats.category.top_features).map(([cat, words]: [string, any]) => (
-                                <tr key={cat} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                                  <td style={{ padding: '8px 12px', color: '#444' }}><strong>{CAT_LABELS[cat] || cat}</strong></td>
-                                  <td style={{ padding: '8px 12px', color: '#444' }}>{words.map((w: any, i: number) => <span key={i} style={{ display: 'inline-block', padding: '3px 8px', background: '#e3f2fd', borderRadius: 8, fontSize: '.76rem', color: '#1565c0', margin: 2 }} title={`Score: ${w.score}`}>{w.word}</span>)}</td>
-                                </tr>
+                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 16, lineHeight: 1.6 }}>
+                        Pour les modèles linéaires (TF-IDF + LinearSVC), les <strong>valeurs SHAP</strong> correspondent aux coefficients du classifieur.
+                        Une barre <span style={{ display:'inline-block', width:10, height:10, background:'#5c6bc0', borderRadius:2, verticalAlign:'middle' }}></span> <strong style={{color:'#5c6bc0'}}>bleue</strong> signifie que le mot <em>pousse vers cette catégorie</em> ; <span style={{ display:'inline-block', width:10, height:10, background:'#ef5350', borderRadius:2, verticalAlign:'middle' }}></span> <strong style={{color:'#ef5350'}}>rouge</strong> = pousse ailleurs.
+                      </p>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14, marginBottom: 28 }}>
+                        {Object.entries(mlStats.category.top_features).map(([cat, words]: [string, any]) => {
+                          const maxScore = Math.max(...words.map((w: any) => Math.abs(w.score)), 0.001)
+                          const catColors: Record<string,string> = { lighting:'#f57f17', trash:'#2e7d32', roads:'#6a1b9a', noise:'#b71c1c', other:'#0277bd' }
+                          const catBg: Record<string,string> = { lighting:'#fff8e1', trash:'#e8f5e9', roads:'#f3e5f5', noise:'#fce4ec', other:'#e3f2fd' }
+                          return (
+                            <div key={cat} style={{ background: catBg[cat] || '#f8fafc', borderRadius: 10, border: `1px solid ${catColors[cat] || '#e0e0e0'}22`, padding: '14px 16px' }}>
+                              <div style={{ fontWeight: 700, fontSize: '.82rem', color: catColors[cat] || '#333', marginBottom: 10 }}>{CAT_LABELS[cat] || cat}</div>
+                              {words.slice(0, 7).map((w: any, i: number) => (
+                                <div key={i} style={{ marginBottom: 7 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.72rem', marginBottom: 3 }}>
+                                    <span style={{ color: '#444', fontWeight: 500 }}>{w.word}</span>
+                                    <span style={{ color: '#999', fontFamily: 'monospace' }}>{w.score > 0 ? '+' : ''}{w.score.toFixed(3)}</span>
+                                  </div>
+                                  <div style={{ height: 6, background: '#e0e0e0', borderRadius: 3, overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${(Math.abs(w.score) / maxScore * 100).toFixed(0)}%`, background: w.score >= 0 ? '#5c6bc0' : '#ef5350', borderRadius: 3, transition: 'width .4s' }} />
+                                  </div>
+                                </div>
                               ))}
-                            </tbody>
-                          </table>
-                        </div>
+                            </div>
+                          )
+                        })}
                       </div>
 
                       {/* TABLE 4 — Priority Classification Report */}
@@ -2153,6 +2184,124 @@ export default function AgentDashboardPage() {
                         <i className="fas fa-info-circle me-1"></i>
                         {t('stats_ia_model_trained')} · {mlStats.n_samples} {t('stats_ia_samples')}
                       </div>
+
+                      {/* ── LIME + SHAP Live Demo ─────────────────────────── */}
+                      <div style={{ fontSize: '1rem', fontWeight: 700, color: '#5c6bc0', margin: '32px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
+                        <i className="fas fa-flask"></i> LIME + SHAP — Démo en Direct
+                      </div>
+                      <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 14, lineHeight: 1.6 }}>
+                        Entrez une description de signalement pour voir comment l'IA explique sa décision de priorité mot par mot.
+                        <strong> LIME</strong> approxime l'influence locale de chaque mot. <strong>SHAP</strong> utilise les poids du modèle linéaire.
+                      </p>
+                      <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+                        <textarea
+                          value={explainText}
+                          onChange={e => setExplainText(e.target.value)}
+                          placeholder="Ex: La rue est inondée depuis 3 jours, danger immédiat pour les piétons..."
+                          rows={3}
+                          style={{ flex: 1, borderRadius: 10, border: '1px solid #e0e0e0', padding: '10px 14px', fontSize: '.83rem', resize: 'vertical', fontFamily: 'inherit', outline: 'none' }}
+                          onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) fetchExplain() }}
+                        />
+                        <button
+                          onClick={fetchExplain}
+                          disabled={explainLoading || !explainText.trim()}
+                          style={{ alignSelf: 'flex-end', background: '#5c6bc0', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontWeight: 700, fontSize: '.83rem', cursor: 'pointer', whiteSpace: 'nowrap', opacity: (!explainText.trim() || explainLoading) ? 0.6 : 1 }}>
+                          {explainLoading ? <><span className="spinner-border spinner-border-sm me-2"></span>Analyse…</> : <><i className="fas fa-magic me-2"></i>Analyser</>}
+                        </button>
+                      </div>
+                      {explainError && (
+                        <div style={{ background: '#ffebee', border: '1px solid #ef9a9a', borderRadius: 8, padding: '10px 14px', fontSize: '.82rem', color: '#b71c1c', marginBottom: 14 }}>
+                          <i className="fas fa-exclamation-triangle me-2"></i>{explainError}
+                        </div>
+                      )}
+                      {explainResult && (() => {
+                        const priColors: Record<string,{bg:string,color:string}> = {
+                          urgente: { bg:'#fff1f2', color:'#be123c' },
+                          normale: { bg:'#eff6ff', color:'#1d4ed8' },
+                          faible:  { bg:'#f0fdf4', color:'#166534' },
+                        }
+                        const priStyle = priColors[explainResult.predicted_priority] || priColors.normale
+                        const probs: Record<string,number> = explainResult.probabilities || {}
+                        const shap: any[] = explainResult.shap || []
+                        const lime: any[] = explainResult.lime || []
+                        const maxShap = Math.max(...shap.map((w: any) => Math.abs(w.shap_value)), 0.001)
+                        const maxLime = Math.max(...lime.map((w: any) => Math.abs(w.score)), 0.001)
+                        return (
+                          <div style={{ background: '#f8fafc', borderRadius: 12, border: '1px solid #e8eaf6', padding: '20px 22px', marginBottom: 8 }}>
+                            {/* Prediction */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '.78rem', color: '#555' }}>Priorité prédite :</span>
+                              <span style={{ background: priStyle.bg, color: priStyle.color, fontWeight: 700, padding: '4px 14px', borderRadius: 20, fontSize: '.85rem' }}>
+                                {explainResult.predicted_priority === 'urgente' ? '🔴' : explainResult.predicted_priority === 'normale' ? '🔵' : '🟣'} {explainResult.predicted_priority}
+                              </span>
+                              <span style={{ fontSize: '.76rem', color: '#999' }}>Confiance : {Math.round((explainResult.confidence || 0) * 100)}%</span>
+                            </div>
+                            {/* Probability bars */}
+                            {Object.keys(probs).length > 0 && (
+                              <div style={{ marginBottom: 20 }}>
+                                <div style={{ fontSize: '.75rem', fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>Probabilités par classe</div>
+                                {Object.entries(probs).sort((a,b) => b[1]-a[1]).map(([lbl, val]: [string, any]) => (
+                                  <div key={lbl} style={{ marginBottom: 7 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.72rem', marginBottom: 3 }}>
+                                      <span style={{ color: '#444', fontWeight: 500 }}>{lbl === 'urgente' ? '🔴' : lbl === 'normale' ? '🔵' : '🟣'} {lbl}</span>
+                                      <span style={{ color: '#777' }}>{Math.round(val * 100)}%</span>
+                                    </div>
+                                    <div style={{ height: 8, background: '#e0e0e0', borderRadius: 4, overflow: 'hidden' }}>
+                                      <div style={{ height: '100%', width: `${(val * 100).toFixed(0)}%`, background: lbl === 'urgente' ? '#be123c' : lbl === 'normale' ? '#1d4ed8' : '#166534', borderRadius: 4, transition: 'width .5s' }} />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
+                              {/* SHAP */}
+                              {shap.length > 0 && (
+                                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e8eaf6', padding: '14px 16px' }}>
+                                  <div style={{ fontWeight: 700, fontSize: '.82rem', color: '#5c6bc0', marginBottom: 4 }}><i className="fas fa-puzzle-piece me-2"></i>SHAP — Mots influents</div>
+                                  <p style={{ fontSize: '.7rem', color: '#aaa', marginBottom: 10 }}>Contribution de chaque mot au score de priorité (modèle linéaire)</p>
+                                  {shap.slice(0, 10).map((w: any, i: number) => (
+                                    <div key={i} style={{ marginBottom: 7 }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.72rem', marginBottom: 3 }}>
+                                        <span style={{ color: w.direction === 'increases' ? '#be123c' : '#166534', fontWeight: 600 }}>{w.word}</span>
+                                        <span style={{ color: '#999', fontFamily: 'monospace' }}>{w.shap_value > 0 ? '+' : ''}{w.shap_value.toFixed(4)}</span>
+                                      </div>
+                                      <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+                                        <div style={{ height: '100%', width: `${(Math.abs(w.shap_value) / maxShap * 100).toFixed(0)}%`, background: w.direction === 'increases' ? '#be123c' : '#166534', borderRadius: 3 }} />
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {shap.length === 0 && <p style={{ fontSize: '.75rem', color: '#aaa' }}>Aucun résultat SHAP</p>}
+                                </div>
+                              )}
+                              {/* LIME */}
+                              {lime.length > 0 && (
+                                <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e8eaf6', padding: '14px 16px' }}>
+                                  <div style={{ fontWeight: 700, fontSize: '.82rem', color: '#0277bd', marginBottom: 4 }}><i className="fas fa-lemon me-2"></i>LIME — Explication Locale</div>
+                                  <p style={{ fontSize: '.7rem', color: '#aaa', marginBottom: 10 }}>Perturbation locale du texte pour mesurer l'importance des mots</p>
+                                  {lime.slice(0, 10).map((w: any, i: number) => (
+                                    <div key={i} style={{ marginBottom: 7 }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.72rem', marginBottom: 3 }}>
+                                        <span style={{ color: w.direction === 'increases' ? '#be123c' : '#166534', fontWeight: 600 }}>{w.word}</span>
+                                        <span style={{ color: '#999', fontFamily: 'monospace' }}>{w.score > 0 ? '+' : ''}{w.score.toFixed(4)}</span>
+                                      </div>
+                                      <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+                                        <div style={{ height: '100%', width: `${(Math.abs(w.score) / maxLime * 100).toFixed(0)}%`, background: w.direction === 'increases' ? '#f57f17' : '#0277bd', borderRadius: 3 }} />
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {lime.length === 0 && <p style={{ fontSize: '.75rem', color: '#aaa' }}>LIME non disponible (package non installé)</p>}
+                                </div>
+                              )}
+                              {shap.length === 0 && lime.length === 0 && (
+                                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#aaa', fontSize: '.82rem', padding: '20px 0' }}>
+                                  <i className="fas fa-info-circle me-2"></i>
+                                  {(explainResult.errors || []).join(' · ') || 'LIME/SHAP non disponibles sur ce serveur (packages ML requis).'}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })()}
                     </>
                   )
                 })()}
