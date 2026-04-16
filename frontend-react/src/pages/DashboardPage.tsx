@@ -42,7 +42,7 @@ const CSS = `
 }
 .db-section-title::before {
   content:''; display:inline-block; width:5px; height:28px;
-  background:linear-gradient(135deg, #954a00 0%, #f18221 100%); border-radius:3px; flex-shrink:0;
+  background:linear-gradient(135deg, #e8893a 0%, #ffb785 100%); border-radius:3px; flex-shrink:0;
 }
 .db-action-card {
   display:flex; flex-direction:column; align-items:center; text-align:center;
@@ -82,7 +82,7 @@ const CSS = `
   font-weight:800; padding:2px 8px; border-radius:3px; font-size:.78rem;
 }
 .db-signalement-btn {
-  width:100%; padding:16px; background:linear-gradient(135deg, #954a00 0%, #f18221 100%); color:#fff;
+  width:100%; padding:16px; background:linear-gradient(135deg, #e8893a 0%, #ffb785 100%); color:#fff;
   font-weight:700; font-size:.82rem; letter-spacing:1.5px; text-transform:uppercase;
   border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
   gap:10px; transition:opacity .2s; font-family:'Public Sans',sans-serif;
@@ -94,7 +94,7 @@ const CSS = `
 .db-news-time { font-size:.68rem; font-weight:700; color:#ffb785; display:block; margin-bottom:3px; }
 .db-news-headline { font-size:.82rem; font-weight:700; color:#1a1c1c; line-height:1.35; transition:color .15s; }
 .db-news-ar { font-size:.68rem; color:#5b403d; margin-top:2px; }
-.db-urgence { background:linear-gradient(135deg, #954a00 0%, #f18221 100%); padding:28px; color:#fff; }
+.db-urgence { background:linear-gradient(135deg, #e8893a 0%, #ffb785 100%); padding:28px; color:#fff; }
 .db-urgence-title { font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; font-family:'Public Sans',sans-serif; }
 .db-urgence-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .db-urgence-label { font-size:.75rem; font-weight:500; opacity:.9; }
@@ -124,7 +124,7 @@ const CSS = `
   display:flex; align-items:center; justify-content:center;
   font-size:.8rem; color:#1a1c1c; transition:all .2s; text-decoration:none;
 }
-.db-footer-social-btn:hover { background:linear-gradient(135deg, #954a00 0%, #f18221 100%); color:#fff; }
+.db-footer-social-btn:hover { background:linear-gradient(135deg, #e8893a 0%, #ffb785 100%); color:#fff; }
 .db-footer-bottom { margin-top:32px; padding-top:20px; border-top:1px solid rgba(26,28,28,.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
 .db-footer-legal { font-size:.65rem; color:#5b403d; font-weight:500; text-transform:uppercase; letter-spacing:1px; }
 .db-footer-legal a { color:#5b403d; text-decoration:none; margin-left:20px; }
@@ -433,7 +433,7 @@ export default function DashboardPage() {
           </h3>
           <Link
             to="/nouvelle-reclamation"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'linear-gradient(135deg, #954a00 0%, #f18221 100%)', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'linear-gradient(135deg, #e8893a 0%, #ffb785 100%)', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
           >
             <i className="fas fa-plus-circle"></i>
             {t('new_signalement')}
