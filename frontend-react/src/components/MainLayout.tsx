@@ -48,7 +48,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               style={{
                 border: 'none', borderRadius: 999, padding: '3px 14px',
                 fontSize: '.7rem', fontWeight: 700, cursor: 'pointer',
-                background: lang === 'fr' ? '#0d1b2e' : 'transparent',
+                background: lang === 'fr' ? '#045b7e' : 'transparent',
                 color: lang === 'fr' ? '#fff' : '#6b7280',
                 transition: 'all .2s',
               }}
@@ -58,7 +58,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               style={{
                 border: 'none', borderRadius: 999, padding: '3px 14px',
                 fontSize: '.7rem', fontWeight: 700, cursor: 'pointer',
-                background: lang === 'ar' ? '#0d1b2e' : 'transparent',
+                background: lang === 'ar' ? '#045b7e' : 'transparent',
                 color: lang === 'ar' ? '#fff' : '#6b7280',
                 transition: 'all .2s',
               }}
@@ -76,14 +76,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
         {/* Breadcrumb */}
         <div className="bg-white border-b border-slate-100 px-8 py-3 flex items-center text-sm text-slate-500" style={{ paddingTop: '12px' }}>
-          <i className="fas fa-home me-2" style={{ color: '#c61f2c' }}></i>
-          <a href="/dashboard" className="no-underline" style={{ color: '#c61f2c' }}>{t('home')}</a>
+          <i className="fas fa-home me-2" style={{ color: '#ffb785' }}></i>
+          <a href="/dashboard" className="no-underline" style={{ color: '#ffb785' }}>{t('home')}</a>
           {breadcrumbs.length > 0 ? (
             breadcrumbs.map((bc, idx) => (
               <React.Fragment key={idx}>
                 <span className="mx-2 text-slate-300">/</span>
                 {bc.link ? (
-                  <a href={bc.link} className="no-underline" style={{ color: '#c61f2c' }}>{bc.label}</a>
+                  <a href={bc.link} className="no-underline" style={{ color: '#ffb785' }}>{bc.label}</a>
                 ) : (
                   <span className="text-slate-600">{bc.label}</span>
                 )}

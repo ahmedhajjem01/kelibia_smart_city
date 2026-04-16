@@ -42,7 +42,7 @@ const CSS = `
 }
 .db-section-title::before {
   content:''; display:inline-block; width:5px; height:28px;
-  background:#ae131a; border-radius:3px; flex-shrink:0;
+  background:#ffb785; border-radius:3px; flex-shrink:0;
 }
 .db-action-card {
   display:flex; flex-direction:column; align-items:center; text-align:center;
@@ -55,9 +55,9 @@ const CSS = `
 }
 .db-action-icon {
   width:38px; height:38px; border-radius:50%;
-  background:rgba(210,49,47,.08); display:flex; align-items:center;
+  background:rgba(255,183,133,.08); display:flex; align-items:center;
   justify-content:center; margin-bottom:8px; transition:transform .2s;
-  color:#ae131a; font-size:1rem;
+  color:#ffb785; font-size:1rem;
 }
 .db-action-card:hover .db-action-icon { transform:scale(1.1); }
 .db-action-label { font-size:.65rem; font-weight:700; color:#1a1c1c; text-transform:uppercase; letter-spacing:.4px; line-height:1.3; }
@@ -66,11 +66,11 @@ const CSS = `
 .db-profile-card { background:#fff; padding:28px; box-shadow:0 12px 32px -4px rgba(26,28,28,.06); }
 .db-profile-avatar {
   width:58px; height:58px; border-radius:50%; background:#e8e8e8;
-  overflow:hidden; border:2px solid rgba(210,49,47,.18);
+  overflow:hidden; border:2px solid rgba(255,183,133,.18);
 }
 .db-profile-avatar-inner {
   width:100%; height:100%; display:flex; align-items:center; justify-content:center;
-  font-size:1.4rem; font-weight:800; color:#ae131a; background:#fef2f2;
+  font-size:1.4rem; font-weight:800; color:#ffb785; background:#fef2f2;
 }
 .db-stat-row {
   display:flex; justify-content:space-between; align-items:center;
@@ -78,11 +78,11 @@ const CSS = `
   border-bottom:1px solid #e8e8e8;
 }
 .db-stat-badge {
-  background:rgba(174,19,26,.1); color:#ae131a;
+  background:rgba(255,183,133,.1); color:#ffb785;
   font-weight:800; padding:2px 8px; border-radius:3px; font-size:.78rem;
 }
 .db-signalement-btn {
-  width:100%; padding:16px; background:#ae131a; color:#fff;
+  width:100%; padding:16px; background:#ffb785; color:#fff;
   font-weight:700; font-size:.82rem; letter-spacing:1.5px; text-transform:uppercase;
   border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
   gap:10px; transition:opacity .2s; font-family:'Public Sans',sans-serif;
@@ -90,11 +90,11 @@ const CSS = `
 }
 .db-signalement-btn:hover { opacity:.9; color:#fff; }
 .db-news-item { cursor:pointer; }
-.db-news-item:hover .db-news-headline { color:#ae131a; }
-.db-news-time { font-size:.68rem; font-weight:700; color:#ae131a; display:block; margin-bottom:3px; }
+.db-news-item:hover .db-news-headline { color:#ffb785; }
+.db-news-time { font-size:.68rem; font-weight:700; color:#ffb785; display:block; margin-bottom:3px; }
 .db-news-headline { font-size:.82rem; font-weight:700; color:#1a1c1c; line-height:1.35; transition:color .15s; }
 .db-news-ar { font-size:.68rem; color:#5b403d; margin-top:2px; }
-.db-urgence { background:#ae131a; padding:28px; color:#fff; }
+.db-urgence { background:#ffb785; padding:28px; color:#fff; }
 .db-urgence-title { font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; font-family:'Public Sans',sans-serif; }
 .db-urgence-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .db-urgence-label { font-size:.75rem; font-weight:500; opacity:.9; }
@@ -107,28 +107,28 @@ const CSS = `
   background:#f9f9f9; transition:border-color .15s;
 }
 .db-rec-row:hover { border-color:#e4beba; }
-.db-rec-icon { width:44px; height:44px; border-radius:50%; background:rgba(174,19,26,.08); display:flex; align-items:center; justify-content:center; color:#ae131a; flex-shrink:0; }
+.db-rec-icon { width:44px; height:44px; border-radius:50%; background:rgba(255,183,133,.08); display:flex; align-items:center; justify-content:center; color:#ffb785; flex-shrink:0; }
 .db-status-badge { font-size:.65rem; font-weight:800; padding:4px 10px; text-transform:uppercase; letter-spacing:.5px; border-radius:2px; }
 
 /* Footer */
 .db-footer { background:#e8e8e8; padding:40px 48px; margin-top:0; border-top:1px solid transparent; }
 .db-footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:32px; }
-.db-footer-brand { font-size:1.05rem; font-weight:900; color:#ae131a; text-transform:uppercase; letter-spacing:-.3px; font-family:'Public Sans',sans-serif; }
+.db-footer-brand { font-size:1.05rem; font-weight:900; color:#ffb785; text-transform:uppercase; letter-spacing:-.3px; font-family:'Public Sans',sans-serif; }
 .db-footer-copy { font-size:.72rem; color:#5b403d; margin-top:4px; }
 .db-footer-heading { font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; color:#1a1c1c; }
 .db-footer-link { display:block; font-size:.75rem; color:#5b403d; text-decoration:none; margin-bottom:6px; }
-.db-footer-link:hover { color:#ae131a; }
+.db-footer-link:hover { color:#ffb785; }
 .db-footer-social { display:flex; gap:10px; margin-top:4px; }
 .db-footer-social-btn {
   width:32px; height:32px; border-radius:50%; background:#dadada;
   display:flex; align-items:center; justify-content:center;
   font-size:.8rem; color:#1a1c1c; transition:all .2s; text-decoration:none;
 }
-.db-footer-social-btn:hover { background:#ae131a; color:#fff; }
+.db-footer-social-btn:hover { background:#ffb785; color:#fff; }
 .db-footer-bottom { margin-top:32px; padding-top:20px; border-top:1px solid rgba(26,28,28,.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
 .db-footer-legal { font-size:.65rem; color:#5b403d; font-weight:500; text-transform:uppercase; letter-spacing:1px; }
 .db-footer-legal a { color:#5b403d; text-decoration:none; margin-left:20px; }
-.db-footer-legal a:hover { color:#ae131a; }
+.db-footer-legal a:hover { color:#ffb785; }
 
 @media (max-width:900px) {
   .db-footer-grid { grid-template-columns:1fr; }
@@ -193,10 +193,10 @@ export default function DashboardPage() {
   }
 
   const statusConfig: Record<string, { bg: string; color: string; label: string }> = {
-    pending:     { bg: '#fef2f2', color: '#ae131a', label: t('status_pending') },
+    pending:     { bg: '#fef2f2', color: '#ffb785', label: t('status_pending') },
     in_progress: { bg: '#eff6ff', color: '#1565c0', label: t('status_in_progress') },
     resolved:    { bg: '#f0fdf4', color: '#166534', label: t('status_resolved') },
-    rejected:    { bg: '#fef2f2', color: '#ae131a', label: t('status_rejected') },
+    rejected:    { bg: '#fef2f2', color: '#ffb785', label: t('status_rejected') },
   }
 
   const catIcons: Record<string, string> = {
@@ -258,7 +258,7 @@ export default function DashboardPage() {
 
       {/* Recent news list */}
       <div style={{ background: '#fff', padding: '24px' }}>
-        <div style={{ fontWeight: 800, fontSize: '.82rem', color: '#1a1c1c', textTransform: 'uppercase', letterSpacing: '.5px', paddingBottom: 6, borderBottom: '2px solid #ae131a', display: 'inline-block', marginBottom: 16, fontFamily: 'Public Sans,sans-serif' }}>
+        <div style={{ fontWeight: 800, fontSize: '.82rem', color: '#1a1c1c', textTransform: 'uppercase', letterSpacing: '.5px', paddingBottom: 6, borderBottom: '2px solid #ffb785', display: 'inline-block', marginBottom: 16, fontFamily: 'Public Sans,sans-serif' }}>
           {t('news_title')}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -284,7 +284,7 @@ export default function DashboardPage() {
         </div>
         <Link
           to="/news"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 20, fontSize: '.72rem', fontWeight: 800, color: '#ae131a', textDecoration: 'none', textTransform: 'uppercase', borderBottom: '2px solid rgba(174,19,26,.2)', paddingBottom: 2 }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 20, fontSize: '.72rem', fontWeight: 800, color: '#ffb785', textDecoration: 'none', textTransform: 'uppercase', borderBottom: '2px solid rgba(255,183,133,.2)', paddingBottom: 2 }}
         >
           Voir tout le flux <i className="fas fa-arrow-right" style={{ fontSize: '.7rem' }}></i>
         </Link>
@@ -433,7 +433,7 @@ export default function DashboardPage() {
           </h3>
           <Link
             to="/nouvelle-reclamation"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: '#ae131a', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: '#ffb785', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
           >
             <i className="fas fa-plus-circle"></i>
             {t('new_signalement')}
@@ -466,7 +466,7 @@ export default function DashboardPage() {
             })
           )}
           {reclamations.length > 3 && (
-            <Link to="/mes-reclamations" style={{ textAlign: 'center', display: 'block', fontSize: '.78rem', fontWeight: 700, color: '#ae131a', textDecoration: 'none', padding: '10px 0' }}>
+            <Link to="/mes-reclamations" style={{ textAlign: 'center', display: 'block', fontSize: '.78rem', fontWeight: 700, color: '#ffb785', textDecoration: 'none', padding: '10px 0' }}>
               {t('view_all') || 'Voir tout'} ({reclamations.length})
             </Link>
           )}
@@ -483,7 +483,7 @@ export default function DashboardPage() {
             <div style={{ fontWeight: 800, color: '#1a1c1c', fontFamily: 'Public Sans,sans-serif' }}>
               {t('forum')}
               {forumUnread > 0 && (
-                <span style={{ marginLeft: 8, background: '#ae131a', color: '#fff', fontSize: '.62rem', fontWeight: 800, padding: '1px 7px', borderRadius: 999 }}>{forumUnread}</span>
+                <span style={{ marginLeft: 8, background: '#ffb785', color: '#fff', fontSize: '.62rem', fontWeight: 800, padding: '1px 7px', borderRadius: 999 }}>{forumUnread}</span>
               )}
             </div>
             <div style={{ fontSize: '.75rem', color: '#5b403d', marginTop: 2 }}>{t('forum_desc')}</div>
@@ -502,7 +502,7 @@ export default function DashboardPage() {
         <div className="db-footer-grid">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <i className="fas fa-landmark" style={{ color: '#ae131a', fontSize: '1.1rem' }}></i>
+              <i className="fas fa-landmark" style={{ color: '#ffb785', fontSize: '1.1rem' }}></i>
               <span className="db-footer-brand">{lang === 'ar' ? 'بلدية قليبية' : 'VILLE DE KÉLIBIA'}</span>
             </div>
             <p style={{ fontSize: '.75rem', color: '#5b403d', lineHeight: 1.65, maxWidth: 340, margin: 0 }}>
