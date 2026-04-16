@@ -52,10 +52,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
       <div className="px-4 pt-5 pb-4 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.12)' }}>
         <img src={logo} alt="Logo Kélibia" style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
         <div>
-          <div style={{ color: '#fff', fontWeight: 900, fontSize: '.78rem', letterSpacing: '.3px', lineHeight: 1.15, textTransform: 'uppercase' }}>
+          <div style={{ color: '#fff', fontWeight: 900, fontSize: '.78rem', letterSpacing: '.3px', lineHeight: 1.2, textTransform: 'uppercase' }}>
             Ville de Kélibia
           </div>
-          <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, marginTop: 3 }}>بلدية قليبية</div>
+          <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, lineHeight: 1.2 }}>بلدية قليبية</div>
         </div>
       </div>
 
