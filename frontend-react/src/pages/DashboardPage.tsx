@@ -100,33 +100,6 @@ const CSS = `
 .db-urgence-label { font-size:.75rem; font-weight:500; opacity:.9; }
 .db-urgence-number { font-size:1.4rem; font-weight:800; letter-spacing:-.5px; }
 
-/* Bento news grid */
-.db-bento { display:grid; grid-template-columns:1fr 1fr; gap:14px; height:340px; }
-.db-bento-main { position:relative; overflow:hidden; }
-.db-bento-right { display:grid; grid-template-rows:1fr 1fr; gap:14px; }
-.db-bento-img { width:100%; height:100%; object-fit:cover; transition:transform .7s; }
-.db-bento-main:hover .db-bento-img,
-.db-bento-small:hover .db-bento-img { transform:scale(1.07); }
-.db-bento-overlay {
-  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end;
-  padding:20px; background:linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.12) 60%, transparent 100%);
-}
-.db-bento-tag {
-  background:#ae131a; color:#fff; font-size:.62rem; font-weight:800;
-  text-transform:uppercase; padding:2px 10px; width:max-content; margin-bottom:10px; letter-spacing:.8px;
-}
-.db-bento-title { font-size:1.05rem; font-weight:800; color:#fff; line-height:1.25; font-family:'Public Sans',sans-serif; }
-.db-bento-title-ar { font-size:.72rem; color:rgba(255,255,255,.65); margin-top:4px; }
-.db-bento-small { position:relative; overflow:hidden; }
-.db-bento-event {
-  background:#fff; border-left:4px solid #ae131a; padding:18px;
-  display:flex; flex-direction:column; justify-content:center;
-}
-.db-bento-event-tag { font-size:.65rem; font-weight:800; color:#ae131a; text-transform:uppercase; letter-spacing:.8px; }
-.db-bento-event-title { font-size:.95rem; font-weight:800; color:#1a1c1c; margin-top:6px; font-family:'Public Sans',sans-serif; line-height:1.25; }
-.db-bento-event-ar { font-size:.72rem; color:#5b403d; margin-top:4px; }
-.db-bento-event-date { display:flex; align-items:center; gap:6px; margin-top:12px; font-size:.72rem; font-weight:700; color:#ae131a; }
-
 /* Reclamation rows */
 .db-rec-row {
   display:flex; align-items:center; justify-content:space-between;
@@ -158,8 +131,6 @@ const CSS = `
 .db-footer-legal a:hover { color:#ae131a; }
 
 @media (max-width:900px) {
-  .db-bento { grid-template-columns:1fr; height:auto; }
-  .db-bento-right { grid-template-rows:auto; }
   .db-footer-grid { grid-template-columns:1fr; }
 }
 `
@@ -395,52 +366,6 @@ export default function DashboardPage() {
               <span className="db-action-label">{t(item.labelKey)}</span>
             </Link>
           ))}
-        </div>
-      </div>
-
-      {/* ── À la une bento ── */}
-      <div style={{ marginBottom: 28 }}>
-        <div className="db-section-bar">
-          <h3 className="db-section-title">{t('news_title')}</h3>
-        </div>
-        <div className="db-bento">
-          {/* Main big card */}
-          <div className="db-bento-main">
-            <img
-              className="db-bento-img"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnjCa6-dmd3BLgi5E0T_2-4TuU3EovbMFAP5U8hdFsOAG_ef4RxyBiSVmO2eYsjjM7EgTO8ZSQGWIqzsrq4_bGzK4RuswVoPTl4Tl_ZlaYQe7Hwj3hGvq0ygaykpry3zA74ORn0yBReZ_dJPX41Erk-Mmgz7TQBAC7FPHJjLMxcNXZc8FkclQPVy1KOMC_3BgG1uveNIi8LKf6CXq4JWubyq_KHsIbJqR-jj01cPuzgrVdOgoeXOCDyLDx3zW4wK7bIvLUo5EtLRFC"
-              alt="News"
-            />
-            <div className="db-bento-overlay">
-              <span className="db-bento-tag">{lang === 'ar' ? 'خبر' : 'Actualité'}</span>
-              <div className="db-bento-title">{lang === 'ar' ? 'افتتاح المجمع الرياضي الجديد بالمنصورة' : 'Inauguration du nouveau complexe sportif de Mansoura'}</div>
-            </div>
-          </div>
-
-          {/* Right column */}
-          <div className="db-bento-right">
-            {/* Small image */}
-            <div className="db-bento-small">
-              <img
-                className="db-bento-img"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrsOubuvyfq-huir9vWevBAFEdCYz8vgBvgwY4AYvPXAnr-ocRj8bRXSMGMMuGeiILsBHRS1YyiimHsIm0waV7vBO69A3I7dPUDWRD-Z0uYyXaMtF0sehIshPnJjdEmaXmEQL1WTA41SDW04p46dUjFxry3wls7r-4frR8pX9DzvKTW0uSx_8V-MtT8VflVWOEUWKicPXVNQFNkx8ivU1mihilQd6Gs6qaGdGaTpc08iei0-Dhh8hE-hczfdaPxiaCeUbrf7LOaucZ"
-                alt="News"
-              />
-              <div className="db-bento-overlay">
-                <div style={{ fontSize: '.88rem', fontWeight: 800, color: '#fff', fontFamily: 'Public Sans,sans-serif' }}>{lang === 'ar' ? 'تهيئة السوق المركزي' : 'Aménagement du marché central'}</div>
-              </div>
-            </div>
-
-            {/* Event card */}
-            <div className="db-bento-event">
-              <span className="db-bento-event-tag">{lang === 'ar' ? 'الحدث القادم' : 'Prochain Événement'}</span>
-              <div className="db-bento-event-title">{lang === 'ar' ? 'مهرجان صيد القرنيط بقليبية' : 'Festival de la Pêche au Jarret'}</div>
-              <div className="db-bento-event-date">
-                <i className="fas fa-calendar-alt"></i>
-                <span>24 JUILLET 2024</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
