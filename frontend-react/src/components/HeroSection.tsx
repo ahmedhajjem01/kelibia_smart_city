@@ -29,8 +29,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         </h1>
         <h2
           className="font-medium text-white mb-6 leading-none"
-          dir="rtl"
-          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(1.8rem, 4vw, 3rem)', opacity: 0.9 }}
+          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', opacity: 0.85 }}
         >
           بلدية قليبية
         </h2>
@@ -41,7 +40,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
             style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '4px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', transition: 'background .2s' }}
           >
             <i className="fas fa-compass"></i>
-            {t('discover_city') || 'Découvrir la Ville'}
+            Découvrir la Ville
           </Link>
         </div>
       </div>
