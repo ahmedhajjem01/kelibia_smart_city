@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
     <aside
       className="sidebar fixed left-0 top-0 h-full w-64 flex flex-col z-50"
       style={{
-        background: 'linear-gradient(180deg, #175ead 0%, #0e4a8f 100%)',
+        background: 'linear-gradient(180deg, #045b7e 0%, #033f58 100%)',
         boxShadow: '4px 0 24px rgba(0,0,0,.35)',
         fontFamily: 'Public Sans, sans-serif',
         overflowY: 'auto',
