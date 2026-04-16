@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import logo from '../assets/logo.png'
 
 type TokenResponse = {
   access: string
@@ -475,7 +476,7 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXxofGh8pDXCkYXwP1qvQu6f3nI-NpzQY1TBvuA_0RczTAtS-foDfpusI_fwTJ97u0T7VDc2WxNJhSr2BufovZlz7HLjxj5vvDktrG3NcJT-V1yXikFBcc8TAtighE9Rh7rw7IBp5_QKy5nyilxPWReP8-SbSFPgatszO-WQvmWmuO0DmSlEaKPXxv48YxcthidL1MIYFLtnIA0WZbBzOu8EScmjOLxQPToglABlrzjRiI8obNlEGMYhqKvbDNY0U1Xqbl7GshbwCe"
+              src={logo}
               alt="Ville de Kélibia"
             />
             <div>
@@ -518,10 +519,7 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-_NytB4G5_BlxwR-bIX1uvMIVdWBnm30wP3l89REEUeOkBq171i-AI-9LDfrg-fJPAbM5pt3jWfhjAKGRdHzEy8h7tc1nHKaT-7E3-s1VsV5dRfgvBTDxWCB2RkFzRCsp3HQQC5q-9wBOosQWfKTUxBPUfZXBHsCvkSDF6Pa5Cxd1hIEP6xOmc8E0gpQn_04ztANq3Ke0vdx6eVEEVITK5ZweO9V70W8baoDKngIpME0C3bac-HhMkxT6Q3jGco8oIcImd3Q1pAs8"
-              alt="Kélibia Smart City"
-            />
+            <img src={logo} alt="Kélibia Smart City" />
           </div>
 
           {/* Greeting */}

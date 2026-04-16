@@ -4,6 +4,7 @@ import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
 import '../styles/agent-dashboard.css'
+import logo from '../assets/logo.png'
 
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
@@ -813,10 +814,10 @@ export default function AgentDashboardPage() {
       {/* ── Fixed Sidebar ── */}
       <aside className="ag-sidebar">
         <div className="ag-sidebar-brand">
-          <i className="fas fa-city" style={{fontSize:'1.5rem',color:'var(--primary)'}}></i>
+          <img src={logo} alt="Logo Kélibia" style={{width:42,height:42,objectFit:'contain',flexShrink:0}} />
           <div>
-            <div className="brand-name">Kelibia Smart City</div>
-            <div className="brand-sub">Municipal Agent Portal</div>
+            <div className="brand-name">Ville de Kélibia</div>
+            <div className="brand-sub">Espace Agent Municipal</div>
           </div>
         </div>
         <nav style={{flex:1}}>

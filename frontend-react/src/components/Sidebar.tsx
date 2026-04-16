@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
+import logo from '../assets/logo.png';
 
 interface SidebarProps {
   onLogout: () => void;
@@ -46,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
       `}</style>
       {/* ── Brand ── */}
       <div className="px-5 pt-6 pb-5 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.08)' }}>
-        <i className="fas fa-landmark" style={{ color: '#ae131a', fontSize: '1.4rem', flexShrink: 0 }}></i>
+        <img src={logo} alt="Logo Kélibia" style={{ width: 42, height: 42, objectFit: 'contain', flexShrink: 0 }} />
         <div>
           <div style={{ color: '#fff', fontWeight: 900, fontSize: '.82rem', letterSpacing: '.3px', lineHeight: 1.1, textTransform: 'uppercase' }}>
             Ville de Kélibia

@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
 import { useI18n } from '../i18n/LanguageProvider'
+import logo from '../assets/logo.png'
 
 const cityData: Record<string, string[]> = {
   Nabeul: [
@@ -725,7 +726,7 @@ export default function SignupPage() {
         <a className="sg-nav-brand" href="/">
           <img
             className="sg-nav-logo"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbLAmKtkBQshXo3NZk0q4qIK4rVJ_J8nEu4Ay-eu_J--h-C-ot-X_QibRxePQUtOYyfLxIEGRDxZjYxdZ3-2wqpewJsh8Cw1Te5-QKpFzzpf_a1LVGJfsMxPcfYF2dsL7hwHMlodJovJ22uHyN5xrGbJ3njsgE8jUkXI9j5pMJpoSAv6ci_8pqtzEeLlOsYTCceEIxBzLkOAg7PElc2gPBw_N7NReNMsNHpjqZHbDh160yCXWmY76BWzR1x925UXmvoupiUkK_hObn"
+            src={logo}
             alt="Ville de Kélibia"
           />
           <span className="sg-nav-name">Ville de Kélibia</span>
