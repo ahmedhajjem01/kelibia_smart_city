@@ -332,10 +332,10 @@ export default function ServicesPage() {
                 <div key={pay.id} className="col-md-4">
                   <div className="card h-100 border-0 shadow-sm" style={{ borderRadius: '15px' }}>
                     <div className="card-body p-4 text-center">
-                      <i className={`fas ${pay.icon} fs-1 text-primary mb-3`}></i>
+                      <i className={`fas ${pay.icon} fs-1 mb-3`} style={{ color: '#d4aa8d' }}></i>
                       <h5 className="fw-bold">{pay.title}</h5>
-                      <h4 className="text-primary fw-bold mb-3">{pay.amount} DT</h4>
-                      <button className="btn btn-primary w-100 rounded-pill" onClick={() => navigate(`/paiement?amount=${pay.amount}`)}>
+                      <h4 className="fw-bold mb-3" style={{ color: '#d4aa8d' }}>{pay.amount} DT</h4>
+                      <button className="w-100 rounded-pill border-0 py-2 fw-bold" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', color: '#fff', cursor: 'pointer' }} onClick={() => navigate(`/paiement?amount=${pay.amount}`)}>
                         {lang === 'ar' ? 'دفع الآن' : 'Payer'}
                       </button>
                     </div>
