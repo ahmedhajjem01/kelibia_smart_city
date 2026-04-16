@@ -87,7 +87,10 @@ export default function ForumPage() {
     const res = await fetch(`/api/forum/topics/?${params}`, {
       headers: { Authorization: `Bearer ${access}` },
     })
-    if (res.ok) setTopics(await res.json())
+    if (res.ok) {
+      const data = await res.json()
+      setTopics(Array.isArray(data) ? data : (data.results || []))
+    }
   }
 
   async function fetchStats() {
