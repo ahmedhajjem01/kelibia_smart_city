@@ -82,19 +82,19 @@ const CSS = `
   font-weight:800; padding:2px 8px; border-radius:3px; font-size:.78rem;
 }
 .db-signalement-btn {
-  width:100%; padding:16px; background:linear-gradient(135deg, #1D6FA3 0%, #155D8A 100%); color:#fff;
+  width:100%; padding:16px; background:#E6F4F7; color:#0F4C5C;
   font-weight:700; font-size:.82rem; letter-spacing:1.5px; text-transform:uppercase;
-  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:10px; transition:filter .2s; font-family:'Public Sans',sans-serif;
+  border:1px solid #B5DDE5; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:10px; transition:background .2s, color .2s; font-family:'Public Sans',sans-serif;
   text-decoration:none;
 }
-.db-signalement-btn:hover { filter:brightness(1.12); color:#fff; }
+.db-signalement-btn:hover { background:#B5DDE5; color:#0F4C5C; }
 .db-news-item { cursor:pointer; }
 .db-news-item:hover .db-news-headline { color:#d4aa8d; }
 .db-news-time { font-size:.68rem; font-weight:700; color:#d4aa8d; display:block; margin-bottom:3px; }
 .db-news-headline { font-size:.82rem; font-weight:700; color:#1a1c1c; line-height:1.35; transition:color .15s; }
 .db-news-ar { font-size:.68rem; color:#5b403d; margin-top:2px; }
-.db-urgence { background:#144E75; padding:28px; color:#fff; }
+.db-urgence { background:#C44536; padding:28px; color:#fff; }
 .db-urgence-title { font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; font-family:'Public Sans',sans-serif; }
 .db-urgence-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .db-urgence-label { font-size:.75rem; font-weight:500; opacity:.9; }
@@ -433,7 +433,7 @@ export default function DashboardPage() {
           </h3>
           <Link
             to="/nouvelle-reclamation"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'linear-gradient(135deg, #1D6FA3 0%, #155D8A 100%)', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: '#E6F4F7', color: '#0F4C5C', border: '1px solid #B5DDE5', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '.5px' }}
           >
             <i className="fas fa-plus-circle"></i>
             {t('new_signalement')}
