@@ -142,7 +142,7 @@ export default function DemandeLivretFamillePage() {
     })
 
     try {
-      const res = await fetch(resolveBackendUrl('/api/livret-famille/demandes/'), {
+      const res = await fetch(resolveBackendUrl('/livret-famille/demandes/'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${access}`,

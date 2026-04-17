@@ -377,7 +377,7 @@ export default function AgentDashboardPage() {
       const res = await fetch('/api/forum/topics/', { headers: { Authorization: `Bearer ${access}` } })
       if (res.ok) setAllTopics(await res.json())
       
-      const sRes = await fetch('/api/forum/topics/stats/', { headers: { Authorization: `Bearer ${access}` } })
+      const sRes = await fetch('/api/forum/stats/stats/', { headers: { Authorization: `Bearer ${access}` } })
       if (sRes.ok) setForumStats(await sRes.json())
     } catch (e) { console.error(e) }
     finally { setLoadingTopics(false) }

@@ -10,7 +10,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
     queryset = Reclamation.objects.all()
 
     def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve', 'classify_preview', 'ml_stats', 'reclassify']:
+        if self.action in ['create', 'list', 'retrieve', 'classify_preview', 'ml_stats', 'reclassify', 'update_status', 'explain_text', 'explain_priority']:
             return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
