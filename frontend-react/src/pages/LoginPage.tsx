@@ -126,7 +126,19 @@ const CSS = `
 .lp-field:focus-within .lp-label i {
   color: #954a00;
 }
-.lp-input { width: 100%; background: #e7e7f1; border: none; border-radius: 10px; padding: 13px 16px; font-size: .9rem; outline: none; box-sizing: border-box; }
+.lp-input {
+  width: 100%;
+  background: #e7e7f1;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: .9rem;
+  color: #191b22;
+  outline: none;
+  box-sizing: border-box;
+  transition: box-shadow .2s, background .2s;
+}
+.lp-input::placeholder { color: #9ca3af; }
 .lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #954a00; }
 .lp-input-wrap { position: relative; }
 .lp-eye { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #897364; cursor: pointer; }
@@ -377,7 +389,7 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="lp-footer">
             <p className="lp-signup-link">
-              {t('already_have_account')} ? <Link to="/signup">{t('create_account')}</Link>
+              {t('already_have_account')} <Link to="/signup">{t('create_account')}</Link>
             </p>
             <p>{t('footer_text')}</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
