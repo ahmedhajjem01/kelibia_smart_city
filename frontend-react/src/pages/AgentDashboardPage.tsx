@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -1412,8 +1412,8 @@ export default function AgentDashboardPage() {
       </div>
       <nav className="ag-navbar">
         <a className="ag-brand" href="#">
-          <div className="ag-logo"><i className="fas fa-city"></i></div>
-          <div className="ag-title"><span className="main">Ï¿┘äÏ»┘èÏ® ┘é┘ä┘èÏ¿┘èÏ® ÔÇö Commune de K├®libia</span><span className="sub">Espace Agent ÔÇö Kelibia Smart City</span></div>
+          <img src="/media/tunisia_logo.png" className="ag-logo" style={{ height: '36px', width: 'auto' }} alt="Logo" />
+          <div className="ag-title"><span className="main">{lang === 'ar' ? 'البوابة الوطنية' : 'Portail National'}</span><span className="sub">Administration — Tunisia Smart City</span></div>
         </a>
         <div className="ag-actions">
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
