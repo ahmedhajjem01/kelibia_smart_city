@@ -108,12 +108,12 @@ const CSS = `
   color:#fff;font-size:1.2rem;
 }
 .ag-title .main{
-  font-size:1rem;font-weight:800;
+  font-size:0.85rem;font-weight:800;
   color:var(--primary);display:block;
   font-family:'Public Sans',sans-serif;
   letter-spacing:-0.3px;
 }
-.ag-title .sub{font-size:.7rem;color:#94a3b8;font-weight:500}
+.ag-title .sub{font-size:.65rem;color:#94a3b8;font-weight:500}
 .ag-actions{display:flex;align-items:center;gap:10px}
 .ag-lang-btn{
   background:transparent;border:0;
