@@ -1791,7 +1791,7 @@ export default function SignupPage() {
                     <option value="" disabled>{t('choose')}</option>
 
                     {cityOptions.map(c => {
-                      const key = `city_${c.replace(/ /g, '').replace(/[éèêë]/g, 'e').replace(/[àâ]/g, 'a').replace(/[îï]/g, 'i').replace(/[ôö]/g, 'o').replace(/[ûü]/g, 'u').replace(/ç/g, 'c')}`
+                      const key = `city_${c.replace(/[ -]/g, '').replace(/[éèêë]/g, 'e').replace(/[àâ]/g, 'a').replace(/[îï]/g, 'i').replace(/[ôö]/g, 'o').replace(/[ûü]/g, 'u').replace(/ç/g, 'c')}`
                       return (
                         <option key={c} value={c}>
                           {t(key) || c}
