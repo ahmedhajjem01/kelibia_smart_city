@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' | '/demande-residence' | '/demande-raccordement' | '/demande-transfert-corps' | '/demande-legalisation' | '/demande-bien' | '/demande-propriete-changement' | '/demande-vocation-changement' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -85,12 +85,12 @@ export default function ServicesPage() {
           fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } }),
         ])
 
-        // User profile — optional, don't fail if it errors
+        // User profile ÔÇö optional, don't fail if it errors
         if (uRes.ok) {
           try { setUser(await uRes.json()) } catch { /* ignore parse errors */ }
         }
 
-        // Services — if token expired (401), retry without auth (it's a public endpoint)
+        // Services ÔÇö if token expired (401), retry without auth (it's a public endpoint)
         let finalSvcRes = svcRes
         if (svcRes.status === 401) {
           finalSvcRes = await fetch('/api/services/categories/')
@@ -102,7 +102,7 @@ export default function ServicesPage() {
       } catch (e) {
         console.error(e)
         setErrorText(
-          'Erreur lors de la récupération des services. Veuillez réessayer plus tard.'
+          'Erreur lors de la r├®cup├®ration des services. Veuillez r├®essayer plus tard.'
         )
       } finally {
         setLoading(false)
@@ -123,134 +123,92 @@ export default function ServicesPage() {
 
     const svcName = lang === 'ar' ? svc.name_ar : svc.name_fr
     const svcDesc = lang === 'ar' ? svc.description_ar : svc.description_fr
-    let timeText = svc.processing_time || (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
+    let timeText = svc.processing_time || (lang === 'ar' ? 'Ï║┘èÏ▒ ┘àÏ¡Ï»Ï»' : 'Non sp├®cifi├®')
     
     const reqs = svc.requirements.map((r) => ({ ar: r.name_ar, fr: r.name_fr }))
 
     const nameLower = svc.name_fr.toLowerCase().trim()
     const nameAr = svc.name_ar.trim()
-    const isBirthReg = nameLower.includes('naissance') || nameAr.includes('ولادة')
+    const isBirthReg = nameLower.includes('naissance') || nameAr.includes('┘ê┘äÏºÏ»Ï®')
 
     let requestButton: RequestButtonState = { kind: 'disabled', label: t('request_online') }
 
-    if (nameLower === 'extrait de naissance' || nameAr === 'مضمون ولادة') {
+    if (nameLower === 'extrait de naissance' || nameAr === '┘àÏÂ┘à┘ê┘å ┘ê┘äÏºÏ»Ï®') {
       requestButton = {
         kind: 'extract_now',
-        label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
+        label: lang === 'ar' ? 'ÏºÏ│Ï¬Ï«Ï▒ÏºÏ¼ ┘ü┘êÏ▒┘è ÔÜí' : 'Extraction Imm├®diate ÔÜí',
         target: '/mes-extraits',
       }
     } else if (isBirthReg) {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
+        label: lang === 'ar' ? 'ÏÀ┘äÏ¿ Ï╣┘å Ï¿Ï╣Ï»' : 'Demander en ligne',
         target: '/declaration-naissance',
       }
-    } else if (nameLower === 'extrait de mariage' || nameAr.includes('مضمون زواج')) {
+    } else if (nameLower === 'extrait de mariage' || nameAr.includes('┘àÏÂ┘à┘ê┘å Ï▓┘êÏºÏ¼')) {
       requestButton = {
         kind: 'extract_now',
-        label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
+        label: lang === 'ar' ? 'ÏºÏ│Ï¬Ï«Ï▒ÏºÏ¼ ┘ü┘êÏ▒┘è ÔÜí' : 'Extraction Imm├®diate ÔÜí',
         target: '/mes-mariages',
       }
-    } else if (nameLower === 'extrait de décès' || nameAr === 'مضمون وفاة') {
+    } else if (nameLower === 'extrait de d├®c├¿s' || nameAr === '┘àÏÂ┘à┘ê┘å ┘ê┘üÏºÏ®') {
       requestButton = {
         kind: 'extract_now',
-        label: lang === 'ar' ? 'استخراج فوري ⚡' : 'Extraction Immédiate ⚡',
+        label: lang === 'ar' ? 'ÏºÏ│Ï¬Ï«Ï▒ÏºÏ¼ ┘ü┘êÏ▒┘è ÔÜí' : 'Extraction Imm├®diate ÔÜí',
         target: '/mes-deces',
       }
-    } else if (nameLower.includes('déclaration de décès') || nameAr === 'تصريح بوفاة') {
+    } else if (nameLower.includes('d├®claration de d├®c├¿s') || nameAr === 'Ï¬ÏÁÏ▒┘èÏ¡ Ï¿┘ê┘üÏºÏ®') {
       requestButton = {
         kind: 'declare_death',
         label: t('declare_death'),
         target: '/declaration-deces',
       }
-    } else if (nameLower.includes('mariage') || nameAr.includes('زواج')) {
+    } else if (nameLower.includes('mariage') || nameAr.includes('Ï▓┘êÏºÏ¼')) {
       requestButton = {
         kind: 'declare_birth',
         label: t('request_online'),
         target: '/demande-mariage',
       }
-    } else if (nameLower.includes('livret') || nameAr.includes('دفتر') || nameAr.includes('عائلي')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
-        target: '/demande-livret-famille',
-      }
-    } else if (nameLower.includes('inhumation') || nameAr.includes('دفن')) {
+    } else if (nameLower.includes('inhumation') || nameAr.includes('Ï»┘ü┘å')) {
       requestButton = {
         kind: 'declare_death',
-        label: lang === 'ar' ? 'طلب رخصة دفن' : 'Demander rdv Inhumation',
+        label: lang === 'ar' ? 'ÏÀ┘äÏ¿ Ï▒Ï«ÏÁÏ® Ï»┘ü┘å' : 'Demander rdv Inhumation',
         target: '/demande-inhumation',
       }
-    } else if (nameLower.includes('transfert') || nameAr.includes('نقل جثة')) {
+    } else if (nameLower === '├®v├®nement public' || nameAr === '┘üÏ╣Ïº┘ä┘èÏ® Ï╣┘à┘ê┘à┘èÏ®') {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'طلب رخصة نقل' : 'Demander un permis de transfert',
-        target: '/demande-transfert-corps',
-      }
-    } else if (nameLower === 'événement public' || nameAr === 'فعالية عمومية') {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander une autorisation',
+        label: lang === 'ar' ? 'Ï¬┘éÏ»┘è┘à ÏÀ┘äÏ¿' : 'Demander une autorisation',
         target: '/demande-evenement-public',
       }
-    } else if (nameLower === 'événement privé' || nameAr === 'فعالية خاصة') {
+    } else if (nameLower === '├®v├®nement priv├®' || nameAr === '┘üÏ╣Ïº┘ä┘èÏ® Ï«ÏºÏÁÏ®') {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Faire une déclaration',
+        label: lang === 'ar' ? 'Ï¬┘éÏ»┘è┘à ÏÀ┘äÏ¿' : 'Faire une d├®claration',
         target: '/demande-evenement-prive',
       }
-    } else if (nameLower.includes('goudronnage') || nameAr.includes('تعبيد') || nameAr.includes('رصف')) {
+    } else if (nameLower.includes('goudronnage') || nameAr.includes('Ï¬Ï╣Ï¿┘èÏ»') || nameAr.includes('Ï▒ÏÁ┘ü')) {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        label: lang === 'ar' ? 'Ï¬┘éÏ»┘è┘à ÏÀ┘äÏ¿' : 'Demander en ligne',
         target: '/demande-goudronnage',
       }
-    } else if (nameLower.includes('vocation') || nameAr.includes('صبغة') || nameAr.includes('وجهة')) {
+    } else if (nameLower.includes('vocation') || nameAr.includes('ÏÁÏ¿Ï║Ï®') || nameAr.includes('┘êÏ¼┘çÏ®')) {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'طلب تغيير' : 'Changer la vocation',
-        target: '/demande-vocation-changement',
+        label: lang === 'ar' ? 'Ï¬┘éÏ»┘è┘à ÏÀ┘äÏ¿' : 'Demander en ligne',
+        target: '/demande-certificat-vocation',
       }
-    } else if (nameLower.includes('changement') || nameLower.includes('achat') || nameLower.includes('héritage')) {
+    } else if (nameLower.includes('construction') || nameLower.includes('construire') || nameAr.includes('Ï¿┘åÏºÏí') || nameAr.includes('Ï¬Ï▒Ï«┘èÏÁ Ï¿┘åÏºÏí')) {
       requestButton = {
         kind: 'declare_birth',
-        label: lang === 'ar' ? 'طلب تحيين' : 'Mise à jour propriétaire',
-        target: '/demande-propriete-changement',
-      }
-    } else if (nameLower.includes('bien') || nameLower.includes('propriété') || nameAr.includes('عقار') || nameAr.includes('بناء')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'تسجيل عقار' : 'Enregistrer un bien',
-        target: '/demande-bien',
-      }
-    } else if (nameLower.includes('construction') || nameLower.includes('construire') || nameAr.includes('بناء') || nameAr.includes('ترخيص بناء')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        label: lang === 'ar' ? 'Ï¬┘éÏ»┘è┘à ÏÀ┘äÏ¿' : 'Demander en ligne',
         target: '/demande-construction',
-      }
-    } else if (nameLower.includes('résidence') || nameAr.includes('مسكن') || nameAr.includes('إقامة')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-        target: '/demande-residence',
-      }
-    } else if (nameLower.includes('raccordement') || nameAr.includes('ربط') || nameAr.includes('توصيل')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-        target: '/demande-raccordement',
-      }
-    } else if (nameLower.includes('signature') || nameAr.includes('تعريف') || nameAr.includes('إمضاء')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
-        target: '/demande-legalisation',
       }
     } else {
       requestButton = {
         kind: 'disabled',
-        label: lang === 'ar' ? 'قريباً على المنصة' : 'Prochainement disponible',
+        label: lang === 'ar' ? 'ÏÀ┘äÏ¿ Ï╣┘å Ï¿Ï╣Ï» (┘éÏ▒┘èÏ¿Ïº)' : 'Demander en ligne (Bient├┤t)',
       }
     }
 
@@ -299,19 +257,19 @@ export default function ServicesPage() {
           <div className="alert alert-danger">{errorText}</div>
         ) : allCategories.length === 0 ? (
           <p className="text-center text-muted">
-            {lang === 'ar' ? 'لا توجد خدمات متاحة حالياً.' : 'Aucun service disponible pour le moment.'}
+            {lang === 'ar' ? '┘äÏº Ï¬┘êÏ¼Ï» Ï«Ï»┘àÏºÏ¬ ┘àÏ¬ÏºÏ¡Ï® Ï¡Ïº┘ä┘èÏº┘ï.' : 'Aucun service disponible pour le moment.'}
           </p>
         ) : (
           <div className="d-flex flex-column gap-2 mb-4">
             {allCategories
-              .filter((cat) => !cat.name_fr.toLowerCase().includes('problèmes') && !cat.name_fr.toLowerCase().includes('signalements'))
+              .filter((cat) => !cat.name_fr.toLowerCase().includes('probl├¿mes') && !cat.name_fr.toLowerCase().includes('signalements'))
               .map((cat) => {
                 const catName = lang === 'ar' ? cat.name_ar : cat.name_fr
                 const isOpen = openCatId === cat.id
                 const visibleServices = cat.services.filter(s => {
                   const nf = s.name_fr.toLowerCase()
                   const na = s.name_ar
-                  return !nf.includes('extrait') && !na.includes('مضمون')
+                  return !nf.includes('extrait') && !na.includes('┘àÏÂ┘à┘ê┘å') && !nf.includes('r├®sidence')
                 })
                 return (
                   <div key={cat.id} className="border rounded-4 overflow-hidden shadow-sm mb-2">
@@ -332,7 +290,7 @@ export default function ServicesPage() {
                         </div>
                         <div>
                           <div className="fw-bold">{catName}</div>
-                          <div style={{ fontSize: '.78rem', opacity: .75 }}>{visibleServices.length} {lang === 'ar' ? 'خدمة' : 'service(s)'}</div>
+                          <div style={{ fontSize: '.78rem', opacity: .75 }}>{visibleServices.length} {lang === 'ar' ? 'Ï«Ï»┘àÏ®' : 'service(s)'}</div>
                         </div>
                       </div>
                       <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'}`} />
@@ -362,14 +320,14 @@ export default function ServicesPage() {
         {!loading && (
           <div className="category-section mb-5 mt-5">
             <h4 className="fw-bold border-bottom pb-2 mb-4">
-              {lang === 'ar' ? 'الأداء والجباية المحلية' : 'Paiements et Taxes Locales'}
-              <span className="badge bg-primary ms-2 small" style={{ fontSize: '0.6rem' }}>OFFICIEL PORTAIL</span>
+              {lang === 'ar' ? 'Ïº┘äÏúÏ»ÏºÏí ┘êÏº┘äÏ¼Ï¿Ïº┘èÏ® Ïº┘ä┘àÏ¡┘ä┘èÏ®' : 'Paiements et Taxes Locales'}
+              <span className="badge bg-danger ms-2 small" style={{ fontSize: '0.6rem' }}>SIMULATION PFE</span>
             </h4>
             <div className="row g-4">
               {[
-                { id: 't1', title: lang === 'ar' ? 'معلوم على العقارات' : 'Taxe Habitation', amount: '125.000', icon: 'fa-home' },
-                { id: 't2', title: lang === 'ar' ? 'المعلوم على المؤسسات (TCL)' : 'Taxe Commerciale (TCL)', amount: '250.000', icon: 'fa-store' },
-                { id: 't3', title: lang === 'ar' ? 'معلوم الخدمات' : 'Frais Services', amount: '2.000', icon: 'fa-file-invoice' }
+                { id: 't1', title: lang === 'ar' ? '┘àÏ╣┘ä┘ê┘à Ï╣┘ä┘ë Ïº┘äÏ╣┘éÏºÏ▒ÏºÏ¬' : 'Taxe Habitation', amount: '125.000', icon: 'fa-home' },
+                { id: 't2', title: lang === 'ar' ? 'Ïº┘äÏ«ÏÀÏº┘èÏº Ïº┘ä┘àÏ▒┘êÏ▒┘èÏ®' : 'Amendes', amount: '20.000', icon: 'fa-car' },
+                { id: 't3', title: lang === 'ar' ? '┘àÏ╣┘ä┘ê┘à Ïº┘äÏ«Ï»┘àÏºÏ¬' : 'Frais Services', amount: '2.000', icon: 'fa-file-invoice' }
               ].map(pay => (
                 <div key={pay.id} className="col-md-4">
                   <div className="card h-100 border-0 shadow-sm" style={{ borderRadius: '15px' }}>
@@ -377,14 +335,9 @@ export default function ServicesPage() {
                       <i className={`fas ${pay.icon} fs-1 mb-3`} style={{ color: '#d4aa8d' }}></i>
                       <h5 className="fw-bold">{pay.title}</h5>
                       <h4 className="fw-bold mb-3" style={{ color: '#d4aa8d' }}>{pay.amount} DT</h4>
-                      {localStorage.getItem(`tax_paid_${pay.id}`) === 'true' ? (
-                          <div className="text-success fw-bold p-2 bg-light rounded-pill"><i className="fas fa-check-circle me-1"></i> {lang === 'ar' ? 'خالصة' : 'Payé'}</div>
-                      ) : (
-                          <button className="w-100 rounded-pill border-0 py-2 fw-bold" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', color: '#fff', cursor: 'pointer' }} 
-                            onClick={() => navigate(`/paiement?amount=${pay.amount}&reason=${encodeURIComponent(pay.title)}&requestId=${pay.id}&requestType=tax&target=/services`)}>
-                            {lang === 'ar' ? 'دفع الآن' : 'Payer'}
-                          </button>
-                      )}
+                      <button className="w-100 rounded-pill border-0 py-2 fw-bold" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', color: '#fff', cursor: 'pointer' }} onClick={() => navigate(`/paiement?amount=${pay.amount}`)}>
+                        {lang === 'ar' ? 'Ï»┘üÏ╣ Ïº┘äÏó┘å' : 'Payer'}
+                      </button>
                     </div>
                   </div>
                 </div>

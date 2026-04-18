@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
-// ── Types ───────────────────────────────────────────────────────────────────
+// ÔöÇÔöÇ Types ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 type Article = {
   id: number
@@ -36,18 +36,18 @@ type PublicEvent = {
   association_nom: string | null
 }
 
-// ── Constants ────────────────────────────────────────────────────────────────
+// ÔöÇÔöÇ Constants ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 const CATEGORY_TAGS = [
-  { value: '', label_fr: 'Toutes', label_ar: 'الكل', icon: 'fa-th-large' },
-  { value: 'municipal', label_fr: 'Municipal', label_ar: 'بلدي', icon: 'fa-landmark' },
-  { value: 'travaux', label_fr: 'Travaux', label_ar: 'أشغال', icon: 'fa-hard-hat' },
-  { value: 'environnement', label_fr: 'Environnement', label_ar: 'بيئة', icon: 'fa-leaf' },
-  { value: 'culture', label_fr: 'Culture', label_ar: 'ثقافة', icon: 'fa-paint-brush' },
-  { value: 'sport', label_fr: 'Sport', label_ar: 'رياضة', icon: 'fa-running' },
+  { value: '', label_fr: 'Toutes', label_ar: 'Ïº┘ä┘â┘ä', icon: 'fa-th-large' },
+  { value: 'municipal', label_fr: 'Municipal', label_ar: 'Ï¿┘äÏ»┘è', icon: 'fa-landmark' },
+  { value: 'travaux', label_fr: 'Travaux', label_ar: 'ÏúÏ┤Ï║Ïº┘ä', icon: 'fa-hard-hat' },
+  { value: 'environnement', label_fr: 'Environnement', label_ar: 'Ï¿┘èÏªÏ®', icon: 'fa-leaf' },
+  { value: 'culture', label_fr: 'Culture', label_ar: 'Ï½┘éÏº┘üÏ®', icon: 'fa-paint-brush' },
+  { value: 'sport', label_fr: 'Sport', label_ar: 'Ï▒┘èÏºÏÂÏ®', icon: 'fa-running' },
 ]
 
-// Only show public/community events — exclude private family events
+// Only show public/community events ÔÇö exclude private family events
 const PUBLIC_EVENT_TYPES = [
   'concert', 'culturel', 'sportif', 'marche', 'association',
   'religieux', 'commercial', 'charite', 'politique', 'autre',
@@ -67,7 +67,7 @@ const TYPE_ICON: Record<string, string> = {
   religieux: 'fa-mosque', politique: 'fa-landmark', charite: 'fa-hand-holding-heart', autre: 'fa-calendar-day',
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ÔöÇÔöÇ Helpers ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 function formatDate(dateStr: string, lang: string) {
   return new Date(dateStr).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR', {
@@ -81,12 +81,12 @@ function formatShortDate(dateStr: string) {
 
 function readingTime(content: string, lang: string) {
   const mins = Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200))
-  return lang === 'ar' ? `${mins} دقيقة قراءة` : `${mins} min de lecture`
+  return lang === 'ar' ? `${mins} Ï»┘é┘è┘éÏ® ┘éÏ▒ÏºÏíÏ®` : `${mins} min de lecture`
 }
 
 function excerpt(content: string, maxLen = 160) {
   const plain = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  return plain.length > maxLen ? plain.slice(0, maxLen) + '…' : plain
+  return plain.length > maxLen ? plain.slice(0, maxLen) + 'ÔÇª' : plain
 }
 
 function isUpcoming(ev: PublicEvent) { return new Date(ev.date_debut) > new Date() }
@@ -95,26 +95,16 @@ function isOngoing(ev: PublicEvent) {
   return new Date(ev.date_debut) <= now && new Date(ev.date_fin) >= now
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ÔöÇÔöÇ Component ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 export default function NewsPage() {
   const { lang } = useI18n()
   const navigate = useNavigate()
 
-  const getFastMediaUrl = (article: Article) => {
-    if (!article) return '';
-    if (article.slug?.includes('1001')) return 'https://images.unsplash.com/photo-1594911771142-99052026f74a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
-    if (article.slug?.includes('1002')) return 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
-    if (article.slug?.includes('1003')) return 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
-    if (article.slug?.includes('1004')) return 'https://images.unsplash.com/photo-1548543604-a87a9909bfec?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
-    if (article.slug?.includes('1005')) return 'https://picsum.photos/seed/kelibia_street/800/600';
-    return article.image ? resolveBackendUrl(article.image) : '';
-  }
-
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
 
-  // Tab: 'news' | 'events' | 'facebook'
-  const [activeTab, setActiveTab] = useState<'news' | 'events' | 'facebook'>('news')
+  // Tab: 'news' | 'events'
+  const [activeTab, setActiveTab] = useState<'news' | 'events'>('news')
 
   // News state
   const [articles, setArticles] = useState<Article[]>([])
@@ -203,9 +193,9 @@ export default function NewsPage() {
     <MainLayout
       user={user}
       onLogout={logout}
-      breadcrumbs={[{ label: lang === 'ar' ? 'أخبار قليبية' : 'Actualités de Kélibia' }]}
+      breadcrumbs={[{ label: lang === 'ar' ? 'ÏúÏ«Ï¿ÏºÏ▒ ┘é┘ä┘èÏ¿┘èÏ®' : 'Actualit├®s de K├®libia' }]}
     >
-      {/* ── HERO ──────────────────────────────────────────────────── */}
+      {/* ÔöÇÔöÇ HERO ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */}
       <div
         className="rounded-4 mb-4 p-4 text-white position-relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0F4C5C 0%, #B5DDE5 100%)' }}
@@ -216,28 +206,28 @@ export default function NewsPage() {
           <div>
             <h2 className="fw-bold mb-1">
               <i className="fas fa-newspaper me-2"></i>
-              {lang === 'ar' ? 'أخبار قليبية' : 'Actualités de Kélibia'}
+              {lang === 'ar' ? 'ÏúÏ«Ï¿ÏºÏ▒ ┘é┘ä┘èÏ¿┘èÏ®' : 'Actualit├®s de K├®libia'}
             </h2>
             <p className="mb-0 opacity-75" style={{ fontSize: '.9rem' }}>
               {lang === 'ar'
-                ? 'ابق على اطلاع بآخر الأحداث والبلاغات الصادرة عن بلديتك'
-                : 'Restez informé des derniers événements et annonces de votre commune'}
+                ? 'ÏºÏ¿┘é Ï╣┘ä┘ë ÏºÏÀ┘äÏºÏ╣ Ï¿ÏóÏ«Ï▒ Ïº┘äÏúÏ¡Ï»ÏºÏ½ ┘êÏº┘äÏ¿┘äÏºÏ║ÏºÏ¬ Ïº┘äÏÁÏºÏ»Ï▒Ï® Ï╣┘å Ï¿┘äÏ»┘èÏ¬┘â'
+                : 'Restez inform├® des derniers ├®v├®nements et annonces de votre commune'}
             </p>
           </div>
           <div className="d-flex gap-2">
             <span className="badge rounded-pill px-3 py-2" style={{ background: 'rgba(255,255,255,.2)', fontSize: '.82rem' }}>
               <i className="fas fa-file-alt me-1"></i>
-              {articles.length} {lang === 'ar' ? 'خبر' : `article${articles.length !== 1 ? 's' : ''}`}
+              {articles.length} {lang === 'ar' ? 'Ï«Ï¿Ï▒' : `article${articles.length !== 1 ? 's' : ''}`}
             </span>
             <span className="badge rounded-pill px-3 py-2" style={{ background: 'rgba(181,221,229,.35)', fontSize: '.82rem' }}>
               <i className="fas fa-calendar-star me-1"></i>
-              {eventsFetched ? publicEvents.length : '—'} {lang === 'ar' ? 'فعالية' : 'événement(s)'}
+              {eventsFetched ? publicEvents.length : 'ÔÇö'} {lang === 'ar' ? '┘üÏ╣Ïº┘ä┘èÏ®' : '├®v├®nement(s)'}
             </span>
           </div>
         </div>
       </div>
 
-      {/* ── TABS ──────────────────────────────────────────────────── */}
+      {/* ÔöÇÔöÇ TABS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */}
       <div className="d-flex gap-2 mb-4">
         <button
           onClick={() => setActiveTab('news')}
@@ -245,7 +235,7 @@ export default function NewsPage() {
           style={{ fontSize: '.88rem', transition: 'all .2s', ...(activeTab === 'news' ? { background: '#B5DDE5', color: '#0F4C5C', borderColor: '#B5DDE5' } : {}) }}
         >
           <i className="fas fa-newspaper me-2"></i>
-          {lang === 'ar' ? 'الأخبار البلدية' : 'Actualités municipales'}
+          {lang === 'ar' ? 'Ïº┘äÏúÏ«Ï¿ÏºÏ▒ Ïº┘äÏ¿┘äÏ»┘èÏ®' : 'Actualit├®s municipales'}
           {articles.length > 0 && (
             <span className={`ms-2 badge rounded-pill ${activeTab === 'news' ? 'bg-white' : 'bg-secondary text-white'}`}
               style={{ fontSize: '.7rem', color: activeTab === 'news' ? '#0F4C5C' : undefined }}>{articles.length}</span>
@@ -262,30 +252,17 @@ export default function NewsPage() {
           }}
         >
           <i className="fas fa-calendar-star me-2"></i>
-          {lang === 'ar' ? 'الفعاليات' : 'Événements'}
+          {lang === 'ar' ? 'Ïº┘ä┘üÏ╣Ïº┘ä┘èÏºÏ¬' : '├ëv├®nements'}
           {eventsFetched && publicEvents.length > 0 && (
             <span className={`ms-2 badge rounded-pill ${activeTab === 'events' ? 'bg-white' : 'bg-secondary text-white'}`}
               style={{ fontSize: '.7rem', color: activeTab === 'events' ? '#0F4C5C' : '' }}>{publicEvents.length}</span>
           )}
         </button>
-        <button
-          onClick={() => setActiveTab('facebook')}
-          className={`btn rounded-pill px-4 fw-bold ${activeTab === 'facebook' ? 'shadow-sm' : 'btn-outline-secondary'}`}
-          style={{
-            fontSize: '.88rem', transition: 'all .2s',
-            background: activeTab === 'facebook' ? '#1877F2' : '',
-            color: activeTab === 'facebook' ? '#fff' : '',
-            borderColor: activeTab === 'facebook' ? '#1877F2' : '',
-          }}
-        >
-          <i className="fab fa-facebook me-2"></i>
-          {lang === 'ar' ? 'بث فيسبوك' : 'Direct Facebook'}
-        </button>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════
-          TAB: ACTUALITÉS
-      ════════════════════════════════════════════════════════════ */}
+      {/* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+          TAB: ACTUALIT├ëS
+      ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ */}
       {activeTab === 'news' && (
         <>
           {/* Search + tag filters */}
@@ -300,7 +277,7 @@ export default function NewsPage() {
                     <input
                       type="text"
                       className="form-control border-start-0 bg-white"
-                      placeholder={lang === 'ar' ? 'ابحث في الأخبار...' : 'Rechercher une actualité...'}
+                      placeholder={lang === 'ar' ? 'ÏºÏ¿Ï¡Ï½ ┘ü┘è Ïº┘äÏúÏ«Ï¿ÏºÏ▒...' : 'Rechercher une actualit├®...'}
                       value={search}
                       onChange={e => setSearch(e.target.value)}
                     />
@@ -343,12 +320,12 @@ export default function NewsPage() {
             <div className="text-center py-5">
               <i className="fas fa-newspaper fa-3x text-muted opacity-25 mb-3 d-block"></i>
               <p className="text-muted fw-bold">
-                {lang === 'ar' ? 'لا توجد أخبار حاليًا' : 'Aucune actualité pour le moment'}
+                {lang === 'ar' ? '┘äÏº Ï¬┘êÏ¼Ï» ÏúÏ«Ï¿ÏºÏ▒ Ï¡Ïº┘ä┘è┘ïÏº' : 'Aucune actualit├® pour le moment'}
               </p>
               {search && (
                 <button className="btn btn-outline-primary btn-sm rounded-pill px-4 mt-2" onClick={() => setSearch('')}>
                   <i className="fas fa-times me-1"></i>
-                  {lang === 'ar' ? 'مسح البحث' : 'Effacer la recherche'}
+                  {lang === 'ar' ? '┘àÏ│Ï¡ Ïº┘äÏ¿Ï¡Ï½' : 'Effacer la recherche'}
                 </button>
               )}
             </div>
@@ -365,8 +342,8 @@ export default function NewsPage() {
                 >
                   <div className="row g-0">
                     <div className="col-md-5 position-relative" style={{ minHeight: 220 }}>
-                      {getFastMediaUrl(featured) ? (
-                        <img src={getFastMediaUrl(featured)} alt={featured.title}
+                      {featured.image ? (
+                        <img src={resolveBackendUrl(featured.image)} alt={featured.title}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 220 }} />
                       ) : (
                         <div className="w-100 h-100 d-flex align-items-center justify-content-center"
@@ -377,7 +354,7 @@ export default function NewsPage() {
                       <span className="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill"
                         style={{ background: '#B5DDE5', color: '#0F4C5C', fontSize: '.78rem' }}>
                         <i className="fas fa-star me-1"></i>
-                        {lang === 'ar' ? 'الخبر الأبرز' : 'À la une'}
+                        {lang === 'ar' ? 'Ïº┘äÏ«Ï¿Ï▒ Ïº┘äÏúÏ¿Ï▒Ï▓' : '├Ç la une'}
                       </span>
                     </div>
                     <div className="col-md-7">
@@ -385,9 +362,9 @@ export default function NewsPage() {
                         <div>
                           <div className="d-flex align-items-center gap-2 mb-3" style={{ fontSize: '.8rem', color: '#888' }}>
                             <span><i className="fas fa-user me-1"></i>{featured.author_name}</span>
-                            <span>·</span>
+                            <span>┬À</span>
                             <span><i className="fas fa-calendar me-1"></i>{formatDate(featured.created_at, lang)}</span>
-                            <span>·</span>
+                            <span>┬À</span>
                             <span><i className="fas fa-clock me-1"></i>{readingTime(featured.content, lang)}</span>
                           </div>
                           <h3 className="fw-bold mb-3" style={{ color: '#1a1a2e', lineHeight: 1.35 }}>{featured.title}</h3>
@@ -397,7 +374,7 @@ export default function NewsPage() {
                           <button className="btn rounded-pill px-4 fw-bold" style={{ fontSize: '.85rem', background: '#B5DDE5', color: '#0F4C5C', borderColor: '#B5DDE5' }}
                             onClick={e => { e.stopPropagation(); setSelectedArticle(featured) }}>
                             <i className="fas fa-arrow-right me-2"></i>
-                            {lang === 'ar' ? 'قراءة المزيد' : "Lire l'article"}
+                            {lang === 'ar' ? '┘éÏ▒ÏºÏíÏ® Ïº┘ä┘àÏ▓┘èÏ»' : "Lire l'article"}
                           </button>
                         </div>
                       </div>
@@ -412,33 +389,17 @@ export default function NewsPage() {
                   {restArticles.map(article => (
                     <div key={article.id} className="col-12 col-md-6 col-xl-4">
                       <div
-                        className="card border-0 rounded-4 h-100 overflow-hidden"
-                        style={{ 
-                          cursor: 'pointer', 
-                          transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                          boxShadow: '0 8px 30px rgba(0,0,0,0.05)',
-                          background: '#ffffff'
-                        }}
-                        onMouseEnter={e => { 
-                          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'; 
-                          e.currentTarget.style.boxShadow = '0 20px 40px rgba(111,66,193,0.15)' 
-                        }}
-                        onMouseLeave={e => { 
-                          e.currentTarget.style.transform = 'translateY(0) scale(1)'; 
-                          e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.05)' 
-                        }}
+                        className="card border-0 rounded-4 shadow-sm h-100 overflow-hidden"
+                        style={{ cursor: 'pointer', transition: 'transform .2s, box-shadow .2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,.1)' }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '' }}
                         onClick={() => setSelectedArticle(article)}
                       >
-                        <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
-                          {getFastMediaUrl(article) ? (
-                            <img src={getFastMediaUrl(article)} alt={article.title}
-                              onError={(e) => {
-                                // Fallback en cas d'erreur de chargement (ex: cache de navigateur)
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement!.innerHTML = '<div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #1a3a5c 0%, #1565c0 100%)"><i class="fas fa-newspaper fa-3x text-white opacity-50"></i></div>';
-                              }}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease' }}
-                              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
+                        <div style={{ height: 160, overflow: 'hidden' }}>
+                          {article.image ? (
+                            <img src={resolveBackendUrl(article.image)} alt={article.title}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }}
+                              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
                               onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
                           ) : (
                             <div className="w-100 h-100 d-flex align-items-center justify-content-center"
@@ -446,32 +407,25 @@ export default function NewsPage() {
                               <i className="fas fa-newspaper fa-2x" style={{ color: '#0F4C5C', opacity: .5 }}></i>
                             </div>
                           )}
-                          <div style={{
-                            position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
-                            background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)'
-                          }}></div>
                         </div>
-                        <div className="p-4 d-flex flex-column flex-grow-1 position-relative" style={{ zIndex: 1, marginTop: '-20px', background: '#fff', borderRadius: '1.5rem 1.5rem 0 0' }}>
-                          <div className="d-flex align-items-center justify-content-between mb-3" style={{ fontSize: '.75rem', fontWeight: 600, color: '#6f42c1', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            <span><i className="fas fa-calendar-alt me-1"></i>{formatDate(article.created_at, lang)}</span>
-                            {article.slug?.includes('facebook') && (
-                              <span className="badge rounded-pill" style={{ background: '#1877F2', color: '#fff', fontSize: '.6rem' }}>
-                                <i className="fab fa-facebook me-1"></i> Facebook
-                              </span>
-                            )}
+                        <div className="p-3 d-flex flex-column flex-grow-1">
+                          <div className="d-flex align-items-center gap-2 mb-2" style={{ fontSize: '.75rem', color: '#aaa' }}>
+                            <span><i className="fas fa-calendar me-1"></i>{formatDate(article.created_at, lang)}</span>
+                            <span>┬À</span>
+                            <span><i className="fas fa-clock me-1"></i>{readingTime(article.content, lang)}</span>
                           </div>
-                          <h5 className="fw-bold mb-2" style={{ color: '#1a1a2e', lineHeight: 1.4, fontSize: '1.1rem' }}>{article.title}</h5>
-                          <p className="text-muted small mb-3 flex-grow-1" style={{ lineHeight: 1.6, fontSize: '0.9rem' }}>{excerpt(article.content, 110)}</p>
-                          <div className="d-flex align-items-center justify-content-between mt-auto pt-3 border-top border-light">
-                            <span style={{ fontSize: '.75rem', color: '#888', fontWeight: 600 }}>
-                              <i className="fas fa-clock me-1 text-primary"></i>{readingTime(article.content, lang)}
+                          <h6 className="fw-bold mb-2" style={{ color: '#1a1a2e', lineHeight: 1.4 }}>{article.title}</h6>
+                          <p className="text-muted small mb-3 flex-grow-1" style={{ lineHeight: 1.6 }}>{excerpt(article.content, 120)}</p>
+                          <div className="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
+                            <span style={{ fontSize: '.75rem', color: '#888' }}>
+                              <i className="fas fa-user me-1"></i>{article.author_name}
                             </span>
                             <button
                               className="btn btn-sm rounded-pill px-3"
                               style={{ fontSize: '.76rem', color: '#0F4C5C', borderColor: '#B5DDE5', background: 'transparent' }}
                               onClick={e => { e.stopPropagation(); setSelectedArticle(article) }}
                             >
-                              {lang === 'ar' ? 'قراءة المزيد' : 'Lire la suite'} <i className="fas fa-arrow-right ms-1"></i>
+                              {lang === 'ar' ? '┘éÏ▒ÏºÏíÏ®' : 'Lire'} <i className="fas fa-arrow-right ms-1"></i>
                             </button>
                           </div>
                         </div>
@@ -485,9 +439,9 @@ export default function NewsPage() {
         </>
       )}
 
-      {/* ════════════════════════════════════════════════════════════
-          TAB: ÉVÉNEMENTS CITOYENS
-      ════════════════════════════════════════════════════════════ */}
+      {/* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+          TAB: ├ëV├ëNEMENTS CITOYENS
+      ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ */}
       {activeTab === 'events' && (
         <>
           {/* Search + type filter */}
@@ -502,7 +456,7 @@ export default function NewsPage() {
                     <input
                       type="text"
                       className="form-control border-start-0 bg-white"
-                      placeholder={lang === 'ar' ? 'ابحث في التظاهرات...' : 'Rechercher un événement...'}
+                      placeholder={lang === 'ar' ? 'ÏºÏ¿Ï¡Ï½ ┘ü┘è Ïº┘äÏ¬Ï©Ïº┘çÏ▒ÏºÏ¬...' : 'Rechercher un ├®v├®nement...'}
                       value={eventSearch}
                       onChange={e => setEventSearch(e.target.value)}
                     />
@@ -519,7 +473,7 @@ export default function NewsPage() {
                     value={eventTypeFilter}
                     onChange={e => setEventTypeFilter(e.target.value)}
                   >
-                    <option value="">{lang === 'ar' ? 'كل الأنواع' : 'Tous les types'}</option>
+                    <option value="">{lang === 'ar' ? '┘â┘ä Ïº┘äÏú┘å┘êÏºÏ╣' : 'Tous les types'}</option>
                     {eventTypes.map(t => (
                       <option key={t} value={t}>
                         {events.find(e => e.type_evenement === t)?.type_evenement_display || t}
@@ -529,7 +483,7 @@ export default function NewsPage() {
                 </div>
                 <div className="col-12 col-md-2 text-end">
                   <span className="badge rounded-pill px-3 py-2" style={{ background: '#B5DDE5', color: '#0F4C5C', fontSize: '.82rem' }}>
-                    {filteredEvents.length} {lang === 'ar' ? 'نتيجة' : 'résultat(s)'}
+                    {filteredEvents.length} {lang === 'ar' ? '┘åÏ¬┘èÏ¼Ï®' : 'r├®sultat(s)'}
                   </span>
                 </div>
               </div>
@@ -539,22 +493,22 @@ export default function NewsPage() {
           {loadingEvents ? (
             <div className="text-center py-5">
               <div className="spinner-border" style={{ color: '#0F4C5C' }}></div>
-              <p className="mt-3 text-muted">{lang === 'ar' ? 'جاري تحميل التظاهرات...' : 'Chargement des événements...'}</p>
+              <p className="mt-3 text-muted">{lang === 'ar' ? 'Ï¼ÏºÏ▒┘è Ï¬Ï¡┘à┘è┘ä Ïº┘äÏ¬Ï©Ïº┘çÏ▒ÏºÏ¬...' : 'Chargement des ├®v├®nements...'}</p>
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="text-center py-5">
               <i className="fas fa-calendar-times fa-3x opacity-25 mb-3 d-block" style={{ color: '#0F4C5C' }}></i>
               <p className="text-muted fw-bold">
-                {lang === 'ar' ? 'لا توجد فعاليات حاليًا' : 'Aucun événement pour le moment'}
+                {lang === 'ar' ? '┘äÏº Ï¬┘êÏ¼Ï» ┘üÏ╣Ïº┘ä┘èÏºÏ¬ Ï¡Ïº┘ä┘è┘ïÏº' : 'Aucun ├®v├®nement pour le moment'}
               </p>
               <p className="text-muted small">
-                {lang === 'ar' ? 'تحقق لاحقًا' : 'Revenez plus tard'}
+                {lang === 'ar' ? 'Ï¬Ï¡┘é┘é ┘äÏºÏ¡┘é┘ïÏº' : 'Revenez plus tard'}
               </p>
               <button className="btn btn-sm rounded-pill px-4 mt-2 fw-bold"
                 style={{ background: '#B5DDE5', color: '#0F4C5C' }}
                 onClick={() => navigate('/demande-evenement')}>
                 <i className="fas fa-plus me-2"></i>
-                {lang === 'ar' ? 'تنظيم تظاهرة' : 'Organiser un événement'}
+                {lang === 'ar' ? 'Ï¬┘åÏ©┘è┘à Ï¬Ï©Ïº┘çÏ▒Ï®' : 'Organiser un ├®v├®nement'}
               </button>
             </div>
           ) : (
@@ -589,13 +543,13 @@ export default function NewsPage() {
                           {ongoing && (
                             <span className="badge bg-success rounded-pill" style={{ fontSize: '.65rem' }}>
                               <i className="fas fa-circle me-1" style={{ fontSize: '.45rem' }}></i>
-                              {lang === 'ar' ? 'جارٍ' : 'En cours'}
+                              {lang === 'ar' ? 'Ï¼ÏºÏ▒┘ì' : 'En cours'}
                             </span>
                           )}
                           {upcoming && !ongoing && (
                             <span className="badge rounded-pill" style={{ fontSize: '.65rem', background: '#B5DDE5', color: '#0F4C5C' }}>
                               <i className="fas fa-clock me-1"></i>
-                              {lang === 'ar' ? 'قادم' : 'À venir'}
+                              {lang === 'ar' ? '┘éÏºÏ»┘à' : '├Ç venir'}
                             </span>
                           )}
                         </div>
@@ -607,14 +561,14 @@ export default function NewsPage() {
                           <div>
                             <i className="fas fa-calendar-alt me-2" style={{ color: '#0F4C5C' }}></i>
                             <strong>{formatShortDate(ev.date_debut)}</strong>
-                            {ev.date_debut !== ev.date_fin && <> → <strong>{formatShortDate(ev.date_fin)}</strong></>}
+                            {ev.date_debut !== ev.date_fin && <> ÔåÆ <strong>{formatShortDate(ev.date_fin)}</strong></>}
                             <span className="text-muted ms-2">
-                              {ev.heure_debut?.slice(0, 5)} — {ev.heure_fin?.slice(0, 5)}
+                              {ev.heure_debut?.slice(0, 5)} ÔÇö {ev.heure_fin?.slice(0, 5)}
                             </span>
                           </div>
                           <div><i className="fas fa-map-marker-alt me-2 text-danger"></i>{ev.lieu_details}</div>
                           <div><i className="fas fa-users me-2 text-info"></i>
-                            {ev.nombre_participants} {lang === 'ar' ? 'مشارك' : 'participants attendus'}
+                            {ev.nombre_participants} {lang === 'ar' ? '┘àÏ┤ÏºÏ▒┘â' : 'participants attendus'}
                           </div>
                         </div>
 
@@ -648,83 +602,25 @@ export default function NewsPage() {
               style={{ background: 'linear-gradient(135deg, #E6F4F7, #B5DDE5)' }}>
               <i className="fas fa-calendar-plus fa-2x mb-3 d-block" style={{ color: '#0F4C5C' }}></i>
               <h5 className="fw-bold" style={{ color: '#0F4C5C' }}>
-                {lang === 'ar' ? 'هل تريد تنظيم فعالية؟' : 'Vous souhaitez organiser un événement ?'}
+                {lang === 'ar' ? '┘ç┘ä Ï¬Ï▒┘èÏ» Ï¬┘åÏ©┘è┘à ┘üÏ╣Ïº┘ä┘èÏ®Ïƒ' : 'Vous souhaitez organiser un ├®v├®nement ?'}
               </h5>
               <p className="text-muted small mb-3">
                 {lang === 'ar'
-                  ? 'قدّم طلب ترخيص وسيتم مراجعته من قبل البلدية.'
-                  : 'Déposez une demande d\'autorisation auprès de la municipalité.'}
+                  ? '┘éÏ»┘æ┘à ÏÀ┘äÏ¿ Ï¬Ï▒Ï«┘èÏÁ ┘êÏ│┘èÏ¬┘à ┘àÏ▒ÏºÏ¼Ï╣Ï¬┘ç ┘à┘å ┘éÏ¿┘ä Ïº┘äÏ¿┘äÏ»┘èÏ®.'
+                  : 'D├®posez une demande d\'autorisation aupr├¿s de la municipalit├®.'}
               </p>
               <button className="btn rounded-pill px-5 fw-bold shadow-sm"
                 style={{ background: '#0F4C5C', color: '#fff' }}
                 onClick={() => navigate('/demande-evenement')}>
                 <i className="fas fa-plus me-2"></i>
-                {lang === 'ar' ? 'تقديم طلب' : 'Déposer une demande'}
+                {lang === 'ar' ? 'Ï¬┘éÏ»┘è┘à ÏÀ┘äÏ¿' : 'D├®poser une demande'}
               </button>
             </div>
           )}
         </>
       )}
 
-      {/* ════════════════════════════════════════════════════════════
-          TAB: DIRECT FACEBOOK
-      ════════════════════════════════════════════════════════════ */}
-      {activeTab === 'facebook' && (
-        <div className="card border-0 rounded-4 shadow-sm overflow-hidden animate__animated animate__fadeIn">
-          <div className="card-header bg-white border-0 p-4 d-flex align-items-center justify-content-between">
-            <div>
-              <h4 className="fw-bold mb-1" style={{ color: '#1877F2' }}>
-                <i className="fab fa-facebook me-2"></i>
-                {lang === 'ar' ? 'الصفحة الرسمية لبلدية قليبية' : 'Page Officielle de la Municipalité'}
-              </h4>
-              <p className="text-muted mb-0 small">
-                {lang === 'ar' ? 'آخر التحديثات والتفاعل المباشر' : 'Dernières mises à jour et interaction directe'}
-              </p>
-            </div>
-            <a 
-              href="https://www.facebook.com/MunKelibia" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn btn-primary rounded-pill px-4 btn-sm"
-              style={{ background: '#1877F2', border: 'none' }}
-            >
-              {lang === 'ar' ? 'زيارة الصفحة' : 'Visiter la page'}
-            </a>
-          </div>
-          <div className="card-body p-0 text-center bg-light" style={{ minHeight: '600px' }}>
-            <div className="py-5">
-              <iframe 
-                src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FMunKelibia&tabs=timeline%2Cevents%2Cmessages&width=500&height=800&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true" 
-                width="500" 
-                height="800" 
-                style={{ border: 'none', overflow: 'hidden' }} 
-                scrolling="no" 
-                frameBorder="0" 
-                allowFullScreen={true} 
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              ></iframe>
-              
-              <div className="mt-4 p-4 mx-auto" style={{ maxWidth: '600px' }}>
-                <div className="p-4 rounded-4 bg-white shadow-sm border">
-                   <i className="fab fa-facebook fa-4x mb-3" style={{ color: '#1877F2', opacity: 0.1 }}></i>
-                   <h5 className="fw-bold">{lang === 'ar' ? 'لا يمكنك رؤية الخلاصة؟' : 'Vous ne voyez pas le flux ?'}</h5>
-                   <p className="text-muted small">
-                     {lang === 'ar' 
-                       ? 'نتزامن تلقائياً مع فيسبوك. يمكنك العثور على نفس الأخبار في تبويب "الأخبار البلدية".' 
-                       : 'Nous nous synchronisons automatiquement avec Facebook. Retrouvez les mêmes actualités dans l\'onglet "Actualités municipales".'}
-                   </p>
-                   <button className="btn btn-outline-primary rounded-pill px-4 mt-2" onClick={() => setActiveTab('news')}>
-                     <i className="fas fa-newspaper me-2"></i>
-                     {lang === 'ar' ? 'العودة للأخبار' : 'Voir les actualités synchronisées'}
-                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── ARTICLE DETAIL MODAL ─────────────────────────────────── */}
+      {/* ÔöÇÔöÇ ARTICLE DETAIL MODAL ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */}
       {selectedArticle && (
         <div
           className="modal fade show d-block"
@@ -733,9 +629,9 @@ export default function NewsPage() {
         >
           <div className="modal-dialog modal-xl modal-dialog-scrollable" onClick={e => e.stopPropagation()}>
             <div className="modal-content border-0 shadow rounded-4 overflow-hidden">
-              {getFastMediaUrl(selectedArticle) ? (
+              {selectedArticle.image ? (
                 <div style={{ height: 280, overflow: 'hidden', position: 'relative' }}>
-                  <img src={getFastMediaUrl(selectedArticle)} alt={selectedArticle.title}
+                  <img src={resolveBackendUrl(selectedArticle.image)} alt={selectedArticle.title}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -771,7 +667,7 @@ export default function NewsPage() {
                   {selectedArticle.updated_at !== selectedArticle.created_at && (
                     <span className="badge bg-light text-secondary border">
                       <i className="fas fa-pen me-1"></i>
-                      {lang === 'ar' ? 'تم التحديث' : 'Mis à jour'} {formatDate(selectedArticle.updated_at, lang)}
+                      {lang === 'ar' ? 'Ï¬┘à Ïº┘äÏ¬Ï¡Ï»┘èÏ½' : 'Mis ├á jour'} {formatDate(selectedArticle.updated_at, lang)}
                     </span>
                   )}
                 </div>
@@ -787,7 +683,7 @@ export default function NewsPage() {
               <div className="modal-footer border-0 bg-light px-4 py-3">
                 <button className="btn btn-light rounded-pill px-4" onClick={() => setSelectedArticle(null)}>
                   <i className="fas fa-arrow-left me-2"></i>
-                  {lang === 'ar' ? 'العودة للأخبار' : 'Retour aux actualités'}
+                  {lang === 'ar' ? 'Ïº┘äÏ╣┘êÏ»Ï® ┘ä┘äÏúÏ«Ï¿ÏºÏ▒' : 'Retour aux actualit├®s'}
                 </button>
               </div>
             </div>

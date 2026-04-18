@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet'
 import L from 'leaflet'
@@ -32,7 +32,7 @@ type UserInfo = {
 
 type ForumNotif = { id: number; is_read: boolean }
 
-/* ── Styling ── */
+/* ÔöÇÔöÇ Styling ÔöÇÔöÇ */
 const CSS = `
 .db-section-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
 .db-section-title {
@@ -212,7 +212,7 @@ export default function DashboardPage() {
     ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar[0] : user.first_name[0]).toUpperCase()
     : '?'
 
-  /* ── Right sidebar ── */
+  /* ÔöÇÔöÇ Right sidebar ÔöÇÔöÇ */
   const rightSidebar = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 8 }}>
       <style>{CSS}</style>
@@ -236,7 +236,7 @@ export default function DashboardPage() {
             <span className="db-stat-badge">{String(reclamations.length).padStart(2, '0')}</span>
           </div>
           <div className="db-stat-row" style={{ borderBottom: 'none' }}>
-            <span style={{ color: '#5b403d' }}>Points Fidélité</span>
+            <span style={{ color: '#5b403d' }}>Points Fid├®lit├®</span>
             <span style={{ fontWeight: 800, color: '#1a1c1c' }}>1 240 pts</span>
           </div>
         </div>
@@ -292,13 +292,13 @@ export default function DashboardPage() {
 
       {/* Urgence panel */}
       <div className="db-urgence">
-        <div className="db-urgence-title">{lang === 'ar' ? 'طوارئ' : 'Urgence'}</div>
+        <div className="db-urgence-title">{lang === 'ar' ? 'ÏÀ┘êÏºÏ▒Ïª' : 'Urgence'}</div>
         <div className="db-urgence-row">
-          <span className="db-urgence-label">{lang === 'ar' ? 'الحماية المدنية' : 'Protection Civile'}</span>
+          <span className="db-urgence-label">{lang === 'ar' ? 'Ïº┘äÏ¡┘àÏº┘èÏ® Ïº┘ä┘àÏ»┘å┘èÏ®' : 'Protection Civile'}</span>
           <span className="db-urgence-number">198</span>
         </div>
         <div className="db-urgence-row" style={{ marginBottom: 0 }}>
-          <span className="db-urgence-label">{lang === 'ar' ? 'طوارئ البلدية' : 'S.O.S Municipalité'}</span>
+          <span className="db-urgence-label">{lang === 'ar' ? 'ÏÀ┘êÏºÏ▒Ïª Ïº┘äÏ¿┘äÏ»┘èÏ®' : 'S.O.S Municipalit├®'}</span>
           <span className="db-urgence-number">72 295 034</span>
         </div>
       </div>
@@ -309,7 +309,7 @@ export default function DashboardPage() {
     <MainLayout user={user} onLogout={logout} showHero={true} rightSidebar={rightSidebar}>
       <style>{CSS}</style>
 
-      {/* ── Alerts ── */}
+      {/* ÔöÇÔöÇ Alerts ÔöÇÔöÇ */}
       {user && !user.is_verified && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 18px', marginBottom: 18, borderLeft: '4px solid #f59e0b', background: '#fffbeb', borderRadius: 2 }}>
           <i className="fas fa-exclamation-triangle" style={{ color: '#d97706', marginTop: 2 }}></i>
@@ -345,42 +345,31 @@ export default function DashboardPage() {
         </div>
       ))}
 
-      {/* ── Quick Actions ── */}
+      {/* ÔöÇÔöÇ Quick Actions ÔöÇÔöÇ */}
       <div style={{ marginBottom: 28 }}>
         <div className="db-section-bar">
           <h3 className="db-section-title">{t('quick_actions')}</h3>
         </div>
-        <div className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle', label: t('new_reclamation'), ar: 'بلاغ جديد' },
-              { to: '/mes-extraits', icon: 'fas fa-file-contract', label: t('extraits_hub_title'), ar: 'وثائق الحالة المدنية' },
-              { to: '/mes-reclamations', icon: 'fas fa-bullhorn', label: t('my_reclamations'), ar: 'بلاغاتي' },
-              { to: '/mes-demandes', icon: 'fas fa-tasks', label: t('my_requests'), ar: 'طلباتي' },
-              { to: '/services', icon: 'fas fa-file-invoice', label: t('admin_services'), ar: 'الخدمات' },
-              { to: '/news', icon: 'fas fa-newspaper', label: t('news_title'), ar: 'الأخبار' },
-              { to: '/demande-construction', icon: 'fas fa-hard-hat', label: 'Permis de construire', ar: 'رخصة البناء' },
-              { to: '/forum', icon: 'fas fa-comments', label: t('forum') || 'Forum', ar: 'المنتدى' },
-              { to: '/demande-livret-famille', icon: 'fas fa-book-open', label: 'Livret de Famille', ar: 'دفتر العائلة' },
-            ].map(item => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex flex-col items-center p-5 rounded-xl no-underline transition-all duration-300 group border border-transparent hover:border-orange-100"
-                style={{ backgroundColor: '#f8fafc' }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fff7ed')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-              >
-                <i className={`${item.icon} text-3xl mb-3 group-hover:scale-110 transition-transform`} style={{ color: '#F18221' }}></i>
-                <span className="font-bold text-sm text-slate-800 text-center">{item.label}</span>
-                <span className="text-xs text-slate-400 mt-1 text-center" dir="rtl">{item.ar}</span>
-              </Link>
-            ))}
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          {[
+            { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle',   labelKey: 'new_reclamation' },
+            { to: '/mes-extraits',         icon: 'fas fa-file-contract', labelKey: 'extraits_hub_title' },
+            { to: '/services',             icon: 'fas fa-receipt',       labelKey: 'admin_services' },
+            { to: '/mes-demandes',         icon: 'fas fa-calendar-alt',  labelKey: 'my_requests' },
+            { to: '/demande-construction', icon: 'fas fa-hard-hat',      labelKey: 'permis_construire' },
+            { to: '/news',                 icon: 'fas fa-leaf',          labelKey: 'news_title' },
+            { to: '/nouvelle-reclamation', icon: 'fas fa-traffic-light', labelKey: 'new_signalement' },
+            { to: '/forum',                icon: 'fas fa-comments',      labelKey: 'forum' },
+          ].map(item => (
+            <Link key={item.to + item.labelKey} to={item.to} className="db-action-card">
+              <div className="db-action-icon"><i className={item.icon}></i></div>
+              <span className="db-action-label">{t(item.labelKey)}</span>
+            </Link>
+          ))}
         </div>
       </div>
 
-      {/* ── Map ── */}
+      {/* ÔöÇÔöÇ Map ÔöÇÔöÇ */}
       <div style={{ background: '#fff', marginBottom: 28, border: '1px solid #eeeeee' }} id="mapCard">
         <div style={{ padding: '14px 18px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -388,10 +377,10 @@ export default function DashboardPage() {
           </div>
           <div style={{ display: 'flex', gap: 14 }}>
             {[
-              { color: '#f57f17', label: lang === 'ar' ? 'بانتظار' : 'En attente' },
-              { color: '#1565c0', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours' },
-              { color: '#2e7d32', label: lang === 'ar' ? 'محلول' : 'Résolu' },
-              { color: '#c62828', label: lang === 'ar' ? 'مرفوض' : 'Rejeté' },
+              { color: '#f57f17', label: lang === 'ar' ? 'Ï¿Ïº┘åÏ¬Ï©ÏºÏ▒' : 'En attente' },
+              { color: '#1565c0', label: lang === 'ar' ? '┘é┘èÏ» Ïº┘äÏ¬┘å┘ü┘èÏ░' : 'En cours' },
+              { color: '#2e7d32', label: lang === 'ar' ? '┘àÏ¡┘ä┘ê┘ä' : 'R├®solu' },
+              { color: '#c62828', label: lang === 'ar' ? '┘àÏ▒┘ü┘êÏÂ' : 'Rejet├®' },
             ].map(i => (
               <div key={i.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '.72rem', color: '#5b403d' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: i.color, display: 'inline-block' }}></span>
@@ -436,7 +425,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Mes signalements ── */}
+      {/* ÔöÇÔöÇ Mes signalements ÔöÇÔöÇ */}
       <div style={{ background: '#fff', border: '1px solid #eeeeee', marginBottom: 28 }}>
         <div style={{ padding: '14px 18px', borderBottom: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontWeight: 800, fontSize: '.88rem', margin: 0, fontFamily: 'Public Sans,sans-serif', color: '#1a1c1c' }}>
@@ -484,7 +473,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Forum card ── */}
+      {/* ÔöÇÔöÇ Forum card ÔöÇÔöÇ */}
       <div style={{ background: '#fff', border: '1px solid #eeeeee', borderLeft: '4px solid #1D6FA3', padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(29,111,163,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1D6FA3', fontSize: '1rem' }}>
@@ -508,13 +497,13 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* ── Footer ── */}
+      {/* ÔöÇÔöÇ Footer ÔöÇÔöÇ */}
       <div className="db-footer" style={{ marginLeft: -32, marginRight: -32, marginBottom: -24 }}>
         <div className="db-footer-grid">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <i className="fas fa-landmark" style={{ color: '#d4aa8d', fontSize: '1.1rem' }}></i>
-              <span className="db-footer-brand">{lang === 'ar' ? 'الجمهورية التونسية' : 'RÉPUBLIQUE TUNISIENNE'}</span>
+              <span className="db-footer-brand">{lang === 'ar' ? 'Ï¿┘äÏ»┘èÏ® ┘é┘ä┘èÏ¿┘èÏ®' : 'VILLE DE K├ëLIBIA'}</span>
             </div>
             <p style={{ fontSize: '.75rem', color: '#5b403d', lineHeight: 1.65, maxWidth: 340, margin: 0 }}>
               {t('footer_text')}
@@ -537,10 +526,10 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="db-footer-bottom">
-          <span className="db-footer-legal">© 2024 Portail National Smart City — Tous droits réservés</span>
+          <span className="db-footer-legal">┬® 2024 Commune de K├®libia ÔÇö Tous droits r├®serv├®s</span>
           <div>
-            <a href="#" className="db-footer-legal" style={{ marginLeft: 0 }}>Mentions Légales</a>
-            <a href="#" className="db-footer-legal">Confidentialité</a>
+            <a href="#" className="db-footer-legal" style={{ marginLeft: 0 }}>Mentions L├®gales</a>
+            <a href="#" className="db-footer-legal">Confidentialit├®</a>
           </div>
         </div>
       </div>

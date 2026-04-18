@@ -1,7 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
-import tunisiaLogo from '../assets/tunisia_logo.png'
 
 interface TopNavProps {
   user: { first_name: string; last_name: string; first_name_ar?: string; last_name_ar?: string; user_type?: string; is_staff?: boolean; is_superuser?: boolean } | null;
@@ -31,13 +30,13 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
             to={isAgentOrAdmin ? '/agent-dashboard' : '/dashboard'}
             className="flex items-center gap-3 no-underline"
           >
-            <img src={tunisiaLogo} alt="Logo" style={{ width: '40px', height: 'auto' }} />
-            <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#F18221', fontFamily: 'Public Sans, sans-serif' }}>
-              {lang === 'ar' ? 'الجمهورية التونسية' : 'République Tunisienne'}
+            <i className="fas fa-city text-2xl" style={{ color: '#c61f2c' }}></i>
+            <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#c61f2c', fontFamily: 'Public Sans, sans-serif' }}>
+              {lang === 'ar' ? 'Ï¿┘äÏ»┘èÏ® ┘é┘ä┘èÏ¿┘èÏ®' : 'Ville de K├®libia'}
             </span>
           </Link>
 
-          {/* Horizontal nav links — hidden on mobile, shown for citizen */}
+          {/* Horizontal nav links ÔÇö hidden on mobile, shown for citizen */}
           {!isAgentOrAdmin && (
             <nav className="hidden md:flex items-center gap-6">
               <NavLink
@@ -46,7 +45,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
                   `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
                 }
               >
-                {lang === 'ar' ? 'الرئيسية' : 'Accueil'}
+                {lang === 'ar' ? 'Ïº┘äÏ▒Ïª┘èÏ│┘èÏ®' : 'Accueil'}
               </NavLink>
               <NavLink
                 to="/services"
