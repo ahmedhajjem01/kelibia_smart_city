@@ -137,27 +137,27 @@ export default function ForgotPasswordPage() {
           <div className="lp-hero-brand">
             <img className="lp-hero-logo" src={tunisiaLogo} alt="Logo" />
             <div>
-              <div className="lp-hero-brand-name">République de Tunisie</div>
+              <div className="lp-hero-brand-name">{t('republic_of_tunisia')}</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
 
           <div>
             <div className="lp-hero-headline">
-              Récupérer <br />
-              <span className="lp-hero-accent">Votre accès.</span>
+              {t('recover')} <br />
+              <span className="lp-hero-accent">{t('your_access')}</span>
             </div>
             <p className="lp-hero-desc">
-              Entrez l'adresse e-mail associée à votre compte, et nous vous enverrons un lien sécurisé pour réinitialiser votre mot de passe.
+              {t('forgot_password_hero_desc')}
             </p>
           </div>
 
           <div className="lp-hero-badges">
             <div className="lp-hero-badge">
-              <i className="fas fa-shield-alt"></i> Sécurisé
+              <i className="fas fa-shield-alt"></i> {t('secure')}
             </div>
             <div className="lp-hero-badge">
-              <i className="fas fa-language"></i> Multilingue
+              <i className="fas fa-language"></i> {t('multilingual')}
             </div>
           </div>
         </div>
@@ -178,10 +178,9 @@ export default function ForgotPasswordPage() {
             <img src={logo} alt="Logo" />
           </div>
 
-          {/* Greeting */}
           <div className="lp-greeting">
             <h2>{t('forgot_password')}</h2>
-            <p>{t('forgot_password_desc') || 'Entrez votre e-mail pour réinitialiser.'}</p>
+            <p>{t('forgot_password_desc')}</p>
           </div>
 
           <form onSubmit={onSubmit}>
@@ -201,10 +200,9 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            {/* Submit */}
             <button className="lp-btn" type="submit" disabled={loading}>
               {loading && <span className="spinner-border spinner-border-sm" role="status" />}
-              {t('send_link') || 'Envoyer le lien'} <i className="fas fa-paper-plane"></i>
+              {t('send_link')} <i className="fas fa-paper-plane"></i>
             </button>
 
             {message && (
@@ -221,8 +219,8 @@ export default function ForgotPasswordPage() {
             </p>
             <p>{t('footer_text')}</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Confidentialité</a>
-              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Assistance</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>{t('privacy')}</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>{t('assistance')}</a>
             </div>
           </div>
 
