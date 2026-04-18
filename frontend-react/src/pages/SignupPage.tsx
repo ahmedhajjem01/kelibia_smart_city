@@ -479,7 +479,7 @@ export default function SignupPage() {
     <div className="sp-root">
       <style>{CSS}</style>
       <div className="sp-card">
-        <div className="sp-icon"><img src="/media/tunisia log.png" alt="Logo" style={{ width: '80px', height: 'auto' }} /></div>
+        <div className="sp-icon"><img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '80px', height: 'auto' }} /></div>
         <div className="sp-title">République Tunisienne</div>
         <div className="sp-sub">{t('create_citizen_account')}</div>
 

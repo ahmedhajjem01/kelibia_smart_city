@@ -124,7 +124,7 @@ export default function LoginPage() {
     <div className="lp-root">
       <div className="lp-card">
         <div className="lp-icon">
-          <img src="/media/tunisia log.png" alt="Logo" style={{ width: '100px', height: 'auto' }} />
+          <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '100px', height: 'auto' }} />
         </div>
         <div className="lp-title">République Tunisienne</div>
         <div className="lp-sub">{t('portal_title')}</div>

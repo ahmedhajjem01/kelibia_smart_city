@@ -26,7 +26,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
         {/* Icon */}
-        <img src="/media/tunisia log.png" alt="Logo" style={{ width: '80px', height: 'auto', marginBottom: '20px' }} />
+        <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '80px', height: 'auto', marginBottom: '20px' }} />
 
         {/* Bilingual title */}
         <h1
