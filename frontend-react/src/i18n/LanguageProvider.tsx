@@ -58,6 +58,11 @@ const translations: Record<Lang, Record<string, string>> = {
     gov_Tozeur: 'Tozeur',
     gov_Tunis: 'Tunis',
     gov_Zaghouan: 'Zaghouan',
+    city_Kelibia: 'Kélibia',
+    city_Nabeul: 'Nabeul',
+    city_Tunis: 'Tunis',
+    city_Sousse: 'Sousse',
+    city_Hammamet: 'Hammamet',
     services_desc:
       'Consultez la liste des documents requis pour vos démarches administratives (État civil, Urbanisme, etc.).',
     services_desc_long:
@@ -908,6 +913,11 @@ const translations: Record<Lang, Record<string, string>> = {
     gov_Tozeur: 'توزر',
     gov_Tunis: 'تونس',
     gov_Zaghouan: 'زغوان',
+    city_Kelibia: 'قليبية',
+    city_Nabeul: 'نابل',
+    city_Tunis: 'تونس',
+    city_Sousse: 'سوسة',
+    city_Hammamet: 'الحمامات',
     security: 'الأمان',
     confirm_password: 'تأكيد كلمة السر',
     signup_btn: 'تسجيل',
