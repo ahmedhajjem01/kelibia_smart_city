@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 const resolveBackendUrl = (path: string) => {
   if (!path) return ''
@@ -1412,7 +1413,7 @@ export default function AgentDashboardPage() {
       </div>
       <nav className="ag-navbar">
         <a className="ag-brand" href="#">
-          <img src="/media/tunisia_logo.png" className="ag-logo" style={{ height: '36px', width: 'auto' }} alt="Logo" />
+          <img src={tunisiaLogo} className="ag-logo" style={{ height: '36px', width: 'auto' }} alt="Logo" />
           <div className="ag-title"><span className="main">{lang === 'ar' ? 'البوابة الوطنية' : 'Portail National'}</span><span className="sub">Administration — Tunisia Smart City</span></div>
         </a>
         <div className="ag-actions">

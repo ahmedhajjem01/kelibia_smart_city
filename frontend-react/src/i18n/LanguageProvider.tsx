@@ -291,7 +291,7 @@ const translations: Record<Lang, Record<string, string>> = {
     account_title: 'COMPTE',
     portal_citoyen: 'Portail Citoyen',
     fort_caption: 'Fort de Kélibia — Patrimoine Historique',
-    footer_text: '© 2026 République Tunisienne — Portail National Tunisia Smart City | Tous droits réservés',
+    footer_text: '© 2026 Portail National | Tous droits réservés',
 
     // --- Admin & Dashboards ---
     nav_monitoring: 'MONITORING',
@@ -967,7 +967,7 @@ const translations: Record<Lang, Record<string, string>> = {
     account_title: 'الحساب',
     portal_citoyen: 'بوابة المواطن',
     fort_caption: 'برج قليبية — تراث تاريخي',
-    footer_text: '© 2026 الجمهورية التونسية — البوابة الوطنية تونس مدينة ذكية | جميع الحقوق محفوظة',
+    footer_text: '© 2026 البوابة الوطنية | جميع الحقوق محفوظة',
 
     // --- Admin & Dashboards ---
     nav_monitoring: 'المراقبة',

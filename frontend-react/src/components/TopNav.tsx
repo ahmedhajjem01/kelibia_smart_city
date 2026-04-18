@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 interface TopNavProps {
   user: { first_name: string; last_name: string; first_name_ar?: string; last_name_ar?: string; user_type?: string; is_staff?: boolean; is_superuser?: boolean } | null;
@@ -30,7 +31,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
             to={isAgentOrAdmin ? '/agent-dashboard' : '/dashboard'}
             className="flex items-center gap-3 no-underline"
           >
-            <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '40px', height: 'auto' }} />
+            <img src={tunisiaLogo} alt="Logo" style={{ width: '40px', height: 'auto' }} />
             <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#F18221', fontFamily: 'Public Sans, sans-serif' }}>
               {lang === 'ar' ? 'الجمهورية التونسية' : 'République Tunisienne'}
             </span>

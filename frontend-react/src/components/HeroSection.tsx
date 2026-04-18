@@ -2,6 +2,7 @@ import React from 'react';
 import { useI18n } from '../i18n/LanguageProvider';
 import { Link } from 'react-router-dom';
 import fortImg from '../assets/fort.webp';
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 interface HeroSectionProps {
   user: { first_name: string; first_name_ar?: string } | null;
@@ -22,7 +23,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       {/* Content — bottom-left aligned like the mockup */}
       <div className="absolute inset-0 flex flex-col justify-end px-12 pb-14">
         {/* Icon (moved from center to left) */}
-        <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '60px', height: 'auto', marginBottom: '12px' }} />
+        <img src={tunisiaLogo} alt="Logo" style={{ width: '60px', height: 'auto', marginBottom: '12px' }} />
 
         <h1
           className="font-extrabold text-white uppercase tracking-tighter leading-none mb-2"

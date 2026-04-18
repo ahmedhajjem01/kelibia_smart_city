@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 const cityData: Record<string, string[]> = {
   Nabeul: [
@@ -243,7 +244,7 @@ export default function SignupPage() {
         <a className="sg-nav-brand" href="/">
           <img
             className="sg-nav-logo"
-            src="/media/tunisia_logo.png"
+            src={tunisiaLogo}
             alt="Logo"
           />
           <span className="sg-nav-name">République Tunisienne</span>

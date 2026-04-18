@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 type TokenResponse = {
   access: string
@@ -210,7 +211,7 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src="/media/tunisia_logo.png"
+              src={tunisiaLogo}
               alt="Logo"
             />
             <div>
@@ -253,7 +254,7 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src="/media/tunisia_logo.png" alt="Logo" />
+            <img src={tunisiaLogo} alt="Logo" />
           </div>
 
           {/* Greeting */}
