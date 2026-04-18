@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useI18n } from '../i18n/LanguageProvider'
+import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 const CSS = `
 /* ── Root ── */
@@ -17,7 +19,7 @@ const CSS = `
 .lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
 .lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
 .lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
-.lp-hero-accent { color: #ffb785; }
+.lp-hero-accent { color: #ffb785; white-space: nowrap; }
 .lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
 .lp-hero-badges { display: flex; align-items: center; gap: 28px; }
 .lp-hero-badge { display: flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 700; text-transform: uppercase; opacity: .9; }
@@ -34,8 +36,39 @@ const CSS = `
 .lp-greeting h2 { font-size: 1.55rem; font-weight: 800; color: #191b22; margin-bottom: 6px; }
 .lp-greeting p { font-size: .88rem; color: #6b7280; margin: 0; }
 .lp-field { margin-bottom: 18px; }
-.lp-label { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: #564336; margin-bottom: 7px; }
-.lp-input { width: 100%; background: #e7e7f1; border: none; border-radius: 10px; padding: 13px 16px; font-size: .9rem; outline: none; box-sizing: border-box; }
+.lp-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #564336;
+  margin-bottom: 7px;
+  transition: color 0.2s;
+}
+.lp-label i {
+  color: #564336;
+  font-size: .85rem;
+  transition: color 0.2s;
+}
+.lp-field:focus-within .lp-label i {
+  color: #954a00;
+}
+.lp-input {
+  width: 100%;
+  background: #e7e7f1;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: .9rem;
+  color: #191b22;
+  outline: none;
+  box-sizing: border-box;
+  transition: box-shadow .2s, background .2s;
+}
+.lp-input::placeholder { color: #9ca3af; }
 .lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #954a00; }
 .lp-btn { width: 100%; background: linear-gradient(135deg, #954a00 0%, #f18221 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .lp-error { background: #ffdad6; border: 1px solid #ba1a1a; border-radius: 10px; padding: 11px; color: #93000a; font-size: .83rem; margin-top: 14px; }
