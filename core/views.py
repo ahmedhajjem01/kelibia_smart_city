@@ -7,6 +7,9 @@ from attestation_residence.models import DemandeResidence
 from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance
 from extrait_mariage.models import ExtraitMariage
 from extrait_deces.models import ExtraitDeces
+from eau_lumiere_egouts.models import DemandeEau
+from argent_impots.models import DemandeImpot
+from boutiques_commerces.models import DemandeCommerce
 
 
 def login_redirect(request):
@@ -85,6 +88,10 @@ def get_supervisor_services_summary(request):
         summary["declaration_deces"] = DeclarationDeces.objects.filter(status='pending').count()
     except: pass
 
+    summary["eau"] = DemandeEau.objects.filter(status='pending').count()
+    summary["impots"] = DemandeImpot.objects.filter(status='pending').count()
+    summary["commerce"] = DemandeCommerce.objects.filter(status='pending').count()
+
     return Response(summary)
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -100,8 +107,11 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
         'residence': DemandeResidence,
         'livret': DemandeLivretFamille,
         'naissance': DeclarationNaissance,
-        'mariage': ExtraitMariage, # Note: Extrait vs Declaration varies, but here we cover the main ones
-        'deces': ExtraitDeces
+        'mariage': ExtraitMariage,
+        'deces': ExtraitDeces,
+        'eau': DemandeEau,
+        'impots': DemandeImpot,
+        'commerce': DemandeCommerce,
     }
 
     if request.method == 'GET':
@@ -136,6 +146,31 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                         "lieu_naissance_fr": getattr(o, 'lieu_naissance_fr', ''),
                         "sexe": getattr(o, 'sexe', ''),
                         "commentaire": getattr(o, 'commentaire', ''),
+                    }
+                elif key == 'eau':
+                    details = {
+                        "service_type": getattr(o, 'service_type', ''),
+                        "service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '',
+                        "adresse": getattr(o, 'adresse', ''),
+                        "description": getattr(o, 'description', ''),
+                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
+                    }
+                elif key == 'impots':
+                    details = {
+                        "service_type": getattr(o, 'service_type', ''),
+                        "service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '',
+                        "adresse_bien": getattr(o, 'adresse_bien', ''),
+                        "description": getattr(o, 'description', ''),
+                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
+                    }
+                elif key == 'commerce':
+                    details = {
+                        "service_type": getattr(o, 'service_type', ''),
+                        "service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '',
+                        "nom_commerce": getattr(o, 'nom_commerce', ''),
+                        "adresse_commerce": getattr(o, 'adresse_commerce', ''),
+                        "description": getattr(o, 'description', ''),
+                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
                     }
 
                 resp.append({

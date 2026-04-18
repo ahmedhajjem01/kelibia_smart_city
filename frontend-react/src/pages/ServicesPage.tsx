@@ -37,7 +37,7 @@ type ServiceCategory = {
 
 type RequestButtonState =
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
+  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' | '/demande-eau' | '/demande-argent' | '/demande-commerce' }
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
   | { kind: 'disabled'; label: string }
 
@@ -204,6 +204,24 @@ export default function ServicesPage() {
         kind: 'declare_birth',
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-construction',
+      }
+    } else if (nameLower.includes('raccordement') || nameLower.includes('compteur') || nameLower.includes('eau') || nameLower.includes('électricité') || nameLower.includes('égout') || nameAr.includes('ربط') || nameAr.includes('عداد') || nameAr.includes('ماء') || nameAr.includes('كهرباء')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-eau',
+      }
+    } else if (nameLower.includes('enregistrement') || nameLower.includes('propriété') || nameLower.includes('vocation') || nameLower.includes('imposition') || nameLower.includes('arrêt d\'activité') || nameAr.includes('تسجيل') || nameAr.includes('ملكية') || nameAr.includes('ضريبة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-argent',
+      }
+    } else if (nameLower.includes('enseigne') || nameLower.includes('licence') || nameLower.includes('commerce') || nameLower.includes('boutique') || nameAr.includes('لافتة') || nameAr.includes('رخصة') || nameAr.includes('تجارة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-commerce',
       }
     } else {
       requestButton = {

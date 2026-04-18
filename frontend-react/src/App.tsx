@@ -38,6 +38,12 @@ import MesConstructionsPage from './pages/MesConstructionsPage'
 import DemandeGoudronnagePage from './pages/DemandeGoudronnagePage'
 import DemandeCertificatVocationPage from './pages/DemandeCertificatVocationPage'
 import NewsPage from './pages/NewsPage'
+import DemandeEauPage from './pages/DemandeEauPage'
+import MesEauPage from './pages/MesEauPage'
+import DemandeArgentPage from './pages/DemandeArgentPage'
+import MesImpotsPage from './pages/MesImpotsPage'
+import DemandeCommercePage from './pages/DemandeCommercePage'
+import MesCommercePage from './pages/MesCommercePage'
 
 
 
@@ -141,6 +147,18 @@ export default function App() {
           <Route path="/demande-certificat-vocation" element={<DemandeCertificatVocationPage />} />
           <Route path="/mes-constructions" element={<MesConstructionsPage />} />
           <Route path="/evenements" element={<EvenementsPublicsPage />} />
+
+          {/* Eau, Lumière & Égouts */}
+          <Route path="/demande-eau" element={<DemandeEauPage />} />
+          <Route path="/mes-eau" element={<MesEauPage />} />
+
+          {/* Argent & Impôts */}
+          <Route path="/demande-argent" element={<DemandeArgentPage />} />
+          <Route path="/mes-impots" element={<MesImpotsPage />} />
+
+          {/* Boutiques & Commerces */}
+          <Route path="/demande-commerce" element={<DemandeCommercePage />} />
+          <Route path="/mes-commerce" element={<MesCommercePage />} />
 
           {/* Profile */}
           <Route path="/profile" element={<ProfilePage />} />

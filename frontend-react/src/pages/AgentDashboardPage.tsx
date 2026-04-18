@@ -1340,6 +1340,24 @@ export default function AgentDashboardPage() {
                               <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.livret_famille || 0} en attente</div>
                            </div>
                         </div>
+                        <div className="col-md-4">
+                           <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #0288d1' }}>
+                              <div className="text-muted small fw-bold">💧 EAU / LUMIÈRE / ÉGOUTS</div>
+                              <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.eau || 0} en attente</div>
+                           </div>
+                        </div>
+                        <div className="col-md-4">
+                           <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #388e3c' }}>
+                              <div className="text-muted small fw-bold">💰 ARGENT & IMPÔTS</div>
+                              <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.impots || 0} en attente</div>
+                           </div>
+                        </div>
+                        <div className="col-md-4">
+                           <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #7b1fa2' }}>
+                              <div className="text-muted small fw-bold">🏪 BOUTIQUES & COMMERCES</div>
+                              <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.commerce || 0} en attente</div>
+                           </div>
+                        </div>
                      </div>
                   </div>
                </div>
@@ -1379,7 +1397,7 @@ export default function AgentDashboardPage() {
                     </div>
                     <div className="d-flex flex-wrap gap-2">
                       {Object.entries(typeCounts).map(([type, count]) => {
-                        const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
+                        const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces` }
                         return <span key={type} style={{ background: '#e8eaf6', color: '#283593', border: '1px solid #c5cae9', borderRadius: 12, padding: '2px 10px', fontSize: '.75rem', fontWeight: 600 }}>{typeLabels[type] || type} ({count})</span>
                       })}
                     </div>
@@ -1400,6 +1418,9 @@ export default function AgentDashboardPage() {
                   <option value="naissance">👶 {t('birth_cert')}</option>
                   <option value="mariage">💍 {t('mariage_cert')}</option>
                   <option value="deces">⚰️ {t('deces_cert')}</option>
+                  <option value="eau">💧 Eau, Lumière &amp; Égouts</option>
+                  <option value="impots">💰 Argent &amp; Impôts</option>
+                  <option value="commerce">🏪 Boutiques &amp; Commerces</option>
                 </select>
                 <select className="ag-filter-select" value={demandeStatusFilter} onChange={e => setDemandeStatusFilter(e.target.value)}>
                   <option value="">{t('demande_all_statuses')}</option>
@@ -1419,7 +1440,7 @@ export default function AgentDashboardPage() {
                 <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#006d94' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>{t('loading')}</div></div>
               ) : (() => {
                 const q = demandeSearchQ.toLowerCase()
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces` }
                 const filtered = allDemandes.filter((d: any) => {
                   if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
                   if (demandeStatusFilter && d.status !== demandeStatusFilter) return false
@@ -1459,6 +1480,9 @@ export default function AgentDashboardPage() {
                           if (d.type === 'residence') summary = d.adresse ? `📍 ${String(d.adresse).slice(0, 40)}` : ''
                           else if (d.type === 'livret') summary = d.nom_chef ? `👤 ${d.nom_chef} ${d.prenom_chef}` : ''
                           else if (d.type === 'naissance') summary = d.prenom_fr ? `👶 ${d.prenom_fr} ${d.nom_fr}` : ''
+                          else if (d.type === 'eau') summary = d.service_type_label ? `💧 ${String(d.service_type_label).slice(0, 35)}` : ''
+                          else if (d.type === 'impots') summary = d.service_type_label ? `💰 ${String(d.service_type_label).slice(0, 35)}` : ''
+                          else if (d.type === 'commerce') summary = d.nom_commerce ? `🏪 ${d.nom_commerce}` : ''
                           return (
                             <tr key={`${d.type}-${d.id}`}>
                               <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{d.id}</td>
@@ -1500,7 +1524,7 @@ export default function AgentDashboardPage() {
 
               {/* ── Detail Modal */}
               {demandeDetail && (() => {
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}` }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces` }
                 return (
                   <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 9100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                     <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
@@ -1534,6 +1558,22 @@ export default function AgentDashboardPage() {
                             <div className="col-6"><div className="det-label">{t('date_of_birth')}</div><div className="det-value">{demandeDetail.date_naissance}</div></div>
                             {demandeDetail.lieu_naissance_fr && <div className="col-6"><div className="det-label">{t('place_of_birth')}</div><div className="det-value">{demandeDetail.lieu_naissance_fr}</div></div>}
                             {demandeDetail.sexe && <div className="col-6"><div className="det-label">{t('gender')}</div><div className="det-value">{demandeDetail.sexe}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'eau' && (<>
+                            <div className="col-12"><div className="det-label">Type de service</div><div className="det-value">{demandeDetail.service_type_label || demandeDetail.service_type}</div></div>
+                            {demandeDetail.adresse && <div className="col-12"><div className="det-label">Adresse</div><div className="det-value">{demandeDetail.adresse}</div></div>}
+                            {demandeDetail.description && <div className="col-12"><div className="det-label">Description</div><div className="det-value">{demandeDetail.description}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'impots' && (<>
+                            <div className="col-12"><div className="det-label">Type de service</div><div className="det-value">{demandeDetail.service_type_label || demandeDetail.service_type}</div></div>
+                            {demandeDetail.adresse_bien && <div className="col-12"><div className="det-label">Adresse du bien</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>}
+                            {demandeDetail.description && <div className="col-12"><div className="det-label">Description</div><div className="det-value">{demandeDetail.description}</div></div>}
+                          </>)}
+                          {demandeDetail.type === 'commerce' && (<>
+                            <div className="col-12"><div className="det-label">Type de service</div><div className="det-value">{demandeDetail.service_type_label || demandeDetail.service_type}</div></div>
+                            {demandeDetail.nom_commerce && <div className="col-6"><div className="det-label">Nom du commerce</div><div className="det-value">{demandeDetail.nom_commerce}</div></div>}
+                            {demandeDetail.adresse_commerce && <div className="col-6"><div className="det-label">Adresse</div><div className="det-value">{demandeDetail.adresse_commerce}</div></div>}
+                            {demandeDetail.description && <div className="col-12"><div className="det-label">Description</div><div className="det-value">{demandeDetail.description}</div></div>}
                           </>)}
 
                           <div className="col-6"><div className="det-label">{t('demande_payment')}</div><div className="det-value">{demandeDetail.is_paid ? `✅ ${t('paid_label')}` : `⏳ ${t('status_pending')}`}</div></div>

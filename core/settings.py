@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     "livret_famille",
     "social_evenements",
     "maison_construction",
+    "eau_lumiere_egouts",
+    "argent_impots",
+    "boutiques_commerces",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
