@@ -1776,7 +1776,7 @@ export default function SignupPage() {
 
                     <option value="" disabled>{t('choose')}</option>
 
-                    {governorates.map(g => <option key={g} value={g}>{g === 'Kef' ? 'Le Kef' : g}</option>)}
+                    {governorates.map(g => <option key={g} value={g}>{t(`gov_${g.replace(' ', '')}`)}</option>)}
 
                   </select>
 
