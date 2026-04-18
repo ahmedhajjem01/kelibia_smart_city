@@ -7,6 +7,7 @@ import Webcam from 'react-webcam'
 import { useI18n } from '../i18n/LanguageProvider'
 
 import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_logo.png'
 
 
 
@@ -1447,7 +1448,7 @@ export default function SignupPage() {
       {/* Top Nav */}
 
       {/* Background */}
-      <div className="lp-bg" style={{ position: 'fixed', inset: 0, z-index: 0 }}>
+      <div className="lp-bg" style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
         <img
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOK4NOsrgsp-7XZZsRks3tpwcQfxiLaK9BLKPLGysOqi9B4Be--eGvYLPbbIFV6dc7-hLPuvXRlY7HheSreAP2qvCU3wDdMA9a-3Dv_SOFTwoO8MNLu_9aYbUk6Bo-rKqMzo3ff_7xbYsWzYNXbw1eDkJlsYtce8Q1KTjckP2T3NM2wpEJxpP3EpzSd3jeKl8P0tiK4lbHLRLfrJ_PEBUUKum0kOSE15G0rCmPfJ-VM3fGpC3qVjB2bLMWS1sP-rhdl-cvddrc9IbZ"
           alt="Background"
