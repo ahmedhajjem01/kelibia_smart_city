@@ -122,7 +122,6 @@ const CSS = `
   font-size: .85rem;
   transition: color 0.2s;
 }
-.lp-field:focus-within .lp-label,
 .lp-field:focus-within .lp-label i {
   color: #954a00;
 }
