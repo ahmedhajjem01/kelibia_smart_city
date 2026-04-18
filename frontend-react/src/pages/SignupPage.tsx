@@ -1501,21 +1501,11 @@ export default function SignupPage() {
           <div className="sg-sidebar">
 
             <h1 className="sg-hero-title">
-
-              <span className="sg-gradient-text">Devenir Citoyen</span>{' '}
-
-              Numérique
-
+              <span className="sg-gradient-text">{t('become_citizen_num')}</span>
             </h1>
 
             <p className="sg-hero-sub">
-
-              Rejoignez l'écosystème Smart City de Kélibia. Accédez à vos
-
-              services municipaux, suivez vos demandes et participez à la vie
-
-              locale en un clic.
-
+              {t('hero_desc')}
             </p>
 
             <div className="sg-glass-tile">
@@ -1527,17 +1517,10 @@ export default function SignupPage() {
               </div>
 
               <div>
-
-                <div className="sg-tile-title">Sécurité des données</div>
-
+                <div className="sg-tile-title">{t('data_security')}</div>
                 <div className="sg-tile-body">
-
-                  Vos documents sont chiffrés et stockés localement selon les
-
-                  normes nationales.
-
+                  {t('data_security_desc')}
                 </div>
-
               </div>
 
             </div>
@@ -1574,10 +1557,7 @@ export default function SignupPage() {
 
                 <h2 className="sg-section-title">
 
-                  Identité Personnelle
-
-                  <span className="sg-section-title-ar">الهوية الشخصية</span>
-
+                  {t('identity')}
                 </h2>
 
                 
@@ -1588,7 +1568,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Prénom / الإسم</label>
+                  <label className="sg-label">{t('first_name')}</label>
 
                   <input className="sg-input" type="text" placeholder="Ex: Mohamed" required value={firstName} onChange={e => setFirstName(e.target.value)} />
 
@@ -1596,7 +1576,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Nom / اللقب</label>
+                  <label className="sg-label">{t('last_name')}</label>
 
                   <input className="sg-input" type="text" placeholder="Ex: Ben Ali" required value={lastName} onChange={e => setLastName(e.target.value)} />
 
@@ -1604,7 +1584,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">N° Carte d'Identité (CIN) / رقم بطاقة التعريف</label>
+                  <label className="sg-label">{t('cin_label')}</label>
 
                   <input className="sg-input" type="text" placeholder="00000000" pattern="[0-9]{8}" maxLength={8} required value={cin} onChange={e => setCin(e.target.value)} />
 
@@ -1612,7 +1592,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Date de Naissance / تاريخ الولادة</label>
+                  <label className="sg-label">{t('birth_date')}</label>
 
                   <input className="sg-input" type="date" required value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]} />
 
@@ -1620,7 +1600,7 @@ export default function SignupPage() {
 
                 <div className="sg-field sg-grid-full">
 
-                  <label className="sg-label">Lieu de Naissance / مكان الولادة</label>
+                  <label className="sg-label">{t('place_of_birth')}</label>
 
                   <input className="sg-input" type="text" placeholder="Ex: Kélibia" required value={placeOfBirth} onChange={e => setPlaceOfBirth(e.target.value)} />
 
@@ -1688,10 +1668,7 @@ export default function SignupPage() {
 
                   <h2 className="sg-section-title">
 
-                    Documents
-
-                    <span className="sg-section-title-ar">الوثائق المطلوبة</span>
-
+                    {t('documents_cin')}
                   </h2>
 
                   
@@ -1716,9 +1693,9 @@ export default function SignupPage() {
 
                             <span className="sg-cin-slot-icon"><i className="fas fa-id-card"></i></span>
 
-                            <span className="sg-cin-slot-lbl">{side === 'front' ? 'Face Avant CIN' : 'Face Arrière CIN'}</span>
+                            <span className="sg-cin-slot-lbl">{side === 'front' ? t('cin_front') : t('cin_back')}</span>
 
-                            <span className="sg-cin-slot-sub">{side === 'front' ? 'Recto / وجه البطاقة' : 'Verso / ظهر البطاقة'}</span>
+                            <span className="sg-cin-slot-sub">{side === 'front' ? t('cin_recto_label') : t('cin_verso_label')}</span>
 
                           </>
 
@@ -1760,10 +1737,7 @@ export default function SignupPage() {
 
                 <h2 className="sg-section-title">
 
-                  Contact &amp; Localisation
-
-                  <span className="sg-section-title-ar">الاتصال والموقع</span>
-
+                  {t('contact_loc')}
                 </h2>
 
                 
@@ -1774,7 +1748,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Mobile / الهاتف الجوال</label>
+                  <label className="sg-label">{t('phone_label')}</label>
 
                   <div className="sg-phone-wrap">
 
@@ -1788,7 +1762,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">E-mail / البريد الإلكتروني</label>
+                  <label className="sg-label">{t('email')}</label>
 
                   <input className="sg-input" type="email" placeholder="nom@exemple.com" required value={email} onChange={e => setEmail(e.target.value)} />
 
@@ -1796,7 +1770,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Gouvernorat / الولاية</label>
+                  <label className="sg-label">{t('governorate_label')}</label>
 
                   <select className="sg-select" required value={governorate} onChange={e => { setGovernorate(e.target.value); setCity('') }}>
 
@@ -1810,7 +1784,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Ville / المعتمدية</label>
+                  <label className="sg-label">{t('city_label')}</label>
 
                   <select className="sg-select" required disabled={!governorate} value={city} onChange={e => setCity(e.target.value)}>
 
@@ -1824,9 +1798,9 @@ export default function SignupPage() {
 
                 <div className="sg-field sg-grid-full">
 
-                  <label className="sg-label">Adresse Résidence / العنوان السكني</label>
+                  <label className="sg-label">{t('address_label')}</label>
 
-                  <textarea className="sg-textarea" placeholder="Rue, Quartier, Code Postal..." required value={address} onChange={e => setAddress(e.target.value)} />
+                  <textarea className="sg-textarea" placeholder={t('address_placeholder') || "Rue, Quartier, Code Postal..."} required value={address} onChange={e => setAddress(e.target.value)} />
 
                 </div>
 
@@ -1844,9 +1818,7 @@ export default function SignupPage() {
 
                 <h2 className="sg-section-title">
 
-                  Sécurité
-
-                  <span className="sg-section-title-ar">الأمان</span>
+                  {t('security')}
 
                 </h2>
 
@@ -1858,7 +1830,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Mot de passe / كلمة السر</label>
+                  <label className="sg-label">{t('password_label')}</label>
 
                   <div className="sg-input-wrap">
 
@@ -1876,7 +1848,7 @@ export default function SignupPage() {
 
                 <div className="sg-field">
 
-                  <label className="sg-label">Confirmer / تأكيد كلمة السر</label>
+                  <label className="sg-label">{t('confirm_password')}</label>
 
                   <div className="sg-input-wrap">
 
@@ -1906,7 +1878,7 @@ export default function SignupPage() {
 
                     {loading && <span className="spinner-border spinner-border-sm" role="status" />}
 
-                    Créer mon compte citoyen
+                    {t('signup_btn')}
 
                   </button>
 
