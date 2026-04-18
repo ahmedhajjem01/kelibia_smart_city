@@ -389,7 +389,7 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="lp-footer">
             <p className="lp-signup-link">
-              {t('already_have_account')} <Link to="/signup">{t('create_account')}</Link>
+              {t('not_registered_yet')} <Link to="/signup">{t('create_account')}</Link>
             </p>
             <p>{t('footer_text')}</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
