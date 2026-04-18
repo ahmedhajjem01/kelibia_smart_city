@@ -6,10 +6,10 @@ import { useI18n } from '../i18n/LanguageProvider'
 const CSS = `
 .lp-root{min-height:100vh;background:#0f1117;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif}
 .lp-card{width:100%;max-width:400px;background:#1a1d27;border-radius:16px;padding:44px 40px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.lp-icon{width:52px;height:52px;background:#2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
+.lp-icon{width:52px;height:52px;background:#f18221;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
 .lp-title{text-align:center;color:#f0f2f5;font-size:1.25rem;font-weight:700;margin-bottom:4px}
 .lp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:32px}
-.lp-btn{width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.lp-btn{width:100%;background:#f18221;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
 .lp-btn:hover:not(:disabled){background:#1d4ed8}
 .lp-btn:disabled{opacity:.6;cursor:not-allowed}
 .lp-error{background:#2d1515;border:1px solid #7f1d1d;border-radius:8px;padding:10px 14px;color:#fca5a5;font-size:.82rem;margin-top:14px}
@@ -102,7 +102,7 @@ export default function ActivatePage() {
         <div style={{ textAlign: 'center' }}>
           {loading ? (
             <div className="text-center">
-              <div className="spinner-border text-primary mb-3" role="status" style={{ color: '#2563eb' }} />
+              <div className="spinner-border text-primary mb-3" role="status" style={{ color: '#f18221' }} />
               <p style={{ color: '#6b7280', fontSize: '.9rem' }}>{t('processing') || 'Vérification...'}</p>
             </div>
           ) : null}

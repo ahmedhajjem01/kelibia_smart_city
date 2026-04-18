@@ -5,14 +5,14 @@ import { useI18n } from '../i18n/LanguageProvider'
 const CSS = `
 .lp-root{min-height:100vh;background:#0f1117;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif}
 .lp-card{width:100%;max-width:400px;background:#1a1d27;border-radius:16px;padding:44px 40px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.lp-icon{width:52px;height:52px;background:#2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
+.lp-icon{width:52px;height:52px;background:#f18221;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
 .lp-title{text-align:center;color:#f0f2f5;font-size:1.25rem;font-weight:700;margin-bottom:4px}
 .lp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:32px}
 .lp-label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:6px;font-weight:500}
 .lp-input{width:100%;background:#0f1117;border:1.5px solid #2a2d3a;border-radius:8px;padding:11px 14px;font-size:.9rem;color:#e5e7eb;outline:none;box-sizing:border-box;transition:border-color .2s}
-.lp-input:focus{border-color:#2563eb}
+.lp-input:focus{border-color:#f18221}
 .lp-input::placeholder{color:#4b5563}
-.lp-btn{width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.lp-btn{width:100%;background:#f18221;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
 .lp-btn:hover:not(:disabled){background:#1d4ed8}
 .lp-btn:disabled{opacity:.6;cursor:not-allowed}
 .lp-links{display:flex;justify-content:center;gap:20px;margin-top:22px}
@@ -23,7 +23,7 @@ const CSS = `
 .lp-field{margin-bottom:18px}
 .lp-lang{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
 .lp-lang-btn{background:none;border:1px solid #2a2d3a;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem;color:#6b7280;display:flex;align-items:center;gap:5px;transition:all .2s}
-.lp-lang-btn:hover,.lp-lang-btn.active{border-color:#2563eb;color:#93c5fd}
+.lp-lang-btn:hover,.lp-lang-btn.active{border-color:#f18221;color:#93c5fd}
 `
 
 type MessageState =

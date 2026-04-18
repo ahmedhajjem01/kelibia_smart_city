@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_logo.png'
 
 type TokenResponse = {
   access: string
@@ -42,7 +41,7 @@ const CSS = `
 .lp-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(23,94,173,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%);
+  background: linear-gradient(135deg, rgba(149,74,0,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%);
 }
 
 /* ── Container ── */
@@ -64,7 +63,7 @@ const CSS = `
 /* ── Hero side ── */
 .lp-hero {
   display: none;
-  background: rgba(23,94,173,.82);
+  background: rgba(149,74,0,.82);
   backdrop-filter: blur(10px);
   padding: 48px 44px;
   flex-direction: column;
@@ -97,7 +96,7 @@ const CSS = `
 .lp-lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 28px; }
 .lp-lang-pill { background: #e7e7f1; border-radius: 999px; padding: 4px; display: flex; }
 .lp-lang-opt { border: none; background: none; border-radius: 999px; padding: 5px 16px; font-size: .75rem; font-weight: 700; cursor: pointer; color: #6b7280; }
-.lp-lang-opt.active { background: #175ead; color: #fff; }
+.lp-lang-opt.active { background: #954a00; color: #fff; }
 .lp-mobile-logo { display: flex; justify-content: center; margin-bottom: 20px; }
 .lp-mobile-logo img { height: 44px; }
 @media (min-width: 768px) { .lp-mobile-logo { display: none; } }
@@ -107,13 +106,13 @@ const CSS = `
 .lp-field { margin-bottom: 18px; }
 .lp-label { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: #564336; margin-bottom: 7px; }
 .lp-input { width: 100%; background: #e7e7f1; border: none; border-radius: 10px; padding: 13px 16px; font-size: .9rem; outline: none; box-sizing: border-box; }
-.lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #175ead; }
+.lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #954a00; }
 .lp-input-wrap { position: relative; }
 .lp-eye { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #897364; cursor: pointer; }
 .lp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .lp-remember { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: .82rem; color: #6b7280; }
-.lp-forgot { font-size: .82rem; color: #175ead; font-weight: 700; text-decoration: none; }
-.lp-btn { width: 100%; background: linear-gradient(135deg, #175ead 0%, #2563eb 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.lp-forgot { font-size: .82rem; color: #954a00; font-weight: 700; text-decoration: none; }
+.lp-btn { width: 100%; background: linear-gradient(135deg, #954a00 0%, #f18221 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .lp-error { background: #ffdad6; border: 1px solid #ba1a1a; border-radius: 10px; padding: 11px; color: #93000a; font-size: .83rem; margin-top: 14px; }
 .lp-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
 .lp-divider-line { flex: 1; height: 1px; background: rgba(0,0,0,.1); }
@@ -123,7 +122,7 @@ const CSS = `
 .lp-footer { margin-top: 20px; text-align: center; }
 .lp-footer p { font-size: .72rem; color: #9ca3af; margin: 4px 0; }
 .lp-signup-link { font-size: .78rem; color: #6b7280; }
-.lp-signup-link a { color: #175ead; font-weight: 600; text-decoration: none; }
+.lp-signup-link a { color: #954a00; font-weight: 600; text-decoration: none; }
 `
 
 export default function LoginPage() {
@@ -198,7 +197,7 @@ export default function LoginPage() {
       {/* Background */}
       <div className="lp-bg">
         <img
-          src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOK4NOsrgsp-7XZZsRks3tpwcQfxiLaK9BLKPLGysOqi9B4Be--eGvYLPbbIFV6dc7-hLPuvXRlY7HheSreAP2qvCU3wDdMA9a-3Dv_SOFTwoO8MNLu_9aYbUk6Bo-rKqMzo3ff_7xbYsWzYNXbw1eDkJlsYtce8Q1KTjckP2T3NM2wpEJxpP3EpzSd3jeKl8P0tiK4lbHLRLfrJ_PEBUUKum0kOSE15G0rCmPfJ-VM3fGpC3qVjB2bLMWS1sP-rhdl-cvddrc9IbZ"
           alt="Background"
         />
         <div className="lp-bg-overlay"></div>
@@ -212,23 +211,23 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src={tunisiaLogo}
+              src={logo}
               alt="Logo"
             />
             <div>
-              <div className="lp-hero-brand-name">République Tunisienne</div>
+              <div className="lp-hero-brand-name">Ville de Kélibia</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
 
           <div>
             <div className="lp-hero-headline">
-              Votre pays,<br />
-              <span className="lp-hero-accent">Connecté &amp; Durable.</span>
+              Votre ville,<br />
+              <span className="lp-hero-accent">Connectée &amp; Durable.</span>
             </div>
             <p className="lp-hero-desc">
-              Accédez à vos services administratifs, suivez vos demandes en temps
-              réel et participez à l'évolution de notre portail national.
+              Accédez à vos services municipaux, suivez vos demandes en temps
+              réel et participez à l'évolution de notre cité méditerranéenne.
             </p>
           </div>
 
@@ -255,13 +254,13 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={tunisiaLogo} alt="Logo" />
+            <img src={logo} alt="Logo" />
           </div>
 
           {/* Greeting */}
           <div className="lp-greeting">
-            <h2>{lang === 'ar' ? 'البوابة الوطنية' : 'République Tunisienne'}</h2>
-            <p>{t('portal_title')}</p>
+            <h2>Bon retour !</h2>
+            <p>Connectez-vous pour accéder à votre espace citoyen.</p>
           </div>
 
           <form onSubmit={onSubmit}>

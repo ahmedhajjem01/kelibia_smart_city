@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useI18n } from '../i18n/LanguageProvider'
-import tunisiaLogo from '../assets/tunisia_logo.png'
 
 const CSS = `
 /* ── Root ── */
 .lp-root { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; position: relative; overflow: hidden; font-family: "Public Sans", "Segoe UI", sans-serif; background: #0f1117; }
 .lp-bg { position: absolute; inset: 0; z-index: 0; }
 .lp-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
-.lp-bg-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(23,94,173,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%); }
+.lp-bg-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(149,74,0,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%); }
 .lp-container { position: relative; z-index: 10; width: 100%; max-width: 960px; display: grid; grid-template-columns: 1fr; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.35); }
 @media (min-width: 768px) { .lp-container { grid-template-columns: 7fr 5fr; } }
-.lp-hero { display: none; background: rgba(23,94,173,.82); backdrop-filter: blur(10px); padding: 48px 44px; flex-direction: column; justify-content: space-between; color: #fff; }
+.lp-hero { display: none; background: rgba(149,74,0,.82); backdrop-filter: blur(10px); padding: 48px 44px; flex-direction: column; justify-content: space-between; color: #fff; }
 @media (min-width: 768px) { .lp-hero { display: flex; } }
 .lp-hero-brand { display: flex; align-items: center; gap: 14px; }
 .lp-hero-logo { height: 56px; width: auto; }
@@ -27,7 +26,7 @@ const CSS = `
 .lp-lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 28px; }
 .lp-lang-pill { background: #e7e7f1; border-radius: 999px; padding: 4px; display: flex; }
 .lp-lang-opt { border: none; background: none; border-radius: 999px; padding: 5px 16px; font-size: .75rem; font-weight: 700; cursor: pointer; color: #6b7280; }
-.lp-lang-opt.active { background: #175ead; color: #fff; }
+.lp-lang-opt.active { background: #954a00; color: #fff; }
 .lp-mobile-logo { display: flex; justify-content: center; margin-bottom: 20px; }
 .lp-mobile-logo img { height: 44px; }
 @media (min-width: 768px) { .lp-mobile-logo { display: none; } }
@@ -37,13 +36,13 @@ const CSS = `
 .lp-field { margin-bottom: 18px; }
 .lp-label { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: #564336; margin-bottom: 7px; }
 .lp-input { width: 100%; background: #e7e7f1; border: none; border-radius: 10px; padding: 13px 16px; font-size: .9rem; outline: none; box-sizing: border-box; }
-.lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #175ead; }
-.lp-btn { width: 100%; background: linear-gradient(135deg, #175ead 0%, #2563eb 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #954a00; }
+.lp-btn { width: 100%; background: linear-gradient(135deg, #954a00 0%, #f18221 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .lp-error { background: #ffdad6; border: 1px solid #ba1a1a; border-radius: 10px; padding: 11px; color: #93000a; font-size: .83rem; margin-top: 14px; }
 .lp-success{ background: #d3f9d8; border: 1px solid #2b8a3e; border-radius: 10px; padding: 11px; color: #092c09; font-size: .83rem; margin-top: 14px; }
 .lp-footer { margin-top: 28px; text-align: center; }
 .lp-signup-link { font-size: .85rem; color: #564336; }
-.lp-signup-link a { color: #175ead; font-weight: 700; text-decoration: none; }
+.lp-signup-link a { color: #954a00; font-weight: 700; text-decoration: none; }
 `
 
 export default function ForgotPasswordPage() {
@@ -90,7 +89,7 @@ export default function ForgotPasswordPage() {
       {/* Background */}
       <div className="lp-bg">
         <img
-          src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOK4NOsrgsp-7XZZsRks3tpwcQfxiLaK9BLKPLGysOqi9B4Be--eGvYLPbbIFV6dc7-hLPuvXRlY7HheSreAP2qvCU3wDdMA9a-3Dv_SOFTwoO8MNLu_9aYbUk6Bo-rKqMzo3ff_7xbYsWzYNXbw1eDkJlsYtce8Q1KTjckP2T3NM2wpEJxpP3EpzSd3jeKl8P0tiK4lbHLRLfrJ_PEBUUKum0kOSE15G0rCmPfJ-VM3fGpC3qVjB2bLMWS1sP-rhdl-cvddrc9IbZ"
           alt="Background"
         />
         <div className="lp-bg-overlay"></div>
@@ -102,9 +101,9 @@ export default function ForgotPasswordPage() {
         {/* ── Hero side ── */}
         <div className="lp-hero">
           <div className="lp-hero-brand">
-            <img className="lp-hero-logo" src={tunisiaLogo} alt="Logo" />
+            <img className="lp-hero-logo" src={logo} alt="Logo" />
             <div>
-              <div className="lp-hero-brand-name">République Tunisienne</div>
+              <div className="lp-hero-brand-name">Ville de Kélibia</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
@@ -142,7 +141,7 @@ export default function ForgotPasswordPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={tunisiaLogo} alt="Logo" />
+            <img src={logo} alt="Logo" />
           </div>
 
           {/* Greeting */}

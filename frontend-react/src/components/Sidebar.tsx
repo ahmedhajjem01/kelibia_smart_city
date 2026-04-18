@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
 import logo from '../assets/logo.png';
-import tunisiaLogo from '../assets/tunisia_logo.png'
 
 interface SidebarProps {
   onLogout: () => void;
@@ -51,10 +50,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
 
       {/* ── Brand ── */}
       <div className="px-4 pt-5 pb-4 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.12)' }}>
-        <img src={tunisiaLogo} alt="Logo National" style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
+        <img src={logo} alt="Logo National" style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
         <div>
           <div style={{ color: '#fff', fontWeight: 900, fontSize: '.78rem', letterSpacing: '.3px', lineHeight: 1.2, textTransform: 'uppercase' }}>
-            Portail National
+            Smart City Portal
           </div>
           <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, lineHeight: 1.2 }}>الجمهورية التونسية</div>
         </div>
