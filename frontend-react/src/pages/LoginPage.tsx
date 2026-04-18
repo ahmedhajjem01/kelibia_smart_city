@@ -266,28 +266,27 @@ export default function LoginPage() {
               alt="Logo"
             />
             <div>
-              <div className="lp-hero-brand-name">République de Tunisie</div>
+              <div className="lp-hero-brand-name">{t('republic_of_tunisia')}</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
 
           <div>
             <div className="lp-hero-headline">
-              Votre ville,<br />
-              <span className="lp-hero-accent">Connectée &amp; Durable.</span>
+              {t('hero_headline_1')}<br />
+              <span className="lp-hero-accent">{t('hero_headline_2')}</span>
             </div>
             <p className="lp-hero-desc">
-              Accédez à vos services municipaux, suivez vos demandes en temps
-              réel et participez à l'évolution de notre cité méditerranéenne.
+              {t('hero_desc')}
             </p>
           </div>
 
           <div className="lp-hero-badges">
             <div className="lp-hero-badge">
-              <i className="fas fa-shield-alt"></i> Sécurisé
+              <i className="fas fa-shield-alt"></i> {t('secure')}
             </div>
             <div className="lp-hero-badge">
-              <i className="fas fa-language"></i> Multilingue
+              <i className="fas fa-language"></i> {t('multilingual')}
             </div>
           </div>
         </div>
@@ -310,8 +309,8 @@ export default function LoginPage() {
 
           {/* Greeting */}
           <div className="lp-greeting">
-            <h2>Bienvenu!</h2>
-            <p>Connectez-vous pour accéder à votre espace citoyen.</p>
+            <h2>{t('welcome_title')}</h2>
+            <p>{t('welcome_subtitle')}</p>
           </div>
 
           <form onSubmit={onSubmit}>
@@ -378,10 +377,10 @@ export default function LoginPage() {
           </div>
           <div className="lp-alt-grid">
             <button className="lp-alt-btn">
-              <i className="fas fa-id-card icon-blue"></i> Tunisie ID
+              <i className="fas fa-id-card icon-blue"></i> {t('tunisia_id')}
             </button>
             <button className="lp-alt-btn">
-              <i className="fas fa-qrcode icon-orange"></i> Scan QR
+              <i className="fas fa-qrcode icon-orange"></i> {t('scan_qr')}
             </button>
           </div>
 
@@ -392,8 +391,8 @@ export default function LoginPage() {
             </p>
             <p>{t('footer_text')}</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Confidentialité</a>
-              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Assistance</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>{t('privacy')}</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>{t('assistance')}</a>
             </div>
           </div>
 
