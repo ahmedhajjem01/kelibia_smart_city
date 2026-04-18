@@ -120,9 +120,10 @@ const CSS = `
 .lp-divider-txt { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: #897364; }
 .lp-alt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .lp-alt-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; border: 1.5px solid rgba(0,0,0,.1); border-radius: 10px; background: none; font-size: .82rem; font-weight: 600; cursor: pointer; }
-.lp-footer { margin-top: 28px; text-align: center; }
-.lp-signup-link { font-size: .85rem; color: #564336; }
-.lp-signup-link a { color: #175ead; font-weight: 700; text-decoration: none; }
+.lp-footer { margin-top: 20px; text-align: center; }
+.lp-footer p { font-size: .72rem; color: #9ca3af; margin: 4px 0; }
+.lp-signup-link { font-size: .78rem; color: #6b7280; }
+.lp-signup-link a { color: #175ead; font-weight: 600; text-decoration: none; }
 `
 
 export default function LoginPage() {
@@ -340,6 +341,10 @@ export default function LoginPage() {
               {t('already_have_account')} ? <Link to="/signup">{t('create_account')}</Link>
             </p>
             <p>{t('footer_text')}</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Confidentialité</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Assistance</a>
+            </div>
           </div>
 
         </div>
