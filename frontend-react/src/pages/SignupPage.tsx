@@ -1446,6 +1446,16 @@ export default function SignupPage() {
 
       {/* Top Nav */}
 
+      {/* Background */}
+      <div className="lp-bg" style={{ position: 'fixed', inset: 0, z-index: 0 }}>
+        <img
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOK4NOsrgsp-7XZZsRks3tpwcQfxiLaK9BLKPLGysOqi9B4Be--eGvYLPbbIFV6dc7-hLPuvXRlY7HheSreAP2qvCU3wDdMA9a-3Dv_SOFTwoO8MNLu_9aYbUk6Bo-rKqMzo3ff_7xbYsWzYNXbw1eDkJlsYtce8Q1KTjckP2T3NM2wpEJxpP3EpzSd3jeKl8P0tiK4lbHLRLfrJ_PEBUUKum0kOSE15G0rCmPfJ-VM3fGpC3qVjB2bLMWS1sP-rhdl-cvddrc9IbZ"
+          alt="Background"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15 }}
+        />
+        <div className="lp-bg-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(149,74,0,.15) 0%, transparent 60%, rgba(149,74,0,.08) 100%)' }}></div>
+      </div>
+
       <nav className="sg-nav">
 
         <a className="sg-nav-brand" href="/">
@@ -1906,7 +1916,7 @@ export default function SignupPage() {
 
                   <p className="sg-login-link">
 
-                    Déjà inscrit ? <Link to="/login">Se connecter</Link>
+                    {t('already_have_account')} <Link to="/login" style={{ color: '#954a00', fontWeight: 'bold' }}>Connectez-vous</Link>
 
                   </p>
 
