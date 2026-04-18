@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -33,7 +33,7 @@ function initials(name: string) {
   return name.trim().split(/\s+/).map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
 }
 function formatDate(iso: string) {
-  if (!iso) return '—'
+  if (!iso) return 'ÔÇö'
   return new Date(iso).toLocaleDateString('fr-TN', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 const PAGE_SIZE = 10
@@ -46,7 +46,7 @@ function getRoleLabel(u: UserInfo | null, t: any) {
 }
 
 const CSS = `
-/* ── New Design System ── */
+/* ÔöÇÔöÇ New Design System ÔöÇÔöÇ */
 :root{
   --primary:#F18221;
   --primary-hover:#e0731a;
@@ -63,14 +63,14 @@ const CSS = `
   --blue:#004786;
 }
 
-/* ── Page shell ── */
+/* ÔöÇÔöÇ Page shell ÔöÇÔöÇ */
 .agent-page{
   font-family:'Public Sans','Segoe UI',sans-serif;
   background:var(--body-bg);
   min-height:100vh;
 }
 
-/* ── Top info bar (hidden on mobile) ── */
+/* ÔöÇÔöÇ Top info bar (hidden on mobile) ÔöÇÔöÇ */
 .ag-topbar{
   background:var(--secondary);
   color:rgba(255,255,255,.8);
@@ -83,7 +83,7 @@ const CSS = `
 .ag-topbar a{color:rgba(255,255,255,.7);text-decoration:none;margin:0 6px}
 .ag-topbar a:hover{color:#fff}
 
-/* ── Glassmorphism navbar ── */
+/* ÔöÇÔöÇ Glassmorphism navbar ÔöÇÔöÇ */
 .ag-navbar{
   background:rgba(255,255,255,0.88);
   backdrop-filter:blur(12px);
@@ -153,7 +153,7 @@ const CSS = `
 }
 .ag-logout:hover{background:#f1f5f9;color:var(--red-tn)}
 
-/* ── Small user avatar (used in users table) ── */
+/* ÔöÇÔöÇ Small user avatar (used in users table) ÔöÇÔöÇ */
 .ag-user-av-sm{
   width:32px;height:32px;
   background:var(--primary);
@@ -162,7 +162,7 @@ const CSS = `
   font-size:.78rem;font-weight:700;flex-shrink:0;
 }
 
-/* ── Hero / welcome strip ── */
+/* ÔöÇÔöÇ Hero / welcome strip ÔöÇÔöÇ */
 .ag-hero{
   background:linear-gradient(135deg,#0d1b2e 0%,#1565c0 100%);
   color:#fff;
@@ -178,7 +178,7 @@ const CSS = `
   border-radius:20px;padding:4px 14px;font-size:.75rem;
 }
 
-/* ── Breadcrumb ── */
+/* ÔöÇÔöÇ Breadcrumb ÔöÇÔöÇ */
 .ag-breadcrumb{
   background:#fff;
   border-bottom:1px solid #e2e8f0;
@@ -187,10 +187,10 @@ const CSS = `
 }
 .ag-breadcrumb a{color:var(--primary);text-decoration:none}
 
-/* ── Layout body ── */
+/* ÔöÇÔöÇ Layout body ÔöÇÔöÇ */
 .ag-body{display:flex;min-height:calc(100vh - 160px);align-items:flex-start}
 
-/* ── Sidebar ── */
+/* ÔöÇÔöÇ Sidebar ÔöÇÔöÇ */
 .ag-sidebar{
   width:240px;min-width:240px;
   background:var(--sidebar-bg);
@@ -234,7 +234,7 @@ const CSS = `
   font-size:.65rem;font-weight:700;
 }
 
-/* ── Main content ── */
+/* ÔöÇÔöÇ Main content ÔöÇÔöÇ */
 .ag-main{
   flex:1;
   padding:24px 28px;
@@ -245,7 +245,7 @@ const CSS = `
   min-height:800px;
 }
 
-/* ── Stats Cards ── */
+/* ÔöÇÔöÇ Stats Cards ÔöÇÔöÇ */
 .ag-stats-grid{
   display:grid;
   grid-template-columns:repeat(6,1fr);
@@ -281,7 +281,7 @@ const CSS = `
 .ag-stat .val{font-size:1.8rem;font-weight:900;line-height:1;color:#0f172a;font-family:'Public Sans',sans-serif}
 .ag-stat .lbl{font-size:.7rem;color:#94a3b8;margin-top:4px;font-weight:500}
 
-/* ── Content cards ── */
+/* ÔöÇÔöÇ Content cards ÔöÇÔöÇ */
 .ag-card{
   background:#fff;border-radius:12px;
   box-shadow:var(--card-shadow);
@@ -309,7 +309,7 @@ const CSS = `
 }
 .ag-card-body{padding:18px}
 
-/* ── Filter bar ── */
+/* ÔöÇÔöÇ Filter bar ÔöÇÔöÇ */
 .ag-filter-bar{
   padding:10px 16px;
   background:#f8fafc;
@@ -336,7 +336,7 @@ const CSS = `
   padding:5px 10px 5px 30px;font-size:.78rem;width:200px;background:#fff;
 }
 
-/* ── Table ── */
+/* ÔöÇÔöÇ Table ÔöÇÔöÇ */
 .ag-table{width:100%;border-collapse:separate;border-spacing:0}
 .ag-table thead th{
   background:#f8fafc;color:#64748b;
@@ -353,7 +353,7 @@ const CSS = `
   border-bottom:1px solid #f1f5f9;vertical-align:middle;
 }
 
-/* ── Badges ── */
+/* ÔöÇÔöÇ Badges ÔöÇÔöÇ */
 .cat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap}
 .cat-lighting{background:#fffbeb;color:#b45309}.cat-trash{background:#f0fdf4;color:#166534}
 .cat-roads{background:#f5f3ff;color:#5b21b6}.cat-noise{background:#fdf2f8;color:#9d174d}
@@ -383,7 +383,7 @@ const CSS = `
 .ag-empty{text-align:center;padding:40px 20px;color:#94a3b8}
 .ag-empty i{font-size:2.5rem;margin-bottom:10px;opacity:.3}
 
-/* ── Profile card ── */
+/* ÔöÇÔöÇ Profile card ÔöÇÔöÇ */
 .ag-profile-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:16px}
 .ag-profile-hdr{background:linear-gradient(135deg,#0d1b2e,#1565c0);padding:24px;text-align:center;color:#fff}
 .ag-profile-av{
@@ -402,11 +402,11 @@ const CSS = `
 .ag-profile-row:last-child{border-bottom:none}
 .ag-profile-row .lbl{color:#94a3b8}.ag-profile-row .val{color:#1e293b;font-weight:600}
 
-/* ── Mini progress bar ── */
+/* ÔöÇÔöÇ Mini progress bar ÔöÇÔöÇ */
 .mini-progress{height:5px;border-radius:3px;background:#e2e8f0;margin-top:4px;overflow:hidden}
 .mini-progress .bar{height:100%;border-radius:3px;transition:width .6s}
 
-/* ── Pagination ── */
+/* ÔöÇÔöÇ Pagination ÔöÇÔöÇ */
 .ag-pag-bar{
   padding:10px 16px;
   display:flex;align-items:center;justify-content:space-between;
@@ -422,7 +422,7 @@ const CSS = `
 .ag-page-btn:disabled{opacity:.4;cursor:not-allowed}
 .ag-page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
-/* ── Toast notifications ── */
+/* ÔöÇÔöÇ Toast notifications ÔöÇÔöÇ */
 .ag-toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
 .ag-toast{
   background:#fff;border-radius:12px;
@@ -440,7 +440,7 @@ const CSS = `
 .ag-toast.error .ticon{color:var(--red-tn)}
 @keyframes ag-slide{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}
 
-/* ── Modals ── */
+/* ÔöÇÔöÇ Modals ÔöÇÔöÇ */
 .ag-modal-hdr{
   background:linear-gradient(90deg,#0d1b2e,#1565c0);
   color:#fff;padding:16px 20px;
@@ -457,27 +457,27 @@ const CSS = `
 .det-value{font-size:.88rem;color:#1e293b;font-weight:500}
 .ag-footer{background:#0d1b2e;color:rgba(255,255,255,.5);text-align:center;font-size:.72rem;padding:14px}
 
-/* ── Duplicate card ── */
+/* ÔöÇÔöÇ Duplicate card ÔöÇÔöÇ */
 .ag-dup-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);margin-bottom:0;overflow:hidden;border-left:4px solid #7c3aed}
 
-/* ── ML confidence badges ── */
+/* ÔöÇÔöÇ ML confidence badges ÔöÇÔöÇ */
 .conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:2px}
 .conf-high{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
 .conf-med{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
 .conf-low{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
 
-/* ── Reclassify box ── */
+/* ÔöÇÔöÇ Reclassify box ÔöÇÔöÇ */
 .reclassify-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-top:12px}
 .reclassify-box .rc-title{font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:8px}
 
-/* ── Skeleton loader ── */
+/* ÔöÇÔöÇ Skeleton loader ÔöÇÔöÇ */
 .skeleton-box{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:10px;width:100%}
 @keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .table-skeleton{height:400px;margin-bottom:20px}
 #ag-map-card{min-height:430px}
 #ag-recs-card{min-height:500px}
 
-/* ══════════════════════ MOBILE ══════════════════════ */
+/* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ MOBILE ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ */
 @media(max-width:1023px){
   .ag-topbar{display:none}
   .ag-navbar{height:54px;padding:0 10px}
@@ -523,7 +523,7 @@ const CSS = `
   .ag-navbar{height:50px}
 }
 
-/* ── Mobile bottom nav ── */
+/* ÔöÇÔöÇ Mobile bottom nav ÔöÇÔöÇ */
 .ag-mobile-nav{
   display:none;
   position:fixed;bottom:0;left:0;right:0;
@@ -555,11 +555,11 @@ export default function AgentDashboardPage() {
   const navigate = useNavigate()
 
   const CAT: Record<string, { label: string; cls: string }> = {
-    lighting: { label: `💡 ${t('lighting')}`, cls: 'cat-lighting' },
-    trash:    { label: `🗑️ ${t('trash')}`,   cls: 'cat-trash'    },
-    roads:    { label: `🛣️ ${t('roads')}`,    cls: 'cat-roads'    },
-    noise:    { label: `🔊 ${t('noise')}`, cls: 'cat-noise'    },
-    other:    { label: `📌 ${t('other')}`,     cls: 'cat-other'    },
+    lighting: { label: `­ƒÆí ${t('lighting')}`, cls: 'cat-lighting' },
+    trash:    { label: `­ƒùæ´©Å ${t('trash')}`,   cls: 'cat-trash'    },
+    roads:    { label: `­ƒøú´©Å ${t('roads')}`,    cls: 'cat-roads'    },
+    noise:    { label: `­ƒöè ${t('noise')}`, cls: 'cat-noise'    },
+    other:    { label: `­ƒôî ${t('other')}`,     cls: 'cat-other'    },
   }
   const STATUS: Record<string, { label: string; cls: string }> = {
     pending:     { label: t('status_pending'), cls: 'status-pending'     },
@@ -568,9 +568,9 @@ export default function AgentDashboardPage() {
     rejected:    { label: t('status_rejected'),   cls: 'status-rejected'    },
   }
   const PRIORITY: Record<string, { label: string; cls: string }> = {
-    urgente: { label: `🔴 ${t('urgent')}`, cls: 'priority-urgente' },
-    normale: { label: `🔵 ${t('normal')}`, cls: 'priority-normale' },
-    faible:  { label: `🟣 ${t('low')}`,  cls: 'priority-faible'  },
+    urgente: { label: `­ƒö┤ ${t('urgent')}`, cls: 'priority-urgente' },
+    normale: { label: `­ƒöÁ ${t('normal')}`, cls: 'priority-normale' },
+    faible:  { label: `­ƒƒú ${t('low')}`,  cls: 'priority-faible'  },
   }
   const access = getAccessToken()
   const [user, setUser] = useState<UserInfo | null>(null)
@@ -616,7 +616,7 @@ export default function AgentDashboardPage() {
    const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
    const [enlargedImage, setEnlargedImage] = useState<string | null>(null)
 
-  // ── News Management ──
+  // ÔöÇÔöÇ News Management ÔöÇÔöÇ
   const [allAgents, setAllAgents] = useState<any[]>([])
   const [loadingAgents, setLoadingAgents] = useState(false)
   const [articleImage, setArticleImage] = useState<File | null>(null)
@@ -641,14 +641,14 @@ export default function AgentDashboardPage() {
         body: JSON.stringify({ agent_id: agentId })
       })
       if (res.ok) {
-        showToast('Agent affecté avec succès')
+        showToast('Agent affect├® avec succ├¿s')
         fetchReclamations()
         setDetailRec(null)
       } else {
         const err = await res.json()
         showToast(err.detail || 'Erreur lors de l\'affectation', 'error')
       }
-    } catch (e) { showToast('Erreur réseau', 'error') }
+    } catch (e) { showToast('Erreur r├®seau', 'error') }
   }
   const [allArticles, setAllArticles] = useState<any[]>([])
   const [loadingArticles, setLoadingArticles] = useState(false)
@@ -656,7 +656,7 @@ export default function AgentDashboardPage() {
   const [editingArticle, setEditingArticle] = useState<any | null>(null)
   const [articleForm, setArticleForm] = useState({ title: '', content: '', is_published: true })
   
-  // ── Config / Settings ──
+  // ÔöÇÔöÇ Config / Settings ÔöÇÔöÇ
   const [globalSettings, setGlobalSettings] = useState({ site_name: 'Kelibia Smart City', maintenance_mode: false, contact_email: 'webmaster@commune-kelibia.tn' })
   const [configSaving, setConfigSaving] = useState(false)
 
@@ -679,7 +679,7 @@ export default function AgentDashboardPage() {
   const [servicePdfFr, setServicePdfFr] = useState<File | null>(null)
   const [magicServiceText, setMagicServiceText] = useState('')
 
-  // ── Demandes Citoyens tab ──
+  // ÔöÇÔöÇ Demandes Citoyens tab ÔöÇÔöÇ
   const [allDemandes, setAllDemandes] = useState<any[]>([])
   const [loadingDemandes, setLoadingDemandes] = useState(false)
   const [demandeDetail, setDemandeDetail] = useState<any | null>(null)
@@ -701,7 +701,7 @@ export default function AgentDashboardPage() {
   const [mlLoading, setMlLoading] = useState(false)
   const [mlError, setMlError] = useState<string | null>(null)
 
-  // ── Profile Tab State ──
+  // ÔöÇÔöÇ Profile Tab State ÔöÇÔöÇ
   const [editingProfile, setEditingProfile] = useState(false)
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null)
@@ -741,7 +741,7 @@ export default function AgentDashboardPage() {
         body: fd
       })
       if (res.ok) {
-        showToast(editingArticle ? 'Article mis à jour' : 'Article créé')
+        showToast(editingArticle ? 'Article mis ├á jour' : 'Article cr├®├®')
         setShowAddArticleModal(false)
         setArticleImage(null)
         fetchArticles()
@@ -757,7 +757,7 @@ export default function AgentDashboardPage() {
         headers: { Authorization: `Bearer ${access}` }
       })
       if (res.ok) {
-        showToast('Article supprimé')
+        showToast('Article supprim├®')
         fetchArticles()
       }
     } catch (e) { showToast('Erreur lors de la suppression', 'error') }
@@ -778,9 +778,9 @@ export default function AgentDashboardPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
         body: JSON.stringify(globalSettings)
       })
-      if (res.ok) showToast('Configuration enregistrée avec succès !')
+      if (res.ok) showToast('Configuration enregistr├®e avec succ├¿s !')
       else showToast('Erreur lors de l\'enregistrement', 'error')
-    } catch { showToast('Erreur réseau', 'error') }
+    } catch { showToast('Erreur r├®seau', 'error') }
     finally { setConfigSaving(false) }
   }
 
@@ -845,9 +845,9 @@ export default function AgentDashboardPage() {
     setMlLoading(true); setMlError(null)
     try {
       const res = await fetch('/api/reclamations/ml_stats/', { headers: { Authorization: `Bearer ${access}` } })
-      if (!res.ok) { setMlError(`Erreur ${res.status} — Stats IA indisponibles.`); return }
+      if (!res.ok) { setMlError(`Erreur ${res.status} ÔÇö Stats IA indisponibles.`); return }
       setMlStats(await res.json())
-    } catch { setMlError('Erreur réseau — Stats IA indisponibles.') }
+    } catch { setMlError('Erreur r├®seau ÔÇö Stats IA indisponibles.') }
     finally { setMlLoading(false) }
   }
 
@@ -865,12 +865,12 @@ export default function AgentDashboardPage() {
         setEditingProfile(false)
         setProfileSaveSuccess(true)
         setTimeout(() => setProfileSaveSuccess(false), 3000)
-        showToast('Profil mis à jour !')
+        showToast('Profil mis ├á jour !')
       } else {
         const err = await res.json()
         setProfileSaveError(err.error || 'Erreur lors de la sauvegarde.')
       }
-    } catch { setProfileSaveError('Erreur réseau.') }
+    } catch { setProfileSaveError('Erreur r├®seau.') }
     finally { setProfileSaving(false) }
   }
 
@@ -882,12 +882,12 @@ export default function AgentDashboardPage() {
         headers: { Authorization: `Bearer ${access}` }
       })
       if (res.ok) {
-        showToast('Service supprimé !')
+        showToast('Service supprim├® !')
         setAllServices(prev => prev.filter(s => s.id !== serviceId))
       } else {
-        showToast('Impossible de supprimer ce service (peut-être lié à des demandes).', 'error')
+        showToast('Impossible de supprimer ce service (peut-├¬tre li├® ├á des demandes).', 'error')
       }
-    } catch { showToast('Erreur réseau.', 'error') }
+    } catch { showToast('Erreur r├®seau.', 'error') }
   }
 
 
@@ -911,9 +911,9 @@ export default function AgentDashboardPage() {
       if (res.ok) {
         setAllDemandes(prev => prev.map(d => d.type === order.type && d.id === order.id ? { ...d, status: newStatus } : d))
         if (demandeDetail?.id === order.id && demandeDetail?.type === order.type) setDemandeDetail((p: any) => ({ ...p, status: newStatus }))
-        showToast('Statut mis à jour !')
-      } else { showToast('Erreur lors de la mise à jour.', 'error') }
-    } catch { showToast('Erreur réseau.', 'error') }
+        showToast('Statut mis ├á jour !')
+      } else { showToast('Erreur lors de la mise ├á jour.', 'error') }
+    } catch { showToast('Erreur r├®seau.', 'error') }
     finally { setDemandeSaving(false) }
   }
 
@@ -958,7 +958,7 @@ export default function AgentDashboardPage() {
         const updated = await res.json()
         setAllConstructions(prev => prev.map(c => c.id === id ? updated : c))
         if (constructionDetail?.id === id) setConstructionDetail(updated)
-        showToast('Statut mis à jour ✓')
+        showToast('Statut mis ├á jour Ô£ô')
       }
     } catch (e) { console.error(e) }
   }
@@ -1100,7 +1100,7 @@ export default function AgentDashboardPage() {
       })
       if (res.ok) {
         const data = await res.json()
-        showToast(data.message || 'Action réussie !')
+        showToast(data.message || 'Action r├®ussie !')
         if (action === 'verify') {
           if (usersMode === 'unverified') setManagedUsers(prev => prev.filter(u => u.id !== userId))
           else setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, is_verified: true, cin_front: null, cin_back: null } : u))
@@ -1123,12 +1123,12 @@ export default function AgentDashboardPage() {
       })
       if (res.ok) {
         const data = await res.json()
-        showToast(data.message || 'ASD Activé !')
+        showToast(data.message || 'ASD Activ├® !')
         setManagedUsers(prev => prev.map(u => u.id === userId ? { ...u, has_active_asd: true, asd_expiration: data.asd_expiration } : u))
       } else {
-        showToast('Erreur lors de l’activation ASD.', 'error')
+        showToast('Erreur lors de lÔÇÖactivation ASD.', 'error')
       }
-    } catch { showToast('Erreur réseau.', 'error') }
+    } catch { showToast('Erreur r├®seau.', 'error') }
   }
 
 
@@ -1150,7 +1150,7 @@ export default function AgentDashboardPage() {
       })
       if (res.ok) {
         const data = await res.json()
-        showToast(data.message || 'Action réussie !')
+        showToast(data.message || 'Action r├®ussie !')
         if (action === 'verify') {
           setAgentCitizens(prev => prev.filter(c => c.id !== citizenId))
           if (selectedCitizen?.id === citizenId) setSelectedCitizen(null)
@@ -1162,7 +1162,7 @@ export default function AgentDashboardPage() {
         const err = await res.json()
         showToast(err.error || 'Erreur.', 'error')
       }
-    } catch { showToast('Erreur réseau.', 'error') }
+    } catch { showToast('Erreur r├®seau.', 'error') }
   }
 
   async function fetchReclamations() {
@@ -1242,25 +1242,25 @@ export default function AgentDashboardPage() {
     }
 
     const m = L.map(mapRef.current).setView([36.8467, 11.1047], 13)
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(m)
-    const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri', maxZoom: 19 })
-    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: '© OpenTopoMap', maxZoom: 17 })
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '┬® OpenStreetMap contributors', maxZoom: 19 }).addTo(m)
+    const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '┬® Esri', maxZoom: 19 })
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: '┬® OpenTopoMap', maxZoom: 17 })
     markersLayer.current = L.layerGroup().addTo(m)
     L.control.layers(
-      { '🗺️ OpenStreetMap': osm, '🛰️ Satellite (Esri)': sat, '🏔️ Topographique (WMS)': topo },
-      { '📍 Signalements': markersLayer.current },
+      { '­ƒù║´©Å OpenStreetMap': osm, '­ƒø░´©Å Satellite (Esri)': sat, '­ƒÅö´©Å Topographique (WMS)': topo },
+      { '­ƒôì Signalements': markersLayer.current },
       { position: 'topright', collapsed: false }
     ).addTo(m)
     const legend = L.control({ position: 'bottomleft' })
     legend.onAdd = function () {
       const div = L.DomUtil.create('div')
       div.style.cssText = 'background:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:12px;min-width:170px;'
-      div.innerHTML = `<div style="font-weight:700;margin-bottom:6px;color:#1a3a5c;border-bottom:1px solid #eee;padding-bottom:4px;">📋 Légende</div>
+      div.innerHTML = `<div style="font-weight:700;margin-bottom:6px;color:#1a3a5c;border-bottom:1px solid #eee;padding-bottom:4px;">­ƒôï L├®gende</div>
         <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Statut des signalements</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#e65100;display:inline-block;"></span> En attente</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> Résolu</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejeté</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> R├®solu</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejet├®</div>
         <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Couches SIG (3 couches)</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:18px;height:10px;background:#e3f2fd;border:1px solid #90caf9;display:inline-block;border-radius:2px;"></span> OSM Standard</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:18px;height:10px;background:#795548;border:1px solid #5d4037;display:inline-block;border-radius:2px;"></span> Satellite Esri</div>
@@ -1306,9 +1306,9 @@ export default function AgentDashboardPage() {
       const prioColor = pc[r.priority] || '#1565c0'
       mk.bindPopup(`<div style="min-width:210px;font-size:13px;"><strong style="color:#1a3a5c;">${r.title}</strong><br>
         <span style="color:#888;font-size:11px;">${cat.label}</span><br>
-        <span style="font-size:11px;">👤 ${r.citizen_name || '—'}</span><br>
-        <span style="font-size:11px;">📅 ${formatDate(r.created_at)}</span><br>
-        <span style="font-size:11px;">🏢 ${r.service_responsable || '—'}</span><br>
+        <span style="font-size:11px;">­ƒæñ ${r.citizen_name || 'ÔÇö'}</span><br>
+        <span style="font-size:11px;">­ƒôà ${formatDate(r.created_at)}</span><br>
+        <span style="font-size:11px;">­ƒÅó ${r.service_responsable || 'ÔÇö'}</span><br>
         <div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap;">
           <span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44;">${STATUS[r.status]?.label || r.status}</span>
           <span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}33;">${prio.label}</span>
@@ -1332,11 +1332,11 @@ export default function AgentDashboardPage() {
       })
       if (res.ok) { 
         setAllRecs(p => p.map(r => r.id === id ? { ...r, status: newStatus } : r)); 
-        showToast(`Statut mis à jour → ${STATUS[newStatus]?.label || newStatus}`); 
+        showToast(`Statut mis ├á jour ÔåÆ ${STATUS[newStatus]?.label || newStatus}`); 
         cb(true) 
       }
-      else { showToast('Erreur lors de la mise à jour.', 'error'); cb(false) }
-    } catch { showToast('Erreur réseau.', 'error'); cb(false) }
+      else { showToast('Erreur lors de la mise ├á jour.', 'error'); cb(false) }
+    } catch { showToast('Erreur r├®seau.', 'error'); cb(false) }
   }
 
   async function deleteReclamation(id: number) {
@@ -1347,12 +1347,12 @@ export default function AgentDashboardPage() {
         headers: { Authorization: `Bearer ${access}` }
       })
       if (res.ok) {
-        showToast('Signalement supprimé !')
+        showToast('Signalement supprim├® !')
         setAllRecs(prev => prev.filter(r => r.id !== id))
       } else {
-        showToast('Action non autorisée ou erreur technique.', 'error')
+        showToast('Action non autoris├®e ou erreur technique.', 'error')
       }
-    } catch { showToast('Erreur réseau.', 'error') }
+    } catch { showToast('Erreur r├®seau.', 'error') }
   }
 
   async function saveDetailStatus() {
@@ -1363,15 +1363,15 @@ export default function AgentDashboardPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
         body: JSON.stringify({ status: detailStatus }),
       })
-      if (res.ok) { setAllRecs(p => p.map(r => r.id === detailRec.id ? { ...r, status: detailStatus } : r)); showToast('Statut enregistré !'); setDetailRec(null) }
+      if (res.ok) { setAllRecs(p => p.map(r => r.id === detailRec.id ? { ...r, status: detailStatus } : r)); showToast('Statut enregistr├® !'); setDetailRec(null) }
       else showToast('Erreur.', 'error')
-    } catch { showToast('Erreur réseau.', 'error') }
+    } catch { showToast('Erreur r├®seau.', 'error') }
     finally { setDetailSaving(false) }
   }
 
   async function saveReclassify() {
     if (!detailRec) return
-    if (!reClsCat && !reClsPrio) { showToast('Choisissez au moins catégorie ou priorité.', 'error'); return }
+    if (!reClsCat && !reClsPrio) { showToast('Choisissez au moins cat├®gorie ou priorit├®.', 'error'); return }
     setReClsSaving(true)
     try {
       const body: Record<string, string> = {}
@@ -1388,7 +1388,7 @@ export default function AgentDashboardPage() {
         ? { ...r, category: updated.category, priority: updated.priority, service_responsable: updated.service_responsable }
         : r))
       setDetailRec(prev => prev ? { ...prev, category: updated.category, priority: updated.priority, service_responsable: updated.service_responsable } : null)
-      showToast('Reclassification enregistrée !')
+      showToast('Reclassification enregistr├®e !')
       setReClsCat(''); setReClsPrio('')
     } catch { showToast('Erreur lors de la reclassification.', 'error') }
     finally { setReClsSaving(false) }
@@ -1404,27 +1404,27 @@ export default function AgentDashboardPage() {
 
   return (
     <div className="agent-page">
-      {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
+      {/* Inject styles synchronously on first render ÔÇö avoids flash before useEffect fires */}
       <style>{CSS}</style>
       <div className="ag-topbar">
-        <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
+        <div><i className="fas fa-map-marker-alt me-1"></i> Commune de K├®libia ÔÇö Gouvernorat de Nabeul</div>
         <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 296 239</a><a href="#"><i className="fas fa-envelope me-1"></i>webmaster.commune-kelibia@topnet.tn</a></div>
       </div>
       <nav className="ag-navbar">
         <a className="ag-brand" href="#">
           <div className="ag-logo"><i className="fas fa-city"></i></div>
-          <div className="ag-title"><span className="main">بلدية قليبية — Commune de Kélibia</span><span className="sub">Espace Agent — Kelibia Smart City</span></div>
+          <div className="ag-title"><span className="main">Ï¿┘äÏ»┘èÏ® ┘é┘ä┘èÏ¿┘èÏ® ÔÇö Commune de K├®libia</span><span className="sub">Espace Agent ÔÇö Kelibia Smart City</span></div>
         </a>
         <div className="ag-actions">
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
-          <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
+          <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> Ï╣Ï▒Ï¿┘è</button>
           <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
           <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i><span className="logout-text ms-1"> {t('logout')}</span></button>
         </div>
       </nav>
       <div className="ag-hero">
         <div>
-          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
+          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} ÔÇö <strong>{user?.first_name || '...'}</strong></div>
           <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
         </div>
         <div className="d-flex align-items-center gap-2 ag-hero-right">
@@ -1446,7 +1446,7 @@ export default function AgentDashboardPage() {
             <i className="fas fa-user-circle"></i> {t('nav_profile')}
           </a>
 
-          {/* ── Visible to ALL agents ── */}
+          {/* ÔöÇÔöÇ Visible to ALL agents ÔöÇÔöÇ */}
           <div className="ag-divider"></div>
           <div className="ag-sec-title">{t('nav_agent_space')}</div>
           <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
@@ -1469,11 +1469,11 @@ export default function AgentDashboardPage() {
             <i className="fas fa-robot"></i> {t('nav_stats_ia')}
           </a>
           <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
-            <i className="fas fa-user-check"></i> Vérification Citoyens
+            <i className="fas fa-user-check"></i> V├®rification Citoyens
             {agentCitizens.length > 0 && <span className="ag-badge">{agentCitizens.length}</span>}
           </a>
 
-          {/* ── Supervisor / Admin only ── */}
+          {/* ÔöÇÔöÇ Supervisor / Admin only ÔöÇÔöÇ */}
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
             <>
               <div className="ag-divider"></div>
@@ -1495,10 +1495,10 @@ export default function AgentDashboardPage() {
                 <i className="fas fa-comments"></i> {t('nav_forum_moderation')}
               </a>
               <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
-                <i className="fas fa-newspaper"></i> {lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}
+                <i className="fas fa-newspaper"></i> {lang === 'ar' ? 'ÏÑÏ»ÏºÏ▒Ï® Ïº┘äÏúÏ«Ï¿ÏºÏ▒' : 'G├®rer Actualit├®s'}
               </a>
               <div className="ag-divider"></div>
-              <div className="ag-sec-title">Système</div>
+              <div className="ag-sec-title">Syst├¿me</div>
               <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
                 <i className="fas fa-cogs"></i> Configuration
               </a>
@@ -1512,14 +1512,14 @@ export default function AgentDashboardPage() {
           <>
           {activeTab === 'dashboard' ? (
             <>
-              {/* Stats grid — CSS handles desktop (6-col) vs mobile (3-col) automatically */}
+              {/* Stats grid ÔÇö CSS handles desktop (6-col) vs mobile (3-col) automatically */}
               <div className="ag-stats-grid">
                 {[
                   { val: total,    lbl: t('total_reclamations_short'), chipLabel: 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check',   onClick: undefined },
                   { val: pending,  lbl: t('total_pending'),            chipLabel: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock',        onClick: undefined },
                   { val: inprog,   lbl: t('total_in_progress'),        chipLabel: 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools',        onClick: undefined },
-                  { val: resolved, lbl: t('total_resolved'),           chipLabel: 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
-                  { val: rejected, lbl: t('total_rejected'),           chipLabel: 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
+                  { val: resolved, lbl: t('total_resolved'),           chipLabel: 'R├®solus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
+                  { val: rejected, lbl: t('total_rejected'),           chipLabel: 'Rejet├®s',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
                   { val: dupCount, lbl: t('total_duplicates'),         chipLabel: 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
                     onClick: () => setShowDupPanel(p => !p) },
                 ].map((s, i) => (
@@ -1528,7 +1528,7 @@ export default function AgentDashboardPage() {
                       <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
                       <span className="chip" style={{ color: s.color }}>{s.chipLabel}</span>
                     </div>
-                    <div className="val">{loading ? '—' : s.val}</div>
+                    <div className="val">{loading ? 'ÔÇö' : s.val}</div>
                     <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
                   </div>
                 ))}
@@ -1547,7 +1547,7 @@ export default function AgentDashboardPage() {
                           <div style={{ fontSize: '.78rem', color: '#6a1b9a', fontWeight: 700, marginBottom: 8 }}><i className="fas fa-copy me-1"></i>{grp.length} {t('similar_reports')}</div>
                           {grp.map((r: Reclamation) => (
                             <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #ede7f6', fontSize: '.8rem' }}>
-                              <span><strong>#{r.id}</strong> — {r.title}</span><span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
+                              <span><strong>#{r.id}</strong> ÔÇö {r.title}</span><span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
                             </div>
                           ))}
                         </div>
@@ -1571,7 +1571,7 @@ export default function AgentDashboardPage() {
                   <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} /></div>
                   <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="">{t('all_statuses')}</option><option value="pending">{t('status_pending')}</option><option value="in_progress">{t('status_in_progress')}</option><option value="resolved">{t('status_resolved')}</option><option value="rejected">{t('status_rejected')}</option></select>
                   <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}><option value="">{t('all_categories')}</option><option value="lighting">{t('lighting')}</option><option value="trash">{t('trash')}</option><option value="roads">{t('roads')}</option><option value="noise">{t('noise')}</option><option value="other">{t('other')}</option></select>
-                  <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">{t('all_priorities')}</option><option value="urgente">🔴 {t('urgent')}</option><option value="normale">🔵 {t('normal')}</option><option value="faible">🟣 {t('low')}</option></select>
+                  <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">{t('all_priorities')}</option><option value="urgente">­ƒö┤ {t('urgent')}</option><option value="normale">­ƒöÁ {t('normal')}</option><option value="faible">­ƒƒú {t('low')}</option></select>
                   <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> {t('urgent_only')}</button>
                   <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} {t('results_count')}</span>
                 </div>
@@ -1586,7 +1586,7 @@ export default function AgentDashboardPage() {
                         {pageRecs.map(r => {
                           const cat = CAT[r.category] || CAT.other
                           const prio = PRIORITY[r.priority] || PRIORITY.normale
-                          const svc = r.service_responsable || '—'
+                          const svc = r.service_responsable || 'ÔÇö'
                           return (
                             <tr key={r.id}>
                               <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{r.id}</td>
@@ -1594,31 +1594,31 @@ export default function AgentDashboardPage() {
                                  <div style={{ fontWeight: 600, color: '#1a1a2e', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
                                  <div style={{ fontSize: '.7rem', color: '#888', marginTop: 1 }}>
                                    {r.agent_name ? (
-                                      <span className="text-primary fw-bold"><i className="fas fa-id-badge me-1"></i>Assigné à: {r.agent_name}</span>
+                                      <span className="text-primary fw-bold"><i className="fas fa-id-badge me-1"></i>Assign├® ├á: {r.agent_name}</span>
                                    ) : (
-                                      <span className="text-muted italic"><i className="fas fa-user-clock me-1"></i>Non assigné</span>
+                                      <span className="text-muted italic"><i className="fas fa-user-clock me-1"></i>Non assign├®</span>
                                    )}
                                  </div>
                                </td>
-                              <td style={{ fontSize: '.8rem', color: '#444' }}>{r.citizen_name || '—'}</td>
+                              <td style={{ fontSize: '.8rem', color: '#444' }}>{r.citizen_name || 'ÔÇö'}</td>
                               <td><span className={`cat-badge ${cat.cls}`}>{cat.label}</span></td>
                               <td><span className={`priority-badge ${prio.cls}`}>{prio.label}</span></td>
                               <td>{(() => {
                                 const cc = r.confidence?.category
                                 const v = cc !== undefined ? cc : undefined
-                                if (v === undefined) return <span className="conf-badge conf-med">🤖 —</span>
-                                if (v >= 0.80) return <span className="conf-badge conf-high">🤖 {Math.round(v*100)}%</span>
-                                if (v >= 0.60) return <span className="conf-badge conf-med">⚠️ {Math.round(v*100)}%</span>
-                                return <span className="conf-badge conf-low">❌ {Math.round(v*100)}%</span>
+                                if (v === undefined) return <span className="conf-badge conf-med">­ƒñû ÔÇö</span>
+                                if (v >= 0.80) return <span className="conf-badge conf-high">­ƒñû {Math.round(v*100)}%</span>
+                                if (v >= 0.60) return <span className="conf-badge conf-med">ÔÜá´©Å {Math.round(v*100)}%</span>
+                                return <span className="conf-badge conf-low">ÔØî {Math.round(v*100)}%</span>
                               })()}</td>
                               <td><span className="service-badge" title={svc}>{svc}</span></td>
                               <td><QSSelect rec={r} onUpdate={quickUpdateStatus} /></td>
                               <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(r.created_at)}</td>
                               <td>
                                 <div className="d-flex gap-1">
-                                  <button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button>
+                                  <button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir d├®tail"><i className="fas fa-eye"></i></button>
                                   {(user?.is_superuser || user?.is_staff || user?.user_type === 'supervisor') && (
-                                    <button className="ag-action-btn text-danger" onClick={() => deleteReclamation(r.id)} title="Supprimer définitivement"><i className="fas fa-trash"></i></button>
+                                    <button className="ag-action-btn text-danger" onClick={() => deleteReclamation(r.id)} title="Supprimer d├®finitivement"><i className="fas fa-trash"></i></button>
                                   )}
                                 </div>
                               </td>
@@ -1629,7 +1629,7 @@ export default function AgentDashboardPage() {
                     </table>
                     {totalPages > 1 && (
                       <div className="ag-pag-bar">
-                        <span>Page {currentPage} / {totalPages} — {filteredRecs.length} {t('signalements_short')}</span>
+                        <span>Page {currentPage} / {totalPages} ÔÇö {filteredRecs.length} {t('signalements_short')}</span>
                         <div className="d-flex gap-2">
                           <button className="ag-page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><i className="fas fa-chevron-left"></i></button>
                           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const p = Math.max(1, currentPage - 2) + i; return p > totalPages ? null : <button key={p} className={`ag-page-btn${p === currentPage ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button> })}
@@ -1743,14 +1743,14 @@ export default function AgentDashboardPage() {
                                   <i className={`fas ${u.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
                                 </button>
                                 {u.user_type === 'citizen' && (
-                                  <button className="btn btn-sm btn-outline-info" title={t('promote_agent')} onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privilèges de modération.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
+                                  <button className="btn btn-sm btn-outline-info" title={t('promote_agent')} onClick={(e) => { e.stopPropagation(); if(window.confirm(`├ètes-vous s├╗r de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privil├¿ges de mod├®ration.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
                                 )}
                                 {user?.is_superuser && u.user_type !== 'supervisor' && (
-                                  <button className="btn btn-sm btn-outline-warning" title={t('promote_supervisor')} onClick={(e) => { e.stopPropagation(); if(window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Superviseur ? Il aura des accès administratifs complets.`)) handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
+                                  <button className="btn btn-sm btn-outline-warning" title={t('promote_supervisor')} onClick={(e) => { e.stopPropagation(); if(window.confirm(`├ètes-vous s├╗r de vouloir promouvoir "${u.full_name}" en Superviseur ? Il aura des acc├¿s administratifs complets.`)) handleToggleUserStatus(u.id, 'promote_to_supervisor') }}><i className="fas fa-crown"></i></button>
                                 )}
                                 {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
                                   <button className="btn btn-sm btn-outline-secondary" title={t('demote_citizen')}
-                                    onClick={(e) => { e.stopPropagation(); if(window.confirm(`Rétrograder "${u.full_name}" en Citoyen ? Il perdra ses droits d'agent.`)) handleToggleUserStatus(u.id, 'demote_to_citizen') }}>
+                                    onClick={(e) => { e.stopPropagation(); if(window.confirm(`R├®trograder "${u.full_name}" en Citoyen ? Il perdra ses droits d'agent.`)) handleToggleUserStatus(u.id, 'demote_to_citizen') }}>
                                     <i className="fas fa-user-minus"></i>
                                   </button>
                                 )}
@@ -1758,7 +1758,7 @@ export default function AgentDashboardPage() {
                                   <button className="btn btn-sm btn-outline-info" title={t('reset_pwd')}
                                     onClick={async (e) => {
                                       e.stopPropagation()
-                                      if (!window.confirm(`Générer un nouveau mot de passe pour "${u.full_name}" ?`)) return
+                                      if (!window.confirm(`G├®n├®rer un nouveau mot de passe pour "${u.full_name}" ?`)) return
                                       try {
                                         const res = await fetch('/api/accounts/verify-citizens/', {
                                           method: 'POST',
@@ -1768,7 +1768,7 @@ export default function AgentDashboardPage() {
                                         const data = await res.json()
                                         if (res.ok) setResetPwdResult({ name: u.full_name, password: data.new_password })
                                         else showToast(data.error || 'Erreur', 'error')
-                                      } catch { showToast('Erreur réseau', 'error') }
+                                      } catch { showToast('Erreur r├®seau', 'error') }
                                     }}>
                                     <i className="fas fa-key"></i>
                                   </button>
@@ -1800,15 +1800,15 @@ export default function AgentDashboardPage() {
                   {loadingServicesTab ? (
                     <div className="text-center p-5"><div className="spinner-border text-primary"></div></div>
                   ) : allServices.length === 0 ? (
-                    <div className="text-center p-5 text-muted"><i className="fas fa-file-invoice fa-3x mb-3 opacity-25"></i><p>Aucun service configuré.</p></div>
+                    <div className="text-center p-5 text-muted"><i className="fas fa-file-invoice fa-3x mb-3 opacity-25"></i><p>Aucun service configur├®.</p></div>
                   ) : (
                     <div style={{ overflowX: 'auto' }}>
                       <table className="ag-table">
                         <thead>
                           <tr>
                             <th>Service</th>
-                            <th>Catégorie</th>
-                            <th>Délai</th>
+                            <th>Cat├®gorie</th>
+                            <th>D├®lai</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -1820,7 +1820,7 @@ export default function AgentDashboardPage() {
                                 <div className="text-muted" style={{ fontSize: '11px' }}>{s.name_ar}</div>
                               </td>
                               <td><span className="badge bg-light text-dark border">{s.category_name}</span></td>
-                              <td style={{ fontSize: '12px' }}>{s.processing_time || '—'}</td>
+                              <td style={{ fontSize: '12px' }}>{s.processing_time || 'ÔÇö'}</td>
                               <td>
                                 <div className="d-flex gap-2">
                                   <button className="btn btn-sm btn-outline-primary" title="Modifier" onClick={() => { 
@@ -1840,11 +1840,11 @@ export default function AgentDashboardPage() {
                   
                   {/* Summary Section below table */}
                   <div className="p-4 bg-light border-top">
-                     <h6 className="fw-bold mb-3"><i className="fas fa-chart-line me-2"></i>Résumé des Demandes Actives</h6>
+                     <h6 className="fw-bold mb-3"><i className="fas fa-chart-line me-2"></i>R├®sum├® des Demandes Actives</h6>
                      <div className="row g-3">
                         <div className="col-md-4">
                            <div className="p-3 border rounded bg-white shadow-sm" style={{ borderLeft: '4px solid #1a237e' }}>
-                              <div className="text-muted small fw-bold">RÉSIDENCE</div>
+                              <div className="text-muted small fw-bold">R├ëSIDENCE</div>
                               <div className="h4 mt-2 mb-0 text-primary">{servicesSummary?.attestation_residence || 0} en attente</div>
                            </div>
                         </div>
@@ -1899,7 +1899,7 @@ export default function AgentDashboardPage() {
                     </div>
                     <div className="d-flex flex-wrap gap-2">
                       {Object.entries(typeCounts).map(([type, count]) => {
-                        const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
+                        const typeLabels: Record<string, string> = { residence: `­ƒÅá ${t('residence_cert')}`, livret: `­ƒôÿ ${t('nav_managed_users')}`, naissance: `­ƒæÂ ${t('birth_cert')}`, mariage: `­ƒÆì ${t('mariage_cert')}`, deces: `ÔÜ░´©Å ${t('deces_cert')}`, transfert: `­ƒÜæ ${lang === 'ar' ? '┘å┘é┘ä Ï¼Ï½Ï®' : 'Transfert Corps'}`, legalisation: `Ô£Æ´©Å ${lang === 'ar' ? 'Ï¬Ï╣Ï▒┘è┘ü Ï¿Ïº┘äÏÑ┘àÏÂÏºÏí' : 'L├®galisation'}`, goudronnage: `­ƒøñ´©Å ${lang === 'ar' ? 'Ï¬Ï╣Ï¿┘èÏ» ÏÀÏ▒┘è┘é' : 'Goudronnage'}`, bien: `­ƒÅó ${lang === 'ar' ? 'Ï¬Ï│Ï¼┘è┘ä Ï╣┘éÏºÏ▒' : 'Bien Immo'}`, mutation: `­ƒöä ${lang === 'ar' ? 'Ï¬Ï¡┘è┘è┘å ┘à┘ä┘â┘èÏ®' : 'Mutation'}`, vocation: `­ƒÅù´©Å ${lang === 'ar' ? 'Ï¬Ï║┘è┘èÏ▒ ÏÁÏ¿Ï║Ï®' : 'Vocation'}` }
                         return <span key={type} style={{ background: '#e8eaf6', color: '#283593', border: '1px solid #c5cae9', borderRadius: 12, padding: '2px 10px', fontSize: '.75rem', fontWeight: 600 }}>{typeLabels[type] || type} ({count})</span>
                       })}
                     </div>
@@ -1915,24 +1915,24 @@ export default function AgentDashboardPage() {
                 </div>
                 <select className="ag-filter-select" value={demandeTypeFilter} onChange={e => setDemandeTypeFilter(e.target.value)}>
                   <option value="">{t('demande_all_types')}</option>
-                  <option value="residence">🏠 {t('residence_cert')}</option>
-                  <option value="livret">📘 {t('nav_managed_users')}</option>
-                  <option value="naissance">👶 {t('birth_cert')}</option>
-                  <option value="mariage">💍 {t('mariage_cert')}</option>
-                  <option value="deces">⚰️ {t('deces_cert')}</option>
-                  <option value="transfert">🚑 {lang === 'ar' ? 'رخصة نقل جثة' : 'Transfert de Corps'}</option>
-                  <option value="legalisation">✒️ {lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation Signature'}</option>
-                  <option value="goudronnage">🛤️ {lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage Street'}</option>
-                  <option value="bien">🏢 {lang === 'ar' ? 'تسجيل عقار' : 'Bien Immobilier'}</option>
-                  <option value="mutation">🔄 {lang === 'ar' ? 'تحيين ملكية' : 'Mutation Propriété'}</option>
-                  <option value="vocation">🏗️ {lang === 'ar' ? 'تغيير صبغة' : 'Vocation Change'}</option>
+                  <option value="residence">­ƒÅá {t('residence_cert')}</option>
+                  <option value="livret">­ƒôÿ {t('nav_managed_users')}</option>
+                  <option value="naissance">­ƒæÂ {t('birth_cert')}</option>
+                  <option value="mariage">­ƒÆì {t('mariage_cert')}</option>
+                  <option value="deces">ÔÜ░´©Å {t('deces_cert')}</option>
+                  <option value="transfert">­ƒÜæ {lang === 'ar' ? 'Ï▒Ï«ÏÁÏ® ┘å┘é┘ä Ï¼Ï½Ï®' : 'Transfert de Corps'}</option>
+                  <option value="legalisation">Ô£Æ´©Å {lang === 'ar' ? 'Ï¬Ï╣Ï▒┘è┘ü Ï¿Ïº┘äÏÑ┘àÏÂÏºÏí' : 'L├®galisation Signature'}</option>
+                  <option value="goudronnage">­ƒøñ´©Å {lang === 'ar' ? 'Ï¬Ï╣Ï¿┘èÏ» ÏÀÏ▒┘è┘é' : 'Goudronnage Street'}</option>
+                  <option value="bien">­ƒÅó {lang === 'ar' ? 'Ï¬Ï│Ï¼┘è┘ä Ï╣┘éÏºÏ▒' : 'Bien Immobilier'}</option>
+                  <option value="mutation">­ƒöä {lang === 'ar' ? 'Ï¬Ï¡┘è┘è┘å ┘à┘ä┘â┘èÏ®' : 'Mutation Propri├®t├®'}</option>
+                  <option value="vocation">­ƒÅù´©Å {lang === 'ar' ? 'Ï¬Ï║┘è┘èÏ▒ ÏÁÏ¿Ï║Ï®' : 'Vocation Change'}</option>
                 </select>
                 <select className="ag-filter-select" value={demandeStatusFilter} onChange={e => setDemandeStatusFilter(e.target.value)}>
                   <option value="">{t('demande_all_statuses')}</option>
-                  <option value="pending">⏳ {t('status_pending')}</option>
-                  <option value="in_progress">🔄 {t('status_in_progress')}</option>
-                  <option value="approved">✅ {t('status_resolved')}</option>
-                  <option value="rejected">❌ {t('status_rejected')}</option>
+                  <option value="pending">ÔÅ│ {t('status_pending')}</option>
+                  <option value="in_progress">­ƒöä {t('status_in_progress')}</option>
+                  <option value="approved">Ô£à {t('status_resolved')}</option>
+                  <option value="rejected">ÔØî {t('status_rejected')}</option>
                 </select>
                 {(demandeSearchQ || demandeTypeFilter || demandeStatusFilter) && (
                   <button className="ag-filter-btn" onClick={() => { setDemandeSearchQ(''); setDemandeTypeFilter(''); setDemandeStatusFilter('') }}>
@@ -1945,7 +1945,7 @@ export default function AgentDashboardPage() {
                 <div className="ag-spinner-wrap"><div className="spinner-border" style={{ color: '#006d94' }} role="status"></div><div className="mt-2" style={{ fontSize: '.82rem', color: '#888' }}>{t('loading')}</div></div>
               ) : (() => {
                 const q = demandeSearchQ.toLowerCase()
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
+                const typeLabelsMap: Record<string, string> = { residence: `­ƒÅá ${t('residence_cert')}`, livret: `­ƒôÿ ${t('nav_managed_users')}`, naissance: `­ƒæÂ ${t('birth_cert')}`, mariage: `­ƒÆì ${t('mariage_cert')}`, deces: `ÔÜ░´©Å ${t('deces_cert')}`, transfert: `­ƒÜæ ${lang === 'ar' ? '┘å┘é┘ä Ï¼Ï½Ï®' : 'Transfert Corps'}`, legalisation: `Ô£Æ´©Å ${lang === 'ar' ? 'Ï¬Ï╣Ï▒┘è┘ü Ï¿Ïº┘äÏÑ┘àÏÂÏºÏí' : 'L├®galisation'}`, goudronnage: `­ƒøñ´©Å ${lang === 'ar' ? 'Ï¬Ï╣Ï¿┘èÏ» ÏÀÏ▒┘è┘é' : 'Goudronnage'}`, bien: `­ƒÅó ${lang === 'ar' ? 'Ï¬Ï│Ï¼┘è┘ä Ï╣┘éÏºÏ▒' : 'Bien Immo'}`, mutation: `­ƒöä ${lang === 'ar' ? 'Ï¬Ï¡┘è┘è┘å ┘à┘ä┘â┘èÏ®' : 'Mutation'}`, vocation: `­ƒÅù´©Å ${lang === 'ar' ? 'Ï¬Ï║┘è┘èÏ▒ ÏÁÏ¿Ï║Ï®' : 'Vocation'}` }
                 const filtered = allDemandes.filter((d: any) => {
                   if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
                   if (demandeStatusFilter && d.status !== demandeStatusFilter) return false
@@ -1982,15 +1982,15 @@ export default function AgentDashboardPage() {
                           const st = stMap[d.status] || { cls: 'status-pending', icon: 'fa-question', label: d.status }
                           // Build a short summary of key fields
                           let summary = ''
-                          if (d.type === 'residence') summary = d.adresse ? `📍 ${String(d.adresse).slice(0, 40)}` : ''
-                          else if (d.type === 'livret') summary = d.nom_chef ? `👤 ${d.nom_chef} ${d.prenom_chef}` : ''
-                          else if (d.type === 'naissance') summary = d.prenom_fr ? `👶 ${d.prenom_fr} ${d.nom_fr}` : ''
-                          else if (d.type === 'transfert') summary = d.nom_defunt ? `🚑 ${d.nom_defunt} → ${d.lieu_inhumation}` : ''
-                          else if (d.type === 'legalisation') summary = d.type_document ? `✒️ ${d.type_document} (${d.nombre_copies} ex.)` : ''
-                          else if (d.type === 'goudronnage') summary = d.localisation_rue ? `🛤️ ${d.localisation_rue}` : ''
-                          else if (d.type === 'bien') summary = d.type_bien ? `🏢 ${d.type_bien} (${d.surface} m²)` : ''
-                          else if (d.type === 'mutation') summary = d.type_mutation ? `🔄 ${d.type_mutation.toUpperCase()}: ${d.nouveau_proprio}` : ''
-                          else if (d.type === 'vocation') summary = d.vocation_nouvelle ? `🏗️ ${d.vocation_actuelle} → ${d.vocation_nouvelle}` : ''
+                          if (d.type === 'residence') summary = d.adresse ? `­ƒôì ${String(d.adresse).slice(0, 40)}` : ''
+                          else if (d.type === 'livret') summary = d.nom_chef ? `­ƒæñ ${d.nom_chef} ${d.prenom_chef}` : ''
+                          else if (d.type === 'naissance') summary = d.prenom_fr ? `­ƒæÂ ${d.prenom_fr} ${d.nom_fr}` : ''
+                          else if (d.type === 'transfert') summary = d.nom_defunt ? `­ƒÜæ ${d.nom_defunt} ÔåÆ ${d.lieu_inhumation}` : ''
+                          else if (d.type === 'legalisation') summary = d.type_document ? `Ô£Æ´©Å ${d.type_document} (${d.nombre_copies} ex.)` : ''
+                          else if (d.type === 'goudronnage') summary = d.localisation_rue ? `­ƒøñ´©Å ${d.localisation_rue}` : ''
+                          else if (d.type === 'bien') summary = d.type_bien ? `­ƒÅó ${d.type_bien} (${d.surface} m┬▓)` : ''
+                          else if (d.type === 'mutation') summary = d.type_mutation ? `­ƒöä ${d.type_mutation.toUpperCase()}: ${d.nouveau_proprio}` : ''
+                          else if (d.type === 'vocation') summary = d.vocation_nouvelle ? `­ƒÅù´©Å ${d.vocation_actuelle} ÔåÆ ${d.vocation_nouvelle}` : ''
                           return (
                             <tr key={`${d.type}-${d.id}`}>
                               <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{d.id}</td>
@@ -2005,15 +2005,15 @@ export default function AgentDashboardPage() {
                                 <div style={{ fontSize: '.72rem', color: '#888' }}>{d.citizen_email}</div>
                               </td>
                               <td style={{ fontSize: '.8rem', color: '#555', maxWidth: 160 }}>
-                                <span className="text-truncate d-block" title={summary}>{summary || '—'}</span>
+                                <span className="text-truncate d-block" title={summary}>{summary || 'ÔÇö'}</span>
                               </td>
                               <td>
                                 <span className={`status-badge ${st.cls}`}><i className={`fas ${st.icon} me-1`}></i>{st.label}</span>
                               </td>
                               <td>
                                 {d.is_paid
-                                  ? <span className="badge" style={{ background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', fontSize: '.7rem' }}>💳 {t('paid_label')}</span>
-                                  : <span className="badge" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>⏳ {t('status_pending')}</span>}
+                                  ? <span className="badge" style={{ background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', fontSize: '.7rem' }}>­ƒÆ│ {t('paid_label')}</span>
+                                  : <span className="badge" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>ÔÅ│ {t('status_pending')}</span>}
                               </td>
                               <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(d.created_at)}</td>
                               <td>
@@ -2030,15 +2030,15 @@ export default function AgentDashboardPage() {
                 )
               })()}
 
-              {/* ── Detail Modal */}
+              {/* ÔöÇÔöÇ Detail Modal */}
               {demandeDetail && (() => {
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
+                const typeLabelsMap: Record<string, string> = { residence: `­ƒÅá ${t('residence_cert')}`, livret: `­ƒôÿ ${t('nav_managed_users')}`, naissance: `­ƒæÂ ${t('birth_cert')}`, mariage: `­ƒÆì ${t('mariage_cert')}`, deces: `ÔÜ░´©Å ${t('deces_cert')}`, transfert: `­ƒÜæ ${lang === 'ar' ? '┘å┘é┘ä Ï¼Ï½Ï®' : 'Transfert Corps'}`, legalisation: `Ô£Æ´©Å ${lang === 'ar' ? 'Ï¬Ï╣Ï▒┘è┘ü Ï¿Ïº┘äÏÑ┘àÏÂÏºÏí' : 'L├®galisation'}`, goudronnage: `­ƒøñ´©Å ${lang === 'ar' ? 'Ï¬Ï╣Ï¿┘èÏ» ÏÀÏ▒┘è┘é' : 'Goudronnage'}`, bien: `­ƒÅó ${lang === 'ar' ? 'Ï¬Ï│Ï¼┘è┘ä Ï╣┘éÏºÏ▒' : 'Bien Immo'}`, mutation: `­ƒöä ${lang === 'ar' ? 'Ï¬Ï¡┘è┘è┘å ┘à┘ä┘â┘èÏ®' : 'Mutation'}`, vocation: `­ƒÅù´©Å ${lang === 'ar' ? 'Ï¬Ï║┘è┘èÏ▒ ÏÁÏ¿Ï║Ï®' : 'Vocation'}` }
                 return (
                   <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 9100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                     <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
                       <div style={{ background: 'linear-gradient(90deg,#004968,#006d94)', borderRadius: '16px 16px 0 0', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}><i className="fas fa-folder-open me-2"></i>{typeLabelsMap[demandeDetail.type] || demandeDetail.type}</span>
-                        <button onClick={() => setDemandeDetail(null)} style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff', width: 30, height: 30, borderRadius: '50%', cursor: 'pointer', fontSize: '.9rem' }}>✕</button>
+                        <button onClick={() => setDemandeDetail(null)} style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff', width: 30, height: 30, borderRadius: '50%', cursor: 'pointer', fontSize: '.9rem' }}>Ô£ò</button>
                       </div>
                       <div style={{ padding: '20px 24px' }}>
                         {/* Citizen info */}
@@ -2052,7 +2052,7 @@ export default function AgentDashboardPage() {
                         {/* Type-specific details */}
                         <div className="row g-3 mb-3">
                           {demandeDetail.type === 'residence' && (<>
-                            <div className="col-12"><div className="det-label">{t('adresse_actuelle')}</div><div className="det-value">{demandeDetail.adresse || '—'}</div></div>
+                            <div className="col-12"><div className="det-label">{t('adresse_actuelle')}</div><div className="det-value">{demandeDetail.adresse || 'ÔÇö'}</div></div>
                             {demandeDetail.motif && <div className="col-12"><div className="det-label">{t('motif')}</div><div className="det-value">{demandeDetail.motif}</div></div>}
                             {demandeDetail.profession && <div className="col-6"><div className="det-label">{t('profession')}</div><div className="det-value">{demandeDetail.profession}</div></div>}
                           </>)}
@@ -2066,46 +2066,46 @@ export default function AgentDashboardPage() {
                             {demandeDetail.sexe && <div className="col-6"><div className="det-label">{t('gender')}</div><div className="det-value">{demandeDetail.sexe}</div></div>}
                           </>)}
                           {demandeDetail.type === 'transfert' && (<>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المتوفي' : 'Défunt'}</div><div className="det-value">{demandeDetail.nom_defunt}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘àÏ¬┘ê┘ü┘è' : 'D├®funt'}</div><div className="det-value">{demandeDetail.nom_defunt}</div></div>
                             <div className="col-6"><div className="det-label">{t('deces_date')}</div><div className="det-value">{demandeDetail.date_deces}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'مكان الوفاة' : 'Lieu décès'}</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الوجهة' : 'Destination'}</div><div className="det-value">{demandeDetail.lieu_inhumation}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? '┘à┘âÏº┘å Ïº┘ä┘ê┘üÏºÏ®' : 'Lieu d├®c├¿s'}</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘êÏ¼┘çÏ®' : 'Destination'}</div><div className="det-value">{demandeDetail.lieu_inhumation}</div></div>
                           </>)}
                           {demandeDetail.type === 'legalisation' && (<>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع الوثيقة' : 'Type de document'}</div><div className="det-value">{demandeDetail.type_document}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'عدد النسخ' : 'Nombre de copies'}</div><div className="det-value">{demandeDetail.nombre_copies}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? '┘å┘êÏ╣ Ïº┘ä┘êÏ½┘è┘éÏ®' : 'Type de document'}</div><div className="det-value">{demandeDetail.type_document}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ï╣Ï»Ï» Ïº┘ä┘åÏ│Ï«' : 'Nombre de copies'}</div><div className="det-value">{demandeDetail.nombre_copies}</div></div>
                             {demandeDetail.motif && <div className="col-12"><div className="det-label">{t('motif')}</div><div className="det-value">{demandeDetail.motif}</div></div>}
                           </>)}
                           {demandeDetail.type === 'goudronnage' && (<>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع المطلوب تعبيده' : 'Localisation de la rue'}</div><div className="det-value">{demandeDetail.localisation_rue}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'إحداثيات الموقع' : 'Coordonnées'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'Non spécifié'}</div></div>
-                            {demandeDetail.adresse_residence && <div className="col-6"><div className="det-label">{lang === 'ar' ? 'عنوان السكن' : 'Adresse Demandeur'}</div><div className="det-value">{demandeDetail.adresse_residence}</div></div>}
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘à┘ê┘éÏ╣ Ïº┘ä┘àÏÀ┘ä┘êÏ¿ Ï¬Ï╣Ï¿┘èÏ»┘ç' : 'Localisation de la rue'}</div><div className="det-value">{demandeDetail.localisation_rue}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'ÏÑÏ¡Ï»ÏºÏ½┘èÏºÏ¬ Ïº┘ä┘à┘ê┘éÏ╣' : 'Coordonn├®es'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'Non sp├®cifi├®'}</div></div>
+                            {demandeDetail.adresse_residence && <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ï╣┘å┘êÏº┘å Ïº┘äÏ│┘â┘å' : 'Adresse Demandeur'}</div><div className="det-value">{demandeDetail.adresse_residence}</div></div>}
                           </>)}
                           {demandeDetail.type === 'bien' && (<>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع العقار' : 'Type de bien'}</div><div className="det-value">{demandeDetail.type_bien}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المساحة' : 'Surface'}</div><div className="det-value">{demandeDetail.surface} m²</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الإحداثيات' : 'Coordonnées GPS'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'Manual'}</div></div>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'العنوان' : 'Adresse'}</div><div className="det-value">{demandeDetail.adresse}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? '┘å┘êÏ╣ Ïº┘äÏ╣┘éÏºÏ▒' : 'Type de bien'}</div><div className="det-value">{demandeDetail.type_bien}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘àÏ│ÏºÏ¡Ï®' : 'Surface'}</div><div className="det-value">{demandeDetail.surface} m┬▓</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ï▒┘é┘à Ïº┘äÏ▒Ï│┘à Ïº┘äÏ╣┘éÏºÏ▒┘è' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘äÏÑÏ¡Ï»ÏºÏ½┘èÏºÏ¬' : 'Coordonn├®es GPS'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'Manual'}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ïº┘äÏ╣┘å┘êÏº┘å' : 'Adresse'}</div><div className="det-value">{demandeDetail.adresse}</div></div>
                           </>)}
                           {demandeDetail.type === 'mutation' && (<>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع العملية' : 'Type de mutation'}</div><div className="det-value">{demandeDetail.type_mutation?.toUpperCase()}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المالك السابق' : 'Ancien propriétaire'}</div><div className="det-value">{demandeDetail.ancien_proprio}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المالك الجديد' : 'Nouveau propriétaire'}</div><div className="det-value">{demandeDetail.nouveau_proprio}</div></div>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'عنوان العقار' : 'Adresse du bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? '┘å┘êÏ╣ Ïº┘äÏ╣┘à┘ä┘èÏ®' : 'Type de mutation'}</div><div className="det-value">{demandeDetail.type_mutation?.toUpperCase()}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ï▒┘é┘à Ïº┘äÏ▒Ï│┘à Ïº┘äÏ╣┘éÏºÏ▒┘è' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘àÏº┘ä┘â Ïº┘äÏ│ÏºÏ¿┘é' : 'Ancien propri├®taire'}</div><div className="det-value">{demandeDetail.ancien_proprio}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘àÏº┘ä┘â Ïº┘äÏ¼Ï»┘èÏ»' : 'Nouveau propri├®taire'}</div><div className="det-value">{demandeDetail.nouveau_proprio}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ï╣┘å┘êÏº┘å Ïº┘äÏ╣┘éÏºÏ▒' : 'Adresse du bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘à┘ê┘éÏ╣' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'ÔÇö'}</div></div>
                           </>)}
                           {demandeDetail.type === 'vocation' && (<>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة الأصلية' : 'Vocation Actuelle'}</div><div className="det-value">{demandeDetail.vocation_actuelle?.toUpperCase()}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة المطلوبة' : 'Nouvelle Vocation'}</div><div className="det-value">{demandeDetail.vocation_nouvelle?.toUpperCase()}</div></div>
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الهدف / المبررات' : 'Justification'}</div><div className="det-value">{demandeDetail.motif}</div></div>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'العنوان' : 'Adresse Bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘äÏÁÏ¿Ï║Ï® Ïº┘äÏúÏÁ┘ä┘èÏ®' : 'Vocation Actuelle'}</div><div className="det-value">{demandeDetail.vocation_actuelle?.toUpperCase()}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ïº┘äÏÁÏ¿Ï║Ï® Ïº┘ä┘àÏÀ┘ä┘êÏ¿Ï®' : 'Nouvelle Vocation'}</div><div className="det-value">{demandeDetail.vocation_nouvelle?.toUpperCase()}</div></div>
+                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'Ï▒┘é┘à Ïº┘äÏ▒Ï│┘à Ïº┘äÏ╣┘éÏºÏ▒┘è' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘çÏ»┘ü / Ïº┘ä┘àÏ¿Ï▒Ï▒ÏºÏ¬' : 'Justification'}</div><div className="det-value">{demandeDetail.motif}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ïº┘äÏ╣┘å┘êÏº┘å' : 'Adresse Bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
+                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'Ïº┘ä┘à┘ê┘éÏ╣' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : 'ÔÇö'}</div></div>
                           </>)}
 
-                          <div className="col-6"><div className="det-label">{t('demande_payment')}</div><div className="det-value">{demandeDetail.is_paid ? `✅ ${t('paid_label')}` : `⏳ ${t('status_pending')}`}</div></div>
+                          <div className="col-6"><div className="det-label">{t('demande_payment')}</div><div className="det-value">{demandeDetail.is_paid ? `Ô£à ${t('paid_label')}` : `ÔÅ│ ${t('status_pending')}`}</div></div>
                           <div className="col-6"><div className="det-label">{t('demande_date')}</div><div className="det-value">{formatDate(demandeDetail.created_at)}</div></div>
                         </div>
 
@@ -2123,7 +2123,7 @@ export default function AgentDashboardPage() {
                         {/* Agent Assignment (Supervisor only) */}
                         {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && demandeDetail.type === 'reclamation' && (
                           <div className="mb-3">
-                            <label className="det-label mb-2"><i className="fas fa-user-tag me-1"></i>Affecter à un agent</label>
+                            <label className="det-label mb-2"><i className="fas fa-user-tag me-1"></i>Affecter ├á un agent</label>
                             <div className="d-flex gap-2">
                               <select className="form-select form-select-sm" 
                                 value={demandeDetail.agent || ''} 
@@ -2155,7 +2155,7 @@ export default function AgentDashboardPage() {
               </div>
             </div>
           ) : activeTab === 'forum' ? (
-            /* ── FORUM MANAGEMENT TAB ─────────────────────────────────── */
+            /* ÔöÇÔöÇ FORUM MANAGEMENT TAB ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#311b92,#4527a0)' }}>
                 <span><i className="fas fa-comments me-2"></i>{t('admin_forum_title')}</span>
@@ -2266,7 +2266,7 @@ export default function AgentDashboardPage() {
               })()}
             </div>
           ) : activeTab === 'evenements' ? (
-            /* ── ÉVÉNEMENTS TAB ──────────────────────────────────────── */
+            /* ÔöÇÔöÇ ├ëV├ëNEMENTS TAB ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
             <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)' }}>
                 <span><i className="fas fa-calendar-alt me-2"></i>{t('admin_events_title')}</span>
@@ -2290,7 +2290,7 @@ export default function AgentDashboardPage() {
                       { lbl: t('status_in_progress'), val: ev_inprog,   color: '#0288d1', bg: '#e1f5fe' },
                       { lbl: t('status_validated'),  val: ev_approved, color: '#2e7d32', bg: '#e8f5e9' },
                       { lbl: t('status_rejected'),    val: ev_rejected, color: '#b71c1c', bg: '#ffebee' },
-                      { lbl: `⚠️ ${t('event_conflict')}`, val: ev_conflict, color: '#f57f17', bg: '#fff8e1' },
+                      { lbl: `ÔÜá´©Å ${t('event_conflict')}`, val: ev_conflict, color: '#f57f17', bg: '#fff8e1' },
                     ].map(s => (
                       <div key={s.lbl} className="rounded-3 px-3 py-2 d-flex align-items-center gap-2"
                         style={{ background: s.bg, border: `1px solid ${s.color}33` }}>
@@ -2361,8 +2361,8 @@ export default function AgentDashboardPage() {
                                 <div className="text-truncate" title={ev.lieu_details}>{ev.lieu_details}</div>
                               </td>
                               <td style={{ fontSize: '.78rem', whiteSpace: 'nowrap' }}>
-                                {ev.date_debut} → {ev.date_fin}<br />
-                                <span className="text-muted">{ev.heure_debut?.slice(0,5)} — {ev.heure_fin?.slice(0,5)}</span>
+                                {ev.date_debut} ÔåÆ {ev.date_fin}<br />
+                                <span className="text-muted">{ev.heure_debut?.slice(0,5)} ÔÇö {ev.heure_fin?.slice(0,5)}</span>
                               </td>
                               <td style={{ fontSize: '.8rem' }}>{ev.nom_organisateur}</td>
                               <td><span className={`status-badge ${sc[ev.status] || 'bg-secondary'}`}>{ev.status_display}</span></td>
@@ -2370,10 +2370,10 @@ export default function AgentDashboardPage() {
                                 {ev.has_conflict ? (
                                   <span className="badge rounded-pill px-2" style={{ background: '#fff8e1', color: '#f57f17', border: '1px solid #ffe082', fontSize: '.7rem' }}>
                                     <i className="fas fa-exclamation-triangle me-1"></i>
-                                    {ev.conflict_with_title ? `≈ ${ev.conflict_with_title.slice(0, 20)}` : t('event_conflict_detected')}
+                                    {ev.conflict_with_title ? `Ôëê ${ev.conflict_with_title.slice(0, 20)}` : t('event_conflict_detected')}
                                   </span>
                                 ) : (
-                                  <span className="text-muted" style={{ fontSize: '.75rem' }}>—</span>
+                                  <span className="text-muted" style={{ fontSize: '.75rem' }}>ÔÇö</span>
                                 )}
                               </td>
                               <td>
@@ -2391,10 +2391,10 @@ export default function AgentDashboardPage() {
               })()}
             </div>
           ) : activeTab === 'construction' ? (
-            /* ── CONSTRUCTION TAB ─────────────────────────────────────────── */
+            /* ÔöÇÔöÇ CONSTRUCTION TAB ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#e65100,#f57f17)' }}>
-                <span><i className="fas fa-hard-hat me-2"></i>Permis de Construire — Gestion des dossiers</span>
+                <span><i className="fas fa-hard-hat me-2"></i>Permis de Construire ÔÇö Gestion des dossiers</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchConstructions}>
                   <i className="fas fa-sync-alt me-1"></i>Actualiser
                 </button>
@@ -2407,8 +2407,8 @@ export default function AgentDashboardPage() {
                       { lbl: 'Total', val: constructionStats.total, color: '#1a237e', bg: '#e8eaf6' },
                       { lbl: 'En attente', val: constructionStats.pending, color: '#e65100', bg: '#fff3e0' },
                       { lbl: 'En instruction', val: constructionStats.en_cours, color: '#1565c0', bg: '#e3f2fd' },
-                      { lbl: 'Permis délivrés', val: constructionStats.permis_delivre, color: '#2e7d32', bg: '#e8f5e9' },
-                      { lbl: 'Rejetés', val: constructionStats.rejet, color: '#c62828', bg: '#ffebee' },
+                      { lbl: 'Permis d├®livr├®s', val: constructionStats.permis_delivre, color: '#2e7d32', bg: '#e8f5e9' },
+                      { lbl: 'Rejet├®s', val: constructionStats.rejet, color: '#c62828', bg: '#ffebee' },
                     ].map(s => (
                       <div className="col-6 col-md-4 col-lg-2" key={s.lbl}>
                         <div className="text-center p-3 rounded-3" style={{ background: s.bg }}>
@@ -2429,7 +2429,7 @@ export default function AgentDashboardPage() {
                   {['all','pending','en_cours_instruction','permis_delivre','rejet_definitif','changes_requested'].map(f => (
                     <button key={f} className={`btn btn-sm rounded-pill ${constructionFilter===f?'btn-warning':'btn-outline-secondary'}`}
                       onClick={() => setConstructionFilter(f)} style={{ fontSize: '.75rem' }}>
-                      {f==='all'?'Tous':f==='pending'?'En attente':f==='en_cours_instruction'?'En instruction':f==='permis_delivre'?'Permis délivré':f==='rejet_definitif'?'Rejeté':'Modif. demandées'}
+                      {f==='all'?'Tous':f==='pending'?'En attente':f==='en_cours_instruction'?'En instruction':f==='permis_delivre'?'Permis d├®livr├®':f==='rejet_definitif'?'Rejet├®':'Modif. demand├®es'}
                     </button>
                   ))}
                 </div>
@@ -2455,7 +2455,7 @@ export default function AgentDashboardPage() {
                             onClick={() => setConstructionDetail(constructionDetail?.id === c.id ? null : c)}>
                             <div className="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
                               style={{ width: 40, height: 40, background: '#fff3e0', fontSize: '1.2rem' }}>
-                              🏗️
+                              ­ƒÅù´©Å
                             </div>
                             <div className="flex-grow-1 min-w-0">
                               <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
@@ -2465,7 +2465,7 @@ export default function AgentDashboardPage() {
                               <div style={{ fontSize: '.8rem', color: '#777' }}>
                                 <span className="me-3"><i className="fas fa-tools me-1 text-warning"></i>{c.type_travaux_display}</span>
                                 <span className="me-3"><i className="fas fa-map-marker-alt me-1 text-danger"></i>{c.adresse_terrain}</span>
-                                <span><i className="fas fa-expand me-1 text-success"></i>{c.surface_construite} m² — {c.nombre_etages} étage{c.nombre_etages > 1 ? 's' : ''}</span>
+                                <span><i className="fas fa-expand me-1 text-success"></i>{c.surface_construite} m┬▓ ÔÇö {c.nombre_etages} ├®tage{c.nombre_etages > 1 ? 's' : ''}</span>
                               </div>
                             </div>
                             <i className={`fas fa-chevron-${constructionDetail?.id === c.id ? 'up' : 'down'} text-muted`}></i>
@@ -2473,7 +2473,7 @@ export default function AgentDashboardPage() {
                         )
                       })}
                     {allConstructions.filter(c => constructionFilter === 'all' || c.status === constructionFilter).length === 0 && (
-                      <div className="text-center text-muted py-4"><i className="fas fa-hard-hat fa-2x opacity-25 mb-2 d-block"></i>Aucun dossier trouvé</div>
+                      <div className="text-center text-muted py-4"><i className="fas fa-hard-hat fa-2x opacity-25 mb-2 d-block"></i>Aucun dossier trouv├®</div>
                     )}
                   </div>
                 )}
@@ -2482,35 +2482,35 @@ export default function AgentDashboardPage() {
                 {constructionDetail && (
                   <div className="mt-4 p-4 rounded-3 border" style={{ background: '#fffde7', borderColor: '#f9a825' }}>
                     <div className="d-flex align-items-center gap-2 mb-3">
-                      <span className="fw-bold fs-6">🏗️ Dossier #{constructionDetail.id} — {constructionDetail.nom_proprietaire}</span>
+                      <span className="fw-bold fs-6">­ƒÅù´©Å Dossier #{constructionDetail.id} ÔÇö {constructionDetail.nom_proprietaire}</span>
                       <span className="ms-auto badge bg-secondary rounded-pill" style={{ fontSize: '.72rem' }}>CIN: {constructionDetail.cin_proprietaire}</span>
                     </div>
                     <div className="row g-2 mb-3" style={{ fontSize: '.83rem' }}>
                       <div className="col-md-4"><strong>Type :</strong> {constructionDetail.type_travaux_display}</div>
                       <div className="col-md-4"><strong>Usage :</strong> {constructionDetail.usage_batiment_display}</div>
-                      <div className="col-md-4"><strong>Surface :</strong> {constructionDetail.surface_construite} m²</div>
-                      <div className="col-md-4"><strong>Étages :</strong> {constructionDetail.nombre_etages}</div>
-                      <div className="col-md-4"><strong>Début prévu :</strong> {constructionDetail.date_debut_prevue}</div>
-                      <div className="col-md-4"><strong>Durée :</strong> {constructionDetail.duree_travaux_mois} mois</div>
+                      <div className="col-md-4"><strong>Surface :</strong> {constructionDetail.surface_construite} m┬▓</div>
+                      <div className="col-md-4"><strong>├ëtages :</strong> {constructionDetail.nombre_etages}</div>
+                      <div className="col-md-4"><strong>D├®but pr├®vu :</strong> {constructionDetail.date_debut_prevue}</div>
+                      <div className="col-md-4"><strong>Dur├®e :</strong> {constructionDetail.duree_travaux_mois} mois</div>
                       <div className="col-md-6"><strong>Adresse :</strong> {constructionDetail.adresse_terrain}</div>
-                      <div className="col-md-6"><strong>Tél. propriétaire :</strong> {constructionDetail.telephone_proprietaire}</div>
-                      {constructionDetail.cout_estime && <div className="col-md-4"><strong>Coût estimé :</strong> {constructionDetail.cout_estime} DT</div>}
+                      <div className="col-md-6"><strong>T├®l. propri├®taire :</strong> {constructionDetail.telephone_proprietaire}</div>
+                      {constructionDetail.cout_estime && <div className="col-md-4"><strong>Co├╗t estim├® :</strong> {constructionDetail.cout_estime} DT</div>}
                       {constructionDetail.nom_entrepreneur && <div className="col-md-4"><strong>Entrepreneur :</strong> {constructionDetail.nom_entrepreneur}</div>}
                     </div>
                     {constructionDetail.commentaire_agent && (
                       <div className="mb-3 p-2 rounded-3 bg-white border" style={{ fontSize: '.83rem' }}>
-                        <strong>Commentaire précédent :</strong> {constructionDetail.commentaire_agent}
+                        <strong>Commentaire pr├®c├®dent :</strong> {constructionDetail.commentaire_agent}
                       </div>
                     )}
                     {/* Action buttons */}
                     <div className="d-flex gap-2 flex-wrap mt-2">
                       {[
-                        { s: 'en_cours_instruction', label: '🔍 Mettre en instruction', cls: 'btn-primary' },
-                        { s: 'favorable', label: '👍 Avis favorable', cls: 'btn-info text-white' },
-                        { s: 'permis_delivre', label: '✅ Délivrer le permis', cls: 'btn-success' },
-                        { s: 'changes_requested', label: '✏️ Demander modifications', cls: 'btn-warning' },
-                        { s: 'defavorable', label: '👎 Avis défavorable', cls: 'btn-danger' },
-                        { s: 'rejet_definitif', label: '🚫 Rejet définitif', cls: 'btn-dark' },
+                        { s: 'en_cours_instruction', label: '­ƒöì Mettre en instruction', cls: 'btn-primary' },
+                        { s: 'favorable', label: '­ƒæì Avis favorable', cls: 'btn-info text-white' },
+                        { s: 'permis_delivre', label: 'Ô£à D├®livrer le permis', cls: 'btn-success' },
+                        { s: 'changes_requested', label: 'Ô£Å´©Å Demander modifications', cls: 'btn-warning' },
+                        { s: 'defavorable', label: '­ƒæÄ Avis d├®favorable', cls: 'btn-danger' },
+                        { s: 'rejet_definitif', label: '­ƒÜ½ Rejet d├®finitif', cls: 'btn-dark' },
                       ].map(btn => (
                         <button key={btn.s} className={`btn btn-sm rounded-pill ${btn.cls}`}
                           style={{ fontSize: '.78rem' }}
@@ -2530,10 +2530,10 @@ export default function AgentDashboardPage() {
             </div>
 
           ) : activeTab === 'stats' ? (
-            /* ── STATISTIQUES IA TAB ──────────────────────────────────────── */
+            /* ÔöÇÔöÇ STATISTIQUES IA TAB ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
             <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
               <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#1a237e,#283593)' }}>
-                <span><i className="fas fa-brain me-2"></i>{t('stats_ia_title')} — {t('stats_ia_subtitle')}</span>
+                <span><i className="fas fa-brain me-2"></i>{t('stats_ia_title')} ÔÇö {t('stats_ia_subtitle')}</span>
                 <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchMlStats}>
                   <i className="fas fa-sync-alt me-1"></i>{t('stats_ia_recalculate')}
                 </button>
@@ -2563,19 +2563,19 @@ export default function AgentDashboardPage() {
                 )}
                 {!mlLoading && mlStats && (() => {
                   const CAT_LABELS: Record<string,string> = { 
-                    lighting: `💡 ${t('category_lighting')}`, 
-                    trash: `🗑️ ${t('category_trash')}`, 
-                    roads: `🛣️ ${t('category_roads')}`, 
-                    noise: `🔊 ${t('category_noise')}`, 
-                    other: `📌 ${t('category_other')}` 
+                    lighting: `­ƒÆí ${t('category_lighting')}`, 
+                    trash: `­ƒùæ´©Å ${t('category_trash')}`, 
+                    roads: `­ƒøú´©Å ${t('category_roads')}`, 
+                    noise: `­ƒöè ${t('category_noise')}`, 
+                    other: `­ƒôî ${t('category_other')}` 
                   }
                   const PRI_LABELS: Record<string,string> = { 
-                    urgente: `🔴 ${t('priority_urgente')}`, 
-                    normale: `🔵 ${t('priority_normale')}`, 
-                    faible: `🟣 ${t('priority_faible')}` 
+                    urgente: `­ƒö┤ ${t('priority_urgente')}`, 
+                    normale: `­ƒöÁ ${t('priority_normale')}`, 
+                    faible: `­ƒƒú ${t('priority_faible')}` 
                   }
-                  const LMAP_CAT: Record<string,string> = { lighting:'💡', trash:'🗑️', roads:'🛣️', noise:'🔊', other:'📌' }
-                  const LMAP_PRI: Record<string,string> = { urgente:'🔴', normale:'🔵', faible:'🟣' }
+                  const LMAP_CAT: Record<string,string> = { lighting:'­ƒÆí', trash:'­ƒùæ´©Å', roads:'­ƒøú´©Å', noise:'­ƒöè', other:'­ƒôî' }
+                  const LMAP_PRI: Record<string,string> = { urgente:'­ƒö┤', normale:'­ƒöÁ', faible:'­ƒƒú' }
                   return (
                     <>
                       {/* Accuracy summary cards */}
@@ -2593,7 +2593,7 @@ export default function AgentDashboardPage() {
                         ))}
                       </div>
 
-                      {/* TABLE 1 — Category Classification Report */}
+                      {/* TABLE 1 ÔÇö Category Classification Report */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
                         <i className="fas fa-table"></i>{t('stats_ia_table1')}
                       </div>
@@ -2631,7 +2631,7 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
 
-                      {/* TABLE 2 — Confusion Matrix Category */}
+                      {/* TABLE 2 ÔÇö Confusion Matrix Category */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
                         <i className="fas fa-th"></i>{t('stats_ia_table2')}
                       </div>
@@ -2642,7 +2642,7 @@ export default function AgentDashboardPage() {
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
                             <thead><tr style={{ background: '#f5f5f5' }}>
-                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>{lang === 'ar' ? 'حقيقي ↓ / متوقع ←' : 'Réel ↓ / Prédit →'}</th>
+                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>{lang === 'ar' ? 'Ï¡┘é┘è┘é┘è Ôåô / ┘àÏ¬┘ê┘éÏ╣ ÔåÉ' : 'R├®el Ôåô / Pr├®dit ÔåÆ'}</th>
                               {mlStats.category.labels.map((l: string) => <th key={l} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', borderBottom: '2px solid #e0e0e0', fontWeight: 700, color: '#333' }}>{LMAP_CAT[l] || l}</th>)}
                             </tr></thead>
                             <tbody>
@@ -2659,7 +2659,7 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
 
-                      {/* TABLE 3 — Top NLP features */}
+                      {/* TABLE 3 ÔÇö Top NLP features */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
                         <i className="fas fa-star"></i>{t('stats_ia_table3')}
                       </div>
@@ -2680,7 +2680,7 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
 
-                      {/* TABLE 4 — Priority Classification Report */}
+                      {/* TABLE 4 ÔÇö Priority Classification Report */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
                         <i className="fas fa-flag"></i>{t('stats_ia_table4')}
                       </div>
@@ -2713,7 +2713,7 @@ export default function AgentDashboardPage() {
                         </div>
                       </div>
 
-                      {/* TABLE 4b — Confusion Matrix Priority */}
+                      {/* TABLE 4b ÔÇö Confusion Matrix Priority */}
                       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1a237e', margin: '28px 0 8px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '2px solid #e8eaf6', paddingBottom: 8 }}>
                         <i className="fas fa-th"></i>{t('stats_ia_table4b')}
                       </div>
@@ -2721,7 +2721,7 @@ export default function AgentDashboardPage() {
                         <div style={{ overflowX: 'auto', padding: '4px 0' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
                             <thead><tr style={{ background: '#f5f5f5' }}>
-                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>{lang === 'ar' ? 'حقيقي ↓ / متوقع ←' : 'Réel ↓ / Prédit →'}</th>
+                              <th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0', fontSize: '.72rem' }}>{lang === 'ar' ? 'Ï¡┘é┘è┘é┘è Ôåô / ┘àÏ¬┘ê┘éÏ╣ ÔåÉ' : 'R├®el Ôåô / Pr├®dit ÔåÆ'}</th>
                               {mlStats.priority.labels.map((l: string) => <th key={l} style={{ textAlign: 'center', minWidth: 46, padding: 7, fontSize: '.8rem', borderBottom: '2px solid #e0e0e0', fontWeight: 700, color: '#333' }}>{LMAP_PRI[l] || l}</th>)}
                             </tr></thead>
                             <tbody>
@@ -2740,7 +2740,7 @@ export default function AgentDashboardPage() {
 
                       <div style={{ textAlign: 'center', padding: '10px 0 8px', color: '#aaa', fontSize: '.76rem' }}>
                         <i className="fas fa-info-circle me-1"></i>
-                        {t('stats_ia_model_trained')} · {mlStats.n_samples} {t('stats_ia_samples')}
+                        {t('stats_ia_model_trained')} ┬À {mlStats.n_samples} {t('stats_ia_samples')}
                       </div>
                     </>
                   )
@@ -2748,10 +2748,10 @@ export default function AgentDashboardPage() {
               </div>
             </div>
           ) : activeTab === 'citizens' ? (
-            /* ── VÉRIFICATION CITOYENS (agents) ────────────────────────── */
+            /* ÔöÇÔöÇ V├ëRIFICATION CITOYENS (agents) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
             <div className="ag-card animate__animated animate__fadeIn">
               <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
-                <span className="fw-bold"><i className="fas fa-user-check me-2"></i>Vérification des Comptes Citoyens</span>
+                <span className="fw-bold"><i className="fas fa-user-check me-2"></i>V├®rification des Comptes Citoyens</span>
                 <div className="d-flex align-items-center gap-2">
                   <span className="badge bg-warning text-dark" style={{ fontSize: '11px' }}>{agentCitizens.length} en attente</span>
                   <button className="btn btn-sm btn-light" onClick={fetchAgentCitizens}><i className="fas fa-sync-alt"></i></button>
@@ -2773,7 +2773,7 @@ export default function AgentDashboardPage() {
                   {agentCitizens.filter(c => {
                     const q = citizenSearch.toLowerCase()
                     return !q || c.full_name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.cin?.toLowerCase().includes(q)
-                  }).length} résultat(s)
+                  }).length} r├®sultat(s)
                 </div>
               </div>
 
@@ -2783,8 +2783,8 @@ export default function AgentDashboardPage() {
                 ) : agentCitizens.length === 0 ? (
                   <div className="text-center p-5 text-muted">
                     <i className="fas fa-check-circle fa-3x mb-3" style={{ color: '#2e7d32', opacity: .4 }}></i>
-                    <p className="fw-bold">Aucun compte en attente de vérification.</p>
-                    <p className="small">Tous les citoyens inscrits ont été vérifiés.</p>
+                    <p className="fw-bold">Aucun compte en attente de v├®rification.</p>
+                    <p className="small">Tous les citoyens inscrits ont ├®t├® v├®rifi├®s.</p>
                   </div>
                 ) : (
                   <div style={{ overflowX: 'auto' }}>
@@ -2792,7 +2792,7 @@ export default function AgentDashboardPage() {
                       <thead>
                         <tr>
                           <th>Citoyen</th>
-                          <th>CIN / Téléphone</th>
+                          <th>CIN / T├®l├®phone</th>
                           <th>Ville</th>
                           <th>Inscrit le</th>
                           <th>Statut</th>
@@ -2827,7 +2827,7 @@ export default function AgentDashboardPage() {
                             <td>
                               {c.is_active
                                 ? <span className="badge" style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '10px' }}><i className="fas fa-user-check me-1"></i>Actif</span>
-                                : <span className="badge" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>Bloqué</span>
+                                : <span className="badge" style={{ background: '#ffebee', color: '#c62828', fontSize: '10px' }}><i className="fas fa-user-slash me-1"></i>Bloqu├®</span>
                               }
                               {(c.cin_front || c.cin_back) && (
                                 <span className="badge ms-1" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-id-card me-1"></i>CIN disponible</span>
@@ -2837,14 +2837,14 @@ export default function AgentDashboardPage() {
                               <div className="d-flex gap-2">
                                 <button
                                   className="btn btn-sm btn-success"
-                                  title="Vérifier ce compte"
-                                  onClick={e => { e.stopPropagation(); if(window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
+                                  title="V├®rifier ce compte"
+                                  onClick={e => { e.stopPropagation(); if(window.confirm(`V├®rifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
                                 >
-                                  <i className="fas fa-check me-1"></i> Vérifier
+                                  <i className="fas fa-check me-1"></i> V├®rifier
                                 </button>
                                 <button
                                   className={`btn btn-sm ${c.is_active ? 'btn-outline-danger' : 'btn-danger'}`}
-                                  title={c.is_active ? 'Bloquer' : 'Débloquer'}
+                                  title={c.is_active ? 'Bloquer' : 'D├®bloquer'}
                                   onClick={e => { e.stopPropagation(); handleAgentCitizenAction(c.id, 'toggle_active') }}
                                 >
                                   <i className={`fas ${c.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
@@ -2868,13 +2868,13 @@ export default function AgentDashboardPage() {
                 )}
               </div>
 
-              {/* ── Citizen Detail / CIN Modal ── */}
+              {/* ÔöÇÔöÇ Citizen Detail / CIN Modal ÔöÇÔöÇ */}
               {selectedCitizen && (
                 <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,.55)' }} onClick={() => setSelectedCitizen(null)}>
                   <div className="modal-dialog modal-lg modal-dialog-centered" onClick={e => e.stopPropagation()}>
                     <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 14, overflow: 'hidden' }}>
                       <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)' }}>
-                        <span className="title"><i className="fas fa-user-check me-2"></i>Fiche Citoyen — {selectedCitizen.full_name}</span>
+                        <span className="title"><i className="fas fa-user-check me-2"></i>Fiche Citoyen ÔÇö {selectedCitizen.full_name}</span>
                         <button className="ag-close-btn" onClick={() => setSelectedCitizen(null)}><i className="fas fa-times"></i></button>
                       </div>
                       <div className="modal-body p-4">
@@ -2899,14 +2899,14 @@ export default function AgentDashboardPage() {
                           </div>
                           <div className="col-md-4">
                             <div className="p-3 border rounded bg-light">
-                              <div className="det-label">Téléphone</div>
+                              <div className="det-label">T├®l├®phone</div>
                               <div className="det-value">{selectedCitizen.phone}</div>
                             </div>
                           </div>
                           <div className="col-md-4">
                             <div className="p-3 border rounded bg-light">
                               <div className="det-label">Date de naissance</div>
-                              <div className="det-value">{selectedCitizen.date_of_birth ? formatDate(selectedCitizen.date_of_birth) : '—'}</div>
+                              <div className="det-value">{selectedCitizen.date_of_birth ? formatDate(selectedCitizen.date_of_birth) : 'ÔÇö'}</div>
                             </div>
                           </div>
                           <div className="col-md-6">
@@ -2918,7 +2918,7 @@ export default function AgentDashboardPage() {
                           <div className="col-md-6">
                             <div className="p-3 border rounded bg-light">
                               <div className="det-label">Lieu de naissance</div>
-                              <div className="det-value">{selectedCitizen.place_of_birth || '—'}</div>
+                              <div className="det-value">{selectedCitizen.place_of_birth || 'ÔÇö'}</div>
                             </div>
                           </div>
                         </div>
@@ -2960,13 +2960,13 @@ export default function AgentDashboardPage() {
                         )}
                         {!selectedCitizen.cin_front && !selectedCitizen.cin_back && (
                           <div className="alert alert-warning mt-3" style={{ fontSize: '.83rem' }}>
-                            <i className="fas fa-exclamation-triangle me-2"></i>Aucune photo de CIN disponible (déjà vérifiées ou non soumises).
+                            <i className="fas fa-exclamation-triangle me-2"></i>Aucune photo de CIN disponible (d├®j├á v├®rifi├®es ou non soumises).
                           </div>
                         )}
                       </div>
                       <div className="modal-footer border-top bg-light">
-                        <button className="btn btn-success px-4" onClick={() => { if(window.confirm(`Vérifier le compte de "${selectedCitizen.full_name}" ?`)) { handleAgentCitizenAction(selectedCitizen.id, 'verify'); } }}>
-                          <i className="fas fa-check-circle me-2"></i>Confirmer la vérification
+                        <button className="btn btn-success px-4" onClick={() => { if(window.confirm(`V├®rifier le compte de "${selectedCitizen.full_name}" ?`)) { handleAgentCitizenAction(selectedCitizen.id, 'verify'); } }}>
+                          <i className="fas fa-check-circle me-2"></i>Confirmer la v├®rification
                         </button>
                         <button className="btn btn-outline-secondary" onClick={() => setSelectedCitizen(null)}>Fermer</button>
                       </div>
@@ -2985,7 +2985,7 @@ export default function AgentDashboardPage() {
             </div>
           ) : activeTab === 'profile' ? (
              <div className="animate__animated animate__fadeIn">
-                {/* ── PROFILE CONTENT ── */}
+                {/* ÔöÇÔöÇ PROFILE CONTENT ÔöÇÔöÇ */}
                 <div className="ag-card">
                    <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #1a3a5c, #1565c0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span><i className="fas fa-user-circle me-2"></i>{t('profile_personal_info')}</span>
@@ -3031,7 +3031,7 @@ export default function AgentDashboardPage() {
                                      {editingProfile ? (
                                         <input type="text" className="form-control form-control-sm shadow-sm" value={f.val} onChange={e => setProfileForm(p => ({ ...p, [f.key]: e.target.value }))} style={{ borderRadius: 8 }} />
                                      ) : (
-                                        <div className="p-2 border-bottom fw-bold" style={{ fontSize: '.9rem', color: '#333' }}>{f.val || '—'}</div>
+                                        <div className="p-2 border-bottom fw-bold" style={{ fontSize: '.9rem', color: '#333' }}>{f.val || 'ÔÇö'}</div>
                                      )}
                                   </div>
                                ))}
@@ -3042,14 +3042,14 @@ export default function AgentDashboardPage() {
                                   {editingProfile ? (
                                      <input type="text" className="form-control form-control-sm shadow-sm" value={profileForm.address} onChange={e => setProfileForm(p => ({ ...p, address: e.target.value }))} style={{ borderRadius: 8 }} />
                                   ) : (
-                                     <div className="p-2 border-bottom fw-bold" style={{ fontSize: '.9rem', color: '#333' }}>{profileForm.address || '—'}</div>
+                                     <div className="p-2 border-bottom fw-bold" style={{ fontSize: '.9rem', color: '#333' }}>{profileForm.address || 'ÔÇö'}</div>
                                   )}
                                </div>
                                <div className="col-md-6">
                                   <label style={{ fontSize: '.72rem', fontWeight: 700, color: '#888', textTransform: 'uppercase', marginBottom: 5, display: 'block' }}>
                                      <i className="fas fa-id-card me-1 text-primary opacity-50"></i>{t('cin_label')}
                                   </label>
-                                  <div className="p-2 border-bottom text-muted" style={{ fontSize: '.9rem' }}>{(user as any)?.cin || '—'}</div>
+                                  <div className="p-2 border-bottom text-muted" style={{ fontSize: '.9rem' }}>{(user as any)?.cin || 'ÔÇö'}</div>
                                </div>
                             </div>
                          </div>
@@ -3057,7 +3057,7 @@ export default function AgentDashboardPage() {
                    </div>
                 </div>
 
-                {/* ── SECTION MES DOSSIERS ── */}
+                {/* ÔöÇÔöÇ SECTION MES DOSSIERS ÔöÇÔöÇ */}
                 <div className="mb-4 d-flex align-items-center gap-3 mt-5">
                   <div className="rounded-3 p-2 shadow-sm d-flex align-items-center justify-content-center"
                     style={{ background: 'linear-gradient(135deg,#2e7d32,#43a047)', color: '#fff', width: 38, height: 38 }}>
@@ -3098,10 +3098,10 @@ export default function AgentDashboardPage() {
                   <div className="ag-icon-box" style={{ background: 'rgba(255,255,255,0.15)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <i className="fas fa-newspaper" style={{ fontSize: 16 }}></i>
                   </div>
-                  <span className="fw-bold">{lang === 'ar' ? 'إدارة الأخبار' : 'Gestion des Actualités'}</span>
+                  <span className="fw-bold">{lang === 'ar' ? 'ÏÑÏ»ÏºÏ▒Ï® Ïº┘äÏúÏ«Ï¿ÏºÏ▒' : 'Gestion des Actualit├®s'}</span>
                 </div>
                 <button className="btn btn-sm btn-light rounded-pill px-3 fw-bold" onClick={() => { setEditingArticle(null); setArticleForm({ title: '', content: '', is_published: true }); setShowAddArticleModal(true); }}>
-                  <i className="fas fa-plus me-1"></i> {lang === 'ar' ? 'إضافة خبر' : 'Nouveau'}
+                  <i className="fas fa-plus me-1"></i> {lang === 'ar' ? 'ÏÑÏÂÏº┘üÏ® Ï«Ï¿Ï▒' : 'Nouveau'}
                 </button>
               </div>
               <div className="ag-card-body p-0">
@@ -3114,7 +3114,7 @@ export default function AgentDashboardPage() {
                         <tr>
                           <th className="ps-4">Contenu</th>
                           <th className="text-center">Statut</th>
-                          <th>Publié le</th>
+                          <th>Publi├® le</th>
                           <th className="text-end pe-4">Actions</th>
                         </tr>
                       </thead>
@@ -3167,7 +3167,7 @@ export default function AgentDashboardPage() {
                 <div className="row g-4">
                   <div className="col-md-7">
                     <div className="p-4 bg-white rounded-4 shadow-sm border">
-                      <h6 className="fw-bold mb-4 text-primary"><i className="fas fa-globe me-2"></i>Paramètres Généraux</h6>
+                      <h6 className="fw-bold mb-4 text-primary"><i className="fas fa-globe me-2"></i>Param├¿tres G├®n├®raux</h6>
                       <div className="mb-4">
                         <label className="det-label mb-2">Nom de la Plateforme Smart City</label>
                         <input className="form-control form-control-lg border-2" value={globalSettings.site_name} onChange={e => setGlobalSettings({...globalSettings, site_name: e.target.value})} />
@@ -3180,17 +3180,17 @@ export default function AgentDashboardPage() {
                   </div>
                   <div className="col-md-5">
                     <div className="p-4 bg-white rounded-4 shadow-sm border h-100">
-                      <h6 className="fw-bold mb-4 text-danger"><i className="fas fa-exclamation-triangle me-2"></i>Contrôles Système</h6>
+                      <h6 className="fw-bold mb-4 text-danger"><i className="fas fa-exclamation-triangle me-2"></i>Contr├┤les Syst├¿me</h6>
                       <div className="form-check form-switch custom-switch py-2">
                         <input className="form-check-input" type="checkbox" id="maintSwitch" checked={globalSettings.maintenance_mode} onChange={e => setGlobalSettings({...globalSettings, maintenance_mode: e.target.checked})} />
                         <label className="form-check-label fw-bold ms-2" htmlFor="maintSwitch">Mode Maintenance</label>
-                        <p className="text-muted small mt-2 mb-0">Suspend l'accès citoyen pour les interventions techniques prévues.</p>
+                        <p className="text-muted small mt-2 mb-0">Suspend l'acc├¿s citoyen pour les interventions techniques pr├®vues.</p>
                       </div>
                       <hr className="my-4" />
                       <div className="d-grid pt-2">
                         <button className="btn btn-primary btn-lg rounded-pill shadow-sm" onClick={handleSaveConfig} disabled={configSaving}>
                           {configSaving ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="fas fa-save me-2"></i>}
-                          {lang === 'ar' ? 'حفظ التغييرات' : 'Enregistrer'}
+                          {lang === 'ar' ? 'Ï¡┘üÏ© Ïº┘äÏ¬Ï║┘è┘èÏ▒ÏºÏ¬' : 'Enregistrer'}
                         </button>
                       </div>
                     </div>
@@ -3223,7 +3223,7 @@ export default function AgentDashboardPage() {
                     </div>
                     <div className="form-check">
                       <input className="form-check-input" type="checkbox" checked={articleForm.is_published} onChange={e => setArticleForm({...articleForm, is_published: e.target.checked})} />
-                      <label className="form-check-label">Publier immédiatement</label>
+                      <label className="form-check-label">Publier imm├®diatement</label>
                     </div>
                   </div>
                   <div className="modal-footer">
@@ -3250,16 +3250,16 @@ export default function AgentDashboardPage() {
                     </div>
                     <div className="col-6">
                       <div className="det-label">{t('event_organizer')}</div>
-                      <div className="det-value">{evDetail.nom_organisateur} — {evDetail.telephone_organisateur}</div>
+                      <div className="det-value">{evDetail.nom_organisateur} ÔÇö {evDetail.telephone_organisateur}</div>
                     </div>
                     <div className="col-6">
                       <div className="det-label">{t('event_place')}</div>
-                      <div className="det-value">{evDetail.lieu_type_display} — {evDetail.lieu_details}</div>
+                      <div className="det-value">{evDetail.lieu_type_display} ÔÇö {evDetail.lieu_details}</div>
                     </div>
                     <div className="col-6">
                       <div className="det-label">{t('event_dates')}</div>
-                      <div className="det-value">{evDetail.date_debut} → {evDetail.date_fin}</div>
-                      <div className="det-value" style={{ fontSize: '.83rem', color: '#777' }}>{evDetail.heure_debut?.slice(0,5)} — {evDetail.heure_fin?.slice(0,5)}</div>
+                      <div className="det-value">{evDetail.date_debut} ÔåÆ {evDetail.date_fin}</div>
+                      <div className="det-value" style={{ fontSize: '.83rem', color: '#777' }}>{evDetail.heure_debut?.slice(0,5)} ÔÇö {evDetail.heure_fin?.slice(0,5)}</div>
                     </div>
                     <div className="col-6">
                       <div className="det-label">{t('event_participants')}</div>
@@ -3278,8 +3278,8 @@ export default function AgentDashboardPage() {
                         <div className="p-3 rounded-3 d-flex gap-2 align-items-start" style={{ background: '#fff8e1', border: '1px solid #ffe082', fontSize: '.85rem', color: '#e65100' }}>
                           <i className="fas fa-exclamation-triangle mt-1"></i>
                           <div>
-                            <strong>{t('event_conflict_detected')}</strong> — {t('event_conflict_detected_long')}
-                            {evDetail.conflict_with_title && <span> {t('event_conflict_with')} <em>« {evDetail.conflict_with_title} »</em></span>}
+                            <strong>{t('event_conflict_detected')}</strong> ÔÇö {t('event_conflict_detected_long')}
+                            {evDetail.conflict_with_title && <span> {t('event_conflict_with')} <em>┬½ {evDetail.conflict_with_title} ┬╗</em></span>}
                           </div>
                         </div>
                       </div>
@@ -3296,7 +3296,7 @@ export default function AgentDashboardPage() {
                         { key: 'programme_evenement', label: 'Programme' },
                         { key: 'plan_lieu', label: 'Plan du lieu' },
                         { key: 'attestation_assurance', label: 'Assurance' },
-                        { key: 'plan_securite', label: 'Plan sécurité' },
+                        { key: 'plan_securite', label: 'Plan s├®curit├®' },
                         { key: 'attestation_association', label: 'Attestation asso.' },
                       ].filter(doc => evDetail[doc.key]).map(doc => (
                         <a key={doc.key} href={resolveBackendUrl(evDetail[doc.key])} target="_blank" rel="noopener noreferrer"
@@ -3397,7 +3397,7 @@ export default function AgentDashboardPage() {
             <div className="ag-profile-hdr"><div className="ag-profile-av">{inits}</div><div className="ag-profile-name">{fullName}</div><div className="ag-profile-email">{user?.email || '...'}</div></div>
             <div className="ag-profile-body">
               <div className="ag-profile-row"><span className="lbl">{t('role')}</span><span className="val" style={{ color: '#1565c0' }}>{getRoleLabel(user, t)}</span></div>
-              <div className="ag-profile-row"><span className="lbl">{t('city_label')}</span><span className="val">{user?.city || 'Kélibia'}</span></div>
+              <div className="ag-profile-row"><span className="lbl">{t('city_label')}</span><span className="val">{user?.city || 'K├®libia'}</span></div>
               <div className="ag-profile-row"><span className="lbl">{t('profile_dossiers_title')}</span><span className="val">{inprog}</span></div>
             </div>
           </div>
@@ -3435,9 +3435,9 @@ export default function AgentDashboardPage() {
           </div>
         </div>
       </div>
-      <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
+      <div className="ag-footer">┬® 2025 <span>{t('commune_kelibia')}</span> ÔÇö {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
 
-      {/* ── MOBILE BOTTOM NAVIGATION BAR ── */}
+      {/* ÔöÇÔöÇ MOBILE BOTTOM NAVIGATION BAR ÔöÇÔöÇ */}
       <nav className="ag-mobile-nav">
         <button className={`ag-mob-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
           <i className="fas fa-exclamation-circle"></i>
@@ -3446,7 +3446,7 @@ export default function AgentDashboardPage() {
         </button>
         <button className={`ag-mob-btn${activeTab === 'evenements' ? ' active' : ''}`} onClick={() => { setActiveTab('evenements'); fetchEvenements() }}>
           <i className="fas fa-calendar-alt"></i>
-          <span>Événements</span>
+          <span>├ëv├®nements</span>
           {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
             <span className="ag-mob-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
           )}
@@ -3469,7 +3469,7 @@ export default function AgentDashboardPage() {
         </button>
       </nav>
 
-      {/* ── MOBILE SLIDE-UP MENU DRAWER ── */}
+      {/* ÔöÇÔöÇ MOBILE SLIDE-UP MENU DRAWER ÔöÇÔöÇ */}
       {mobileMenuOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
           onClick={() => setMobileMenuOpen(false)}>
@@ -3518,9 +3518,9 @@ export default function AgentDashboardPage() {
               <div className="row g-3">
                 <div className="col-md-8">
                   <div className="mb-3"><div className="det-label">{t('reclamation_title_label')}</div><div className="det-value">{detailRec.title}</div></div>
-                  <div className="mb-3"><div className="det-label">{t('reclamation_description_label')}</div><div className="det-value" style={{ lineHeight: 1.6 }}>{detailRec.description || '—'}</div></div>
+                  <div className="mb-3"><div className="det-label">{t('reclamation_description_label')}</div><div className="det-value" style={{ lineHeight: 1.6 }}>{detailRec.description || 'ÔÇö'}</div></div>
                   <div className="row g-2 mb-3">
-                    <div className="col-6"><div className="det-label">Catégorie</div><div className="det-value"><span className={`cat-badge ${(CAT[detailRec.category] || CAT.other).cls}`}>{(CAT[detailRec.category] || CAT.other).label}</span></div></div>
+                    <div className="col-6"><div className="det-label">Cat├®gorie</div><div className="det-value"><span className={`cat-badge ${(CAT[detailRec.category] || CAT.other).cls}`}>{(CAT[detailRec.category] || CAT.other).label}</span></div></div>
                     <div className="col-6"><div className="det-label">Statut actuel</div><div className="det-value"><span className={`status-badge ${(STATUS[detailRec.status] || STATUS.pending).cls}`}>{(STATUS[detailRec.status] || STATUS.pending).label}</span></div></div>
                   </div>
                   <div className="row g-2 mb-3">
@@ -3530,12 +3530,12 @@ export default function AgentDashboardPage() {
                         <span className={`priority-badge ${(PRIORITY[detailRec.priority] || PRIORITY.normale).cls}`}>{(PRIORITY[detailRec.priority] || PRIORITY.normale).label}</span>
                         {detailRec.confidence?.priority !== undefined && (
                           <span className={`conf-badge ${detailRec.confidence.priority >= 0.80 ? 'conf-high' : detailRec.confidence.priority >= 0.60 ? 'conf-med' : 'conf-low'}`}>
-                            🤖 {Math.round(detailRec.confidence.priority * 100)}%
+                            ­ƒñû {Math.round(detailRec.confidence.priority * 100)}%
                           </span>
                         )}
                         <button
                           onClick={() => setShowExplainModal(true)}
-                          title="Voir l'explication LIME + SHAP de la priorité IA"
+                          title="Voir l'explication LIME + SHAP de la priorit├® IA"
                           style={{
                             background: 'linear-gradient(135deg,#1565c0,#1a3a5c)',
                             color: '#fff', border: 'none', borderRadius: '6px',
@@ -3544,45 +3544,45 @@ export default function AgentDashboardPage() {
                             fontWeight: 600, whiteSpace: 'nowrap',
                           }}
                         >
-                          🔍 Expliquer l'IA
+                          ­ƒöì Expliquer l'IA
                         </button>
                       </div>
                     </div>
-                    <div className="col-6"><div className="det-label">Service responsable</div><div className="det-value" style={{ fontSize: '.82rem' }}>{detailRec.service_responsable || '—'}</div></div>
+                    <div className="col-6"><div className="det-label">Service responsable</div><div className="det-value" style={{ fontSize: '.82rem' }}>{detailRec.service_responsable || 'ÔÇö'}</div></div>
                   </div>
                   <div className="row g-2 mb-3">
-                    <div className="col-6"><div className="det-label">Citoyen</div><div className="det-value">{detailRec.citizen_name || '—'}</div></div>
+                    <div className="col-6"><div className="det-label">Citoyen</div><div className="det-value">{detailRec.citizen_name || 'ÔÇö'}</div></div>
                     <div className="col-6"><div className="det-label">Date de signalement</div><div className="det-value">{formatDate(detailRec.created_at)}</div></div>
                   </div>
                   {detailRec.image && <div><div className="det-label mb-2">{t('reclamation_photo_label')}</div><img src={detailRec.image} style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid #eee' }} alt="Photo" /></div>}
-                  {/* ── Manual reclassify panel ─────────────────────── */}
+                  {/* ÔöÇÔöÇ Manual reclassify panel ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */}
                   {(detailRec.confidence?.category !== undefined && detailRec.confidence.category < 0.60) || true ? (
                     <div className="reclassify-box">
                       <div className="rc-title"><i className="fas fa-robot me-1"></i>Correction manuelle de la classification IA</div>
                       {detailRec.confidence?.category !== undefined && detailRec.confidence.category < 0.60 && (
                         <div style={{ fontSize: '.75rem', color: '#b71c1c', marginBottom: 8, background: '#fce4ec', padding: '4px 8px', borderRadius: 6 }}>
-                          ⚠️ {t('reclassify_low_conf')} ({Math.round(detailRec.confidence.category * 100)}%) — {t('admin_check_classification')}
+                          ÔÜá´©Å {t('reclassify_low_conf')} ({Math.round(detailRec.confidence.category * 100)}%) ÔÇö {t('admin_check_classification')}
                         </div>
                       )}
                       <div className="row g-2">
                         <div className="col-6">
-                          <label style={{ fontSize: '.75rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: 3 }}>Catégorie</label>
+                          <label style={{ fontSize: '.75rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: 3 }}>Cat├®gorie</label>
                           <select className="form-select form-select-sm" value={reClsCat} onChange={e => setReClsCat(e.target.value)}>
-                            <option value="">— Garder actuelle —</option>
-                            <option value="lighting">💡 Éclairage</option>
-                            <option value="trash">🗑️ Déchets</option>
-                            <option value="roads">🛣️ Voirie</option>
-                            <option value="noise">🔊 Nuisances</option>
-                            <option value="other">📌 Autre</option>
+                            <option value="">ÔÇö Garder actuelle ÔÇö</option>
+                            <option value="lighting">­ƒÆí ├ëclairage</option>
+                            <option value="trash">­ƒùæ´©Å D├®chets</option>
+                            <option value="roads">­ƒøú´©Å Voirie</option>
+                            <option value="noise">­ƒöè Nuisances</option>
+                            <option value="other">­ƒôî Autre</option>
                           </select>
                         </div>
                         <div className="col-6">
-                          <label style={{ fontSize: '.75rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: 3 }}>Priorité</label>
+                          <label style={{ fontSize: '.75rem', fontWeight: 600, color: '#555', display: 'block', marginBottom: 3 }}>Priorit├®</label>
                           <select className="form-select form-select-sm" value={reClsPrio} onChange={e => setReClsPrio(e.target.value)}>
-                            <option value="">— Garder actuelle —</option>
-                            <option value="urgente">🔴 Urgente</option>
-                            <option value="normale">🔵 Normale</option>
-                            <option value="faible">🟣 Faible</option>
+                            <option value="">ÔÇö Garder actuelle ÔÇö</option>
+                            <option value="urgente">­ƒö┤ Urgente</option>
+                            <option value="normale">­ƒöÁ Normale</option>
+                            <option value="faible">­ƒƒú Faible</option>
                           </select>
                         </div>
                       </div>
@@ -3595,13 +3595,13 @@ export default function AgentDashboardPage() {
                 <div className="col-md-4">
                   <div className="det-label mb-2">Changer le statut</div>
                   <select className="form-select mb-3" value={detailStatus} onChange={e => setDetailStatus(e.target.value)}>
-                    <option value="pending">⏳ En attente</option><option value="in_progress">🔧 En cours</option><option value="resolved">✅ Résolue</option><option value="rejected">❌ Rejetée</option>
+                    <option value="pending">ÔÅ│ En attente</option><option value="in_progress">­ƒöº En cours</option><option value="resolved">Ô£à R├®solue</option><option value="rejected">ÔØî Rejet├®e</option>
                   </select>
                   <button className="btn btn-primary w-100" onClick={saveDetailStatus} disabled={detailSaving}>
                     {detailSaving ? <><span className="spinner-border spinner-border-sm me-2"></span>{t('registration_in_progress')}</> : <><i className="fas fa-save me-2"></i>{t('save_label')}</>}
                   </button>
                   <div style={{ height: 180, marginTop: 14, borderRadius: 8, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: '#aaa', fontSize: '.8rem' }}><i className="fas fa-map-pin me-1"></i>Pas de coordonnées</span>
+                    <span style={{ color: '#aaa', fontSize: '.8rem' }}><i className="fas fa-map-pin me-1"></i>Pas de coordonn├®es</span>
                   </div>
                 </div>
               </div>
@@ -3610,7 +3610,7 @@ export default function AgentDashboardPage() {
         </div>
       )}
 
-      {/* ── PRIORITY EXPLANATION MODAL (LIME + SHAP) ── */}
+      {/* ÔöÇÔöÇ PRIORITY EXPLANATION MODAL (LIME + SHAP) ÔöÇÔöÇ */}
       {showExplainModal && detailRec && (
         <PriorityExplanationModal
           reclamationId={detailRec.id}
@@ -3620,12 +3620,12 @@ export default function AgentDashboardPage() {
         />
       )}
 
-      {/* ── CITIZEN VERIFICATION MODAL ── */}
+      {/* ÔöÇÔöÇ CITIZEN VERIFICATION MODAL ÔöÇÔöÇ */}
       {selectedUser && (
         <div className="ag-modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedUser(null)}>
            <div className="ag-modal-content animate__animated animate__zoomIn" style={{ maxWidth: 900 }}>
               <div className="ag-modal-hdr" style={{ background: '#004d40' }}>
-                 <div className="title"><i className="fas fa-user-check me-2"></i>Vérification d'Identité : {selectedUser.full_name}</div>
+                 <div className="title"><i className="fas fa-user-check me-2"></i>V├®rification d'Identit├® : {selectedUser.full_name}</div>
                  <button className="ag-close-btn" onClick={() => setSelectedUser(null)}><i className="fas fa-times"></i></button>
               </div>
               <div className="p-4 bg-light">
@@ -3633,10 +3633,10 @@ export default function AgentDashboardPage() {
                     {/* Left: Inputted Info */}
                     <div className="col-md-5">
                        <div className="p-4 bg-white rounded shadow-sm">
-                          <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-info-circle me-2"></i>Données de l'inscription</h6>
+                          <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-info-circle me-2"></i>Donn├®es de l'inscription</h6>
                           
                           <div className="row mb-3">
-                             <div className="col-5 text-muted small">Nom & Prénom</div>
+                             <div className="col-5 text-muted small">Nom & Pr├®nom</div>
                              <div className="col-7 fw-bold">{selectedUser.full_name}</div>
                           </div>
                           <div className="row mb-3">
@@ -3646,7 +3646,7 @@ export default function AgentDashboardPage() {
                           <div className="row mb-3">
                              <div className="col-5 text-muted small">Naissance</div>
                              <div className="col-7">
-                                {selectedUser.date_of_birth ? <div>{selectedUser.date_of_birth}</div> : <i className="text-muted">—</i>}
+                                {selectedUser.date_of_birth ? <div>{selectedUser.date_of_birth}</div> : <i className="text-muted">ÔÇö</i>}
                                 <div className="small text-muted">{selectedUser.place_of_birth || 'Lieu inconnu'}</div>
                              </div>
                           </div>
@@ -3654,7 +3654,7 @@ export default function AgentDashboardPage() {
                           <div className="mb-4">
                              <div className={`p-2 rounded mt-2 d-flex align-items-center gap-2 ${selectedUser.is_married ? 'bg-primary bg-opacity-10 text-primary' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
                                 <i className={`fas ${selectedUser.is_married ? 'fa-ring' : 'fa-user'}`}></i>
-                                <span className="small fw-bold">{selectedUser.is_married ? 'MARIÉ(E)' : 'CÉLIBATAIRE'}</span>
+                                <span className="small fw-bold">{selectedUser.is_married ? 'MARI├ë(E)' : 'C├ëLIBATAIRE'}</span>
                              </div>
                              {selectedUser.is_married && (
                                 <div className="mt-2 text-dark bg-light p-2 rounded border small">
@@ -3668,16 +3668,16 @@ export default function AgentDashboardPage() {
                           <div className="d-grid gap-2">
                              {!selectedUser.is_verified ? (
                                 <button className="btn btn-success" onClick={() => handleToggleUserStatus(selectedUser.id, 'verify')}>
-                                   <i className="fas fa-check-circle me-2"></i>Valider l'identité
+                                   <i className="fas fa-check-circle me-2"></i>Valider l'identit├®
                                 </button>
                              ) : (
                                 <div className="alert alert-success d-flex align-items-center mb-0 py-2">
-                                   <i className="fas fa-check-double me-2"></i>Identité Validée
+                                   <i className="fas fa-check-double me-2"></i>Identit├® Valid├®e
                                 </div>
                              )}
                              <button className={`btn ${selectedUser.is_active ? 'btn-outline-danger' : 'btn-danger'}`} onClick={() => handleToggleUserStatus(selectedUser.id, 'toggle_active')}>
                                 <i className={`fas ${selectedUser.is_active ? 'fa-user-slash' : 'fa-user-check'} me-2 rotate-hover`}></i>
-                                {selectedUser.is_active ? 'Bloquer ce compte' : 'Débloquer maintenant'}
+                                {selectedUser.is_active ? 'Bloquer ce compte' : 'D├®bloquer maintenant'}
                              </button>
                           </div>
                        </div>
@@ -3686,7 +3686,7 @@ export default function AgentDashboardPage() {
                     {/* Right: CIN Images */}
                     <div className="col-md-7">
                        <div className="p-4 bg-white rounded shadow-sm h-100">
-                          <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-id-card me-2"></i>Documents CIN à vérifier</h6>
+                          <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-id-card me-2"></i>Documents CIN ├á v├®rifier</h6>
                           <div className="row g-2">
                              <div className="col-12">
                                 <label className="small text-muted mb-1">FACE AVANT (RECTO)</label>
@@ -3701,7 +3701,7 @@ export default function AgentDashboardPage() {
                                 </div>
                              </div>
                              <div className="col-12">
-                                <label className="small text-muted mb-1">FACE ARRIÈRE (VERSO)</label>
+                                <label className="small text-muted mb-1">FACE ARRI├êRE (VERSO)</label>
                                 <div className="ag-cin-preview">
                                    {selectedUser.cin_back ? (
                                        <div onClick={() => setEnlargedImage(selectedUser.cin_back)} style={{ cursor: 'zoom-in' }}>
@@ -3714,7 +3714,7 @@ export default function AgentDashboardPage() {
                              </div>
                           </div>
                           <div className="small text-muted text-center mt-3 bg-light p-2 rounded">
-                             <i className="fas fa-search-plus me-1"></i> Cliquez sur l'image pour l'agrandir et vérifier les détails.
+                             <i className="fas fa-search-plus me-1"></i> Cliquez sur l'image pour l'agrandir et v├®rifier les d├®tails.
                           </div>
                        </div>
                     </div>
@@ -3728,7 +3728,7 @@ export default function AgentDashboardPage() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 4000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div className="bg-white rounded-4 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '420px' }}>
             <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(90deg,#1a3a5c,#0d6efd)', color: '#fff' }}>
-              <h6 className="mb-0 fw-bold"><i className="fas fa-key me-2"></i>Mot de passe réinitialisé</h6>
+              <h6 className="mb-0 fw-bold"><i className="fas fa-key me-2"></i>Mot de passe r├®initialis├®</h6>
               <button className="btn-close btn-close-white" onClick={() => setResetPwdResult(null)}></button>
             </div>
             <div className="p-4 text-center">
@@ -3739,13 +3739,13 @@ export default function AgentDashboardPage() {
                   {resetPwdResult.password}
                 </code>
                 <button className="btn btn-sm btn-outline-primary rounded-pill" title="Copier"
-                  onClick={() => { navigator.clipboard.writeText(resetPwdResult!.password); showToast('Mot de passe copié !') }}>
+                  onClick={() => { navigator.clipboard.writeText(resetPwdResult!.password); showToast('Mot de passe copi├® !') }}>
                   <i className="fas fa-copy"></i>
                 </button>
               </div>
               <div className="alert alert-warning rounded-3 d-flex gap-2 align-items-start text-start" style={{ fontSize: '.82rem' }}>
                 <i className="fas fa-exclamation-triangle mt-1 flex-shrink-0"></i>
-                <span>Communiquez ce mot de passe à l'agent de façon sécurisée. Il devra le changer dès sa prochaine connexion.</span>
+                <span>Communiquez ce mot de passe ├á l'agent de fa├ºon s├®curis├®e. Il devra le changer d├¿s sa prochaine connexion.</span>
               </div>
               <button className="btn btn-primary rounded-pill px-5 mt-2" onClick={() => setResetPwdResult(null)}>
                 <i className="fas fa-check me-2"></i>Compris
@@ -3766,7 +3766,7 @@ export default function AgentDashboardPage() {
         </div>
       )}
 
-      {/* ── FORUM TOPIC DETAIL / CHAT MODAL ── */}
+      {/* ÔöÇÔöÇ FORUM TOPIC DETAIL / CHAT MODAL ÔöÇÔöÇ */}
       {forumTopicSelected && (() => {
         const t = forumTopicSelected
         const authName = (u: any) => u ? (`${u.first_name} ${u.last_name}`.trim() || u.email) : 'Chargement...'
@@ -3785,7 +3785,7 @@ export default function AgentDashboardPage() {
                   </div>
                   <div>
                     <h5 className="mb-0 fw-bold">{t.title}</h5>
-                    <div className="small opacity-75">{t.replies?.length || 0} intervention(s) · {t.views} vues</div>
+                    <div className="small opacity-75">{t.replies?.length || 0} intervention(s) ┬À {t.views} vues</div>
                   </div>
                 </div>
                 <button className="bg-transparent border-0 text-white opacity-50" onClick={() => setForumTopicSelected(null)} style={{ transition: 'all .2s', cursor: 'pointer', fontSize: '1.5rem' }}>
@@ -3810,7 +3810,7 @@ export default function AgentDashboardPage() {
                         <div style={{ fontSize: '.95rem', color: '#333', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{t.content}</div>
                         <div className="mt-3 d-flex align-items-center gap-3 border-top pt-2">
                            <button className={`btn btn-sm p-0 border-0 ${t.has_voted ? 'text-danger' : 'text-muted'}`} onClick={() => toggleForumTopicVote(t.id)}>
-                              <i className={`${t.has_voted ? 'fas' : 'far'} fa-heart me-1`}></i> {t.votes_count} <span className="small">Réactions</span>
+                              <i className={`${t.has_voted ? 'fas' : 'far'} fa-heart me-1`}></i> {t.votes_count} <span className="small">R├®actions</span>
                            </button>
                         </div>
                      </div>
@@ -3820,7 +3820,7 @@ export default function AgentDashboardPage() {
                 {/* Replies separator */}
                 <div className="d-flex align-items-center gap-3">
                    <div style={{ flex: 1, height: 1, background: '#dee2e6' }}></div>
-                   <div className="small fw-bold text-muted text-uppercase" style={{ letterSpacing: 1 }}>Réponses</div>
+                   <div className="small fw-bold text-muted text-uppercase" style={{ letterSpacing: 1 }}>R├®ponses</div>
                    <div style={{ flex: 1, height: 1, background: '#dee2e6' }}></div>
                 </div>
 
@@ -3828,7 +3828,7 @@ export default function AgentDashboardPage() {
                 {(t.replies || []).length === 0 ? (
                   <div className="text-center py-5">
                     <div className="opacity-25" style={{ fontSize: '3rem' }}><i className="fas fa-comment-slash"></i></div>
-                    <div className="text-muted mt-2 small">Aucune réponse pour le moment sur ce sujet.</div>
+                    <div className="text-muted mt-2 small">Aucune r├®ponse pour le moment sur ce sujet.</div>
                   </div>
                 ) : t.replies.map((r: any) => {
                   const agent = isOfficial(r.author)
@@ -3870,7 +3870,7 @@ export default function AgentDashboardPage() {
                        <textarea 
                         className="form-control border-0 bg-light rounded-4 px-4 py-3" 
                         rows={1} 
-                        placeholder="Écrivez une réponse officielle..." 
+                        placeholder="├ëcrivez une r├®ponse officielle..." 
                         style={{ resize: 'none', fontSize: '.95rem', minHeight: '56px', maxHeight: '150px' }}
                         value={forumReplyText}
                         onChange={e => setForumReplyText(e.target.value)}
@@ -3892,7 +3892,7 @@ export default function AgentDashboardPage() {
                  </div>
                  <div className="text-muted mt-2 ms-2 small d-flex align-items-center gap-1">
                     <i className="fas fa-info-circle"></i>
-                    <span>Votre réponse sera identifiée comme un commentaire <strong>officiel</strong> de la mairie.</span>
+                    <span>Votre r├®ponse sera identifi├®e comme un commentaire <strong>officiel</strong> de la mairie.</span>
                  </div>
               </div>
             </div>
@@ -3924,7 +3924,7 @@ export default function AgentDashboardPage() {
               }}>
                 <div className="mb-3"><label className="form-label small fw-bold">Nom d'utilisateur</label><input className="form-control" name="username" required placeholder="ex: agent_kcl" /></div>
                 <div className="mb-3"><label className="form-label small fw-bold">Email</label><input className="form-control" name="email" type="email" required placeholder="agent@kelibia.tn" /></div>
-                <div className="mb-3"><label className="form-label small fw-bold">Mot de passe</label><input className="form-control" name="password" type="password" required placeholder="••••••••" /></div>
+                <div className="mb-3"><label className="form-label small fw-bold">Mot de passe</label><input className="form-control" name="password" type="password" required placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó" /></div>
                 <div className="mb-3">
                   <label className="form-label small fw-bold">Type de compte</label>
                   <select className="form-select" name="user_type" defaultValue="agent">
@@ -3955,7 +3955,7 @@ export default function AgentDashboardPage() {
                       <textarea 
                         className="form-control form-control-sm" 
                         rows={2} 
-                        placeholder="Ex: Demande de parking, 3 jours, catégorie Urbanisme, papiers: CIN, Photo, Certificat"
+                        placeholder="Ex: Demande de parking, 3 jours, cat├®gorie Urbanisme, papiers: CIN, Photo, Certificat"
                         value={magicServiceText}
                         onChange={e => setMagicServiceText(e.target.value)}
                       />
@@ -3964,20 +3964,20 @@ export default function AgentDashboardPage() {
                     onClick={() => {
                       const text = magicServiceText.trim(); if (!text) return;
                       
-                      // 1. Détection du Nom (premier segment avant la virgule)
+                      // 1. D├®tection du Nom (premier segment avant la virgule)
                       const parts = text.split(',').map(p => p.trim());
                       const name = parts[0].replace(/Nom:\s*/i, '').trim();
                       
-                      // 2. Détection du Délai (recherche de chiffres suivis d'unités de temps)
+                      // 2. D├®tection du D├®lai (recherche de chiffres suivis d'unit├®s de temps)
                       const delayMatch = text.match(/([0-9]+\s*(?:jours?|semaines?|mois?|heures?|h|hr))/i);
                       const delay = delayMatch ? delayMatch[1] : '';
                       
-                      // 3. Détection de la Catégorie par mots-clés
+                      // 3. D├®tection de la Cat├®gorie par mots-cl├®s
                       const catKeywords: Record<string, string[]> = {
-                        'Urbanisme': ['construction', 'batir', 'bâtir', 'permis', 'plan', 'terrain', 'propriétaire', 'proprietaire', 'titre bleu', 'étage', 'logement'],
-                        'Etat Civil': ['naissance', 'mariage', 'décès', 'deces', 'extrait', 'cin', 'famille', 'divorce'],
-                        'Finance': ['taxe', 'impôt', 'fiscal', 'paiement', 'redevance'],
-                        'Environnement': ['déchet', 'jardin', 'nettoyage', 'arbre', 'hygiène', 'propreté'],
+                        'Urbanisme': ['construction', 'batir', 'b├ótir', 'permis', 'plan', 'terrain', 'propri├®taire', 'proprietaire', 'titre bleu', '├®tage', 'logement'],
+                        'Etat Civil': ['naissance', 'mariage', 'd├®c├¿s', 'deces', 'extrait', 'cin', 'famille', 'divorce'],
+                        'Finance': ['taxe', 'imp├┤t', 'fiscal', 'paiement', 'redevance'],
+                        'Environnement': ['d├®chet', 'jardin', 'nettoyage', 'arbre', 'hygi├¿ne', 'propret├®'],
                         'Affaires Sociales': ['aide', 'handicap', 'social', 'souk', 'commerce'],
                       };
                       
@@ -3995,10 +3995,10 @@ export default function AgentDashboardPage() {
                       }
                       const catId = foundCat ? foundCat.id.toString() : '';
                       
-                      // 4. Détection des Documents Requis
+                      // 4. D├®tection des Documents Requis
                       let reqs: any[] = [];
-                      // Recherche après des termes comme "documents", "papiers", " requis", "pièces"
-                      const reqMatch = text.match(/(?:papiers?|documents?|pièces?|requis?)(?:\s+requis)?\s*[:\-]?\s*(.+)$/i);
+                      // Recherche apr├¿s des termes comme "documents", "papiers", " requis", "pi├¿ces"
+                      const reqMatch = text.match(/(?:papiers?|documents?|pi├¿ces?|requis?)(?:\s+requis)?\s*[:\-]?\s*(.+)$/i);
                       const reqPart = reqMatch ? reqMatch[1] : '';
                       
                       if (reqPart) {
@@ -4073,7 +4073,7 @@ export default function AgentDashboardPage() {
                    body: finalFd
                  });
                  if (res.ok) { 
-                   showToast(editingService ? 'Service mis à jour !' : 'Service ajouté !');
+                   showToast(editingService ? 'Service mis ├á jour !' : 'Service ajout├® !');
                    setShowAddServiceModal(false); 
                    setEditingService(null);
                    setServiceReqs([]);
@@ -4084,19 +4084,19 @@ export default function AgentDashboardPage() {
                    const err = await res.json().catch(() => ({}));
                    showToast(Object.values(err).flat().join(', ') || 'Erreur lors de l\'enregistrement', 'error');
                  }
-               } catch { showToast('Erreur réseau', 'error'); }
+               } catch { showToast('Erreur r├®seau', 'error'); }
                finally { setEditServiceSaving(false); }
              }}>
                <div className="row g-3">
                  <div className="col-md-6">
-                   <label className="form-label small fw-bold">Catégorie</label>
+                   <label className="form-label small fw-bold">Cat├®gorie</label>
                    <select className="form-select" name="category" required defaultValue={editingService?.category_id || ''}>
                       <option value="">{t('category_placeholder')}</option>
                       {allCategories.map(c => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
                    </select>
                  </div>
                  <div className="col-md-6">
-                   <label className="form-label small fw-bold">Délai de traitement</label>
+                   <label className="form-label small fw-bold">D├®lai de traitement</label>
                    <input className="form-control" name="processing_time" placeholder={t('processing_delay_placeholder')} defaultValue={editingService?.processing_time || ''} />
                  </div>
                  
@@ -4105,7 +4105,7 @@ export default function AgentDashboardPage() {
                    <input className="form-control" name="name_fr" required defaultValue={editingService?.name_fr || ''} />
                  </div>
                  <div className="col-md-6">
-                   <label className="form-label small fw-bold" dir="rtl">اسم الخدمة (عربي)</label>
+                   <label className="form-label small fw-bold" dir="rtl">ÏºÏ│┘à Ïº┘äÏ«Ï»┘àÏ® (Ï╣Ï▒Ï¿┘è)</label>
                    <input className="form-control" name="name_ar" dir="rtl" required defaultValue={editingService?.name_ar || ''} />
                  </div>
 
@@ -4114,7 +4114,7 @@ export default function AgentDashboardPage() {
                    <textarea className="form-control" name="description_fr" rows={2} defaultValue={editingService?.description_fr || ''}></textarea>
                  </div>
                  <div className="col-md-6">
-                   <label className="form-label small fw-bold" dir="rtl">وصف الخدمة (عربي)</label>
+                   <label className="form-label small fw-bold" dir="rtl">┘êÏÁ┘ü Ïº┘äÏ«Ï»┘àÏ® (Ï╣Ï▒Ï¿┘è)</label>
                    <textarea className="form-control" name="description_ar" rows={2} dir="rtl" defaultValue={editingService?.description_ar || ''}></textarea>
                  </div>
 
@@ -4131,7 +4131,7 @@ export default function AgentDashboardPage() {
                           serviceReqs.map((req, idx) => (
                              <div key={idx} className="p-2 border-bottom d-flex gap-2 align-items-center">
                                 <input className="form-control form-control-sm" placeholder="Nom FR" value={req.name_fr} onChange={e => { const n = [...serviceReqs]; n[idx].name_fr = e.target.value; setServiceReqs(n); }} />
-                                <input className="form-control form-control-sm" dir="rtl" placeholder="اسم بالعربي" value={req.name_ar} onChange={e => { const n = [...serviceReqs]; n[idx].name_ar = e.target.value; setServiceReqs(n); }} />
+                                <input className="form-control form-control-sm" dir="rtl" placeholder="ÏºÏ│┘à Ï¿Ïº┘äÏ╣Ï▒Ï¿┘è" value={req.name_ar} onChange={e => { const n = [...serviceReqs]; n[idx].name_ar = e.target.value; setServiceReqs(n); }} />
                                 <div className="form-check form-switch flex-shrink-0">
                                    <input className="form-check-input" type="checkbox" checked={req.is_mandatory} onChange={e => { const n = [...serviceReqs]; n[idx].is_mandatory = e.target.checked; setServiceReqs(n); }} />
                                 </div>
@@ -4151,7 +4151,7 @@ export default function AgentDashboardPage() {
                  <div className="col-md-6 mt-3">
                     <label className="form-label small fw-bold"><i className="fas fa-file-pdf me-1"></i>Formulaire PDF (AR)</label>
                     <input type="file" className="form-control form-control-sm" accept=".pdf" dir="rtl" onChange={e => setServicePdfAr(e.target.files?.[0] || null)} />
-                    {editingService?.form_pdf_ar && <div className="mt-1 small text-end"><a href={editingService.form_pdf_ar} target="_blank" rel="noreferrer" className="text-success text-decoration-none"><i className="fas fa-check-circle me-1"></i>الملف الحالي موجود</a></div>}
+                    {editingService?.form_pdf_ar && <div className="mt-1 small text-end"><a href={editingService.form_pdf_ar} target="_blank" rel="noreferrer" className="text-success text-decoration-none"><i className="fas fa-check-circle me-1"></i>Ïº┘ä┘à┘ä┘ü Ïº┘äÏ¡Ïº┘ä┘è ┘à┘êÏ¼┘êÏ»</a></div>}
                  </div>
                </div>
 

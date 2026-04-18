@@ -194,7 +194,7 @@ export default function PriorityExplanationModal({ reclamationId, reclamationTit
               {reclamationTitle}
             </div>
             <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '3px' }}>
-              Réclamation #{reclamationId}
+              Signalement #{reclamationId}
             </div>
           </div>
           <button

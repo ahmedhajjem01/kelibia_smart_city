@@ -1,64 +1,52 @@
 import React from 'react';
 import { useI18n } from '../i18n/LanguageProvider';
+import { Link } from 'react-router-dom';
 import fortImg from '../assets/fort.webp';
 
 interface HeroSectionProps {
   user: { first_name: string; first_name_ar?: string } | null;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
-  const { t, lang } = useI18n();
+const HeroSection: React.FC<HeroSectionProps> = () => {
+  const { t } = useI18n();
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: '420px' }}>
-      {/* Background image */}
-      <img
-        src={fortImg}
-        alt="Fort de Kélibia"
-        className="w-full h-full object-cover"
-      />
-      {/* Dark gradient overlay */}
+    <div className="relative w-full overflow-hidden" style={{ height: '384px' }}>
+      {/* Background */}
+      <img src={fortImg} alt="Fort de Kélibia" className="w-full h-full object-cover" />
       <div
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(to bottom, rgba(0,28,58,0.25), rgba(0,28,58,0.72))' }}
-      ></div>
+        style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.15) 70%, transparent 100%)' }}
+      />
 
-      {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-        {/* Icon */}
-        <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '80px', height: 'auto', marginBottom: '20px' }} />
+      {/* Content — bottom-left aligned like the mockup */}
+      <div className="absolute inset-0 flex flex-col justify-end px-12 pb-14">
+        {/* Icon (moved from center to left) */}
+        <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '60px', height: 'auto', marginBottom: '12px' }} />
 
-        {/* Bilingual title */}
         <h1
-          className="font-black text-white uppercase tracking-tighter mb-2"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
+          className="font-extrabold text-white uppercase tracking-tighter leading-none mb-2"
+          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.4rem, 5vw, 3.8rem)' }}
         >
           République Tunisienne
         </h1>
         <h2
-          className="font-bold text-white mb-6"
-          dir="rtl"
-          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(2rem, 5vw, 3.5rem)', opacity: 0.92 }}
+          className="font-medium text-white mb-6 leading-none"
+          style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', opacity: 0.85 }}
         >
           الجمهورية التونسية
         </h2>
-
-        {/* Welcome message */}
-        <p className="text-white font-medium uppercase tracking-[0.2em] text-sm mb-3" style={{ opacity: 0.85 }}>
-          {t('welcome')}, <strong>{user ? (lang === 'ar' && user.first_name_ar ? user.first_name_ar : user.first_name) : t('citoyen_role')}</strong>
-        </p>
-        <p className="text-white text-xs uppercase tracking-widest" style={{ opacity: 0.65 }}>
-          {t('welcome_msg')}
-        </p>
+        <div>
+          <Link
+            to="/services"
+            className="inline-flex items-center gap-2 px-8 py-3 text-sm font-bold uppercase tracking-wider text-white no-underline active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '4px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', transition: 'background .2s' }}
+          >
+            <i className="fas fa-compass"></i>
+            Découvrir la Ville
+          </Link>
+        </div>
       </div>
-
-      {/* Fort caption */}
-      <span
-        className="absolute bottom-4 right-6 text-white text-xs py-1 px-3 rounded"
-        style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)', zIndex: 3 }}
-      >
-        {t('fort_caption')}
-      </span>
     </div>
   );
 };

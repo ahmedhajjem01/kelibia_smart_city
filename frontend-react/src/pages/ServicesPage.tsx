@@ -318,7 +318,7 @@ export default function ServicesPage() {
                     <button
                       className="w-100 d-flex align-items-center justify-content-between px-4 py-3 border-0 text-start"
                       style={{
-                        background: isOpen ? 'linear-gradient(135deg,#1a3a5c 0%,#1565c0 100%)' : '#fff',
+                        background: isOpen ? 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)' : '#fff',
                         color: isOpen ? '#fff' : '#1a1a2e',
                         cursor: 'pointer',
                         transition: 'all .25s',
@@ -327,7 +327,7 @@ export default function ServicesPage() {
                     >
                       <div className="d-flex align-items-center gap-3">
                         <div className="rounded-3 d-flex align-items-center justify-content-center"
-                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : '#e3f2fd', color: isOpen ? '#fff' : '#1565c0' }}>
+                          style={{ width: 40, height: 40, background: isOpen ? 'rgba(255,255,255,.2)' : 'rgba(212,170,141,.1)', color: isOpen ? '#fff' : '#d4aa8d' }}>
                           <i className={`fas ${cat.icon || 'fa-folder-open'}`} />
                         </div>
                         <div>
@@ -338,7 +338,7 @@ export default function ServicesPage() {
                       <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'}`} />
                     </button>
                     {isOpen && (
-                      <div className="p-4" style={{ background: '#f8faff', borderTop: '1px solid #e3f2fd' }}>
+                      <div className="p-4" style={{ background: '#f8faff', borderTop: '1px solid #E6F4F7' }}>
                         <div className="row g-3">
                           {visibleServices.map(service => (
                             <div key={service.id} className="col-md-4">
@@ -374,13 +374,14 @@ export default function ServicesPage() {
                 <div key={pay.id} className="col-md-4">
                   <div className="card h-100 border-0 shadow-sm" style={{ borderRadius: '15px' }}>
                     <div className="card-body p-4 text-center">
-                      <i className={`fas ${pay.icon} fs-1 text-primary mb-3`}></i>
+                      <i className={`fas ${pay.icon} fs-1 mb-3`} style={{ color: '#d4aa8d' }}></i>
                       <h5 className="fw-bold">{pay.title}</h5>
-                      <h4 className="text-primary fw-bold mb-3">{pay.amount} DT</h4>
+                      <h4 className="fw-bold mb-3" style={{ color: '#d4aa8d' }}>{pay.amount} DT</h4>
                       {localStorage.getItem(`tax_paid_${pay.id}`) === 'true' ? (
                           <div className="text-success fw-bold p-2 bg-light rounded-pill"><i className="fas fa-check-circle me-1"></i> {lang === 'ar' ? 'خالصة' : 'Payé'}</div>
                       ) : (
-                          <button className="btn btn-primary w-100 rounded-pill" onClick={() => navigate(`/paiement?amount=${pay.amount}&reason=${encodeURIComponent(pay.title)}&requestId=${pay.id}&requestType=tax&target=/services`)}>
+                          <button className="w-100 rounded-pill border-0 py-2 fw-bold" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', color: '#fff', cursor: 'pointer' }} 
+                            onClick={() => navigate(`/paiement?amount=${pay.amount}&reason=${encodeURIComponent(pay.title)}&requestId=${pay.id}&requestType=tax&target=/services`)}>
                             {lang === 'ar' ? 'دفع الآن' : 'Payer'}
                           </button>
                       )}

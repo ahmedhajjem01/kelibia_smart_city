@@ -10,7 +10,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
     queryset = Reclamation.objects.all()
 
     def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve', 'classify_preview', 'ml_stats', 'reclassify']:
+        if self.action in ['create', 'list', 'retrieve', 'classify_preview', 'ml_stats', 'reclassify', 'update_status', 'explain_text', 'explain_priority']:
             return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
@@ -284,6 +284,23 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             except Exception:
                 top_features = {}
 
+            # ── 3b. Top features per priority (SHAP for priority model) ──────
+            prio_top_features = {}
+            try:
+                tfidf_p    = prio_model.named_steps['tfidf']
+                clf_p      = prio_model.named_steps['clf']
+                base_clf_p = clf_p.calibrated_classifiers_[0].estimator
+                feat_names_p = tfidf_p.get_feature_names_out()
+                for i, cls in enumerate(base_clf_p.classes_):
+                    coef = base_clf_p.coef_[i]
+                    top_idx = np.argsort(coef)[::-1][:8]
+                    prio_top_features[cls] = [
+                        {"word": feat_names_p[j], "score": round(float(coef[j]), 3)}
+                        for j in top_idx
+                    ]
+            except Exception:
+                prio_top_features = {}
+
             # ── 4. Overall accuracy ──────────────────────────────────────────
             correct_cat  = sum(1 for a, b in zip(categories, cat_pred)  if a == b)
             correct_prio = sum(1 for a, b in zip(priorities, prio_pred) if a == b)
@@ -303,12 +320,44 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                     "accuracy":         round(correct_prio / n, 3),
                     "confusion_matrix": cm_prio,
                     "report":           prio_report,
+                    "top_features":     prio_top_features,
                 },
             })
         except Exception as e:
             return Response({"error": f"Stats computation failed: {e}\n{traceback.format_exc()}"}, status=500)
 
 
+
+    # ── explain_text (LIME + SHAP for free text — AI stats page demo) ──────────
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def explain_text(self, request):
+        """
+        POST /api/reclamations/explain_text/
+        Body: { "title": "...", "description": "..." }
+
+        Returns LIME + SHAP word-level explanations for free text input.
+        Used by the AI stats page live demo. Agents/staff only.
+        """
+        user = request.user
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
+            return Response({"detail": "Non autorisé."}, status=status.HTTP_403_FORBIDDEN)
+
+        title       = request.data.get('title', '')
+        description = request.data.get('description', '')
+        if not title and not description:
+            return Response({"detail": "title or description is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from .classifier import explain_priority
+        except ImportError as e:
+            return Response({"error": f"ML packages not available: {e}"}, status=503)
+
+        try:
+            result = explain_priority(title, description)
+            return Response(result)
+        except Exception as exc:
+            import traceback
+            return Response({"error": str(exc), "traceback": traceback.format_exc()}, status=500)
 
     # ── explain_priority (LIME + SHAP for agents) ────────────────────────────
     @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])

@@ -175,9 +175,9 @@ DJOSER = {
     "SEND_CONFIRMATION_EMAIL": True,
     "SET_USERNAME_RETYPE": True,
     "SET_PASSWORD_RETYPE": True,
-    "PASSWORD_RESET_CONFIRM_URL": "reset-password-confirm.html?uid={uid}&token={token}",
+    "PASSWORD_RESET_CONFIRM_URL": "reset-password-confirm?uid={uid}&token={token}",
     "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
-    "ACTIVATION_URL": "activate.html?uid={uid}&token={token}",
+    "ACTIVATION_URL": "activate?uid={uid}&token={token}",
     "SEND_ACTIVATION_EMAIL": True,
     "SERIALIZERS": {
         "user_create": "accounts.serializers.UserCreateSerializer",

@@ -120,7 +120,7 @@ class DemandeMariage(models.Model):
     ]
 
     TYPE_CHOICES = [
-        ('municipal ', ' Municipal / بلدي'),
+        ('municipal', 'Municipal / بلدي'),
         ('notaire', 'Notaire / عدلي'),
     ]
     LIEU_CHOICES = [

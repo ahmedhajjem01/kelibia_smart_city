@@ -24,13 +24,13 @@ type UserInfo = {
   is_verified: boolean
   is_staff?: boolean
   is_superuser?: boolean
+  date_joined?: string
 }
 
 type StatCard = {
   key: string
   icon: string
   color: string
-  bg: string
   label: string
   labelAr: string
   route: string
@@ -41,16 +41,7 @@ type StatCard = {
 
 function initials(u: UserInfo | null) {
   if (!u) return '?'
-  const f = u.first_name?.[0] || ''
-  const l = u.last_name?.[0] || ''
-  return (f + l).toUpperCase() || u.email?.[0]?.toUpperCase() || '?'
-}
-
-function avatarColor(name: string) {
-  const colors = ['#6f42c1', '#0d6efd', '#198754', '#dc3545', '#fd7e14', '#0dcaf0', '#6610f2', '#d63384']
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  return colors[Math.abs(hash) % colors.length]
+  return ((u.first_name?.[0] || '') + (u.last_name?.[0] || '')).toUpperCase() || u.email?.[0]?.toUpperCase() || '?'
 }
 
 function formatDate(iso?: string) {
@@ -59,70 +50,103 @@ function formatDate(iso?: string) {
   catch { return iso }
 }
 
+const CSS = `
+.pf-wrap { max-width:900px; margin:0 auto; }
+.pf-card { background:#fff; border:1px solid #eeeeee; margin-bottom:16px; }
+.pf-card-top { background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); height:72px; }
+.pf-card-body { padding:0 24px 24px; }
+.pf-avatar-row { display:flex; align-items:flex-end; gap:18px; margin-top:-40px; margin-bottom:18px; }
+.pf-avatar { width:76px; height:76px; border-radius:50%; background:#d4aa8d; color:#fff; font-size:1.7rem; font-weight:900; display:flex; align-items:center; justify-content:center; border:4px solid #fff; flex-shrink:0; font-family:'Public Sans',sans-serif; }
+.pf-name { font-size:1rem; font-weight:900; color:#1a1c1c; font-family:'Public Sans',sans-serif; margin-bottom:4px; }
+.pf-name-ar { font-size:.85rem; color:#6b7280; font-family:'Cairo',sans-serif; direction:rtl; }
+.pf-badges { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.pf-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.3px; }
+.pf-badge-verified   { background:#d1fae5; color:#065f46; }
+.pf-badge-unverified { background:#fef3c7; color:#92400e; }
+.pf-badge-citizen    { background:#dbeafe; color:#1e40af; }
+.pf-badge-agent      { background:#ede9fe; color:#5b21b6; }
+.pf-edit-btn { margin-left:auto; padding-bottom:4px; }
+.pf-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; border:none; cursor:pointer; font-family:'Public Sans',sans-serif; transition:filter .15s; }
+.pf-btn-primary { background:linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%); color:#fff; }
+.pf-btn-primary:hover { filter:brightness(1.1); }
+.pf-btn-secondary { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; }
+.pf-btn-secondary:hover { background:#e5e7eb; }
+.pf-btn-success { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+.pf-btn-success:hover { background:#a7f3d0; }
+.pf-divider { border:none; border-top:1px solid #f3f4f6; margin:18px 0; }
+.pf-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.pf-field { display:flex; flex-direction:column; gap:5px; }
+.pf-field-full { grid-column:1/-1; }
+.pf-label { font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#9ca3af; display:flex; align-items:center; gap:5px; }
+.pf-value { font-size:.85rem; color:#1a1c1c; padding:9px 12px; background:#f9fafb; border:1px solid #f3f4f6; }
+.pf-input { font-size:.85rem; color:#1a1c1c; padding:9px 12px; background:#fff; border:1px solid #e5e7eb; outline:none; font-family:inherit; transition:border .15s; width:100%; }
+.pf-input:focus { border-color:#d4aa8d; }
+.pf-readonly { opacity:.6; cursor:default; display:flex; align-items:center; gap:8px; }
+.pf-feedback-ok  { background:#d1fae5; color:#065f46; padding:10px 14px; font-size:.8rem; font-weight:600; margin-bottom:14px; border-left:3px solid #065f46; }
+.pf-feedback-err { background:#fee2e2; color:#991b1b; padding:10px 14px; font-size:.8rem; font-weight:600; margin-bottom:14px; border-left:3px solid #C44536; }
+.pf-section-hdr { display:flex; align-items:center; gap:10px; margin-bottom:14px; margin-top:8px; }
+.pf-section-hdr-bar { width:4px; height:20px; background:#d4aa8d; }
+.pf-section-hdr-title { font-size:.85rem; font-weight:900; color:#1a1c1c; font-family:'Public Sans',sans-serif; text-transform:uppercase; letter-spacing:.5px; }
+.pf-stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; margin-bottom:16px; }
+.pf-stat-card { background:#fff; border:1px solid #eeeeee; border-left:3px solid #d4aa8d; display:flex; align-items:center; gap:14px; padding:14px 16px; transition:box-shadow .2s; }
+.pf-stat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.07); }
+.pf-stat-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+.pf-stat-label { font-size:.75rem; font-weight:800; color:#1a1c1c; font-family:'Public Sans',sans-serif; }
+.pf-stat-label-ar { font-size:.65rem; color:#9ca3af; font-family:'Cairo',sans-serif; direction:rtl; }
+.pf-stat-count { font-size:1.4rem; font-weight:900; color:#d4aa8d; font-family:'Public Sans',sans-serif; margin-left:auto; }
+.pf-stat-sub { font-size:.62rem; color:#9ca3af; margin-top:2px; }
+.pf-stat-link { display:inline-flex; align-items:center; gap:4px; font-size:.68rem; font-weight:700; color:#d4aa8d; text-decoration:none; text-transform:uppercase; letter-spacing:.3px; margin-top:4px; }
+.pf-stat-link:hover { color:#b87a50; }
+.pf-quick { background:#fff; border:1px solid #eeeeee; padding:16px 20px; }
+.pf-quick-title { font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#9ca3af; margin-bottom:10px; }
+.pf-quick-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.pf-quick-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; background:#E6F4F7; color:#0F4C5C; border:1px solid #B5DDE5; font-size:.72rem; font-weight:700; text-transform:uppercase; text-decoration:none; transition:background .15s; }
+.pf-quick-btn:hover { background:#B5DDE5; color:#0F4C5C; }
+.pf-footer-links { display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; }
+.pf-footer-link { font-size:.72rem; color:#9ca3af; text-decoration:none; display:flex; align-items:center; gap:5px; }
+.pf-footer-link:hover { color:#d4aa8d; }
+.pf-loading { display:flex; align-items:center; justify-content:center; gap:12px; padding:60px 0; }
+.pf-spinner { width:28px; height:28px; border:3px solid #e5e7eb; border-top-color:#d4aa8d; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@media(max-width:600px){ .pf-grid { grid-template-columns:1fr; } .pf-avatar-row { flex-wrap:wrap; } }
+`
+
 export default function ProfilePage() {
   useI18n()
   const navigate = useNavigate()
-
   const [user, setUser] = useState<UserInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
-
-  const [editForm, setEditForm] = useState({
-    first_name: '',
-    last_name: '',
-    phone: '',
-    address: '',
-    city: '',
-    governorate: '',
-    place_of_birth: '',
-  })
-
+  const [editForm, setEditForm] = useState({ first_name: '', last_name: '', phone: '', address: '', city: '', governorate: '', place_of_birth: '' })
   const [stats, setStats] = useState<StatCard[]>([
-    { key: 'reclamations', icon: 'fa-exclamation-circle', color: '#dc3545', bg: '#fff5f5', label: 'Réclamations',         labelAr: 'الشكاوى',          route: '/mes-reclamations', total: null, pending: null, approved: null },
-    { key: 'evenements',   icon: 'fa-calendar-check',    color: '#6f42c1', bg: '#f5f0ff', label: 'Événements',            labelAr: 'التظاهرات',        route: '/mes-evenements',   total: null, pending: null, approved: null },
-    { key: 'residences',   icon: 'fa-home',              color: '#0d6efd', bg: '#f0f5ff', label: 'Attestations résidence', labelAr: 'شهادات الإقامة',   route: '/mes-residences',   total: null, pending: null, approved: null },
-    { key: 'naissances',   icon: 'fa-baby',              color: '#198754', bg: '#f0fff5', label: 'Déclarations naissance', labelAr: 'تصاريح الولادة',   route: '/mes-naissances',   total: null, pending: null, approved: null },
-    { key: 'deces',        icon: 'fa-cross',             color: '#6c757d', bg: '#f8f9fa', label: 'Déclarations décès',    labelAr: 'تصاريح الوفاة',   route: '/mes-deces',        total: null, pending: null, approved: null },
-    { key: 'mariages',     icon: 'fa-ring',              color: '#fd7e14', bg: '#fff8f0', label: 'Demandes mariage',       labelAr: 'طلبات الزواج',     route: '/mes-mariages',     total: null, pending: null, approved: null },
+    { key: 'reclamations', icon: 'fa-bullhorn',        color: '#C44536', label: 'Signalements',           labelAr: 'الشكاوى',        route: '/mes-reclamations', total: null, pending: null, approved: null },
+    { key: 'evenements',   icon: 'fa-calendar-check',  color: '#d4aa8d', label: 'Événements',              labelAr: 'التظاهرات',      route: '/mes-evenements',   total: null, pending: null, approved: null },
+    { key: 'residences',   icon: 'fa-home',             color: '#d4aa8d', label: 'Attestations résidence',  labelAr: 'شهادات الإقامة', route: '/mes-residences',   total: null, pending: null, approved: null },
+    { key: 'naissances',   icon: 'fa-baby',             color: '#065f46', label: 'Déclarations naissance',  labelAr: 'تصاريح الولادة', route: '/mes-naissances',   total: null, pending: null, approved: null },
+    { key: 'deces',        icon: 'fa-cross',            color: '#6b7280', label: 'Déclarations décès',      labelAr: 'تصاريح الوفاة',  route: '/mes-deces',        total: null, pending: null, approved: null },
+    { key: 'mariages',     icon: 'fa-ring',             color: '#d4aa8d', label: 'Demandes mariage',         labelAr: 'طلبات الزواج',   route: '/mes-mariages',     total: null, pending: null, approved: null },
   ])
 
-  // ── Fetch user profile ───────────────────────────────────────────────────────
   useEffect(() => {
     const access = getAccessToken()
     if (!access) { navigate('/login'); return }
-
-    fetch(resolveBackendUrl('/api/accounts/me/'), {
-      headers: { Authorization: `Bearer ${access}` },
-    })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data) {
           setUser(data)
-          setEditForm({
-            first_name:    data.first_name    || '',
-            last_name:     data.last_name     || '',
-            phone:         data.phone         || '',
-            address:       data.address       || '',
-            city:          data.city          || '',
-            governorate:   data.governorate   || '',
-            place_of_birth: data.place_of_birth || '',
-          })
+          setEditForm({ first_name: data.first_name || '', last_name: data.last_name || '', phone: data.phone || '', address: data.address || '', city: data.city || '', governorate: data.governorate || '', place_of_birth: data.place_of_birth || '' })
         }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
+      }).catch(console.error).finally(() => setLoading(false))
   }, [navigate])
 
-  // ── Fetch stats in parallel ──────────────────────────────────────────────────
   useEffect(() => {
     const access = getAccessToken()
     if (!access) return
-
     const h = { Authorization: `Bearer ${access}` }
-
     const endpoints: Record<string, string> = {
       reclamations: resolveBackendUrl('/api/reclamations/'),
       evenements:   resolveBackendUrl('/api/evenements/demande/'),
@@ -131,410 +155,200 @@ export default function ProfilePage() {
       deces:        resolveBackendUrl('/extrait-deces/api/declaration/'),
       mariages:     resolveBackendUrl('/extrait-mariage/demandes/'),
     }
-
-    Promise.allSettled(
-      Object.entries(endpoints).map(([key, url]) =>
-        fetch(url, { headers: h })
-          .then(r => r.ok ? r.json() : null)
-          .then(data => ({ key, data }))
-      )
-    ).then(results => {
+    Promise.allSettled(Object.entries(endpoints).map(([key, url]) =>
+      fetch(url, { headers: h }).then(r => r.ok ? r.json() : null).then(data => ({ key, data }))
+    )).then(results => {
       setStats(prev => prev.map(card => {
         const result = results.find(r => r.status === 'fulfilled' && (r as PromiseFulfilledResult<{key: string; data: unknown}>).value?.key === card.key)
         if (!result || result.status !== 'fulfilled') return card
         const raw = (result as PromiseFulfilledResult<{key: string; data: unknown}>).value.data
         if (!raw) return card
-
         const items: Record<string, string>[] = Array.isArray(raw) ? raw : ((raw as {results?: unknown[]}).results || [])
-        const total   = items.length
-        const pending = items.filter(i => ['pending', 'en_attente', 'soumis'].includes(i.status || i.statut || '')).length
-        const approved = items.filter(i => ['approved', 'resolved', 'approuve', 'signe'].includes(i.status || i.statut || '')).length
-        return { ...card, total, pending, approved }
+        return { ...card, total: items.length, pending: items.filter(i => ['pending','en_attente','soumis'].includes(i.status||i.statut||'')).length, approved: items.filter(i => ['approved','resolved','approuve','signe'].includes(i.status||i.statut||'')).length }
       }))
     })
   }, [])
 
-  // ── Save profile edits ───────────────────────────────────────────────────────
   async function handleSave() {
     const access = getAccessToken()
     if (!access) return
     setSaving(true); setSaveError(null); setSaveSuccess(false)
-
     try {
-      const res = await fetch(resolveBackendUrl('/api/accounts/me/'), {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
-        body: JSON.stringify(editForm),
-      })
-      if (res.ok) {
-        const updated = await res.json()
-        setUser(updated)
-        setEditing(false)
-        setSaveSuccess(true)
-        setTimeout(() => setSaveSuccess(false), 3000)
-      } else {
-        const err = await res.json()
-        setSaveError(err.error || 'Erreur lors de la sauvegarde.')
-      }
-    } catch {
-      setSaveError('Erreur réseau. Veuillez réessayer.')
-    } finally {
-      setSaving(false)
-    }
+      const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` }, body: JSON.stringify(editForm) })
+      if (res.ok) { setUser(await res.json()); setEditing(false); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 3000) }
+      else { const err = await res.json(); setSaveError(err.error || 'Erreur lors de la sauvegarde.') }
+    } catch { setSaveError('Erreur réseau. Veuillez réessayer.') }
+    finally { setSaving(false) }
   }
 
   function handleCancel() {
     if (!user) return
-    setEditForm({
-      first_name:    user.first_name    || '',
-      last_name:     user.last_name     || '',
-      phone:         user.phone         || '',
-      address:       user.address       || '',
-      city:          user.city          || '',
-      governorate:   user.governorate   || '',
-      place_of_birth: user.place_of_birth || '',
-    })
-    setEditing(false)
-    setSaveError(null)
+    setEditForm({ first_name: user.first_name || '', last_name: user.last_name || '', phone: user.phone || '', address: user.address || '', city: user.city || '', governorate: user.governorate || '', place_of_birth: user.place_of_birth || '' })
+    setEditing(false); setSaveError(null)
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-  const roleLabel = () => {
-    if (!user) return ''
-    if (user.is_superuser || user.user_type === 'supervisor') return 'Superviseur'
-    if (user.is_staff || user.user_type === 'agent') return 'Agent Municipal'
-    return 'Citoyen'
-  }
-
-  const roleColor = () => {
-    if (!user) return '#6c757d'
-    if (user.is_superuser || user.user_type === 'supervisor') return '#6f42c1'
-    if (user.is_staff || user.user_type === 'agent') return '#0d6efd'
-    return '#198754'
-  }
-
-  const inputCls = "form-control bg-light border-0 shadow-sm"
-  const inputStyle = { borderRadius: '10px', fontSize: '.9rem' }
-  const labelCls = "form-label fw-semibold small text-uppercase text-muted mb-1"
+  const roleLabel = () => { if (!user) return ''; if (user.is_superuser || user.user_type === 'supervisor') return 'Superviseur'; if (user.is_staff || user.user_type === 'agent') return 'Agent Municipal'; return 'Citoyen' }
+  const isAgent = user?.is_staff || user?.user_type === 'agent' || user?.is_superuser
 
   if (loading) return (
     <MainLayout user={null} onLogout={() => navigate('/login')} breadcrumbs={[{ label: 'Mon Profil' }]}>
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 300 }}>
-        <span className="spinner-border text-primary me-3"></span>
-        <span className="text-muted">Chargement du profil...</span>
-      </div>
+      <style>{CSS}</style>
+      <div className="pf-loading"><div className="pf-spinner"></div><span style={{ fontSize: '.82rem', color: '#9ca3af' }}>Chargement du profil...</span></div>
     </MainLayout>
   )
 
-  const accentColor = user ? avatarColor(`${user.first_name}${user.last_name}`) : '#6f42c1'
-
   return (
-    <MainLayout user={user} onLogout={() => navigate('/login')}
-      breadcrumbs={[{ label: 'Mon Profil' }]}>
-      <div className="container-fluid py-3 pb-5" style={{ maxWidth: 1000 }}>
+    <MainLayout user={user} onLogout={() => navigate('/login')} breadcrumbs={[{ label: 'Mon Profil' }]}>
+      <style>{CSS}</style>
+      <div className="pf-wrap">
 
-        {/* ── SECTION 1: Identity card ─────────────────────────────────────── */}
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-
-          {/* Colored top banner */}
-          <div style={{ background: `linear-gradient(135deg, ${accentColor}dd, ${accentColor}88)`, height: 80 }} />
-
-          <div className="card-body px-4 pb-4 pt-0">
-            {/* Avatar row */}
-            <div className="d-flex align-items-end gap-4 mb-3" style={{ marginTop: -44 }}>
-              <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow"
-                style={{ width: 80, height: 80, background: accentColor, color: '#fff', fontSize: '1.8rem', border: '4px solid #fff', flexShrink: 0 }}>
-                {initials(user)}
-              </div>
-              <div className="pb-1 flex-grow-1">
-                <div className="d-flex align-items-center gap-2 flex-wrap">
-                  <h4 className="fw-bold mb-0" style={{ color: '#1a1a2e' }}>
-                    {user?.first_name} {user?.last_name}
-                  </h4>
-                  {(user?.first_name_ar || user?.last_name_ar) && (
-                    <span className="text-muted" style={{ fontFamily: 'Arial', direction: 'rtl', fontSize: '.95rem' }}>
-                      {user?.first_name_ar} {user?.last_name_ar}
-                    </span>
-                  )}
-                </div>
-                <div className="d-flex align-items-center gap-2 mt-1 flex-wrap">
-                  {/* Verification badge */}
-                  {user?.is_verified ? (
-                    <span className="badge rounded-pill px-3 py-1" style={{ background: '#d1fae5', color: '#065f46', fontSize: '.75rem' }}>
-                      <i className="fas fa-check-circle me-1"></i>Compte vérifié
-                    </span>
-                  ) : (
-                    <span className="badge rounded-pill px-3 py-1" style={{ background: '#fef3c7', color: '#92400e', fontSize: '.75rem' }}>
-                      <i className="fas fa-hourglass-half me-1"></i>En attente de vérification
-                    </span>
-                  )}
-                  {/* Role badge */}
-                  <span className="badge rounded-pill px-3 py-1" style={{ background: `${roleColor()}22`, color: roleColor(), fontSize: '.75rem' }}>
-                    <i className="fas fa-id-badge me-1"></i>{roleLabel()}
+        {/* ── Identity card ── */}
+        <div className="pf-card">
+          <div className="pf-card-top"></div>
+          <div className="pf-card-body">
+            <div className="pf-avatar-row">
+              <div className="pf-avatar">{initials(user)}</div>
+              <div style={{ flex: 1 }}>
+                <div className="pf-name">{user?.first_name} {user?.last_name}</div>
+                {(user?.first_name_ar || user?.last_name_ar) && (
+                  <div className="pf-name-ar">{user?.first_name_ar} {user?.last_name_ar}</div>
+                )}
+                <div className="pf-badges">
+                  {user?.is_verified
+                    ? <span className="pf-badge pf-badge-verified"><i className="fas fa-check-circle"></i>Compte vérifié</span>
+                    : <span className="pf-badge pf-badge-unverified"><i className="fas fa-hourglass-half"></i>En attente de vérification</span>
+                  }
+                  <span className={`pf-badge ${isAgent ? 'pf-badge-agent' : 'pf-badge-citizen'}`}>
+                    <i className="fas fa-id-badge"></i>{roleLabel()}
                   </span>
                 </div>
               </div>
-              {/* Edit toggle */}
-              <div className="pb-1">
+              <div className="pf-edit-btn">
                 {!editing ? (
-                  <button className="btn btn-outline-primary rounded-pill px-4"
-                    style={{ fontSize: '.85rem' }}
-                    onClick={() => setEditing(true)}>
-                    <i className="fas fa-pencil-alt me-2"></i>Modifier
+                  <button className="pf-btn pf-btn-primary" onClick={() => setEditing(true)}>
+                    <i className="fas fa-pencil-alt"></i>Modifier
                   </button>
                 ) : (
-                  <div className="d-flex gap-2">
-                    <button className="btn btn-success rounded-pill px-4" style={{ fontSize: '.85rem' }}
-                      onClick={handleSave} disabled={saving}>
-                      {saving
-                        ? <span className="spinner-border spinner-border-sm"></span>
-                        : <><i className="fas fa-save me-2"></i>Enregistrer</>}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="pf-btn pf-btn-success" onClick={handleSave} disabled={saving}>
+                      {saving ? <span className="pf-spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span> : <i className="fas fa-save"></i>}
+                      Enregistrer
                     </button>
-                    <button className="btn btn-outline-secondary rounded-pill px-3" style={{ fontSize: '.85rem' }}
-                      onClick={handleCancel} disabled={saving}>
-                      Annuler
-                    </button>
+                    <button className="pf-btn pf-btn-secondary" onClick={handleCancel} disabled={saving}>Annuler</button>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Feedback */}
-            {saveSuccess && (
-              <div className="alert alert-success rounded-3 py-2 px-3 mb-3 d-flex align-items-center gap-2" style={{ fontSize: '.88rem' }}>
-                <i className="fas fa-check-circle"></i> Profil mis à jour avec succès !
-              </div>
-            )}
-            {saveError && (
-              <div className="alert alert-danger rounded-3 py-2 px-3 mb-3 d-flex align-items-center gap-2" style={{ fontSize: '.88rem' }}>
-                <i className="fas fa-exclamation-triangle"></i> {saveError}
-              </div>
-            )}
+            {saveSuccess && <div className="pf-feedback-ok"><i className="fas fa-check-circle me-2"></i>Profil mis à jour avec succès !</div>}
+            {saveError  && <div className="pf-feedback-err"><i className="fas fa-exclamation-triangle me-2"></i>{saveError}</div>}
 
-            <hr className="my-3" />
+            <hr className="pf-divider" />
 
             {/* Info grid */}
-            <div className="row g-3">
-
-              {/* Email — always read-only */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-envelope me-1 text-primary opacity-75"></i>Email</label>
-                <div className="d-flex align-items-center gap-2">
-                  <span className="form-control bg-light border-0 shadow-sm text-muted"
-                    style={{ ...inputStyle, cursor: 'default' }}>
-                    {user?.email}
-                  </span>
-                  <span title="Non modifiable"><i className="fas fa-lock text-muted opacity-50"></i></span>
-                </div>
+            <div className="pf-grid">
+              {/* Email */}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-envelope"></i>Email</label>
+                <div className="pf-value pf-readonly">{user?.email}<i className="fas fa-lock" style={{ fontSize: '.65rem', color: '#d1d5db', marginLeft: 'auto' }}></i></div>
               </div>
-
-              {/* CIN — always read-only */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-id-card me-1 text-primary opacity-75"></i>CIN</label>
-                <div className="d-flex align-items-center gap-2">
-                  <span className="form-control bg-light border-0 shadow-sm text-muted"
-                    style={{ ...inputStyle, cursor: 'default' }}>
-                    {user?.cin || '—'}
-                  </span>
-                  <span title="Non modifiable"><i className="fas fa-lock text-muted opacity-50"></i></span>
-                </div>
+              {/* CIN */}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-id-card"></i>CIN</label>
+                <div className="pf-value pf-readonly">{user?.cin || '—'}<i className="fas fa-lock" style={{ fontSize: '.65rem', color: '#d1d5db', marginLeft: 'auto' }}></i></div>
               </div>
-
               {/* First name */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-user me-1 text-primary opacity-75"></i>Prénom</label>
-                {editing ? (
-                  <input type="text" className={inputCls} style={inputStyle}
-                    value={editForm.first_name} onChange={e => setEditForm(f => ({ ...f, first_name: e.target.value }))} />
-                ) : (
-                  <div className="form-control bg-light border-0 shadow-sm" style={{ ...inputStyle, cursor: 'default' }}>{user?.first_name || '—'}</div>
-                )}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-user"></i>Prénom</label>
+                {editing ? <input className="pf-input" type="text" value={editForm.first_name} onChange={e => setEditForm(f => ({ ...f, first_name: e.target.value }))} />
+                  : <div className="pf-value">{user?.first_name || '—'}</div>}
               </div>
-
               {/* Last name */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-user me-1 text-primary opacity-75"></i>Nom</label>
-                {editing ? (
-                  <input type="text" className={inputCls} style={inputStyle}
-                    value={editForm.last_name} onChange={e => setEditForm(f => ({ ...f, last_name: e.target.value }))} />
-                ) : (
-                  <div className="form-control bg-light border-0 shadow-sm" style={{ ...inputStyle, cursor: 'default' }}>{user?.last_name || '—'}</div>
-                )}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-user"></i>Nom</label>
+                {editing ? <input className="pf-input" type="text" value={editForm.last_name} onChange={e => setEditForm(f => ({ ...f, last_name: e.target.value }))} />
+                  : <div className="pf-value">{user?.last_name || '—'}</div>}
               </div>
-
               {/* Phone */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-phone me-1 text-primary opacity-75"></i>Téléphone</label>
-                {editing ? (
-                  <input type="tel" className={inputCls} style={inputStyle}
-                    value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} />
-                ) : (
-                  <div className="form-control bg-light border-0 shadow-sm" style={{ ...inputStyle, cursor: 'default' }}>{user?.phone || '—'}</div>
-                )}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-phone"></i>Téléphone</label>
+                {editing ? <input className="pf-input" type="tel" value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} />
+                  : <div className="pf-value">{user?.phone || '—'}</div>}
               </div>
-
               {/* City */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-city me-1 text-primary opacity-75"></i>Ville</label>
-                {editing ? (
-                  <input type="text" className={inputCls} style={inputStyle}
-                    value={editForm.city} onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))} />
-                ) : (
-                  <div className="form-control bg-light border-0 shadow-sm" style={{ ...inputStyle, cursor: 'default' }}>{user?.city || '—'}</div>
-                )}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-city"></i>Ville</label>
+                {editing ? <input className="pf-input" type="text" value={editForm.city} onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))} />
+                  : <div className="pf-value">{user?.city || '—'}</div>}
               </div>
-
               {/* Governorate */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-map-marker-alt me-1 text-primary opacity-75"></i>Gouvernorat</label>
-                {editing ? (
-                  <input type="text" className={inputCls} style={inputStyle}
-                    value={editForm.governorate} onChange={e => setEditForm(f => ({ ...f, governorate: e.target.value }))} />
-                ) : (
-                  <div className="form-control bg-light border-0 shadow-sm" style={{ ...inputStyle, cursor: 'default' }}>{user?.governorate || '—'}</div>
-                )}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-map-marker-alt"></i>Gouvernorat</label>
+                {editing ? <input className="pf-input" type="text" value={editForm.governorate} onChange={e => setEditForm(f => ({ ...f, governorate: e.target.value }))} />
+                  : <div className="pf-value">{user?.governorate || '—'}</div>}
               </div>
-
-              {/* Date of birth — read-only (set during registration) */}
-              <div className="col-md-6">
-                <label className={labelCls}><i className="fas fa-birthday-cake me-1 text-primary opacity-75"></i>Date de naissance</label>
-                <div className="d-flex align-items-center gap-2">
-                  <span className="form-control bg-light border-0 shadow-sm text-muted"
-                    style={{ ...inputStyle, cursor: 'default' }}>
-                    {formatDate(user?.date_of_birth)}
-                  </span>
-                  <span title="Non modifiable"><i className="fas fa-lock text-muted opacity-50"></i></span>
-                </div>
+              {/* Date of birth */}
+              <div className="pf-field">
+                <label className="pf-label"><i className="fas fa-birthday-cake"></i>Date de naissance</label>
+                <div className="pf-value pf-readonly">{formatDate(user?.date_of_birth)}<i className="fas fa-lock" style={{ fontSize: '.65rem', color: '#d1d5db', marginLeft: 'auto' }}></i></div>
               </div>
-
               {/* Address */}
-              <div className="col-12">
-                <label className={labelCls}><i className="fas fa-map-pin me-1 text-primary opacity-75"></i>Adresse</label>
-                {editing ? (
-                  <input type="text" className={inputCls} style={inputStyle}
-                    value={editForm.address} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))} />
-                ) : (
-                  <div className="form-control bg-light border-0 shadow-sm" style={{ ...inputStyle, cursor: 'default' }}>{user?.address || '—'}</div>
-                )}
+              <div className="pf-field pf-field-full">
+                <label className="pf-label"><i className="fas fa-map-pin"></i>Adresse</label>
+                {editing ? <input className="pf-input" type="text" value={editForm.address} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))} />
+                  : <div className="pf-value">{user?.address || '—'}</div>}
               </div>
-
             </div>
 
-            {/* Footer links */}
-            <div className="d-flex gap-3 mt-4 flex-wrap" style={{ fontSize: '.82rem' }}>
-              <Link to="/forgot-password" className="text-decoration-none text-muted">
-                <i className="fas fa-key me-1"></i>Changer le mot de passe
-              </Link>
-              <span className="text-muted opacity-50">•</span>
-              <span className="text-muted">
-                <i className="fas fa-calendar-alt me-1 opacity-75"></i>
-                Membre depuis {user ? new Date((user as unknown as {date_joined?: string}).date_joined || '').getFullYear() || '—' : '—'}
+            <div className="pf-footer-links">
+              <Link to="/forgot-password" className="pf-footer-link"><i className="fas fa-key"></i>Changer le mot de passe</Link>
+              <span className="pf-footer-link" style={{ cursor: 'default' }}>
+                <i className="fas fa-calendar-alt"></i>Membre depuis {user?.date_joined ? new Date(user.date_joined).getFullYear() : '—'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* ── SECTION 2: Mes demandes ──────────────────────────────────────────── */}
-        <div className="mb-3 d-flex align-items-center gap-3">
-          <div className="rounded-3 p-2 shadow-sm d-flex align-items-center justify-content-center"
-            style={{ background: 'linear-gradient(135deg,#6f42c1,#0d6efd)', color: '#fff', width: 38, height: 38 }}>
-            <i className="fas fa-folder-open"></i>
-          </div>
-          <div>
-            <h5 className="fw-bold mb-0" style={{ color: '#1a1a2e' }}>Mes demandes & dossiers</h5>
-            <p className="text-muted small mb-0" style={{ direction: 'rtl' }}>طلباتي وملفاتي</p>
-          </div>
+        {/* ── Mes demandes ── */}
+        <div className="pf-section-hdr">
+          <div className="pf-section-hdr-bar"></div>
+          <div className="pf-section-hdr-title">Mes demandes & dossiers</div>
+          <span style={{ fontSize: '.65rem', color: '#9ca3af', fontFamily: "'Cairo',sans-serif", direction: 'rtl', marginLeft: 4 }}>طلباتي وملفاتي</span>
         </div>
 
-        <div className="row g-3">
+        <div className="pf-stats-grid">
           {stats.map(card => (
-            <div key={card.key} className="col-md-6 col-lg-4">
-              <div className="card border-0 shadow-sm rounded-4 h-100 overflow-hidden"
-                style={{ transition: 'transform .18s, box-shadow .18s', cursor: 'default' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(0,0,0,.12)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ''; (e.currentTarget as HTMLDivElement).style.boxShadow = '' }}>
-
-                {/* Colored left accent bar */}
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: card.color, borderRadius: '16px 0 0 16px' }} />
-
-                <div className="card-body ps-4 pe-3 py-3">
-                  <div className="d-flex align-items-start justify-content-between mb-2">
-                    {/* Icon */}
-                    <div className="rounded-3 d-flex align-items-center justify-content-center"
-                      style={{ width: 44, height: 44, background: card.bg, color: card.color, fontSize: '1.1rem', flexShrink: 0 }}>
-                      <i className={`fas ${card.icon}`}></i>
-                    </div>
-                    {/* Total badge */}
-                    <span className="badge rounded-pill fw-bold px-3 py-2"
-                      style={{ background: card.total === null ? '#f8f9fa' : card.bg, color: card.color, fontSize: '.85rem', minWidth: 36 }}>
-                      {card.total === null
-                        ? <span className="spinner-border spinner-border-sm" style={{ width: '0.75rem', height: '0.75rem', borderWidth: '0.15em' }}></span>
-                        : card.total}
-                    </span>
-                  </div>
-
-                  <div className="fw-bold mb-1" style={{ color: '#1a1a2e', fontSize: '.93rem' }}>{card.label}</div>
-                  <div className="text-muted small mb-2" style={{ direction: 'rtl', fontSize: '.78rem' }}>{card.labelAr}</div>
-
-                  {/* Sub stats */}
-                  {card.total !== null && card.total > 0 && (
-                    <div className="d-flex gap-2 flex-wrap mb-2">
-                      {card.pending !== null && card.pending > 0 && (
-                        <span className="badge rounded-pill px-2 py-1"
-                          style={{ background: '#fff8e1', color: '#e65100', fontSize: '.72rem' }}>
-                          <i className="fas fa-hourglass-half me-1"></i>{card.pending} en attente
-                        </span>
-                      )}
-                      {card.approved !== null && card.approved > 0 && (
-                        <span className="badge rounded-pill px-2 py-1"
-                          style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '.72rem' }}>
-                          <i className="fas fa-check me-1"></i>{card.approved} approuvé{card.approved > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {card.total === 0 && (
-                    <p className="text-muted small mb-2" style={{ fontSize: '.78rem' }}>Aucune demande pour l'instant</p>
-                  )}
-
-                  <Link to={card.route}
-                    className="btn btn-sm rounded-pill px-3 fw-semibold mt-1"
-                    style={{ background: card.bg, color: card.color, border: `1px solid ${card.color}33`, fontSize: '.8rem' }}>
-                    Voir mes demandes <i className="fas fa-arrow-right ms-1"></i>
-                  </Link>
-                </div>
+            <div key={card.key} className="pf-stat-card" style={{ borderLeftColor: card.color }}>
+              <div className="pf-stat-icon" style={{ background: `${card.color}15`, color: card.color }}>
+                <i className={`fas ${card.icon}`}></i>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div className="pf-stat-label">{card.label}</div>
+                <div className="pf-stat-label-ar">{card.labelAr}</div>
+                {card.total !== null && card.pending !== null && card.pending > 0 && (
+                  <div className="pf-stat-sub">{card.pending} en attente</div>
+                )}
+                <Link to={card.route} className="pf-stat-link">Voir <i className="fas fa-arrow-right"></i></Link>
+              </div>
+              <div className="pf-stat-count">
+                {card.total === null
+                  ? <span style={{ width: 20, height: 20, border: '2px solid #e5e7eb', borderTopColor: card.color, borderRadius: '50%', display: 'inline-block', animation: 'spin .7s linear infinite' }}></span>
+                  : card.total}
               </div>
             </div>
           ))}
         </div>
 
-        {/* ── Quick new request row ─────────────────────────────────────────── */}
-        <div className="card border-0 shadow-sm rounded-4 mt-4">
-          <div className="card-body p-3">
-            <p className="text-muted small fw-semibold text-uppercase mb-3">
-              <i className="fas fa-plus-circle me-2 text-primary"></i>Nouvelle demande
-            </p>
-            <div className="d-flex gap-2 flex-wrap">
-              <Link to="/nouvelle-reclamation" className="btn btn-sm btn-outline-danger rounded-pill px-3">
-                <i className="fas fa-exclamation-circle me-1"></i>Réclamation
-              </Link>
-              <Link to="/demande-evenement" className="btn btn-sm btn-outline-secondary rounded-pill px-3" style={{ color: '#6f42c1', borderColor: '#6f42c1' }}>
-                <i className="fas fa-calendar-plus me-1"></i>Événement
-              </Link>
-              <Link to="/demande-residence" className="btn btn-sm btn-outline-primary rounded-pill px-3">
-                <i className="fas fa-home me-1"></i>Attestation résidence
-              </Link>
-              <Link to="/declaration-naissance" className="btn btn-sm btn-outline-success rounded-pill px-3">
-                <i className="fas fa-baby me-1"></i>Déclaration naissance
-              </Link>
-              <Link to="/declaration-deces" className="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                <i className="fas fa-cross me-1"></i>Déclaration décès
-              </Link>
-              <Link to="/services" className="btn btn-sm btn-light rounded-pill px-3 text-muted">
-                <i className="fas fa-th-large me-1"></i>Tous les services
-              </Link>
-            </div>
+        {/* ── Quick actions ── */}
+        <div className="pf-quick">
+          <div className="pf-quick-title"><i className="fas fa-plus-circle me-2"></i>Nouvelle demande</div>
+          <div className="pf-quick-btns">
+            <Link to="/nouvelle-reclamation" className="pf-quick-btn"><i className="fas fa-bullhorn"></i>Signalement</Link>
+            <Link to="/demande-evenement" className="pf-quick-btn"><i className="fas fa-calendar-plus"></i>Événement</Link>
+            <Link to="/demande-residence" className="pf-quick-btn"><i className="fas fa-home"></i>Attestation résidence</Link>
+            <Link to="/declaration-naissance" className="pf-quick-btn"><i className="fas fa-baby"></i>Décl. naissance</Link>
+            <Link to="/declaration-deces" className="pf-quick-btn"><i className="fas fa-cross"></i>Décl. décès</Link>
+            <Link to="/services" className="pf-quick-btn"><i className="fas fa-th-large"></i>Tous les services</Link>
           </div>
         </div>
 

@@ -208,7 +208,7 @@ export default function NewsPage() {
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <div
         className="rounded-4 mb-4 p-4 text-white position-relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1a3a5c 0%, #1565c0 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0F4C5C 0%, #B5DDE5 100%)' }}
       >
         <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.05)' }} />
         <div style={{ position: 'absolute', bottom: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,.05)' }} />
@@ -229,7 +229,7 @@ export default function NewsPage() {
               <i className="fas fa-file-alt me-1"></i>
               {articles.length} {lang === 'ar' ? 'خبر' : `article${articles.length !== 1 ? 's' : ''}`}
             </span>
-            <span className="badge rounded-pill px-3 py-2" style={{ background: 'rgba(111,66,193,.5)', fontSize: '.82rem' }}>
+            <span className="badge rounded-pill px-3 py-2" style={{ background: 'rgba(181,221,229,.35)', fontSize: '.82rem' }}>
               <i className="fas fa-calendar-star me-1"></i>
               {eventsFetched ? publicEvents.length : '—'} {lang === 'ar' ? 'فعالية' : 'événement(s)'}
             </span>
@@ -241,14 +241,14 @@ export default function NewsPage() {
       <div className="d-flex gap-2 mb-4">
         <button
           onClick={() => setActiveTab('news')}
-          className={`btn rounded-pill px-4 fw-bold ${activeTab === 'news' ? 'btn-primary shadow-sm' : 'btn-outline-secondary'}`}
-          style={{ fontSize: '.88rem', transition: 'all .2s' }}
+          className={`btn rounded-pill px-4 fw-bold ${activeTab === 'news' ? 'shadow-sm' : 'btn-outline-secondary'}`}
+          style={{ fontSize: '.88rem', transition: 'all .2s', ...(activeTab === 'news' ? { background: '#B5DDE5', color: '#0F4C5C', borderColor: '#B5DDE5' } : {}) }}
         >
           <i className="fas fa-newspaper me-2"></i>
           {lang === 'ar' ? 'الأخبار البلدية' : 'Actualités municipales'}
           {articles.length > 0 && (
-            <span className={`ms-2 badge rounded-pill ${activeTab === 'news' ? 'bg-white text-primary' : 'bg-secondary text-white'}`}
-              style={{ fontSize: '.7rem' }}>{articles.length}</span>
+            <span className={`ms-2 badge rounded-pill ${activeTab === 'news' ? 'bg-white' : 'bg-secondary text-white'}`}
+              style={{ fontSize: '.7rem', color: activeTab === 'news' ? '#0F4C5C' : undefined }}>{articles.length}</span>
           )}
         </button>
         <button
@@ -256,16 +256,16 @@ export default function NewsPage() {
           className={`btn rounded-pill px-4 fw-bold ${activeTab === 'events' ? 'shadow-sm' : 'btn-outline-secondary'}`}
           style={{
             fontSize: '.88rem', transition: 'all .2s',
-            background: activeTab === 'events' ? '#6f42c1' : '',
-            color: activeTab === 'events' ? '#fff' : '',
-            borderColor: activeTab === 'events' ? '#6f42c1' : '',
+            background: activeTab === 'events' ? '#B5DDE5' : '',
+            color: activeTab === 'events' ? '#0F4C5C' : '',
+            borderColor: activeTab === 'events' ? '#B5DDE5' : '',
           }}
         >
           <i className="fas fa-calendar-star me-2"></i>
           {lang === 'ar' ? 'الفعاليات' : 'Événements'}
           {eventsFetched && publicEvents.length > 0 && (
             <span className={`ms-2 badge rounded-pill ${activeTab === 'events' ? 'bg-white' : 'bg-secondary text-white'}`}
-              style={{ fontSize: '.7rem', color: activeTab === 'events' ? '#6f42c1' : '' }}>{publicEvents.length}</span>
+              style={{ fontSize: '.7rem', color: activeTab === 'events' ? '#0F4C5C' : '' }}>{publicEvents.length}</span>
           )}
         </button>
         <button
@@ -317,8 +317,8 @@ export default function NewsPage() {
                       <button
                         key={tag.value}
                         onClick={() => setActiveTag(activeTag === tag.value ? '' : tag.value)}
-                        className={`btn btn-sm rounded-pill px-3 fw-bold ${activeTag === tag.value ? 'btn-primary' : 'btn-outline-secondary'}`}
-                        style={{ fontSize: '.8rem', transition: 'all .2s' }}
+                        className={`btn btn-sm rounded-pill px-3 fw-bold ${activeTag === tag.value ? '' : 'btn-outline-secondary'}`}
+                        style={{ fontSize: '.8rem', transition: 'all .2s', ...(activeTag === tag.value ? { background: '#B5DDE5', color: '#0F4C5C', borderColor: '#B5DDE5' } : {}) }}
                       >
                         <i className={`fas ${tag.icon} me-1`}></i>
                         {lang === 'ar' ? tag.label_ar : tag.label_fr}
@@ -370,12 +370,12 @@ export default function NewsPage() {
                           style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 220 }} />
                       ) : (
                         <div className="w-100 h-100 d-flex align-items-center justify-content-center"
-                          style={{ background: 'linear-gradient(135deg, #1a3a5c 0%, #1565c0 100%)', minHeight: 220 }}>
+                          style={{ background: 'linear-gradient(135deg, #0F4C5C 0%, #B5DDE5 100%)', minHeight: 220 }}>
                           <i className="fas fa-newspaper fa-4x text-white opacity-50"></i>
                         </div>
                       )}
                       <span className="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill"
-                        style={{ background: '#1565c0', fontSize: '.78rem' }}>
+                        style={{ background: '#B5DDE5', color: '#0F4C5C', fontSize: '.78rem' }}>
                         <i className="fas fa-star me-1"></i>
                         {lang === 'ar' ? 'الخبر الأبرز' : 'À la une'}
                       </span>
@@ -394,7 +394,7 @@ export default function NewsPage() {
                           <p className="text-muted" style={{ lineHeight: 1.65, fontSize: '.92rem' }}>{excerpt(featured.content, 200)}</p>
                         </div>
                         <div>
-                          <button className="btn btn-primary rounded-pill px-4 fw-bold" style={{ fontSize: '.85rem' }}
+                          <button className="btn rounded-pill px-4 fw-bold" style={{ fontSize: '.85rem', background: '#B5DDE5', color: '#0F4C5C', borderColor: '#B5DDE5' }}
                             onClick={e => { e.stopPropagation(); setSelectedArticle(featured) }}>
                             <i className="fas fa-arrow-right me-2"></i>
                             {lang === 'ar' ? 'قراءة المزيد' : "Lire l'article"}
@@ -442,8 +442,8 @@ export default function NewsPage() {
                               onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')} />
                           ) : (
                             <div className="w-100 h-100 d-flex align-items-center justify-content-center"
-                              style={{ background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}>
-                              <i className="fas fa-image fa-3x" style={{ color: '#1565c0', opacity: .4 }}></i>
+                              style={{ background: 'linear-gradient(135deg, #E6F4F7 0%, #B5DDE5 100%)' }}>
+                              <i className="fas fa-newspaper fa-2x" style={{ color: '#0F4C5C', opacity: .5 }}></i>
                             </div>
                           )}
                           <div style={{
@@ -466,12 +466,13 @@ export default function NewsPage() {
                             <span style={{ fontSize: '.75rem', color: '#888', fontWeight: 600 }}>
                               <i className="fas fa-clock me-1 text-primary"></i>{readingTime(article.content, lang)}
                             </span>
-                            <span
-                              className="text-primary fw-bold"
-                              style={{ fontSize: '.85rem' }}
+                            <button
+                              className="btn btn-sm rounded-pill px-3"
+                              style={{ fontSize: '.76rem', color: '#0F4C5C', borderColor: '#B5DDE5', background: 'transparent' }}
+                              onClick={e => { e.stopPropagation(); setSelectedArticle(article) }}
                             >
                               {lang === 'ar' ? 'قراءة المزيد' : 'Lire la suite'} <i className="fas fa-arrow-right ms-1"></i>
-                            </span>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -527,7 +528,7 @@ export default function NewsPage() {
                   </select>
                 </div>
                 <div className="col-12 col-md-2 text-end">
-                  <span className="badge rounded-pill px-3 py-2" style={{ background: '#6f42c1', fontSize: '.82rem' }}>
+                  <span className="badge rounded-pill px-3 py-2" style={{ background: '#B5DDE5', color: '#0F4C5C', fontSize: '.82rem' }}>
                     {filteredEvents.length} {lang === 'ar' ? 'نتيجة' : 'résultat(s)'}
                   </span>
                 </div>
@@ -537,20 +538,20 @@ export default function NewsPage() {
 
           {loadingEvents ? (
             <div className="text-center py-5">
-              <div className="spinner-border" style={{ color: '#6f42c1' }}></div>
+              <div className="spinner-border" style={{ color: '#0F4C5C' }}></div>
               <p className="mt-3 text-muted">{lang === 'ar' ? 'جاري تحميل التظاهرات...' : 'Chargement des événements...'}</p>
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="text-center py-5">
-              <i className="fas fa-calendar-times fa-3x opacity-25 mb-3 d-block" style={{ color: '#6f42c1' }}></i>
+              <i className="fas fa-calendar-times fa-3x opacity-25 mb-3 d-block" style={{ color: '#0F4C5C' }}></i>
               <p className="text-muted fw-bold">
                 {lang === 'ar' ? 'لا توجد فعاليات حاليًا' : 'Aucun événement pour le moment'}
               </p>
               <p className="text-muted small">
                 {lang === 'ar' ? 'تحقق لاحقًا' : 'Revenez plus tard'}
               </p>
-              <button className="btn btn-sm rounded-pill px-4 mt-2 fw-bold text-white"
-                style={{ background: '#6f42c1' }}
+              <button className="btn btn-sm rounded-pill px-4 mt-2 fw-bold"
+                style={{ background: '#B5DDE5', color: '#0F4C5C' }}
                 onClick={() => navigate('/demande-evenement')}>
                 <i className="fas fa-plus me-2"></i>
                 {lang === 'ar' ? 'تنظيم تظاهرة' : 'Organiser un événement'}
@@ -592,7 +593,7 @@ export default function NewsPage() {
                             </span>
                           )}
                           {upcoming && !ongoing && (
-                            <span className="badge bg-primary rounded-pill" style={{ fontSize: '.65rem' }}>
+                            <span className="badge rounded-pill" style={{ fontSize: '.65rem', background: '#B5DDE5', color: '#0F4C5C' }}>
                               <i className="fas fa-clock me-1"></i>
                               {lang === 'ar' ? 'قادم' : 'À venir'}
                             </span>
@@ -604,7 +605,7 @@ export default function NewsPage() {
                       <div className="p-3">
                         <div className="d-flex flex-column gap-2" style={{ fontSize: '.83rem', color: '#555' }}>
                           <div>
-                            <i className="fas fa-calendar-alt me-2 text-primary"></i>
+                            <i className="fas fa-calendar-alt me-2" style={{ color: '#0F4C5C' }}></i>
                             <strong>{formatShortDate(ev.date_debut)}</strong>
                             {ev.date_debut !== ev.date_fin && <> → <strong>{formatShortDate(ev.date_fin)}</strong></>}
                             <span className="text-muted ms-2">
@@ -644,9 +645,9 @@ export default function NewsPage() {
           {/* CTA */}
           {!loadingEvents && (
             <div className="text-center mt-5 py-4 rounded-4"
-              style={{ background: 'linear-gradient(135deg, #f3e5f5, #ede7f6)' }}>
-              <i className="fas fa-calendar-plus fa-2x mb-3 d-block" style={{ color: '#6f42c1' }}></i>
-              <h5 className="fw-bold" style={{ color: '#4a148c' }}>
+              style={{ background: 'linear-gradient(135deg, #E6F4F7, #B5DDE5)' }}>
+              <i className="fas fa-calendar-plus fa-2x mb-3 d-block" style={{ color: '#0F4C5C' }}></i>
+              <h5 className="fw-bold" style={{ color: '#0F4C5C' }}>
                 {lang === 'ar' ? 'هل تريد تنظيم فعالية؟' : 'Vous souhaitez organiser un événement ?'}
               </h5>
               <p className="text-muted small mb-3">
@@ -654,8 +655,8 @@ export default function NewsPage() {
                   ? 'قدّم طلب ترخيص وسيتم مراجعته من قبل البلدية.'
                   : 'Déposez une demande d\'autorisation auprès de la municipalité.'}
               </p>
-              <button className="btn rounded-pill px-5 fw-bold text-white shadow-sm"
-                style={{ background: '#6f42c1' }}
+              <button className="btn rounded-pill px-5 fw-bold shadow-sm"
+                style={{ background: '#0F4C5C', color: '#fff' }}
                 onClick={() => navigate('/demande-evenement')}>
                 <i className="fas fa-plus me-2"></i>
                 {lang === 'ar' ? 'تقديم طلب' : 'Déposer une demande'}
@@ -751,7 +752,7 @@ export default function NewsPage() {
                 </div>
               ) : (
                 <div className="p-4 text-white position-relative"
-                  style={{ background: 'linear-gradient(135deg, #1a3a5c 0%, #1565c0 100%)' }}>
+                  style={{ background: 'linear-gradient(135deg, #0F4C5C 0%, #B5DDE5 100%)' }}>
                   <h3 className="fw-bold mb-0 pe-5">{selectedArticle.title}</h3>
                   <button className="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-3 shadow"
                     style={{ width: 34, height: 34, padding: 0 }}
@@ -764,9 +765,9 @@ export default function NewsPage() {
               <div className="modal-body p-4">
                 <div className="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom"
                   style={{ fontSize: '.83rem', color: '#888' }}>
-                  <span><i className="fas fa-user-tie me-1 text-primary"></i><strong>{selectedArticle.author_name}</strong></span>
-                  <span><i className="fas fa-calendar-alt me-1 text-primary"></i>{formatDate(selectedArticle.created_at, lang)}</span>
-                  <span><i className="fas fa-clock me-1 text-primary"></i>{readingTime(selectedArticle.content, lang)}</span>
+                  <span><i className="fas fa-user-tie me-1" style={{ color: '#0F4C5C' }}></i><strong>{selectedArticle.author_name}</strong></span>
+                  <span><i className="fas fa-calendar-alt me-1" style={{ color: '#0F4C5C' }}></i>{formatDate(selectedArticle.created_at, lang)}</span>
+                  <span><i className="fas fa-clock me-1" style={{ color: '#0F4C5C' }}></i>{readingTime(selectedArticle.content, lang)}</span>
                   {selectedArticle.updated_at !== selectedArticle.created_at && (
                     <span className="badge bg-light text-secondary border">
                       <i className="fas fa-pen me-1"></i>

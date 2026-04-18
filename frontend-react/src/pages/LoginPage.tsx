@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
+import logo from '../assets/logo.png'
 
 type TokenResponse = {
   access: string
@@ -12,26 +13,115 @@ type TokenResponse = {
 }
 
 const CSS = `
-.lp-root{min-height:100vh;background:#0f1117;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif}
-.lp-card{width:100%;max-width:400px;background:#1a1d27;border-radius:16px;padding:44px 40px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.lp-icon{width:auto;height:auto;background:none;border-radius:0;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.5rem;color:#fff}
-.lp-title{text-align:center;color:#f0f2f5;font-size:1.25rem;font-weight:700;margin-bottom:4px}
-.lp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:32px}
-.lp-label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:6px;font-weight:500}
-.lp-input{width:100%;background:#0f1117;border:1.5px solid #2a2d3a;border-radius:8px;padding:11px 14px;font-size:.9rem;color:#e5e7eb;outline:none;box-sizing:border-box;transition:border-color .2s}
-.lp-input:focus{border-color:#2563eb}
-.lp-input::placeholder{color:#4b5563}
-.lp-btn{width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.lp-btn:hover:not(:disabled){background:#1d4ed8}
-.lp-btn:disabled{opacity:.6;cursor:not-allowed}
-.lp-links{display:flex;justify-content:center;gap:20px;margin-top:22px}
-.lp-links a{color:#6b7280;font-size:.82rem;text-decoration:none;transition:color .2s}
-.lp-links a:hover{color:#9ca3af}
-.lp-error{background:#2d1515;border:1px solid #7f1d1d;border-radius:8px;padding:10px 14px;color:#fca5a5;font-size:.82rem;margin-top:14px}
-.lp-field{margin-bottom:18px}
-.lp-lang{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
-.lp-lang-btn{background:none;border:1px solid #2a2d3a;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem;color:#6b7280;display:flex;align-items:center;gap:5px;transition:all .2s}
-.lp-lang-btn:hover,.lp-lang-btn.active{border-color:#2563eb;color:#93c5fd}
+/* ── Root ── */
+.lp-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  font-family: "Public Sans", "Segoe UI", sans-serif;
+  background: #0f1117;
+}
+
+/* ── Background image ── */
+.lp-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.lp-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+}
+.lp-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(23,94,173,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%);
+}
+
+/* ── Container ── */
+.lp-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1fr;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+}
+@media (min-width: 768px) {
+  .lp-container { grid-template-columns: 7fr 5fr; }
+}
+
+/* ── Hero side ── */
+.lp-hero {
+  display: none;
+  background: rgba(23,94,173,.82);
+  backdrop-filter: blur(10px);
+  padding: 48px 44px;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+}
+@media (min-width: 768px) {
+  .lp-hero { display: flex; }
+}
+.lp-hero-brand { display: flex; align-items: center; gap: 14px; }
+.lp-hero-logo { height: 56px; width: auto; }
+.lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
+.lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+.lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
+.lp-hero-accent { color: #ffb785; }
+.lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
+.lp-hero-badges { display: flex; align-items: center; gap: 28px; }
+.lp-hero-badge { display: flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 700; text-transform: uppercase; opacity: .9; }
+.lp-hero-badge i { color: #ffb785; }
+
+/* ── Form side ── */
+.lp-form-side {
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(18px);
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.lp-lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 28px; }
+.lp-lang-pill { background: #e7e7f1; border-radius: 999px; padding: 4px; display: flex; }
+.lp-lang-opt { border: none; background: none; border-radius: 999px; padding: 5px 16px; font-size: .75rem; font-weight: 700; cursor: pointer; color: #6b7280; }
+.lp-lang-opt.active { background: #175ead; color: #fff; }
+.lp-mobile-logo { display: flex; justify-content: center; margin-bottom: 20px; }
+.lp-mobile-logo img { height: 44px; }
+@media (min-width: 768px) { .lp-mobile-logo { display: none; } }
+.lp-greeting { margin-bottom: 28px; }
+.lp-greeting h2 { font-size: 1.55rem; font-weight: 800; color: #191b22; margin-bottom: 6px; }
+.lp-greeting p { font-size: .88rem; color: #6b7280; margin: 0; }
+.lp-field { margin-bottom: 18px; }
+.lp-label { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; text-transform: uppercase; color: #564336; margin-bottom: 7px; }
+.lp-input { width: 100%; background: #e7e7f1; border: none; border-radius: 10px; padding: 13px 16px; font-size: .9rem; outline: none; box-sizing: border-box; }
+.lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #175ead; }
+.lp-input-wrap { position: relative; }
+.lp-eye { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #897364; cursor: pointer; }
+.lp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.lp-remember { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: .82rem; color: #6b7280; }
+.lp-forgot { font-size: .82rem; color: #175ead; font-weight: 700; text-decoration: none; }
+.lp-btn { width: 100%; background: linear-gradient(135deg, #175ead 0%, #2563eb 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.lp-error { background: #ffdad6; border: 1px solid #ba1a1a; border-radius: 10px; padding: 11px; color: #93000a; font-size: .83rem; margin-top: 14px; }
+.lp-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+.lp-divider-line { flex: 1; height: 1px; background: rgba(0,0,0,.1); }
+.lp-divider-txt { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: #897364; }
+.lp-alt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lp-alt-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; border: 1.5px solid rgba(0,0,0,.1); border-radius: 10px; background: none; font-size: .82rem; font-weight: 600; cursor: pointer; }
+.lp-footer { margin-top: 28px; text-align: center; }
+.lp-signup-link { font-size: .85rem; color: #564336; }
+.lp-signup-link a { color: #175ead; font-weight: 700; text-decoration: none; }
 `
 
 export default function LoginPage() {
@@ -44,13 +134,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-
-  useEffect(() => {
-    const s = document.createElement('style')
-    s.textContent = CSS
-    document.head.appendChild(s)
-    return () => { document.head.removeChild(s) }
-  }, [])
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail')
@@ -76,28 +159,15 @@ export default function LoginPage() {
       })
 
       const raw = await res.text()
-
       let data: Partial<TokenResponse> & { detail?: string } | null = null
       if (raw) {
-        try {
-          data = JSON.parse(raw) as Partial<TokenResponse> & { detail?: string }
-        } catch {
-          // Backend might return HTML/text on failure; keep error generic.
-        }
+        try { data = JSON.parse(raw) as Partial<TokenResponse> & { detail?: string } } catch { /* ignore */ }
       }
 
-      if (!res.ok) {
-        throw new Error(data?.detail || raw || t('error_msg'))
-      }
+      if (!res.ok) throw new Error(data?.detail || raw || t('error_msg'))
+      if (!data?.access || !data?.refresh) throw new Error(data?.detail || t('retrieval_error'))
 
-      if (!data?.access || !data?.refresh) {
-        throw new Error(data?.detail || t('retrieval_error'))
-      }
-
-      storeTokens({
-        access: data.access as string,
-        refresh: data.refresh as string,
-      })
+      storeTokens({ access: data.access as string, refresh: data.refresh as string })
 
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email)
@@ -107,7 +177,6 @@ export default function LoginPage() {
         localStorage.removeItem('rememberedPassword')
       }
 
-      // Role-based redirection
       if (data.is_staff || data.is_superuser || data.user_type === 'supervisor' || data.user_type === 'agent') {
         navigate('/agent-dashboard')
       } else {
@@ -122,96 +191,156 @@ export default function LoginPage() {
 
   return (
     <div className="lp-root">
-      <div className="lp-card">
-        <div className="lp-icon">
-          <img src="/media/tunisia_logo.png" alt="Logo" style={{ width: '100px', height: 'auto' }} />
-        </div>
-        <div className="lp-title">République Tunisienne</div>
-        <div className="lp-sub">{t('portal_title')}</div>
+      <style>{CSS}</style>
 
-        <div className="lp-lang">
-          <button className={`lp-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>
-            <img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR
-          </button>
-          <button className={`lp-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>
-            <img src="https://flagcdn.com/w20/tn.png" width="16" alt="TN" /> عربي
-          </button>
-        </div>
+      {/* Background */}
+      <div className="lp-bg">
+        <img
+          src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+          alt="Background"
+        />
+        <div className="lp-bg-overlay"></div>
+      </div>
 
-        <form onSubmit={onSubmit}>
-          <div className="lp-field">
-            <label className="lp-label" htmlFor="email">{t('email')}</label>
-            <input
-              id="email"
-              type="email"
-              className="lp-input"
-              placeholder="nom@exemple.com"
-              required
-              value={email}
-              onChange={ev => setEmail(ev.target.value)}
+      {/* Card */}
+      <div className="lp-container">
+
+        {/* ── Hero side ── */}
+        <div className="lp-hero">
+          <div className="lp-hero-brand">
+            <img
+              className="lp-hero-logo"
+              src="/media/tunisia_logo.png"
+              alt="Logo"
             />
-          </div>
-
-          <div className="lp-field" style={{ position: 'relative' }}>
-            <label className="lp-label" htmlFor="password">{t('password_label')}</label>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className="lp-input"
-                placeholder="••••••••"
-                required
-                value={password}
-                onChange={ev => setPassword(ev.target.value)}
-                style={{ paddingRight: '46px' }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: '#6b7280',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '4px'
-                }}
-              >
-                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-              </button>
+            <div>
+              <div className="lp-hero-brand-name">République Tunisienne</div>
+              <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, marginTop: -4 }}>
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={ev => setRememberMe(ev.target.checked)}
-              style={{ accentColor: '#2563eb', cursor: 'pointer' }}
-            />
-            <label htmlFor="rememberMe" style={{ fontSize: '.8rem', color: '#6b7280', cursor: 'pointer', userSelect: 'none' }}>
-              {t('remember_me')}
-            </label>
+          <div>
+            <div className="lp-hero-headline">
+              Votre pays,<br />
+              <span className="lp-hero-accent">Connecté &amp; Durable.</span>
+            </div>
+            <p className="lp-hero-desc">
+              Accédez à vos services administratifs, suivez vos demandes en temps
+              réel et participez à l'évolution de notre portail national.
+            </p>
           </div>
 
-          <button className="lp-btn" type="submit" disabled={loading}>
-            {loading && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />}
-            {t('login_btn')}
-          </button>
+          <div className="lp-hero-badges">
+            <div className="lp-hero-badge">
+              <i className="fas fa-shield-alt"></i> Sécurisé
+            </div>
+            <div className="lp-hero-badge">
+              <i className="fas fa-language"></i> Multilingue
+            </div>
+          </div>
+        </div>
 
-          {error && <div className="lp-error">{error}</div>}
-        </form>
+        {/* ── Form side ── */}
+        <div className="lp-form-side">
 
-        <div className="lp-links">
-          <Link to="/signup">{t('create_account')}</Link>
-          <Link to="/forgot-password">{t('forgot_password')}</Link>
+          {/* Language toggle */}
+          <div className="lp-lang-wrap">
+            <div className="lp-lang-pill">
+              <button className={`lp-lang-opt${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>FR</button>
+              <button className={`lp-lang-opt${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>عربي</button>
+            </div>
+          </div>
+
+          {/* Mobile logo */}
+          <div className="lp-mobile-logo">
+            <img src="/media/tunisia_logo.png" alt="Logo" />
+          </div>
+
+          {/* Greeting */}
+          <div className="lp-greeting">
+            <h2>{lang === 'ar' ? 'البوابة الوطنية' : 'République Tunisienne'}</h2>
+            <p>{t('portal_title')}</p>
+          </div>
+
+          <form onSubmit={onSubmit}>
+            {/* Email */}
+            <div className="lp-field">
+              <label className="lp-label" htmlFor="email">
+                <i className="fas fa-at"></i> {t('email')}
+              </label>
+              <input
+                id="email"
+                type="email"
+                className="lp-input"
+                placeholder="nom@exemple.tn"
+                required
+                value={email}
+                onChange={ev => setEmail(ev.target.value)}
+              />
+            </div>
+
+            {/* Password */}
+            <div className="lp-field">
+              <label className="lp-label" htmlFor="password">
+                <i className="fas fa-lock"></i> {t('password_label')}
+              </label>
+              <div className="lp-input-wrap">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="lp-input"
+                  placeholder="••••••••"
+                  required
+                  value={password}
+                  onChange={ev => setPassword(ev.target.value)}
+                />
+                <button type="button" className="lp-eye" onClick={() => setShowPassword(p => !p)}>
+                  <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                </button>
+              </div>
+            </div>
+
+            {/* Remember / Forgot */}
+            <div className="lp-meta">
+              <label className="lp-remember">
+                <input type="checkbox" checked={rememberMe} onChange={ev => setRememberMe(ev.target.checked)} />
+                <span>{t('remember_me')}</span>
+              </label>
+              <Link className="lp-forgot" to="/forgot-password">{t('forgot_password')}</Link>
+            </div>
+
+            {/* Submit */}
+            <button className="lp-btn" type="submit" disabled={loading}>
+              {loading && <span className="spinner-border spinner-border-sm" role="status" />}
+              {t('login_btn').toUpperCase()} <i className="fas fa-arrow-right"></i>
+            </button>
+
+            {error && <div className="lp-error">{error}</div>}
+          </form>
+
+          {/* Alt login */}
+          <div className="lp-divider">
+            <div className="lp-divider-line"></div>
+            <span className="lp-divider-txt">{lang === 'ar' ? 'أو' : 'Ou'}</span>
+            <div className="lp-divider-line"></div>
+          </div>
+          <div className="lp-alt-grid">
+            <button className="lp-alt-btn">
+              <i className="fas fa-id-card icon-blue"></i> Tunisie ID
+            </button>
+            <button className="lp-alt-btn">
+              <i className="fas fa-qrcode icon-orange"></i> Scan QR
+            </button>
+          </div>
+
+          {/* Footer */}
+          <div className="lp-footer">
+            <p className="lp-signup-link">
+              {t('already_have_account')} ? <Link to="/signup">{t('create_account')}</Link>
+            </p>
+            <p>{t('footer_text')}</p>
+          </div>
+
         </div>
       </div>
     </div>

@@ -87,7 +87,10 @@ export default function ForumPage() {
     const res = await fetch(`/api/forum/topics/?${params}`, {
       headers: { Authorization: `Bearer ${access}` },
     })
-    if (res.ok) setTopics(await res.json())
+    if (res.ok) {
+      const data = await res.json()
+      setTopics(Array.isArray(data) ? data : (data.results || []))
+    }
   }
 
   async function fetchStats() {
@@ -158,8 +161,8 @@ export default function ForumPage() {
       {/* Launch discussion button */}
       <button
         onClick={() => setShowModal(true)}
-        className="w-full py-5 text-white font-black text-base tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer"
-        style={{ background: 'linear-gradient(135deg, #F18221, #ff9a44)', boxShadow: '0 10px 30px rgba(241,130,33,0.3)' }}
+        className="w-full py-3 text-white font-black text-sm tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer"
+        style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', boxShadow: '0 10px 30px rgba(180,122,80,0.3)' }}
       >
         <span>{lang === 'ar' ? 'ابدأ نقاشاً' : 'Lancer une discussion'}</span>
         {lang !== 'ar' && <span className="text-sm opacity-80" dir="rtl">ابدأ نقاشاً</span>}
@@ -167,7 +170,7 @@ export default function ForumPage() {
       </button>
 
       {/* Categories */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
         <h4 className="font-bold text-slate-900 border-b border-slate-100 pb-4 mb-4 uppercase tracking-widest text-xs">
           {lang === 'ar' ? 'الأصناف' : 'Catégories'}
         </h4>
@@ -182,7 +185,7 @@ export default function ForumPage() {
               onClick={() => setCategory(category === cat.key ? '' : cat.key)}
             >
               <div className={`flex items-center gap-3 text-sm transition-colors ${category === cat.key ? 'font-bold' : 'text-slate-600'}`}
-                style={{ color: category === cat.key ? '#F18221' : undefined }}>
+                style={{ color: category === cat.key ? '#d4aa8d' : undefined }}>
                 <i className={`${cat.icon} w-5 text-center text-slate-400`}></i>
                 <span>{cat.label}</span>
               </div>
@@ -194,7 +197,7 @@ export default function ForumPage() {
 
       {/* Stats */}
       {stats && (
-        <div className="p-6 rounded-xl text-white" style={{ backgroundColor: '#1e293b' }}>
+        <div className="p-4 rounded-xl text-white" style={{ backgroundColor: '#1e293b' }}>
           <h4 className="font-bold border-b border-white/10 pb-4 mb-4 uppercase tracking-widest text-xs">
             {lang === 'ar' ? 'إحصاءات المنتدى' : 'Statistiques du Forum'}
           </h4>
@@ -205,7 +208,7 @@ export default function ForumPage() {
               { val: stats.total_replies, label: lang === 'ar' ? 'الردود' : 'Réponses', wide: true },
             ].map(s => (
               <div key={s.label} className={`rounded-xl p-3 ${s.wide ? 'col-span-2' : ''}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <span className="text-2xl font-black" style={{ color: '#F18221' }}>{s.val}</span>
+                <span className="text-lg font-black" style={{ color: '#d4aa8d' }}>{s.val}</span>
                 <span className="block text-[10px] uppercase tracking-widest text-slate-300 font-bold mt-1">{s.label}</span>
               </div>
             ))}
@@ -215,9 +218,9 @@ export default function ForumPage() {
 
       {/* Notification badge */}
       {notifCount > 0 && (
-        <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3">
-          <i className="fas fa-bell text-red-500"></i>
-          <span className="text-sm font-bold text-red-700">{notifCount} notification{notifCount > 1 ? 's' : ''} non lue{notifCount > 1 ? 's' : ''}</span>
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3">
+          <i className="fas fa-bell" style={{ color: '#d4aa8d' }}></i>
+          <span className="text-sm font-bold" style={{ color: '#b87a50' }}>{notifCount} notification{notifCount > 1 ? 's' : ''} non lue{notifCount > 1 ? 's' : ''}</span>
         </div>
       )}
     </div>
@@ -232,32 +235,32 @@ export default function ForumPage() {
       rightSidebar={rightSidebar}
     >
       {/* ── HERO BANNER ── */}
-      <div className="relative w-full overflow-hidden rounded-xl mb-6" style={{ height: '260px' }}>
+      <div className="relative w-full overflow-hidden rounded-xl mb-4" style={{ height: '160px' }}>
         <img src={fortImg} alt="Forum" className="w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,28,58,0.4), rgba(0,28,58,0.72))' }}></div>
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h1 className="font-black text-white uppercase tracking-tight mb-1"
-            style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
+          <h1 className="font-black text-white uppercase tracking-tight mb-0"
+            style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(1rem, 2.5vw, 1.4rem)' }}>
             Forum Communautaire
           </h1>
-          <h2 className="font-bold text-white mb-4"
+          <h2 className="font-bold text-white mb-2"
             dir="rtl"
-            style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(1.4rem, 3vw, 2rem)', opacity: 0.9 }}>
+            style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(.85rem, 1.5vw, 1rem)', opacity: 0.9 }}>
             المنتدى المجتمعي
           </h2>
-          <p className="text-white text-xs uppercase tracking-widest" style={{ opacity: 0.75 }}>
+          <p className="text-white uppercase tracking-widest" style={{ opacity: 0.75, fontSize: '.68rem' }}>
             Posez vos questions, partagez vos suggestions, débattez avec la communauté
           </p>
         </div>
       </div>
 
       {/* ── SEARCH & FILTERS ── */}
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-4 flex flex-col md:flex-row gap-3 items-center">
         <div className="relative flex-1 w-full">
-          <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
           <input
             type="text"
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border-0 rounded-xl text-sm focus:ring-2 focus:outline-none"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 border-0 rounded-xl text-xs focus:ring-2 focus:outline-none"
             style={{ '--tw-ring-color': 'rgba(241,130,33,0.2)' } as any}
             placeholder="Rechercher une discussion..."
             value={search}
@@ -273,10 +276,10 @@ export default function ForumPage() {
             <button
               key={btn.key}
               onClick={() => btn.isSortBtn ? setSortBy(btn.sortVal) : setCategory(btn.key)}
-              className="px-5 py-2 rounded-lg text-sm font-bold transition-colors border-0 cursor-pointer"
+              className="px-3 py-1 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
               style={
                 (btn.isSortBtn ? sortBy === btn.sortVal : category === btn.key)
-                  ? { backgroundColor: '#F18221', color: 'white' }
+                  ? { backgroundColor: '#d4aa8d', color: 'white' }
                   : { backgroundColor: '#f1f5f9', color: '#475569' }
               }
             >
@@ -297,7 +300,7 @@ export default function ForumPage() {
           <button
             key={c.key}
             onClick={() => setCategory(c.key)}
-            className="px-4 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
+            className="px-3 py-1 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
             style={
               category === c.key
                 ? { backgroundColor: c.color, color: 'white' }
@@ -319,7 +322,7 @@ export default function ForumPage() {
               key={s.key}
               onClick={() => setSortBy(s.key)}
               className="px-3 py-1 rounded-lg text-xs font-bold border-0 cursor-pointer"
-              style={sortBy === s.key ? { backgroundColor: '#F18221', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
+              style={sortBy === s.key ? { backgroundColor: '#d4aa8d', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
             >
               {s.label}
             </button>
@@ -337,7 +340,7 @@ export default function ForumPage() {
               className="px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-colors"
               style={
                 activeTag === tag.name
-                  ? { backgroundColor: '#F18221', color: 'white' }
+                  ? { backgroundColor: '#d4aa8d', color: 'white' }
                   : { backgroundColor: '#dbeafe', color: '#1e40af' }
               }
             >
@@ -359,7 +362,7 @@ export default function ForumPage() {
           <p>Aucun sujet pour le moment.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {sortedTopics.map((topic, idx) => {
             const catColor = CATEGORY_COLORS[topic.category] || { bg: '#dbeafe', text: '#1e40af' }
             return (
@@ -369,7 +372,7 @@ export default function ForumPage() {
                 className="block no-underline"
               >
                 <div
-                  className="bg-white p-6 rounded-xl shadow-sm border border-transparent hover:border-orange-200 transition-all group"
+                  className="bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-blue-200 transition-all group"
                   style={{ borderLeft: `4px solid ${catColor.text}` }}
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -396,7 +399,7 @@ export default function ForumPage() {
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-orange-600 transition-colors mb-1">
+                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
                         {topic.title}
                       </h3>
 
@@ -432,8 +435,8 @@ export default function ForumPage() {
                         onClick={e => voteTopic(topic.id, e)}
                         className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
                         style={topic.has_voted
-                          ? { backgroundColor: '#F18221', color: 'white' }
-                          : { backgroundColor: '#fff7ed', color: '#F18221' }
+                          ? { backgroundColor: '#d4aa8d', color: 'white' }
+                          : { backgroundColor: 'rgba(212,170,141,.1)', color: '#d4aa8d' }
                         }
                       >
                         <i className="fas fa-thumbs-up"></i>{topic.votes_count}
@@ -442,7 +445,7 @@ export default function ForumPage() {
                         <i className="fas fa-comment"></i>{topic.replies_count}
                       </div>
                       <span className="text-xs font-bold uppercase tracking-tighter hover:underline"
-                        style={{ color: '#F18221', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
+                        style={{ color: '#d4aa8d', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
                         {lang === 'ar' ? 'انضم' : 'Rejoindre'}
                       </span>
                     </div>
@@ -463,7 +466,7 @@ export default function ForumPage() {
         >
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" style={{ maxHeight: '90vh' }}>
             {/* Modal header */}
-            <div className="px-6 py-4 flex justify-between items-center" style={{ background: 'linear-gradient(90deg,#0d2b4e,#1565c0)' }}>
+            <div className="px-6 py-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)' }}>
               <h5 className="font-bold text-white mb-0 flex items-center gap-2">
                 <i className="fas fa-plus-circle"></i>
                 {lang === 'ar' ? 'موضوع جديد' : 'Nouveau sujet'}
@@ -477,7 +480,7 @@ export default function ForumPage() {
             {/* Modal body */}
             <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
               {createError && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-700 text-sm border border-red-100">
+                <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>
                   {createError}
                 </div>
               )}
@@ -540,7 +543,7 @@ export default function ForumPage() {
               </button>
               <button
                 className="px-6 py-2 rounded-xl text-sm font-bold text-white border-0 cursor-pointer flex items-center gap-2 transition-opacity"
-                style={{ backgroundColor: '#F18221', opacity: creating ? 0.7 : 1 }}
+                style={{ backgroundColor: '#d4aa8d', opacity: creating ? 0.7 : 1 }}
                 onClick={createTopic}
                 disabled={creating}
               >

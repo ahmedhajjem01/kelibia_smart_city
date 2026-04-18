@@ -218,7 +218,7 @@ class UserVerificationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ('supervisor', 'agent')):
             return Response({"error": "Accès refusé."}, status=403)
         
         # Get mode: 'unverified', 'agents', or 'all'
@@ -258,9 +258,9 @@ class UserVerificationView(APIView):
         return Response(data)
 
     def post(self, request):
-        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ('supervisor', 'agent')):
             return Response({"error": "Accès refusé."}, status=403)
-        
+
         user_id = request.data.get('user_id')
         action = request.data.get('action') # 'verify' or 'toggle_active'
         

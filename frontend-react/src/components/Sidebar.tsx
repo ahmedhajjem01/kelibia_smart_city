@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
+import logo from '../assets/logo.png';
 
 interface SidebarProps {
   onLogout: () => void;
@@ -16,93 +17,113 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
     if (mapEl) mapEl.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
+  const isAgentOrAdmin = user && (
+    user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser
+  );
 
-  const navItemClass = (isActive: boolean) =>
-    `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all no-underline hover:translate-x-1 ${
+  /* active: orange right-border + slight bg tint; inactive: muted white */
+  const navItem = (isActive: boolean): string =>
+    [
+      'flex items-center gap-3 px-4 py-1.5 no-underline transition-all duration-150',
       isActive
-        ? 'bg-blue-100 text-blue-800 font-bold'
-        : 'text-slate-500 hover:bg-slate-200'
-    }`;
+        ? 'border-r-4 border-[#d4aa8d] bg-white/10 font-bold'
+        : 'hover:bg-white/10',
+    ].join(' ');
 
   return (
-    <aside className="sidebar fixed left-0 top-0 h-full w-60 bg-slate-50 border-r border-slate-200 flex flex-col p-4 z-40 d-none d-md-flex"
-      style={{ fontFamily: 'Public Sans, sans-serif', fontSize: '0.875rem', fontWeight: 500 }}>
+    <aside
+      className="sidebar fixed left-0 top-0 h-full w-64 flex flex-col z-50"
+      style={{
+        background: 'linear-gradient(180deg, #045b7e 0%, #033f58 100%)',
+        boxShadow: '4px 0 24px rgba(0,0,0,.35)',
+        fontFamily: 'Public Sans, sans-serif',
+        overflowY: 'auto',
+      }}
+    >
+      <style>{`
+        .sidebar a { color: rgba(255,255,255,0.6) !important; text-decoration: none !important; font-size: .73rem; }
+        .sidebar a:hover { color: #fff !important; }
+        .sidebar a[aria-current="page"] { color: #fff !important; font-weight: 700; }
+        .sidebar p { font-size: .58rem !important; }
+        .sidebar span { font-size: .73rem; }
+      `}</style>
 
-      {/* Logo header */}
-      <div className="mb-8 flex items-center gap-3 px-2 pt-16">
-        <i className="fas fa-city text-2xl" style={{ color: '#F18221' }}></i>
+      {/* ── Brand ── */}
+      <div className="px-4 pt-5 pb-4 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.12)' }}>
+        <img src={logo} alt="Logo Kélibia" style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
         <div>
-          <h2 className="text-base font-black text-blue-800 tracking-tight mb-0">
-            {isAgentOrAdmin ? 'Portail Agent' : 'Espace Citoyen'}
-          </h2>
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-0">Kelibia Smart City</p>
+          <div style={{ color: '#fff', fontWeight: 900, fontSize: '.78rem', letterSpacing: '.3px', lineHeight: 1.2, textTransform: 'uppercase' }}>
+            Ville de Kélibia
+          </div>
+          <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, lineHeight: 1.2 }}>بلدية قليبية</div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">
-          {isAgentOrAdmin ? t('nav_agent_space') : t('nav_title')}
+      {/* ── Main nav ── */}
+      <nav className="flex-1 px-2 py-3" style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <p style={{ fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', padding: '0 10px', marginBottom: 4 }}>
+          {t('nav_title')}
         </p>
 
         {isAgentOrAdmin ? (
-          <NavLink to="/agent-dashboard" className={({ isActive }) => navItemClass(isActive)}>
-            <i className="fas fa-shield-alt w-4 text-center"></i>
+          <NavLink to="/agent-dashboard" className={({ isActive }) => navItem(isActive)}>
+            <i className="fas fa-shield-alt" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
             <span>{t('back_to_agent_space')}</span>
           </NavLink>
         ) : (
           <>
-            <NavLink to="/dashboard" className={({ isActive }) => navItemClass(isActive)}>
-              <i className="fas fa-tachometer-alt w-4 text-center"></i>
+            <NavLink to="/dashboard" end className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-tachometer-alt" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('dashboard')}</span>
             </NavLink>
-            <a className={navItemClass(false)} href="#mapCard" onClick={scrollToMap}>
-              <i className="fas fa-map-marked-alt w-4 text-center"></i>
-              <span>{t('gis_map')}</span>
-            </a>
-            <NavLink to="/mes-reclamations" className={({ isActive }) => navItemClass(isActive)}>
-              <i className="fas fa-bullhorn w-4 text-center"></i>
+            <NavLink to="/services" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-landmark" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
+              <span>{t('admin_services')}</span>
+            </NavLink>
+            <NavLink to="/mes-reclamations" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-bullhorn" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('my_reclamations')}</span>
             </NavLink>
-            <NavLink to="/mes-demandes" className={({ isActive }) => navItemClass(isActive)}>
-              <i className="fas fa-tasks w-4 text-center"></i>
+            <NavLink to="/news" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-newspaper" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
+              <span>{t('news_title')}</span>
+            </NavLink>
+            <a className={navItem(false)} href="#mapCard" onClick={scrollToMap}>
+              <i className="fas fa-map-marked-alt" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
+              <span>{t('gis_map')}</span>
+            </a>
+            <NavLink to="/mes-demandes" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-tasks" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('my_requests')}</span>
             </NavLink>
-            <NavLink to="/mes-extraits" className={({ isActive }) => navItemClass(isActive)}>
-              <i className="fas fa-file-contract w-4 text-center"></i>
+            <NavLink to="/mes-extraits" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-file-contract" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('extraits_hub_title')}</span>
+            </NavLink>
+            <NavLink to="/forum" className={({ isActive }) => navItem(isActive)}>
+              <i className="fas fa-comments" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
+              <span>{t('forum')}</span>
             </NavLink>
           </>
         )}
-
-        <NavLink to="/services" className={({ isActive }) => navItemClass(isActive)}>
-          <i className="fas fa-file-alt w-4 text-center"></i>
-          <span>{t('admin_services')}</span>
-        </NavLink>
-        <NavLink to="/news" className={({ isActive }) => navItemClass(isActive)}>
-          <i className="fas fa-newspaper w-4 text-center"></i>
-          <span>{t('news_title')}</span>
-        </NavLink>
-        <NavLink to="/forum" className={({ isActive }) => navItemClass(isActive)}>
-          <i className="fas fa-comments w-4 text-center"></i>
-          <span>{t('forum') || 'Forum'}</span>
-        </NavLink>
       </nav>
 
-      {/* Bottom section */}
-      <div className="mt-auto space-y-1 pt-4 border-t border-slate-200">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">{t('account_title')}</p>
-        <NavLink to="/profile" className={({ isActive }) => navItemClass(isActive)}>
-          <i className="fas fa-user-circle w-4 text-center"></i>
-          <span>{t('profile')}</span>
+      {/* ── Bottom: Profil + Déconnexion ── */}
+      <div className="px-2 pb-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,.12)', paddingTop: 10 }}>
+        <p style={{ fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', padding: '6px 10px 3px', marginBottom: 1 }}>
+          {t('account_title')}
+        </p>
+        <NavLink to="/profile" className={({ isActive }) => navItem(isActive)}>
+          <i className="fas fa-cog" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
+          <span>{t('nav_profile')}</span>
         </NavLink>
         <a
-          className={`${navItemClass(false)} text-red-500 hover:bg-red-50 hover:text-red-600`}
+          className={navItem(false)}
           href="#"
+          style={{ color: 'rgba(255,183,133,0.85) !important' as any }}
           onClick={(e) => { e.preventDefault(); onLogout(); }}
         >
-          <i className="fas fa-sign-out-alt w-4 text-center"></i>
+          <i className="fas fa-sign-out-alt" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
           <span>{t('logout')}</span>
         </a>
       </div>
