@@ -1454,13 +1454,13 @@ export default function SignupPage() {
 
             className="sg-nav-logo"
 
-            src={logo}
+            src={tunisiaLogo}
 
-            alt="Ville de Kélibia"
+            alt="République de Tunisie"
 
           />
 
-          <span className="sg-nav-name">Ville de Kélibia</span>
+          <span className="sg-nav-name">République de Tunisie</span>
 
         </a>
 
@@ -1952,9 +1952,9 @@ export default function SignupPage() {
 
         <div>
 
-          <div className="sg-footer-brand">Ville de Kélibia</div>
+          <div className="sg-footer-brand">République de Tunisie</div>
 
-          <div className="sg-footer-copy">© 2024 Commune de Kélibia — Smart City Portal</div>
+          <div className="sg-footer-copy">{t('footer_text')}</div>
 
         </div>
 

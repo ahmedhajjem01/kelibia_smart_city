@@ -134,9 +134,9 @@ export default function ForgotPasswordPage() {
         {/* ── Hero side ── */}
         <div className="lp-hero">
           <div className="lp-hero-brand">
-            <img className="lp-hero-logo" src={logo} alt="Logo" />
+            <img className="lp-hero-logo" src={tunisiaLogo} alt="Logo" />
             <div>
-              <div className="lp-hero-brand-name">Ville de Kélibia</div>
+              <div className="lp-hero-brand-name">République de Tunisie</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
@@ -219,6 +219,10 @@ export default function ForgotPasswordPage() {
               <Link to="/login"><i className="fas fa-arrow-left"></i> {t('back_to_login') || 'Retour à la connexion'}</Link>
             </p>
             <p>{t('footer_text')}</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Confidentialité</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>Assistance</a>
+            </div>
           </div>
 
         </div>
