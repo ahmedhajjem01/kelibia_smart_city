@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_log.png'
 
 type TokenResponse = {
   access: string
@@ -211,11 +212,11 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src={logo}
+              src={tunisiaLogo}
               alt="Logo"
             />
             <div>
-              <div className="lp-hero-brand-name">Ville de Kélibia</div>
+              <div className="lp-hero-brand-name">République de Tunisie</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
@@ -254,12 +255,12 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={logo} alt="Logo" />
+            <img src={tunisiaLogo} alt="Logo" />
           </div>
 
           {/* Greeting */}
           <div className="lp-greeting">
-            <h2>Bon retour !</h2>
+            <h2>Bienvenu!</h2>
             <p>Connectez-vous pour accéder à votre espace citoyen.</p>
           </div>
 
