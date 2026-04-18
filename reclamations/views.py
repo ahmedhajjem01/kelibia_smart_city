@@ -174,11 +174,37 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         new_status = request.data.get('status')
         if new_status in dict(Reclamation.STATUS_CHOICES):
             rec.status = new_status
-            if getattr(user, 'user_type', '') == 'agent':
+            if getattr(user, 'user_type', '') == 'agent' and rec.agent is None:
                 rec.agent = user
             rec.save()
             return Response({"status": "Statut mis a jour."})
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ── assign_agent (Supervisor only) ───────────────────────────────────────
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def assign_agent(self, request, pk=None):
+        """
+        POST /api/reclamations/{id}/assign_agent/
+        Body: { "agent_id": 123 }
+        """
+        rec  = self.get_object()
+        user = request.user
+        # Only supervisors or staff can assign agents
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'supervisor'):
+            return Response({"detail": "Seuls les superviseurs peuvent affecter des agents."}, status=status.HTTP_403_FORBIDDEN)
+        
+        agent_id = request.data.get('agent_id')
+        if not agent_id:
+            return Response({"detail": "ID de l'agent requis."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        from accounts.models import CustomUser
+        try:
+            agent = CustomUser.objects.get(pk=agent_id, user_type='agent')
+            rec.agent = agent
+            rec.save()
+            return Response({"status": f"Agent {agent.first_name} {agent.last_name} affecté avec succès."})
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "Agent introuvable ou n'est pas un agent municipal."}, status=status.HTTP_404_NOT_FOUND)
 
     # ── ml_stats ──────────────────────────────────────────────────────────────
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])

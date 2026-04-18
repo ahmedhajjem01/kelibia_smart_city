@@ -14,7 +14,7 @@ type TokenResponse = {
 const CSS = `
 .lp-root{min-height:100vh;background:#0f1117;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif}
 .lp-card{width:100%;max-width:400px;background:#1a1d27;border-radius:16px;padding:44px 40px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.lp-icon{width:52px;height:52px;background:#2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
+.lp-icon{width:auto;height:auto;background:none;border-radius:0;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.5rem;color:#fff}
 .lp-title{text-align:center;color:#f0f2f5;font-size:1.25rem;font-weight:700;margin-bottom:4px}
 .lp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:32px}
 .lp-label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:6px;font-weight:500}
@@ -124,9 +124,9 @@ export default function LoginPage() {
     <div className="lp-root">
       <div className="lp-card">
         <div className="lp-icon">
-          <i className="fas fa-city"></i>
+          <img src="/media/tunisia log.png" alt="Logo" style={{ width: '100px', height: 'auto' }} />
         </div>
-        <div className="lp-title">Kélibia Smart City</div>
+        <div className="lp-title">République Tunisienne</div>
         <div className="lp-sub">{t('portal_title')}</div>
 
         <div className="lp-lang">

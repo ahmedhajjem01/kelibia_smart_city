@@ -1,11 +1,37 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useI18n } from '../i18n/LanguageProvider'
+
+const CSS = `
+.lp-root{min-height:100vh;background:#0f1117;display:flex;align-items:center;justify-content:center;font-family:"Segoe UI",sans-serif}
+.lp-card{width:100%;max-width:400px;background:#1a1d27;border-radius:16px;padding:44px 40px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.lp-icon{width:52px;height:52px;background:#2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;color:#fff}
+.lp-title{text-align:center;color:#f0f2f5;font-size:1.25rem;font-weight:700;margin-bottom:4px}
+.lp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:32px}
+.lp-label{display:block;font-size:.78rem;color:#9ca3af;margin-bottom:6px;font-weight:500}
+.lp-input{width:100%;background:#0f1117;border:1.5px solid #2a2d3a;border-radius:8px;padding:11px 14px;font-size:.9rem;color:#e5e7eb;outline:none;box-sizing:border-box;transition:border-color .2s}
+.lp-input:focus{border-color:#2563eb}
+.lp-input::placeholder{color:#4b5563}
+.lp-btn{width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.lp-btn:hover:not(:disabled){background:#1d4ed8}
+.lp-btn:disabled{opacity:.6;cursor:not-allowed}
+.lp-links{display:flex;justify-content:center;gap:20px;margin-top:22px}
+.lp-links a{color:#6b7280;font-size:.82rem;text-decoration:none;transition:color .2s}
+.lp-links a:hover{color:#9ca3af}
+.lp-error{background:#2d1515;border:1px solid #7f1d1d;border-radius:8px;padding:10px 14px;color:#fca5a5;font-size:.82rem;margin-top:14px}
+.lp-success{background:#152d15;border:1px solid #166534;border-radius:8px;padding:10px 14px;color:#86efac;font-size:.82rem;margin-top:14px}
+.lp-field{margin-bottom:18px}
+.lp-lang{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
+.lp-lang-btn{background:none;border:1px solid #2a2d3a;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem;color:#6b7280;display:flex;align-items:center;gap:5px;transition:all .2s}
+.lp-lang-btn:hover,.lp-lang-btn.active{border-color:#2563eb;color:#93c5fd}
+`
 
 type MessageState =
   | { type: 'success' | 'danger'; text: string }
   | { type: 'success'; node: React.ReactNode }
 
 export default function ResetPasswordConfirmPage() {
+  const { t, lang, setLang } = useI18n()
   const [searchParams] = useSearchParams()
   const initialUid = searchParams.get('uid') || ''
   const initialToken = searchParams.get('token') || ''
@@ -21,15 +47,22 @@ export default function ResetPasswordConfirmPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const submitLabel = useMemo(() => {
-    return loading ? 'Traitement...' : 'Réinitialiser'
-  }, [loading])
+    return loading ? t('processing') || 'Traitement...' : t('reset') || 'Réinitialiser'
+  }, [loading, t])
+
+  useEffect(() => {
+    const s = document.createElement('style')
+    s.textContent = CSS
+    document.head.appendChild(s)
+    return () => { document.head.removeChild(s) }
+  }, [])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setMessage(null)
 
     if (newPassword !== reNewPassword) {
-      setMessage({ type: 'danger', text: 'Les mots de passe ne correspondent pas.' })
+      setMessage({ type: 'danger', text: t('passwords_not_match') || 'Les mots de passe ne correspondent pas.' })
       return
     }
 
@@ -51,9 +84,9 @@ export default function ResetPasswordConfirmPage() {
           type: 'success',
           node: (
             <>
-              Mot de passe changé avec succès !{' '}
-              <Link to="/login" className="alert-link">
-                Connectez-vous ici
+              {t('password_changed_success') || 'Mot de passe changé avec succès !'}{' '}
+              <Link to="/login" style={{ color: '#86efac', textDecoration: 'underline' }}>
+                {t('back_to_login') || 'Retour à la connexion'}
               </Link>
             </>
           ),
@@ -62,22 +95,20 @@ export default function ResetPasswordConfirmPage() {
         setReNewPassword('')
       } else {
         const data = await res.json().catch(() => ({})) as Record<string, unknown>
-        let errMsg = 'Échec de la réinitialisation.'
-        // Keep same priority as original page
+        let errMsg = t('reset_failed') || 'Échec de la réinitialisation.'
         if (data['new_password'] && Array.isArray(data['new_password'])) {
           errMsg = (data['new_password'] as string[])[0] || errMsg
         } else if (data['non_field_errors'] && Array.isArray(data['non_field_errors'])) {
           errMsg = (data['non_field_errors'] as string[])[0] || errMsg
         } else if (data['token']) {
-          errMsg = 'Le lien est invalide ou a expiré.'
+          errMsg = t('invalid_link') || 'Le lien est invalide ou a expiré.'
         }
-
         setMessage({ type: 'danger', text: errMsg })
       }
     } catch (err) {
       setMessage({
         type: 'danger',
-        text: err instanceof Error ? err.message : 'Erreur de réinitialisation.',
+        text: err instanceof Error ? err.message : t('error_msg'),
       })
     } finally {
       setLoading(false)
@@ -85,112 +116,103 @@ export default function ResetPasswordConfirmPage() {
   }
 
   return (
-    <div className="bg-light d-flex align-items-center vh-100">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-md-5 col-lg-4">
-            <div className="card shadow-lg border-0 rounded-lg">
-              <div className="card-header bg-primary text-white text-center py-4">
-                <h3 className="font-weight-light my-2">Nouveau mot de passe</h3>
+    <div className="lp-root">
+      <div className="lp-card">
+        <div className="lp-icon">
+          <i className="fas fa-lock"></i>
+        </div>
+        <div className="lp-title">{t('new_password_title') || 'Nouveau mot de passe'}</div>
+        <div className="lp-sub">{t('new_password_desc') || 'Choisissez votre nouveau mot de passe.'}</div>
+
+        <div className="lp-lang">
+          <button className={`lp-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>
+            <img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR
+          </button>
+          <button className={`lp-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>
+            <img src="https://flagcdn.com/w20/tn.png" width="16" alt="TN" /> عربي
+          </button>
+        </div>
+
+        <form onSubmit={onSubmit}>
+          {!hasParams && (
+            <>
+              <div className="lp-field">
+                <label className="lp-label">UID (Manuel)</label>
+                <input
+                  type="text"
+                  className="lp-input"
+                  value={uid}
+                  onChange={(ev) => setUid(ev.target.value)}
+                />
               </div>
-
-              <div className="card-body p-4">
-                <form id="resetConfirmForm" onSubmit={onSubmit}>
-                  {!hasParams ? (
-                    <>
-                      <div className="mb-3">
-                        <label className="form-label small text-muted">UID</label>
-                        <input
-                          type="text"
-                          id="uid"
-                          className="form-control form-control-sm"
-                          value={uid}
-                          onChange={(ev) => setUid(ev.target.value)}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label small text-muted">Token</label>
-                        <input
-                          type="text"
-                          id="token"
-                          className="form-control form-control-sm"
-                          value={token}
-                          onChange={(ev) => setToken(ev.target.value)}
-                        />
-                      </div>
-                    </>
-                  ) : null}
-
-                  <div className="form-floating mb-3 position-relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      className="form-control"
-                      id="new_password"
-                      placeholder="Nouveau mot de passe"
-                      required
-                      value={newPassword}
-                      onChange={(ev) => setNewPassword(ev.target.value)}
-                      style={{ paddingRight: '45px' }}
-                    />
-                    <label htmlFor="new_password">Nouveau mot de passe</label>
-                    <button
-                      type="button"
-                      className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none"
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{ zIndex: 10, paddingRight: '15px' }}
-                    >
-                      <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                    </button>
-                  </div>
-
-                  <div className="form-floating mb-3 position-relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      className="form-control"
-                      id="re_new_password"
-                      placeholder="Confirmer"
-                      required
-                      value={reNewPassword}
-                      onChange={(ev) => setReNewPassword(ev.target.value)}
-                      style={{ paddingRight: '45px' }}
-                    />
-                    <label htmlFor="re_new_password">Confirmer</label>
-                    <button
-                      type="button"
-                      className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none"
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{ zIndex: 10, paddingRight: '15px' }}
-                    >
-                      <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                    </button>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                    id="submitBtn"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <span className="spinner-border spinner-border-sm me-2" />
-                    ) : null}
-                    {submitLabel}
-                  </button>
-
-                  {message ? (
-                    <div
-                      className={`alert mt-3 d-block ${
-                        message.type === 'success' ? 'alert-success' : 'alert-danger'
-                      }`}
-                      role="alert"
-                    >
-                      {'text' in message ? message.text : message.node}
-                    </div>
-                  ) : null}
-                </form>
+              <div className="lp-field">
+                <label className="lp-label">Token (Manuel)</label>
+                <input
+                  type="text"
+                  className="lp-input"
+                  value={token}
+                  onChange={(ev) => setToken(ev.target.value)}
+                />
               </div>
+            </>
+          )}
+
+          <div className="lp-field">
+            <label className="lp-label" htmlFor="new_password">{t('new_password_label') || 'Nouveau mot de passe'}</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="new_password"
+                type={showPassword ? "text" : "password"}
+                className="lp-input"
+                placeholder="••••••••"
+                required
+                value={newPassword}
+                onChange={(ev) => setNewPassword(ev.target.value)}
+                style={{ paddingRight: '46px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer'
+                }}
+              >
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
             </div>
           </div>
+
+          <div className="lp-field">
+            <label className="lp-label" htmlFor="re_new_password">{t('confirm_password_label') || 'Confirmer'}</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="re_new_password"
+                type={showPassword ? "text" : "password"}
+                className="lp-input"
+                placeholder="••••••••"
+                required
+                value={reNewPassword}
+                onChange={(ev) => setReNewPassword(ev.target.value)}
+                style={{ paddingRight: '46px' }}
+              />
+            </div>
+          </div>
+
+          <button className="lp-btn" type="submit" disabled={loading}>
+            {loading && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />}
+            {submitLabel}
+          </button>
+
+          {message && (
+            <div className={message.type === 'success' ? 'lp-success' : 'lp-error'}>
+              {'text' in message ? message.text : message.node}
+            </div>
+          )}
+        </form>
+
+        <div className="lp-links">
+          <Link to="/login">{t('back_to_login') || 'Retour à la connexion'}</Link>
         </div>
       </div>
     </div>

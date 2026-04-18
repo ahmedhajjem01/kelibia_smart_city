@@ -26,21 +26,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user }) => {
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
         {/* Icon */}
-        <i className="fas fa-castle text-white mb-4" style={{ fontSize: '3rem', opacity: 0.9 }}></i>
+        <img src="/media/tunisia log.png" alt="Logo" style={{ width: '80px', height: 'auto', marginBottom: '20px' }} />
 
         {/* Bilingual title */}
         <h1
           className="font-black text-white uppercase tracking-tighter mb-2"
           style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}
         >
-          Ville de Kélibia
+          République Tunisienne
         </h1>
         <h2
           className="font-bold text-white mb-6"
           dir="rtl"
           style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(2rem, 5vw, 3.5rem)', opacity: 0.92 }}
         >
-          بلدية قليبية
+          الجمهورية التونسية
         </h2>
 
         {/* Welcome message */}

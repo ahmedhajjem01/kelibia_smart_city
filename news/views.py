@@ -10,6 +10,9 @@ class ArticleViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
+        # Allow Agents and Supervisors to manage news
+        if self.request.user.is_authenticated and self.request.user.user_type in ['agent', 'supervisor']:
+            return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
     def perform_create(self, serializer):

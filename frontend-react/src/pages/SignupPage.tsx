@@ -270,7 +270,7 @@ const governorates = [
 const CSS = `
 .sp-root{min-height:100vh;background:#0f1117;display:flex;align-items:flex-start;justify-content:center;font-family:"Segoe UI",sans-serif;padding:40px 16px}
 .sp-card{width:100%;max-width:560px;background:#1a1d27;border-radius:16px;padding:40px 36px 36px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.sp-icon{width:52px;height:52px;background:#2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem;color:#fff}
+.sp-icon{width:auto;height:auto;background:none;border-radius:0;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.5rem;color:#fff}
 .sp-title{text-align:center;color:#f0f2f5;font-size:1.2rem;font-weight:700;margin-bottom:3px}
 .sp-sub{text-align:center;color:#6b7280;font-size:.82rem;margin-bottom:24px}
 .sp-lang{display:flex;justify-content:center;gap:8px;margin-bottom:28px}
@@ -479,8 +479,8 @@ export default function SignupPage() {
     <div className="sp-root">
       <style>{CSS}</style>
       <div className="sp-card">
-        <div className="sp-icon"><i className="fas fa-city"></i></div>
-        <div className="sp-title">Kélibia Smart City</div>
+        <div className="sp-icon"><img src="/media/tunisia log.png" alt="Logo" style={{ width: '80px', height: 'auto' }} /></div>
+        <div className="sp-title">République Tunisienne</div>
         <div className="sp-sub">{t('create_citizen_account')}</div>
 
         <div className="sp-lang">

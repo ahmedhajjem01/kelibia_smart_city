@@ -92,3 +92,18 @@ class SavedCard(models.Model):
     def __str__(self):
         return f"{self.brand} **** {self.last_4} ({self.user.email})"
 
+
+class SiteConfiguration(models.Model):
+    site_name = models.CharField(max_length=255, default='Kelibia Smart City')
+    contact_email = models.EmailField(default='webmaster.commune-kelibia@topnet.tn')
+    maintenance_mode = models.BooleanField(default=False)
+    
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Configuration: {self.site_name}"
+
+    class Meta:
+        verbose_name = "Configuration Système"
+        verbose_name_plural = "Configuration Système"
+

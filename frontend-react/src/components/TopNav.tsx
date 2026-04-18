@@ -30,9 +30,9 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
             to={isAgentOrAdmin ? '/agent-dashboard' : '/dashboard'}
             className="flex items-center gap-3 no-underline"
           >
-            <i className="fas fa-city text-2xl" style={{ color: '#F18221' }}></i>
+            <img src="/media/tunisia log.png" alt="Logo" style={{ width: '40px', height: 'auto' }} />
             <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#F18221', fontFamily: 'Public Sans, sans-serif' }}>
-              {lang === 'ar' ? 'بلدية قليبية' : 'Ville de Kélibia'}
+              {lang === 'ar' ? 'الجمهورية التونسية' : 'République Tunisienne'}
             </span>
           </Link>
 

@@ -593,7 +593,7 @@ export default function AgentDashboardPage() {
   const [reClsCat, setReClsCat] = useState('')
   const [reClsPrio, setReClsPrio] = useState('')
   const [reClsSaving, setReClsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile' | 'citizens'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile' | 'citizens' | 'actualites' | 'config'>('dashboard')
   const [agentCitizens, setAgentCitizens] = useState<any[]>([])
   const [loadingCitizens, setLoadingCitizens] = useState(false)
   const [citizenSearch, setCitizenSearch] = useState('')
@@ -615,6 +615,50 @@ export default function AgentDashboardPage() {
   const [usersMode, setUsersMode] = useState<'unverified' | 'agents' | 'all'>('unverified')
    const [resetPwdResult, setResetPwdResult] = useState<{ name: string; password: string } | null>(null)
    const [enlargedImage, setEnlargedImage] = useState<string | null>(null)
+
+  // ── News Management ──
+  const [allAgents, setAllAgents] = useState<any[]>([])
+  const [loadingAgents, setLoadingAgents] = useState(false)
+  const [articleImage, setArticleImage] = useState<File | null>(null)
+
+  async function fetchAgents() {
+    setLoadingAgents(true)
+    try {
+      const res = await fetch('/api/accounts/verify-citizens/?type=agent', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) {
+        const data = await res.json()
+        setAllAgents(Array.isArray(data) ? data : (data.results || []))
+      }
+    } catch (e) { console.error(e) }
+    finally { setLoadingAgents(false) }
+  }
+
+  async function handleAssignAgent(recId: number, agentId: number) {
+    try {
+      const res = await fetch(`/api/reclamations/${recId}/assign_agent/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ agent_id: agentId })
+      })
+      if (res.ok) {
+        showToast('Agent affecté avec succès')
+        fetchReclamations()
+        setDetailRec(null)
+      } else {
+        const err = await res.json()
+        showToast(err.detail || 'Erreur lors de l\'affectation', 'error')
+      }
+    } catch (e) { showToast('Erreur réseau', 'error') }
+  }
+  const [allArticles, setAllArticles] = useState<any[]>([])
+  const [loadingArticles, setLoadingArticles] = useState(false)
+  const [showAddArticleModal, setShowAddArticleModal] = useState(false)
+  const [editingArticle, setEditingArticle] = useState<any | null>(null)
+  const [articleForm, setArticleForm] = useState({ title: '', content: '', is_published: true })
+  
+  // ── Config / Settings ──
+  const [globalSettings, setGlobalSettings] = useState({ site_name: 'Kelibia Smart City', maintenance_mode: false, contact_email: 'webmaster@commune-kelibia.tn' })
+  const [configSaving, setConfigSaving] = useState(false)
 
   const [managedUsers, setManagedUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -670,14 +714,82 @@ export default function AgentDashboardPage() {
 
   const mapRef = useRef<HTMLDivElement>(null)
   const leafletMap = useRef<any>(null)
-  const markersLayer = useRef<any>(null)
+  async function fetchArticles() {
+    setLoadingArticles(true)
+    try {
+      const res = await fetch('/api/news/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setAllArticles(await res.json())
+    } catch (e) { console.error(e) }
+    finally { setLoadingArticles(false) }
+  }
+
+  async function handleSaveArticle() {
+    const method = editingArticle ? 'PUT' : 'POST'
+    const url = editingArticle ? `/api/news/${editingArticle.id}/` : '/api/news/'
+    
+    // Use FormData for Multipart/Image upload
+    const fd = new FormData()
+    fd.append('title', articleForm.title)
+    fd.append('content', articleForm.content)
+    fd.append('is_published', String(articleForm.is_published))
+    if (articleImage) fd.append('image', articleImage)
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${access}` }, // Don't set Content-Type, fetch handles boundary
+        body: fd
+      })
+      if (res.ok) {
+        showToast(editingArticle ? 'Article mis à jour' : 'Article créé')
+        setShowAddArticleModal(false)
+        setArticleImage(null)
+        fetchArticles()
+      }
+    } catch (e) { showToast('Erreur lors de la sauvegarde', 'error') }
+  }
+
+  async function deleteArticle(id: number) {
+    if (!window.confirm('Supprimer cet article ?')) return
+    try {
+      const res = await fetch(`/api/news/${id}/`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      if (res.ok) {
+        showToast('Article supprimé')
+        fetchArticles()
+      }
+    } catch (e) { showToast('Erreur lors de la suppression', 'error') }
+  }
+
+  async function fetchConfig() {
+    try {
+      const res = await fetch('/api/accounts/config/', { headers: { Authorization: `Bearer ${access}` } })
+      if (res.ok) setGlobalSettings(await res.json())
+    } catch (e) { console.error(e) }
+  }
+
+  async function handleSaveConfig() {
+    setConfigSaving(true)
+    try {
+      const res = await fetch('/api/accounts/config/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        body: JSON.stringify(globalSettings)
+      })
+      if (res.ok) showToast('Configuration enregistrée avec succès !')
+      else showToast('Erreur lors de l\'enregistrement', 'error')
+    } catch { showToast('Erreur réseau', 'error') }
+    finally { setConfigSaving(false) }
+  }
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
     fetchUserInfo()
+    fetchAgents()
+    fetchConfig()
   }, [])
-
-  useEffect(() => { applyFilters() }, [allRecs, search, filterStatus, filterCategory, filterPriority, urgentOnly])
 
   async function fetchUserInfo() {
     try {
@@ -1063,6 +1175,7 @@ export default function AgentDashboardPage() {
     } catch { setRecError(true) }
     finally { setLoading(false) }
   }
+  useEffect(() => { applyFilters() }, [allRecs, search, filterStatus, filterCategory, filterPriority, urgentOnly])
 
   function applyFilters() {
     const s = search.toLowerCase()
@@ -1381,6 +1494,14 @@ export default function AgentDashboardPage() {
               <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
                 <i className="fas fa-comments"></i> {t('nav_forum_moderation')}
               </a>
+              <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
+                <i className="fas fa-newspaper"></i> {lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}
+              </a>
+              <div className="ag-divider"></div>
+              <div className="ag-sec-title">Système</div>
+              <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
+                <i className="fas fa-cogs"></i> Configuration
+              </a>
             </>
           )}
 
@@ -1456,7 +1577,6 @@ export default function AgentDashboardPage() {
                 </div>
                 {loading ? <div className="p-4"><div className="skeleton-box table-skeleton"></div></div> : <></>}
                 {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>{t('reclamations_error')}</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> {t('retry')}</button></div>}
-                {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>{t('reclamations_error')}</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> {t('retry')}</button></div>}
                 {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>{t('no_reclamations_found')}</p></div>}
                 {!loading && !recError && filteredRecs.length > 0 && (
                   <div style={{ overflowX: 'auto' }}>
@@ -1470,7 +1590,16 @@ export default function AgentDashboardPage() {
                           return (
                             <tr key={r.id}>
                               <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{r.id}</td>
-                              <td><div style={{ fontWeight: 600, color: '#1a1a2e', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div><div style={{ fontSize: '.7rem', color: '#aaa', marginTop: 1 }}>{(r.description || '').slice(0, 40)}{(r.description || '').length > 40 ? '…' : ''}</div></td>
+                              <td>
+                                 <div style={{ fontWeight: 600, color: '#1a1a2e', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                                 <div style={{ fontSize: '.7rem', color: '#888', marginTop: 1 }}>
+                                   {r.agent_name ? (
+                                      <span className="text-primary fw-bold"><i className="fas fa-id-badge me-1"></i>Assigné à: {r.agent_name}</span>
+                                   ) : (
+                                      <span className="text-muted italic"><i className="fas fa-user-clock me-1"></i>Non assigné</span>
+                                   )}
+                                 </div>
+                               </td>
                               <td style={{ fontSize: '.8rem', color: '#444' }}>{r.citizen_name || '—'}</td>
                               <td><span className={`cat-badge ${cat.cls}`}>{cat.label}</span></td>
                               <td><span className={`priority-badge ${prio.cls}`}>{prio.label}</span></td>
@@ -1990,24 +2119,24 @@ export default function AgentDashboardPage() {
 
                         <hr />
                         {/* Status update */}
-                        <div className="mb-3">
-                          <label className="det-label mb-2">{t('event_current_status')}</label>
-                          <div className="d-flex gap-2 flex-wrap">
-                            {[
-                              { val: 'pending',     label: `⏳ ${t('status_pending')}`,  cls: 'btn-outline-warning' },
-                              { val: 'in_progress', label: `🔄 ${t('status_in_progress')}`,    cls: 'btn-outline-primary' },
-                              { val: 'approved',    label: `✅ ${t('event_approve')}`,   cls: 'btn-outline-success' },
-                              { val: 'rejected',    label: `❌ ${t('event_reject')}`,     cls: 'btn-outline-danger' },
-                            ].map(opt => (
-                              <button key={opt.val}
-                                className={`btn btn-sm ${opt.cls} ${demandeNewStatus === opt.val ? 'active' : ''}`}
-                                style={{ fontWeight: 600, fontSize: '.8rem', ...(demandeNewStatus === opt.val ? { opacity: 1 } : { opacity: .7 }) }}
-                                onClick={() => setDemandeNewStatus(opt.val)}>
-                                {opt.label}
-                              </button>
-                            ))}
+
+                        {/* Agent Assignment (Supervisor only) */}
+                        {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && demandeDetail.type === 'reclamation' && (
+                          <div className="mb-3">
+                            <label className="det-label mb-2"><i className="fas fa-user-tag me-1"></i>Affecter à un agent</label>
+                            <div className="d-flex gap-2">
+                              <select className="form-select form-select-sm" 
+                                value={demandeDetail.agent || ''} 
+                                onChange={(e) => handleAssignAgent(demandeDetail.id, parseInt(e.target.value))}
+                              >
+                                <option value="">Choisir un agent...</option>
+                                {allAgents.map(a => (
+                                  <option key={a.id} value={a.id}>{a.full_name}</option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
-                        </div>
+                        )}
 
                         <div className="d-flex gap-2 justify-content-end">
                           <button className="btn btn-secondary btn-sm" onClick={() => setDemandeDetail(null)}>{t('close')}</button>
@@ -2962,7 +3091,149 @@ export default function AgentDashboardPage() {
                    ))}
                 </div>
              </div>
+          ) : activeTab === 'actualites' ? (
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', borderBottom: 'none' }}>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="ag-icon-box" style={{ background: 'rgba(255,255,255,0.15)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fas fa-newspaper" style={{ fontSize: 16 }}></i>
+                  </div>
+                  <span className="fw-bold">{lang === 'ar' ? 'إدارة الأخبار' : 'Gestion des Actualités'}</span>
+                </div>
+                <button className="btn btn-sm btn-light rounded-pill px-3 fw-bold" onClick={() => { setEditingArticle(null); setArticleForm({ title: '', content: '', is_published: true }); setShowAddArticleModal(true); }}>
+                  <i className="fas fa-plus me-1"></i> {lang === 'ar' ? 'إضافة خبر' : 'Nouveau'}
+                </button>
+              </div>
+              <div className="ag-card-body p-0">
+                {loadingArticles ? (
+                  <div className="p-4 text-center"><div className="spinner-border text-primary"></div></div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="ag-table align-middle">
+                      <thead>
+                        <tr>
+                          <th className="ps-4">Contenu</th>
+                          <th className="text-center">Statut</th>
+                          <th>Publié le</th>
+                          <th className="text-end pe-4">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allArticles.map((art: any) => (
+                          <tr key={art.id} className="ag-row-hover">
+                            <td className="ps-4 py-3">
+                              <div className="fw-bold text-dark">{art.title}</div>
+                              <div className="text-muted small text-truncate" style={{ maxWidth: 300 }}>{art.content}</div>
+                            </td>
+                            <td className="text-center">
+                              {art.is_published ? (
+                                <span className="badge bg-success-soft text-success rounded-pill px-3 py-2"><i className="fas fa-check-circle me-1"></i>En ligne</span>
+                              ) : (
+                                <span className="badge bg-warning-soft text-warning rounded-pill px-3 py-2"><i className="fas fa-clock me-1"></i>Brouillon</span>
+                              )}
+                            </td>
+                            <td>
+                              <div className="text-muted small"><i className="far fa-calendar-alt me-1"></i>{formatDate(art.created_at)}</div>
+                            </td>
+                            <td className="text-end pe-4">
+                              <div className="d-flex justify-content-end gap-2">
+                                <button className="ag-btn-icon" onClick={() => { setEditingArticle(art); setArticleForm({ title: art.title, content: art.content, is_published: art.is_published }); setShowAddArticleModal(true); }}>
+                                  <i className="fas fa-edit"></i>
+                                </button>
+                                <button className="ag-btn-icon text-danger" onClick={() => deleteArticle(art.id)}>
+                                  <i className="fas fa-trash"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : activeTab === 'config' ? (
+            <div className="ag-card animate__animated animate__fadeIn">
+              <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #334155 0%, #475569 100%)', borderBottom: 'none' }}>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="ag-icon-box" style={{ background: 'rgba(255,255,255,0.15)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fas fa-cogs" style={{ fontSize: 16 }}></i>
+                  </div>
+                  <span className="fw-bold">Configuration du Portail</span>
+                </div>
+              </div>
+              <div className="ag-card-body p-4 bg-light bg-opacity-10">
+                <div className="row g-4">
+                  <div className="col-md-7">
+                    <div className="p-4 bg-white rounded-4 shadow-sm border">
+                      <h6 className="fw-bold mb-4 text-primary"><i className="fas fa-globe me-2"></i>Paramètres Généraux</h6>
+                      <div className="mb-4">
+                        <label className="det-label mb-2">Nom de la Plateforme Smart City</label>
+                        <input className="form-control form-control-lg border-2" value={globalSettings.site_name} onChange={e => setGlobalSettings({...globalSettings, site_name: e.target.value})} />
+                      </div>
+                      <div className="mb-4">
+                        <label className="det-label mb-2">Email Administrative Contact</label>
+                        <input className="form-control border-2" value={globalSettings.contact_email} onChange={e => setGlobalSettings({...globalSettings, contact_email: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-5">
+                    <div className="p-4 bg-white rounded-4 shadow-sm border h-100">
+                      <h6 className="fw-bold mb-4 text-danger"><i className="fas fa-exclamation-triangle me-2"></i>Contrôles Système</h6>
+                      <div className="form-check form-switch custom-switch py-2">
+                        <input className="form-check-input" type="checkbox" id="maintSwitch" checked={globalSettings.maintenance_mode} onChange={e => setGlobalSettings({...globalSettings, maintenance_mode: e.target.checked})} />
+                        <label className="form-check-label fw-bold ms-2" htmlFor="maintSwitch">Mode Maintenance</label>
+                        <p className="text-muted small mt-2 mb-0">Suspend l'accès citoyen pour les interventions techniques prévues.</p>
+                      </div>
+                      <hr className="my-4" />
+                      <div className="d-grid pt-2">
+                        <button className="btn btn-primary btn-lg rounded-pill shadow-sm" onClick={handleSaveConfig} disabled={configSaving}>
+                          {configSaving ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="fas fa-save me-2"></i>}
+                          {lang === 'ar' ? 'حفظ التغييرات' : 'Enregistrer'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : null}
+          {/* Article Add/Edit Modal */}
+          {showAddArticleModal && (
+            <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">{editingArticle ? 'Modifier l\'article' : 'Ajouter un article'}</h5>
+                    <button type="button" className="btn-close" onClick={() => setShowAddArticleModal(false)}></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="mb-3">
+                      <label className="form-label">Titre</label>
+                      <input className="form-control" value={articleForm.title} onChange={e => setArticleForm({...articleForm, title: e.target.value})} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Image de couverture</label>
+                      <input type="file" className="form-control" onChange={e => setArticleImage(e.target.files?.[0] || null)} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Contenu</label>
+                      <textarea className="form-control" rows={5} value={articleForm.content} onChange={e => setArticleForm({...articleForm, content: e.target.value})}></textarea>
+                    </div>
+                    <div className="form-check">
+                      <input className="form-check-input" type="checkbox" checked={articleForm.is_published} onChange={e => setArticleForm({...articleForm, is_published: e.target.checked})} />
+                      <label className="form-check-label">Publier immédiatement</label>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button className="btn btn-secondary" onClick={() => setShowAddArticleModal(false)}>Annuler</button>
+                    <button className="btn btn-primary" onClick={handleSaveArticle}>Enregistrer</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {activeTab === 'evenements' && evDetail && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
