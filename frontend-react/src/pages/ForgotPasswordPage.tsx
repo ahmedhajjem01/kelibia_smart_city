@@ -73,9 +73,10 @@ const CSS = `
 .lp-btn { width: 100%; background: linear-gradient(135deg, #954a00 0%, #f18221 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .lp-error { background: #ffdad6; border: 1px solid #ba1a1a; border-radius: 10px; padding: 11px; color: #93000a; font-size: .83rem; margin-top: 14px; }
 .lp-success{ background: #d3f9d8; border: 1px solid #2b8a3e; border-radius: 10px; padding: 11px; color: #092c09; font-size: .83rem; margin-top: 14px; }
-.lp-footer { margin-top: 28px; text-align: center; }
-.lp-signup-link { font-size: .85rem; color: #564336; }
-.lp-signup-link a { color: #954a00; font-weight: 700; text-decoration: none; }
+.lp-footer { margin-top: 20px; text-align: center; }
+.lp-footer p { font-size: .72rem; color: #9ca3af; margin: 4px 0; }
+.lp-signup-link { font-size: .78rem; color: #6b7280; }
+.lp-signup-link a { color: #954a00; font-weight: 600; text-decoration: none; }
 `
 
 export default function ForgotPasswordPage() {
