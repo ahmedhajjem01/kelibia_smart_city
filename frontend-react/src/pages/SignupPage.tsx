@@ -221,7 +221,7 @@ const CSS = `
 
 .sg-main {
 
-  padding: 112px 24px 64px;
+  padding: 80px 24px 64px;
 
   max-width: 1100px;
 
@@ -418,18 +418,13 @@ const CSS = `
 /* ── Form card ── */
 
 .sg-card {
-
   flex: 1;
-
-  background: #ffffff;
-
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
   border-radius: 20px;
-
   padding: 44px 48px;
-
-  box-shadow: 0 4px 32px rgba(0,0,0,.06);
-
-  border: 1px solid rgba(225,226,236,.6);
+  box-shadow: 0 4px 60px rgba(0,0,0,.15);
+  border: 1px solid rgba(255,255,255,.4);
 
 }
 
@@ -1585,7 +1580,7 @@ export default function SignupPage() {
 
                 </h2>
 
-                <span className="sg-step-badge">Etape 01/04</span>
+                
 
               </div>
 
@@ -1699,7 +1694,7 @@ export default function SignupPage() {
 
                   </h2>
 
-                  <span className="sg-step-badge">Etape 02/04</span>
+                  
 
                 </div>
 
@@ -1771,7 +1766,7 @@ export default function SignupPage() {
 
                 </h2>
 
-                <span className="sg-step-badge">Etape 03/04</span>
+                
 
               </div>
 
@@ -1855,7 +1850,7 @@ export default function SignupPage() {
 
                 </h2>
 
-                <span className="sg-step-badge">Etape 04/04</span>
+                
 
               </div>
 
