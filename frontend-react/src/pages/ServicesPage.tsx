@@ -637,7 +637,7 @@ export default function ServicesPage() {
 
 
 
-        {!loading && (
+        {!loading && user?.is_verified && (
 
           <div className="category-section mb-5 mt-5">
 
