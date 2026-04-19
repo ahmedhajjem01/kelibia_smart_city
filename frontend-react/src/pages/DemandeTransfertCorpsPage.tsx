@@ -38,7 +38,17 @@ export default function DemandeTransfertCorpsPage() {
     setLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
+    const rawData = new FormData(e.currentTarget)
+    const formData = new FormData()
+    rawData.forEach((value, key) => {
+      if (value instanceof File && value.name) {
+        const ext = value.name.split('.').pop() || 'jpg'
+        const shortName = `${key}_${Date.now()}.${ext}`
+        formData.append(key, value, shortName)
+      } else {
+        formData.append(key, value)
+      }
+    })
     
     // Instead of building a complex backend app, since this is a frontend form flow, 
     // we assume there's an API or we just mock the success if the backend doesn't exist yet.

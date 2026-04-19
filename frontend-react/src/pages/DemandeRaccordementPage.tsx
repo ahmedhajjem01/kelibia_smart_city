@@ -75,10 +75,22 @@ export default function DemandeRaccordementPage() {
     fd.append('latitude', String(position[0]))
     fd.append('longitude', String(position[1]))
     
-    if (cinCopie) fd.append('cin_copie', cinCopie)
-    if (titrePropriete) fd.append('titre_propriete', titrePropriete)
-    if (permisBatir) fd.append('permis_batir', permisBatir)
-    if (planSituation) fd.append('plan_situation', planSituation)
+    if (cinCopie) {
+      const ext = cinCopie.name.split('.').pop() || 'jpg'
+      fd.append('cin_copie', cinCopie, `cin_copie_${Date.now()}.${ext}`)
+    }
+    if (titrePropriete) {
+      const ext = titrePropriete.name.split('.').pop() || 'pdf'
+      fd.append('titre_propriete', titrePropriete, `titre_prop_${Date.now()}.${ext}`)
+    }
+    if (permisBatir) {
+      const ext = permisBatir.name.split('.').pop() || 'pdf'
+      fd.append('permis_batir', permisBatir, `permis_batir_${Date.now()}.${ext}`)
+    }
+    if (planSituation) {
+      const ext = planSituation.name.split('.').pop() || 'jpg'
+      fd.append('plan_situation', planSituation, `plan_sit_${Date.now()}.${ext}`)
+    }
 
     try {
       const res = await fetch(resolveBackendUrl('/api/construction/raccordement/'), {
