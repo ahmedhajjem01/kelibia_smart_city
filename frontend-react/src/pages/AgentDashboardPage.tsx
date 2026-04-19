@@ -3297,15 +3297,18 @@ export default function AgentDashboardPage() {
                 <div className="btn-group btn-group-sm bg-white bg-opacity-10 p-1 rounded">
 
                   <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('pending_verification')}</button>
-
-                  <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? 'btn-warning' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+                  
+                  {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                    <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? 'btn-warning' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+                  )}
 
                   <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('all_label')}</button>
 
                 </div>
 
-                <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>{t('add_agent')}</button>
-
+                {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                  <button className="btn btn-sm btn-light ms-2" onClick={() => setShowAddUserModal(true)} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-plus me-1"></i>{t('add_agent')}</button>
+                )}
               </div>
 
               
@@ -3381,11 +3384,11 @@ export default function AgentDashboardPage() {
                       <tbody>
 
                         {managedUsers.filter(u => {
-
                           const q = userSearch.toLowerCase()
-
-                          return !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.cin?.toLowerCase().includes(q)
-
+                          const matches = !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.cin?.toLowerCase().includes(q)
+                          const isSupervisor = user?.user_type === 'supervisor' || user?.is_superuser
+                          if (!isSupervisor && u.user_type !== 'citizen') return false
+                          return matches
                         }).map(u => (
 
                           <tr key={u.id} className="ag-row-clickable" onClick={() => setSelectedUser(u)} 
