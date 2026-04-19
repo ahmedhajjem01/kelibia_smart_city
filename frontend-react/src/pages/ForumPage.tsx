@@ -161,14 +161,29 @@ export default function ForumPage() {
     <div className="space-y-4 pt-4">
       {/* Launch discussion button */}
       <button
-        onClick={() => setShowModal(true)}
-        className="w-full py-3 text-white font-black text-sm tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer"
-        style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', boxShadow: '0 10px 30px rgba(180,122,80,0.3)' }}
+        onClick={() => {
+          if (!user?.is_verified) {
+            alert(t('account_pending_verification_desc'))
+            return
+          }
+          setShowModal(true)
+        }}
+        className={`w-full py-3 text-white font-black text-sm tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer ${!user?.is_verified ? 'opacity-70 grayscale' : ''}`}
+        style={{ 
+          background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', 
+          boxShadow: user?.is_verified ? '0 10px 30px rgba(180,122,80,0.3)' : 'none' 
+        }}
       >
         <span>{lang === 'ar' ? 'ابدأ نقاشاً' : 'Lancer une discussion'}</span>
         {lang !== 'ar' && <span className="text-sm opacity-80" dir="rtl">ابدأ نقاشاً</span>}
         <i className="fas fa-comment-plus absolute right-6 opacity-20 text-2xl"></i>
       </button>
+
+      {user && !user.is_verified && (
+        <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-amber-800 text-[11px] font-medium animate-pulse">
+           <i className="fas fa-info-circle me-1"></i> {t('account_pending_verification_desc')}
+        </div>
+      )}
 
       {/* Categories */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
