@@ -286,7 +286,12 @@ export default function ReclamationFormPage() {
 
           <div className="rf-card-body">
 
-            {user && !user.is_verified ? (
+            {!user ? (
+              <div className="text-center py-5">
+                <i className="fas fa-spinner fa-spin fa-2x text-primary" />
+                <p className="mt-2 text-muted">{t('loading') || 'Chargement en cours...'}</p>
+              </div>
+            ) : !user.is_verified ? (
               <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
                 <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
                 <div>
