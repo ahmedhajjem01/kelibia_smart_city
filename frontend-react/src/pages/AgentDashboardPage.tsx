@@ -12,21 +12,7 @@ import PriorityExplanationModal from '../components/PriorityExplanationModal'
 
 
 
-const resolveBackendUrl = (path: string) => {
 
-  if (!path) return ''
-
-  if (path.startsWith('http') || path.startsWith('data:')) return path
-
-  // If we are on localhost, use localhost:8000
-
-  // In production, we assume media is served from the same base as /api/
-
-  const base = window.location.hostname === 'localhost' ? 'http://localhost:8000' : ''
-
-  return `${base}${path}`
-
-}
 
 
 
