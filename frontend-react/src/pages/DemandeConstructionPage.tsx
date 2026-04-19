@@ -158,7 +158,12 @@ export default function DemandeConstructionPage() {
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v) })
       if (position) { fd.append('latitude', String(position[0])); fd.append('longitude', String(position[1])) }
-      Object.entries(files).forEach(([k, f]) => { if (f) fd.append(k, f) })
+      Object.entries(files).forEach(([k, f]) => {
+        if (f) {
+          const ext = f.name.split('.').pop() || 'bin'
+          fd.append(k, f, `${k}_${Date.now()}.${ext}`)
+        }
+      })
       const res = await fetch(resolveBackendUrl('/api/construction/demandes/'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${access}` },
