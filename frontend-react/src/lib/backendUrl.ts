@@ -1,5 +1,6 @@
 export function getBackendBaseUrl() {
-  // Local dev uses Django on 127.0.0.1:8000; Vercel uses same origin for the Python backend.
+  // Local dev: Use relative paths so Vite proxy works. 
+  // Production (Vercel): Use origin because backend is served on the same domain.
   const { hostname, origin } = window.location
 
   if (
@@ -8,7 +9,7 @@ export function getBackendBaseUrl() {
     hostname === '0.0.0.0' ||
     hostname.startsWith('127.')
   ) {
-    return 'http://127.0.0.1:8000'
+    return '' 
   }
 
   return origin
