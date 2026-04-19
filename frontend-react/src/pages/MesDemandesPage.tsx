@@ -321,13 +321,21 @@ export default function MesDemandesPage() {
         </div>
 
         {user && !user.is_verified && (
-          <div className="alert alert-info rounded-4 shadow-sm mb-4 d-flex align-items-center p-3 animate__animated animate__fadeInDown">
-            <div className="bg-info bg-opacity-10 p-3 rounded-circle me-3">
-              <i className="fas fa-user-clock fs-4 text-info"></i>
+          <div 
+            className="p-4 mb-4 d-flex align-items-center animate__animated animate__fadeInDown shadow-sm"
+            style={{ 
+              background: '#FFF4CD', 
+              borderRadius: '20px', 
+              border: 'none',
+              gap: '20px'
+            }}
+          >
+            <div className="text-warning">
+              <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
             </div>
             <div>
-              <h5 className="fw-bold mb-1">{t('account_pending_verification')}</h5>
-              <p className="mb-0 small opacity-75">{t('account_pending_verification_desc')}</p>
+              <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>{t('account_pending_verification')}</h5>
+              <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>{t('account_pending_verification_desc')}</p>
             </div>
           </div>
         )}
