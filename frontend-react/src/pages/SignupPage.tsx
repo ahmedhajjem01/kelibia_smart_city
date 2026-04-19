@@ -88,8 +88,14 @@ const governorates = [
 
 
 
-const CSS = `
 
+export default function SignupPage() {
+
+  const navigate = useNavigate()
+
+  const { t, lang, setLang } = useI18n()
+
+  const CSS = `
 /* ── Reset & base ── */
 
 .sg-root {
@@ -419,12 +425,19 @@ const CSS = `
 /* ── Form card ── */
 
 .sg-card {
+
   flex: 1;
+
   background: rgba(255, 255, 255, 0.96);
+
   backdrop-filter: blur(16px);
+
   border-radius: 20px;
+
   padding: 44px 48px;
+
   box-shadow: 0 4px 60px rgba(0,0,0,.15);
+
   border: 1px solid rgba(255,255,255,.4);
 
 }
@@ -615,9 +628,15 @@ const CSS = `
 
 }
 
+
+
 .sg-input-wrap { position: relative; }
 
+
+
 .sg-input-wrap .sg-input { padding-${lang === 'ar' ? 'left' : 'right'}: 44px; }
+
+
 
 .sg-eye {
 
@@ -702,6 +721,8 @@ const CSS = `
   text-align: center;
 
 }
+
+
 
 .sg-cin-slot:hover { border-color: #954a00; background: #fff8f4; }
 
@@ -819,29 +840,25 @@ const CSS = `
 
   color: #f18221;
 
-  margin-bottom: 14px;
-
   display: flex;
 
   align-items: center;
 
-  gap: 6px;
+  gap: 8px;
+
+  margin-bottom: 12px;
 
 }
 
+.sg-spouse-hd i { font-size: .9rem; }
 
 
-/* ── Submit area ── */
+
+/* ── Actions ── */
 
 .sg-actions {
 
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 16px;
-
-  padding-top: 8px;
+  padding-top: 12px;
 
 }
 
@@ -853,7 +870,7 @@ const CSS = `
 
   gap: 20px;
 
-  flex-wrap: wrap;
+  margin-bottom: 24px;
 
 }
 
@@ -865,11 +882,11 @@ const CSS = `
 
   border: none;
 
-  border-radius: 999px;
+  border-radius: 10px;
 
-  padding: 14px 36px;
+  padding: 14px 44px;
 
-  font-size: .95rem;
+  font-size: 1rem;
 
   font-weight: 700;
 
@@ -879,43 +896,25 @@ const CSS = `
 
   align-items: center;
 
-  gap: 8px;
+  gap: 10px;
 
-  transition: opacity .2s, transform .1s;
-
-  font-family: inherit;
-
-  box-shadow: 0 4px 18px rgba(149,74,0,.25);
-
-  white-space: nowrap;
+  transition: transform .2s, box-shadow .2s;
 
 }
 
-.sg-btn:hover:not(:disabled) { opacity: .9; }
+.sg-btn:hover {
 
-.sg-btn:active:not(:disabled) { transform: scale(.97); }
+  transform: translateY(-2px);
 
-.sg-btn:disabled { opacity: .6; cursor: not-allowed; }
-
-.sg-login-link {
-
-  font-size: .85rem;
-
-  color: #6b7280;
+  box-shadow: 0 8px 24px rgba(149,74,0,.25);
 
 }
 
-.sg-login-link a {
+.sg-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-  color: #954a00;
+.sg-login-link { font-size: .88rem; color: #6b7280; }
 
-  font-weight: 700;
-
-  text-decoration: none;
-
-}
-
-.sg-login-link a:hover { text-decoration: underline; }
+.sg-login-link a { color: #954a00; font-weight: 700; text-decoration: none; }
 
 .sg-terms-row {
 
@@ -925,57 +924,59 @@ const CSS = `
 
   gap: 10px;
 
-  background: #f2f3fd;
+  background: #f8fafc;
 
-  border-radius: 10px;
+  padding: 16px;
 
-  padding: 14px 16px;
+  border-radius: 12px;
 
-}
-
-.sg-terms-row input[type=checkbox] { accent-color: #954a00; width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
-
-.sg-terms-text { font-size: .77rem; color: #6b7280; line-height: 1.5; }
-
-.sg-terms-text a { color: #954a00; }
-
-
-
-/* ── Messages ── */
-
-.sg-error {
-
-  background: #ffdad6;
-
-  border: 1px solid #ba1a1a;
-
-  border-radius: 10px;
-
-  padding: 12px 16px;
-
-  color: #93000a;
-
-  font-size: .83rem;
-
-  margin-top: 14px;
+  border: 1px solid #e2e8f0;
 
 }
+
+.sg-terms-row input { margin-top: 3px; accent-color: #954a00; }
+
+.sg-terms-text { font-size: .78rem; color: #64748b; line-height: 1.5; }
+
+.sg-terms-text a { color: #954a00; font-weight: 600; text-decoration: none; }
+
+
+
+/* ── Results ── */
 
 .sg-success {
 
-  background: #e6f4ea;
+  margin-top: 24px;
 
-  border: 1px solid #166534;
+  background: #ecfdf5;
+
+  border: 1px solid #10b981;
+
+  color: #065f46;
+
+  padding: 14px 18px;
 
   border-radius: 10px;
 
-  padding: 12px 16px;
+  font-size: .9rem;
 
-  color: #166534;
+}
 
-  font-size: .83rem;
+.sg-error {
 
-  margin-top: 14px;
+  margin-top: 24px;
+
+  background: #fff1f2;
+
+  border: 1px solid #f43f5e;
+
+  color: #9f1239;
+
+  padding: 14px 18px;
+
+  border-radius: 10px;
+
+  font-size: .9rem;
 
 }
 
@@ -985,11 +986,11 @@ const CSS = `
 
 .sg-footer {
 
-  background: #f8f9fc;
+  margin-top: 80px;
 
-  border-top: 1px solid #e1e2ec;
+  padding: 48px 24px;
 
-  padding: 24px 32px;
+  border-top: 1px solid #f0ebe6;
 
   display: flex;
 
@@ -997,25 +998,21 @@ const CSS = `
 
   align-items: center;
 
-  flex-wrap: wrap;
-
-  gap: 12px;
-
 }
 
-.sg-footer-brand { font-size: .88rem; font-weight: 700; color: #954a00; }
+.sg-footer-brand { font-size: .88rem; font-weight: 700; color: #564336; margin-bottom: 4px; }
 
 .sg-footer-copy { font-size: .78rem; color: #9ca3af; }
 
-.sg-footer-links { display: flex; gap: 20px; }
+.sg-footer-links { display: flex; gap: 24px; }
 
-.sg-footer-links a { font-size: .78rem; color: #9ca3af; text-decoration: none; }
+.sg-footer-links a { font-size: .78rem; color: #6b7280; text-decoration: none; transition: color .2s; }
 
 .sg-footer-links a:hover { color: #954a00; }
 
 
 
-/* ── Camera modal ── */
+/* ── Camera Modal ── */
 
 .sg-cam-overlay {
 
@@ -1023,9 +1020,11 @@ const CSS = `
 
   inset: 0;
 
-  background: rgba(0,0,0,.75);
+  z-index: 100;
 
-  z-index: 9000;
+  background: rgba(15,17,23,.85);
+
+  backdrop-filter: blur(8px);
 
   display: flex;
 
@@ -1041,15 +1040,15 @@ const CSS = `
 
   background: #fff;
 
-  border-radius: 18px;
+  border-radius: 20px;
 
   width: 100%;
 
-  max-width: 480px;
+  max-width: 500px;
 
   overflow: hidden;
 
-  box-shadow: 0 24px 80px rgba(0,0,0,.3);
+  box-shadow: 0 24px 60px rgba(0,0,0,.4);
 
 }
 
@@ -1057,45 +1056,29 @@ const CSS = `
 
   padding: 16px 20px;
 
+  border-bottom: 1px solid #f1f2f9;
+
   display: flex;
 
   justify-content: space-between;
 
   align-items: center;
 
-  border-bottom: 1px solid #e1e2ec;
-
 }
 
-.sg-cam-title { font-weight: 700; font-size: .95rem; color: #191b22; }
+.sg-cam-title { font-weight: 700; color: #191b22; }
 
-.sg-cam-close {
+.sg-cam-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #9ca3af; }
 
-  background: none;
-
-  border: none;
-
-  color: #6b7280;
-
-  cursor: pointer;
-
-  font-size: 1.1rem;
-
-  padding: 4px;
-
-}
-
-.sg-cam-body { padding: 0; background: #000; text-align: center; }
+.sg-cam-body { background: #000; line-height: 0; }
 
 .sg-cam-footer {
 
-  padding: 14px 20px;
+  padding: 20px;
 
   display: flex;
 
-  gap: 10px;
-
-  justify-content: center;
+  gap: 12px;
 
   border-top: 1px solid #e1e2ec;
 
@@ -1166,14 +1149,6 @@ const CSS = `
 }
 
 `
-
-
-
-export default function SignupPage() {
-
-  const navigate = useNavigate()
-
-  const { t, lang, setLang } = useI18n()
 
   const webcamRef = useRef<Webcam>(null)
 

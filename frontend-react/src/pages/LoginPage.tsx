@@ -14,7 +14,11 @@ type TokenResponse = {
   user_type?: 'agent' | string
 }
 
-const CSS = `
+export default function LoginPage() {
+  const navigate = useNavigate()
+  const { t, lang, setLang } = useI18n()
+
+  const CSS = `
 /* ── Root ── */
 .lp-root {
   min-height: 100vh;
@@ -177,10 +181,6 @@ const CSS = `
 .lp-signup-link { font-size: .78rem; color: #6b7280; }
 .lp-signup-link a { color: #954a00; font-weight: 600; text-decoration: none; }
 `
-
-export default function LoginPage() {
-  const navigate = useNavigate()
-  const { t, lang, setLang } = useI18n()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
