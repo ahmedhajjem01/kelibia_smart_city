@@ -271,23 +271,21 @@ const CSS = `
 .ag-user-pill .name-block .role{font-size:.65rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
 
 .ag-logout{
-
-  background:transparent;color:#64748b;
-
+  background:transparent;
+  color:#64748b;
   border:0;
-
-  border-radius:50%;
-
-  width:36px;height:36px;
-
+  border-radius:8px;
+  min-width:36px;
+  height:36px;
+  padding:0 12px;
   cursor:pointer;
-
-  display:flex;align-items:center;justify-content:center;
-
-  font-size:.9rem;
-
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:.85rem;
+  font-weight:600;
   transition:background .2s,color .2s;
-
 }
 
 .ag-logout:hover{background:#f1f5f9;color:var(--red-tn)}
@@ -2998,15 +2996,15 @@ export default function AgentDashboardPage() {
 
               </a>
 
-              <div className="ag-divider"></div>
-
-              <div className="ag-sec-title">Système</div>
-
-              <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
-
-                <i className="fas fa-cogs"></i> Configuration
-
-              </a>
+              {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                <>
+                  <div className="ag-divider"></div>
+                  <div className="ag-sec-title">Système</div>
+                  <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
+                    <i className="fas fa-cogs"></i> Configuration
+                  </a>
+                </>
+              )}
 
             </>
 
