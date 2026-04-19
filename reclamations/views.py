@@ -21,9 +21,11 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
-        from .classifier import classify, detect_duplicate
-        title       = self.request.data.get('title', '')
-        description = self.request.data.get('description', '')
+        import logging
+        logger = logging.getLogger(__name__)
+
+        title         = self.request.data.get('title', '')
+        description   = self.request.data.get('description', '')
         category_hint = self.request.data.get('category', 'other')
 
         # GPS coords
@@ -36,10 +38,34 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             longitude = None
 
-        # ML and Duplicates
-        ml_result  = classify(title, description, category_hint)
-        dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
-        
+        # ML Classification — safe fallback if models are missing or crash
+        SERVICE_MAP_FALLBACK = {
+            'lighting': 'Service Eclairage Public',
+            'trash':    'Service Hygiene & Proprete',
+            'roads':    'Service Voirie & Infrastructure',
+            'noise':    'Service Ordre & Tranquillite',
+            'other':    'Service Technique General',
+        }
+        ml_result = {
+            'category':            category_hint if category_hint in SERVICE_MAP_FALLBACK else 'other',
+            'priority':            'normale',
+            'service_responsable': SERVICE_MAP_FALLBACK.get(category_hint, 'Service Technique General'),
+            'confidence':          {},
+        }
+        try:
+            from .classifier import classify
+            ml_result = classify(title, description, category_hint)
+        except Exception as e:
+            logger.warning(f"ML classify() failed, using defaults: {e}")
+
+        # Duplicate Detection — safe fallback
+        dup_result = {'is_duplicate': False, 'duplicate_of': None, 'final_score': 0.0}
+        try:
+            from .classifier import detect_duplicate
+            dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
+        except Exception as e:
+            logger.warning(f"detect_duplicate() failed, skipping: {e}")
+
         is_duplicate = dup_result.get('is_duplicate', False)
         duplicate_of = None
         if is_duplicate and dup_result.get('duplicate_of'):
@@ -52,14 +78,14 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         # Save the instance
         instance = serializer.save(
             citizen=self.request.user,
-            priority=ml_result['priority'],
-            service_responsable=ml_result['service_responsable'],
-            category=ml_result['category'],
+            priority=ml_result.get('priority', 'normale'),
+            service_responsable=ml_result.get('service_responsable', SERVICE_MAP_FALLBACK.get(category_hint, 'Service Technique General')),
+            category=ml_result.get('category', category_hint),
             is_duplicate=is_duplicate,
             duplicate_of=duplicate_of,
             similarity_score=dup_result.get('final_score', 0.0),
         )
-        
+
         # Attach results to the instance so create() can use them for response metadata
         instance._ml_result = ml_result
         instance._dup_result = dup_result
