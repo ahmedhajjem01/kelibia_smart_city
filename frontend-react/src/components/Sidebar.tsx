@@ -88,10 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
               <i className="fas fa-newspaper" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('news_title')}</span>
             </NavLink>
-            <a className={navItem(false)} href="#mapCard" onClick={scrollToMap}>
-              <i className="fas fa-map-marked-alt" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
-              <span>{t('gis_map')}</span>
-            </a>
             <NavLink to="/mes-demandes" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-tasks" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('my_requests')}</span>
