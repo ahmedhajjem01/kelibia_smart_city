@@ -423,7 +423,7 @@ export default function ServicesPage() {
 
         kind: 'disabled',
 
-        label: lang === 'ar' ? 'طلب عن بعد (قريبا)' : 'Demander en ligne (Bientôt)',
+        label: lang === 'ar' ? 'طلب عن بعد' : 'Demander en ligne',
 
       }
 
