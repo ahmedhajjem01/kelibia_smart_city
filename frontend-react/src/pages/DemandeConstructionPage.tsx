@@ -230,6 +230,18 @@ export default function DemandeConstructionPage() {
           <p className="text-muted small mb-0">رخصة البناء — Kelibia Municipality</p>
         </div>
 
+        {user && !user.is_verified && (
+          <div className="alert alert-info rounded-4 border-0 shadow-sm mb-4 d-flex align-items-center p-3">
+            <div className="bg-info bg-opacity-10 p-3 rounded-circle me-3">
+              <i className="fas fa-user-clock fs-4 text-info"></i>
+            </div>
+            <div>
+              <h5 className="fw-bold mb-1">Compte en attente de vérification</h5>
+              <p className="mb-0 small opacity-75">Votre compte doit être vérifié par l'administration pour accéder à ce service.</p>
+            </div>
+          </div>
+        )}
+
         {/* Step wizard */}
         <div className="cst-wizard">
           {([1,2,3,4] as Step[]).map((s,i) => (
