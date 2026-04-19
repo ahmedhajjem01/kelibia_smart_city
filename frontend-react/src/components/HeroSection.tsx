@@ -22,19 +22,15 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       {/* Content — bottom-left aligned like the mockup */}
       <div className="absolute inset-0 flex flex-col justify-end px-12 pb-14">
         <h1
-          className="font-extrabold text-white uppercase tracking-tighter leading-none mb-2"
-          style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(2.4rem, 5vw, 3.8rem)' }}
+          className="font-extrabold text-white uppercase tracking-tighter leading-none mb-6"
+          style={{ 
+            fontFamily: lang === 'ar' ? 'Cairo, Tajawal, sans-serif' : 'Public Sans, sans-serif', 
+            fontSize: lang === 'ar' ? 'clamp(2.4rem, 5vw, 4rem)' : 'clamp(2.4rem, 5vw, 3.8rem)' 
+          }}
         >
-          VILLE DE KÉLIBIA
+          {t('city_of_kelibia')}
         </h1>
-        {lang === 'ar' && (
-          <h2
-            className="font-medium text-white mb-6 leading-none"
-            style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', opacity: 0.85 }}
-          >
-            بلدية قليبية
-          </h2>
-        )}
+        
         <div>
           <Link
             to="/news"
@@ -45,8 +41,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
               border: '1px solid rgba(255,255,255,0.4)', 
               borderRadius: '4px', 
               boxShadow: '0 4px 20px rgba(0,0,0,0.15)', 
-              transition: 'background .2s',
-              marginTop: lang === 'fr' ? '1.5rem' : '0'
+              transition: 'background .2s'
             }}
           >
             <i className="fas fa-compass"></i>
