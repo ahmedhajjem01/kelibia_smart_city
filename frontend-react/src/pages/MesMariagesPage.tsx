@@ -17,7 +17,7 @@ type ActeMariage = {
 }
 
 export default function MesMariagesPage() {
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
@@ -100,6 +100,14 @@ export default function MesMariagesPage() {
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status" />
           <p className="mt-2 text-muted">Recherche de vos actes de mariage en cours...</p>
+        </div>
+      ) : !user?.is_verified ? (
+        <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
+          <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+          <div>
+            <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
+            <p className="mb-0">{t('account_verification_required')}</p>
+          </div>
         </div>
       ) : error ? (
         <div className="alert alert-danger">{error}</div>

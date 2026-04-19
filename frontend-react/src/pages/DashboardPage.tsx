@@ -464,20 +464,9 @@ export default function DashboardPage() {
 
         <div>
 
-          <div className="db-stat-row">
-
-            <span style={{ color: '#5b403d' }}>Mes Dossiers</span>
-
-            <span className="db-stat-badge">{String(reclamations.length).padStart(2, '0')}</span>
-
-          </div>
-
           <div className="db-stat-row" style={{ borderBottom: 'none' }}>
-
-            <span style={{ color: '#5b403d' }}>Points Fidélité</span>
-
-            <span style={{ fontWeight: 800, color: '#1a1c1c' }}>1 240 pts</span>
-
+            <span style={{ color: '#5b403d' }}>Mes Dossiers</span>
+            <span className="db-stat-badge">{String(reclamations.length).padStart(2, '0')}</span>
           </div>
 
         </div>
