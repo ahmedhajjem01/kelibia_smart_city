@@ -24,9 +24,9 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         from .classifier import classify, detect_duplicate
         title       = self.request.data.get('title', '')
         description = self.request.data.get('description', '')
-        category    = self.request.data.get('category', 'other')
+        category_hint = self.request.data.get('category', 'other')
 
-        # Parse GPS coords (may be None if citizen didn't share location)
+        # GPS coords
         try:
             latitude  = float(self.request.data.get('latitude'))
         except (TypeError, ValueError):
@@ -36,62 +36,65 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             longitude = None
 
-        # ── ML classification ────────────────────────────────────────────────
-        result = classify(title, description, category)
-
-        # ── Duplicate detection (texte + GPS) ────────────────────────────────
-        dup_result   = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
-        is_duplicate = dup_result['is_duplicate']
+        # ML and Duplicates
+        ml_result  = classify(title, description, category_hint)
+        dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
+        
+        is_duplicate = dup_result.get('is_duplicate', False)
         duplicate_of = None
-        if is_duplicate and dup_result['duplicate_of']:
+        if is_duplicate and dup_result.get('duplicate_of'):
             try:
+                from .models import Reclamation
                 duplicate_of = Reclamation.objects.get(pk=dup_result['duplicate_of'])
-            except Reclamation.DoesNotExist:
+            except Exception:
                 duplicate_of = None
 
-        serializer.save(
+        # Save the instance
+        instance = serializer.save(
             citizen=self.request.user,
-            priority=result['priority'],
-            service_responsable=result['service_responsable'],
-            category=result['category'],
+            priority=ml_result['priority'],
+            service_responsable=ml_result['service_responsable'],
+            category=ml_result['category'],
             is_duplicate=is_duplicate,
             duplicate_of=duplicate_of,
-            similarity_score=dup_result['final_score'],
+            similarity_score=dup_result.get('final_score', 0.0),
         )
+        
+        # Attach results to the instance so create() can use them for response metadata
+        instance._ml_result = ml_result
+        instance._dup_result = dup_result
 
     def create(self, request, *args, **kwargs):
-        from .classifier import classify, detect_duplicate
-        title       = request.data.get('title', '')
-        description = request.data.get('description', '')
-        category    = request.data.get('category', 'other')
-
-        try:
-            latitude  = float(request.data.get('latitude'))
-        except (TypeError, ValueError):
-            latitude  = None
-        try:
-            longitude = float(request.data.get('longitude'))
-        except (TypeError, ValueError):
-            longitude = None
-
-        ml_result  = classify(title, description, category)
-        dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
-
-        response = super().create(request, *args, **kwargs)
-        response.data['ml_classification'] = {
-            'category':            ml_result['category'],
-            'priority':            ml_result['priority'],
-            'service_responsable': ml_result['service_responsable'],
-            'confidence':          ml_result.get('confidence', {}),
-        }
-        response.data['duplicate_detection'] = {
-            'is_duplicate':     dup_result['is_duplicate'],
-            'duplicate_of':     dup_result['duplicate_of'],
-            'similarity_score': dup_result['similarity_score'],
-            'geo_score':        dup_result['geo_score'],
-            'final_score':      dup_result['final_score'],
-        }
-        return response
+        # We let super().create handle the standard flow (which calls perform_create)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        instance = serializer.instance
+        data = serializer.data
+        
+        # Add ML and Duplicate metadata to the response
+        if hasattr(instance, '_ml_result'):
+            ml_result = instance._ml_result
+            data['ml_classification'] = {
+                'category':            ml_result['category'],
+                'priority':            ml_result['priority'],
+                'service_responsable': ml_result['service_responsable'],
+                'confidence':          ml_result.get('confidence', {}),
+            }
+        
+        if hasattr(instance, '_dup_result'):
+            dup_result = instance._dup_result
+            data['duplicate_detection'] = {
+                'is_duplicate':     dup_result.get('is_duplicate', False),
+                'duplicate_of':     dup_result.get('duplicate_of'),
+                'similarity_score': dup_result.get('similarity_score', 0.0),
+                'geo_score':        dup_result.get('geo_score', 0.0),
+                'final_score':      dup_result.get('final_score', 0.0),
+            }
+            
+        headers = self.get_success_headers(data)
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
     # ── classify_preview ──────────────────────────────────────────────────────
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])

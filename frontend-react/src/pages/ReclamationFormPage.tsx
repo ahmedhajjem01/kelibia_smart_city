@@ -269,11 +269,20 @@ export default function ReclamationFormPage() {
 
       if (res.ok) { setSuccess(true); setTimeout(() => navigate('/mes-reclamations'), 3000) }
 
-      else { const data = await res.json(); setError(JSON.stringify(data)) }
-
-    } catch { setError(t('error_msg')) }
-
-    finally { setLoading(false) }
+      else {
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch (e) {
+          errorData = { detail: `Erreur serveur (${res.status})` };
+        }
+        setError(JSON.stringify(errorData));
+      }
+    } catch (e: any) {
+      setError(e.message || t('error_msg'));
+    } finally {
+      setLoading(false)
+    }
 
   }
 
