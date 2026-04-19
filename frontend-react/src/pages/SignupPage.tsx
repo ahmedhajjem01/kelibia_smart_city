@@ -1463,11 +1463,11 @@ export default function SignupPage() {
 
             src={tunisiaLogo}
 
-            alt="République de Tunisie"
+            alt={t('republic_of_tunisia')}
 
           />
 
-          <span className="sg-nav-name">République de Tunisie</span>
+          <span className="sg-nav-name">{t('republic_of_tunisia')}</span>
 
         </a>
 
@@ -1536,7 +1536,7 @@ export default function SignupPage() {
 
               />
 
-              <div className="sg-hero-img-caption">Kélibia : Entre Histoire et Futur</div>
+              <div className="sg-hero-img-caption">{t('fort_caption')}</div>
 
             </div>
 
@@ -1892,7 +1892,7 @@ export default function SignupPage() {
 
                   <p className="sg-login-link">
 
-                    {t('already_have_account')} <Link to="/login" style={{ color: '#954a00', fontWeight: 'bold' }}>Connectez-vous</Link>
+                    {t('already_have_account')} <Link to="/login" style={{ color: '#954a00', fontWeight: 'bold' }}>{t('login_now')}</Link>
 
                   </p>
 
@@ -1904,7 +1904,7 @@ export default function SignupPage() {
 
                   <span className="sg-terms-text">
 
-                    J'accepte les <a href="#">Conditions Générales d'Utilisation</a> et la politique de protection des données personnelles de la Commune de Kélibia.
+                    {t('terms_accept')} <a href="#">{t('terms_link')}</a> {t('privacy_policy_text')}
 
                   </span>
 
@@ -1938,7 +1938,7 @@ export default function SignupPage() {
 
         <div>
 
-          <div className="sg-footer-brand">République de Tunisie</div>
+          <div className="sg-footer-brand">{t('republic_of_tunisia')}</div>
 
           <div className="sg-footer-copy">{t('footer_text')}</div>
 
@@ -1968,7 +1968,7 @@ export default function SignupPage() {
 
             <div className="sg-cam-header">
 
-              <span className="sg-cam-title">{t('capture_title')} — {showCamera === 'front' ? 'Face Avant' : 'Face Arrière'}</span>
+              <span className="sg-cam-title">{t('capture_title')} — {showCamera === 'front' ? t('cin_front') : t('cin_back')}</span>
 
               <button className="sg-cam-close" onClick={() => setShowCamera(null)}><i className="fas fa-times"></i></button>
 
@@ -2000,7 +2000,7 @@ export default function SignupPage() {
 
               <button type="button" className="sg-cam-mirror" onClick={() => setMirrored(m => !m)}>
 
-                <i className="fas fa-arrows-alt-h"></i> {mirrored ? 'Miroir ON' : 'Miroir OFF'}
+                <i className="fas fa-arrows-alt-h"></i> {mirrored ? `${t('mirror')} ON` : `${t('mirror')} OFF`}
 
               </button>
 

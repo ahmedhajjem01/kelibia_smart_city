@@ -415,6 +415,10 @@ const translations: Record<Lang, Record<string, string>> = {
     portal_citoyen: 'Portail Citoyen',
     fort_caption: 'Fort de Kélibia — Patrimoine Historique',
     footer_text: '© 2026 Smart City Portal | Tous droits réservés',
+    terms_accept: "J'accepte les",
+    terms_link: "Conditions Générales d'Utilisation",
+    privacy_policy_text: "et la politique de protection des données personnelles de la Commune de Kélibia.",
+    login_now: "Connectez-vous",
 
     // --- Admin & Dashboards ---
     nav_monitoring: 'MONITORING',
@@ -1216,6 +1220,10 @@ const translations: Record<Lang, Record<string, string>> = {
     portal_citoyen: 'بوابة المواطن',
     fort_caption: 'برج قليبية — تراث تاريخي',
     footer_text: '© 2026 البوابة الوطنية | جميع الحقوق محفوظة',
+    terms_accept: "أوافق على",
+    terms_link: "شروط الاستخدام العامة",
+    privacy_policy_text: "وسياسة حماية البيانات الشخصية لبلدية قليبية.",
+    login_now: "سجل دخولك",
 
     // --- Admin & Dashboards ---
     nav_monitoring: 'المراقبة',
