@@ -734,6 +734,26 @@ export default function ServicesPage() {
 
               </div>
 
+
+
+              {user && !user.is_verified && (
+
+                <div className="alert alert-warning border-0 shadow-sm mt-4 p-3 d-flex align-items-center">
+
+                  <i className="fas fa-exclamation-triangle me-3 text-warning"></i>
+
+                  <div className="small">
+
+                    <div className="fw-bold">{t('unverified_title') || 'Compte non vérifié'}</div>
+
+                    <div>{t('account_verification_required') || 'La vérification de votre compte est requise pour effectuer cette demande en ligne.'}</div>
+
+                  </div>
+
+                </div>
+
+              )}
+
             </div>
 
             <div className="modal-footer border-0">
@@ -744,7 +764,7 @@ export default function ServicesPage() {
 
                 type="button"
 
-                className={`btn btn-primary ${modalState?.requestButton.kind === 'disabled' ? 'disabled' : ''}`}
+                className={`btn btn-primary ${modalState?.requestButton.kind === 'disabled' || !user?.is_verified ? 'disabled' : ''}`}
 
                 onClick={() => {
 
