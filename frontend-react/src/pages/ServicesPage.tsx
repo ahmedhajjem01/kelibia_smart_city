@@ -253,7 +253,7 @@ export default function ServicesPage() {
 
     const rawTime = lang === 'ar' ? svc.processing_time_ar : svc.processing_time_fr
 
-    let timeText = rawTime || (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
+    let timeText = rawTime || (lang === 'ar' ? 'من يومين إلى أسبوع' : '2 jours à 1 semaine')
 
     
 
@@ -446,6 +446,13 @@ export default function ServicesPage() {
     }
 
 
+
+    if (requestButton.label) {
+      requestButton.label = requestButton.label
+        .replace('(Bientôt)', '')
+        .replace('(قريبا)', '')
+        .trim();
+    }
 
     setModalState({
 
