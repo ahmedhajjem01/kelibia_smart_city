@@ -17,7 +17,8 @@ class Service(models.Model):
     name_ar = models.CharField(max_length=200, verbose_name="Nom du service (AR)")
     description_fr = models.TextField(blank=True, verbose_name="Description (FR)")
     description_ar = models.TextField(blank=True, verbose_name="Description (AR)")
-    processing_time = models.CharField(max_length=100, blank=True, verbose_name="Délai de traitement")
+    processing_time_fr = models.CharField(max_length=100, blank=True, verbose_name="Délai de traitement (FR)")
+    processing_time_ar = models.CharField(max_length=100, blank=True, verbose_name="Délai de traitement (AR)")
     form_pdf_ar = models.FileField(upload_to='service_forms/ar/', blank=True, null=True, verbose_name="Formulaire PDF (AR)")
     form_pdf_fr = models.FileField(upload_to='service_forms/fr/', blank=True, null=True, verbose_name="Formulaire PDF (FR)")
 

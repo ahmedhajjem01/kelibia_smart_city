@@ -35,7 +35,9 @@ type Service = {
 
   description_ar: string
 
-  processing_time?: string | null
+  processing_time_fr?: string | null
+
+  processing_time_ar?: string | null
 
   requirements: ServiceRequirement[]
 
@@ -249,7 +251,9 @@ export default function ServicesPage() {
 
     const svcDesc = lang === 'ar' ? svc.description_ar : svc.description_fr
 
-    let timeText = svc.processing_time || (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
+    const rawTime = lang === 'ar' ? svc.processing_time_ar : svc.processing_time_fr
+
+    let timeText = rawTime || (lang === 'ar' ? 'غير محدد' : 'Non spécifié')
 
     
 

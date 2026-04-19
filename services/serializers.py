@@ -12,7 +12,7 @@ class ServiceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Service
-        fields = ['id', 'category', 'name_fr', 'name_ar', 'description_fr', 'description_ar', 'processing_time', 'form_pdf_ar', 'form_pdf_fr', 'requirements', 'availability']
+        fields = ['id', 'category', 'name_fr', 'name_ar', 'description_fr', 'description_ar', 'processing_time_fr', 'processing_time_ar', 'form_pdf_ar', 'form_pdf_fr', 'requirements', 'availability']
 
     def create(self, validated_data):
         requirements_data = validated_data.pop('requirements', [])
