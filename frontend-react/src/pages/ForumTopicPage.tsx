@@ -40,7 +40,7 @@ function Avatar({ user }: { user: Author }) {
 
 export default function ForumTopicPage() {
   const { id } = useParams<{ id: string }>()
-  const { setLang } = useI18n()
+  const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
 
   const [topic, setTopic]         = useState<TopicDetail | null>(null)
