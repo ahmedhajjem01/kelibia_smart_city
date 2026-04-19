@@ -141,7 +141,8 @@ const CSS = `
 .lp-input::placeholder { color: #9ca3af; }
 .lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #954a00; }
 .lp-input-wrap { position: relative; }
-.lp-eye { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #897364; cursor: pointer; }
+.lp-eye { position: absolute; ${lang === 'ar' ? 'left: 13px;' : 'right: 13px;'} top: 50%; transform: translateY(-50%); background: none; border: none; color: #897364; cursor: pointer; }
+.lp-input-wrap .lp-input { padding-${lang === 'ar' ? 'left' : 'right'}: 44px; }
 .lp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .lp-remember { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: .82rem; color: #6b7280; }
 .lp-forgot { font-size: .82rem; color: #954a00; font-weight: 700; text-decoration: none; }

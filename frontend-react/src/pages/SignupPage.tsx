@@ -617,13 +617,13 @@ const CSS = `
 
 .sg-input-wrap { position: relative; }
 
-.sg-input-wrap .sg-input { padding-right: 44px; }
+.sg-input-wrap .sg-input { padding-${lang === 'ar' ? 'left' : 'right'}: 44px; }
 
 .sg-eye {
 
   position: absolute;
 
-  right: 12px;
+  ${lang === 'ar' ? 'left: 12px;' : 'right: 12px;'}
 
   top: 50%;
 
