@@ -103,6 +103,26 @@ export default function MesConstructionsPage() {
         </Link>
       </div>
 
+      {user && !user.is_verified && (
+        <div 
+          className="p-4 mb-4 d-flex align-items-center shadow-sm"
+          style={{ 
+            background: '#FFF4CD', 
+            borderRadius: '20px', 
+            border: 'none',
+            gap: '20px'
+          }}
+        >
+          <div className="text-warning">
+            <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
+          </div>
+          <div>
+            <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>Compte en attente de vérification</h5>
+            <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>Votre compte doit être vérifié par l'administration pour accéder à ce service.</p>
+          </div>
+        </div>
+      )}
+
       <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
         <div className="card-body p-0">
           {loading ? (
