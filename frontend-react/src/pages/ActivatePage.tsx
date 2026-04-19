@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'

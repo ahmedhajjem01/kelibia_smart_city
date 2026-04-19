@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import { useMemo, useState, useRef, useCallback } from 'react'
 
 import { Link, useNavigate } from 'react-router-dom'

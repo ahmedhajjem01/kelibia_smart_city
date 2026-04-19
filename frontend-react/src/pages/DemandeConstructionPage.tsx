@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
