@@ -253,7 +253,27 @@ export default function ServicesPage() {
 
     const rawTime = lang === 'ar' ? svc.processing_time_ar : svc.processing_time_fr
 
-    let timeText = rawTime || (lang === 'ar' ? 'من يومين إلى أسبوع' : '2 jours à 1 semaine')
+    const nameLower = svc.name_fr.toLowerCase().trim()
+    const nameAr = svc.name_ar.trim()
+
+    let timeText = rawTime
+    if (!timeText) {
+      if (nameLower.includes('extrait') || nameAr.includes('مضمون')) {
+        timeText = lang === 'ar' ? 'فوري (أو 24 ساعة كحد أقصى)' : 'Immédiat (ou 24h maximum)'
+      } else if (nameLower.includes('construction') || nameLower.includes('bâtir') || nameAr.includes('بناء')) {
+        timeText = lang === 'ar' ? '45 يوما (كحد أقصى)' : '45 jours (maximum)'
+      } else if (nameLower.includes('résidence') || nameAr.includes('إقامة')) {
+        timeText = lang === 'ar' ? '3 أيام' : '3 jours'
+      } else if (nameLower.includes('vocation') || nameAr.includes('صبغة')) {
+        timeText = lang === 'ar' ? '15 يوما' : '15 jours'
+      } else if (nameLower.includes('évènement') || nameAr.includes('فعالية')) {
+        timeText = lang === 'ar' ? '7 إلى 15 يوما' : '7 à 15 jours'
+      } else if (nameLower.includes('légalisation') || nameAr.includes('تعريف بالامضاء') || nameLower.includes('conforme') || nameAr.includes('نسخة مطابقة')) {
+        timeText = lang === 'ar' ? 'فوري' : 'Immédiat'
+      } else {
+        timeText = lang === 'ar' ? 'من يومين إلى أسبوع' : '2 jours à 1 semaine'
+      }
+    }
 
     
 
