@@ -2938,13 +2938,6 @@ export default function AgentDashboardPage() {
 
           </a>
 
-          <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
-
-            <i className="fas fa-user-check"></i> Vérification Citoyens
-
-            {agentCitizens.length > 0 && <span className="ag-badge">{agentCitizens.length}</span>}
-
-          </a>
 
 
 
