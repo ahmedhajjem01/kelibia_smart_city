@@ -1,13 +1,11 @@
 import { resolveBackendUrl } from '../lib/backendUrl'
 import { useEffect, useRef, useState } from 'react'
-
 import { useNavigate } from 'react-router-dom'
-
 import { clearTokens, getAccessToken } from '../lib/authStorage'
-
 import { useI18n } from '../i18n/LanguageProvider'
-
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
+import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_log.png'
 
 
 
@@ -1418,6 +1416,8 @@ export default function AgentDashboardPage() {
 
   const leafletMap = useRef<any>(null)
 
+  const markersLayer = useRef<any>(null)
+
   async function fetchArticles() {
 
     setLoadingArticles(true)
@@ -2472,6 +2472,18 @@ export default function AgentDashboardPage() {
 
 
 
+    // If the DOM container already has a map (e.g. from a previous crash/unmount failure)
+
+    if (mapRef.current && (mapRef.current as any)._leaflet_id) {
+
+       // We must not call L.map() again on this container if it's already initialized.
+
+       return
+
+    }
+
+
+
     const m = L.map(mapRef.current).setView([36.8467, 11.1047], 13)
 
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(m)
@@ -2549,6 +2561,8 @@ export default function AgentDashboardPage() {
         leafletMap.current.remove()
 
         leafletMap.current = null
+
+        markersLayer.current = null
 
       }
 
