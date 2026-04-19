@@ -306,7 +306,7 @@ export default function DashboardPage() {
 
       try {
 
-        const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+        const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
 
         if (res.ok) {
 
@@ -318,7 +318,7 @@ export default function DashboardPage() {
 
         }
 
-        const rRes = await fetch('/api/reclamations/', { headers: { Authorization: `Bearer ${access}` } })
+        const rRes = await fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } })
 
         if (rRes.ok) setReclamations(await rRes.json())
 
@@ -330,13 +330,13 @@ export default function DashboardPage() {
 
 
 
-        const nRes = await fetch('/api/forum/notifications/', { headers: { Authorization: `Bearer ${access}` } })
+        const nRes = await fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
 
         if (nRes.ok) { const d = (await nRes.json()) as ForumNotif[]; setForumUnread(d.filter(n => !n.is_read).length) }
 
 
 
-        const newsRes = await fetch('/api/news/')
+        const newsRes = await fetch(resolveBackendUrl('/api/news/'))
 
         if (newsRes.ok) {
 

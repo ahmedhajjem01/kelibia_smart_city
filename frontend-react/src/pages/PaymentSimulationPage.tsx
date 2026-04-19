@@ -28,11 +28,11 @@ export default function PaymentSimulationPage() {
   useEffect(() => {
     const access = getAccessToken()
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.json()).then(data => setUser(data))
     
     // Fetch Saved Cards
-    fetch('/api/accounts/cards/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/cards/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.json()).then(data => {
         setSavedCards(data)
         if (data.length > 0) setSelectedCardId(data[0].id)
@@ -56,7 +56,7 @@ export default function PaymentSimulationPage() {
             if (requestType === 'tax') {
                 localStorage.setItem(`tax_paid_${requestId}`, 'true');
             } else {
-                const res = await fetch('/api/payments/confirm/', {
+                const res = await fetch(resolveBackendUrl('/api/payments/confirm/'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export default function PaymentSimulationPage() {
 
         // Save card if requested and it's a new card
         if (selectedCardId === 'new' && saveCard) {
-            await fetch('/api/accounts/cards/', {
+            await fetch(resolveBackendUrl('/api/accounts/cards/'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

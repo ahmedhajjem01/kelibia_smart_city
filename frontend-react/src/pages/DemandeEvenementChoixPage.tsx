@@ -12,7 +12,7 @@ export default function DemandeEvenementChoixPage() {
   useEffect(() => {
     const access = getAccessToken()
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null).then(d => d && setUser(d)).catch(() => {})
   }, [navigate])
 

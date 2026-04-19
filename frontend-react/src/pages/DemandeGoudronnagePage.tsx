@@ -89,7 +89,7 @@ export default function DemandeGoudronnagePage() {
   useEffect(() => {
     const token = getAccessToken()
     if (!token) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) setUser(d) })
   }, [navigate])
@@ -113,7 +113,7 @@ export default function DemandeGoudronnagePage() {
     if (cinCopie) fd.append('cin_copie', cinCopie)
 
     try {
-      const res = await fetch('/api/construction/goudronnage/', {
+      const res = await fetch(resolveBackendUrl('/api/construction/goudronnage/'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: fd,

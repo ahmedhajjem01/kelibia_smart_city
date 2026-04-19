@@ -164,9 +164,9 @@ export default function ServicesPage() {
 
         const [uRes, svcRes] = await Promise.all([
 
-          fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } }),
 
-          fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/services/categories/'), { headers: { Authorization: `Bearer ${access}` } }),
 
         ])
 
@@ -188,7 +188,7 @@ export default function ServicesPage() {
 
         if (svcRes.status === 401) {
 
-          finalSvcRes = await fetch('/api/services/categories/')
+          finalSvcRes = await fetch(resolveBackendUrl('/api/services/categories/'))
 
         }
 

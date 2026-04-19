@@ -38,7 +38,7 @@ export default function MesResidencesPage() {
           setUser(userData)
         }
 
-        const res = await fetch('/api/residence/demande/', {
+        const res = await fetch(resolveBackendUrl('/api/residence/demande/'), {
           headers: { Authorization: `Bearer ${access}` },
         })
         const data = await res.json()

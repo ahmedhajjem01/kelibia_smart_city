@@ -61,7 +61,7 @@ export default function MesEvenementsPage() {
       try {
         const [userRes, demandesRes] = await Promise.all([
           fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } }),
-          fetch('/api/evenements/demande/', { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/evenements/demande/'), { headers: { Authorization: `Bearer ${access}` } }),
         ])
         if (userRes.ok) setUser(await userRes.json())
         if (demandesRes.ok) {

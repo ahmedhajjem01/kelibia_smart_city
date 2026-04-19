@@ -56,7 +56,7 @@ export default function ActivatePage() {
 
     ;(async () => {
       try {
-        const res = await fetch('/api/accounts/activation/', {
+        const res = await fetch(resolveBackendUrl('/api/accounts/activation/'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ uid, token }),

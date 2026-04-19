@@ -69,8 +69,8 @@ export default function MesConstructionsPage() {
     const fetchAll = async () => {
       try {
         const [userRes, demandesRes] = await Promise.all([
-          fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } }),
-          fetch('/api/construction/demandes/', { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/construction/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
         ])
         if (userRes.ok) setUser(await userRes.json())
         if (demandesRes.ok) {

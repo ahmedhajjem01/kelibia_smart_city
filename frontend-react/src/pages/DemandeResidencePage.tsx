@@ -144,7 +144,7 @@ export default function DemandeResidencePage() {
     if (files.acte_deces_conjoint) data.append('acte_deces_conjoint', files.acte_deces_conjoint as Blob)
 
     try {
-      const res = await fetch('/api/residence/demande/', {
+      const res = await fetch(resolveBackendUrl('/api/residence/demande/'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${access}`,

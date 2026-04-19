@@ -1402,7 +1402,7 @@ export default function SignupPage() {
 
 
 
-      const res = await fetch('/api/accounts/register/', { method: 'POST', body: formData })
+      const res = await fetch(resolveBackendUrl('/api/accounts/register/'), { method: 'POST', body: formData })
 
       const data = (await res.json().catch(() => null)) as { error?: string } | null
 

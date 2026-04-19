@@ -1251,7 +1251,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/verify-citizens/?type=agent', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/verify-citizens/?type=agent'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) {
 
@@ -1437,7 +1437,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/news/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/news/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) setAllArticles(await res.json())
 
@@ -1533,7 +1533,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/config/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/config/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) setGlobalSettings(await res.json())
 
@@ -1549,7 +1549,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/config/', {
+      const res = await fetch(resolveBackendUrl('/api/accounts/config/'), {
 
         method: 'POST',
 
@@ -1589,7 +1589,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (!res.ok) throw new Error()
 
@@ -1639,7 +1639,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/supervisor/services-summary/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/supervisor/services-summary/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) setServicesSummary(await res.json())
 
@@ -1655,7 +1655,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/services/categories/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/services/categories/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) {
 
@@ -1691,7 +1691,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/reclamations/ml_stats/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/reclamations/ml_stats/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (!res.ok) { setMlError(`Erreur ${res.status} — Stats IA indisponibles.`); return }
 
@@ -1711,7 +1711,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/me/', {
+      const res = await fetch(resolveBackendUrl('/api/accounts/me/'), {
 
         method: 'PATCH',
 
@@ -1791,7 +1791,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/supervisor/manage-orders/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/supervisor/manage-orders/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) setAllDemandes(await res.json())
 
@@ -1809,7 +1809,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/supervisor/manage-orders/', {
+      const res = await fetch(resolveBackendUrl('/api/supervisor/manage-orders/'), {
 
         method: 'POST',
 
@@ -1843,7 +1843,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/evenements/demande/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) {
 
@@ -1869,9 +1869,9 @@ export default function AgentDashboardPage() {
 
       const [listRes, statsRes] = await Promise.all([
 
-        fetch('/api/construction/demandes/', { headers: { Authorization: `Bearer ${access}` } }),
+        fetch(resolveBackendUrl('/api/construction/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
 
-        fetch('/api/construction/demandes/stats/', { headers: { Authorization: `Bearer ${access}` } }),
+        fetch(resolveBackendUrl('/api/construction/demandes/stats/'), { headers: { Authorization: `Bearer ${access}` } }),
 
       ])
 
@@ -1935,13 +1935,13 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/forum/topics/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/forum/topics/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) setAllTopics(await res.json())
 
       
 
-      const sRes = await fetch('/api/forum/topics/stats/', { headers: { Authorization: `Bearer ${access}` } })
+      const sRes = await fetch(resolveBackendUrl('/api/forum/topics/stats/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (sRes.ok) setForumStats(await sRes.json())
 
@@ -2189,7 +2189,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/verify-citizens/', {
+      const res = await fetch(resolveBackendUrl('/api/accounts/verify-citizens/'), {
 
         method: 'POST',
 
@@ -2235,7 +2235,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/verify-citizens/', {
+      const res = await fetch(resolveBackendUrl('/api/accounts/verify-citizens/'), {
 
         method: 'POST',
 
@@ -2273,7 +2273,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/agent-citizens/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/agent-citizens/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (res.ok) setAgentCitizens(await res.json())
 
@@ -2289,7 +2289,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/accounts/agent-citizens/', {
+      const res = await fetch(resolveBackendUrl('/api/accounts/agent-citizens/'), {
 
         method: 'POST',
 
@@ -2339,7 +2339,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch('/api/reclamations/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } })
 
       if (!res.ok) throw new Error()
 
@@ -3523,7 +3523,7 @@ export default function AgentDashboardPage() {
 
                                       try {
 
-                                        const res = await fetch('/api/accounts/verify-citizens/', {
+                                        const res = await fetch(resolveBackendUrl('/api/accounts/verify-citizens/'), {
 
                                           method: 'POST',
 
@@ -7829,7 +7829,7 @@ export default function AgentDashboardPage() {
 
                 try {
 
-                  const res = await fetch('/api/accounts/admin-create/', {
+                  const res = await fetch(resolveBackendUrl('/api/accounts/admin-create/'), {
 
                     method: 'POST',
 

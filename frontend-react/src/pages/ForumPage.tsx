@@ -68,7 +68,7 @@ export default function ForumPage() {
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setUser(data) })
     Promise.all([fetchTopics(), fetchStats(), fetchTags(), fetchNotifCount()])
@@ -94,7 +94,7 @@ export default function ForumPage() {
   }
 
   async function fetchStats() {
-    const res = await fetch('/api/forum/stats/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/forum/stats/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) {
       const data = await res.json()
       setStats(Array.isArray(data) ? data[0] : (data.results ? data.results[0] : data))
@@ -102,12 +102,12 @@ export default function ForumPage() {
   }
 
   async function fetchTags() {
-    const res = await fetch('/api/forum/tags/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/forum/tags/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) setTags(await res.json())
   }
 
   async function fetchNotifCount() {
-    const res = await fetch('/api/forum/notifications/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) {
       const data = await res.json()
       const list = Array.isArray(data) ? data : (data.results || [])
@@ -119,7 +119,7 @@ export default function ForumPage() {
     if (!newTitle.trim() || !newContent.trim()) { setCreateError('Titre et contenu requis.'); return }
     setCreating(true); setCreateError('')
     const tagNames = newTags.split(',').map((tt: string) => tt.trim()).filter(Boolean)
-    const res = await fetch('/api/forum/topics/', {
+    const res = await fetch(resolveBackendUrl('/api/forum/topics/'), {
       method: 'POST',
       headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTitle, content: newContent, category: newCategory, tag_names: tagNames }),

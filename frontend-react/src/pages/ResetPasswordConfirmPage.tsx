@@ -68,7 +68,7 @@ export default function ResetPasswordConfirmPage() {
 
     setLoading(true)
     try {
-      const res = await fetch('/api/users/reset_password_confirm/', {
+      const res = await fetch(resolveBackendUrl('/api/users/reset_password_confirm/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -203,7 +203,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/token/', {
+      const res = await fetch(resolveBackendUrl('/api/token/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

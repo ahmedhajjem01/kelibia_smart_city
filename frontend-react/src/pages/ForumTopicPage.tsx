@@ -65,7 +65,7 @@ export default function ForumTopicPage() {
   }
 
   async function fetchMe() {
-    const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) setCurrentUser((await res.json()) as { user_type?: string; is_staff?: boolean; is_superuser?: boolean })
   }
 

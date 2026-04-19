@@ -158,7 +158,7 @@ export default function DemandeEvenementPage() {
     Object.entries(files).forEach(([k, v]) => { if (v) data.append(k, v as Blob) })
 
     try {
-      const res = await fetch('/api/evenements/demande/', {
+      const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${access}` },
         body: data,
