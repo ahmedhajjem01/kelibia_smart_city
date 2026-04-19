@@ -37,7 +37,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
         )}
         <div>
           <Link
-            to="/services"
+            to="/news"
             className="inline-flex items-center gap-2 px-8 py-3 text-sm font-bold uppercase tracking-wider text-white no-underline active:scale-95"
             style={{ 
               background: 'rgba(255,255,255,0.15)', 
