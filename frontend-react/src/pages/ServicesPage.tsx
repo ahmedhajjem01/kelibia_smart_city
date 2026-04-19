@@ -281,9 +281,7 @@ export default function ServicesPage() {
 
 
 
-    const nameLower = svc.name_fr.toLowerCase().trim()
 
-    const nameAr = svc.name_ar.trim()
 
     const isBirthReg = nameLower.includes('naissance') || nameAr.includes('ولادة')
 
