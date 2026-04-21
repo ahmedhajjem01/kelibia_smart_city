@@ -105,7 +105,7 @@ export default function MesDemandesPage() {
               title: t('mariage_contract_title'),
               status: m.status,
               date: m.created_at,
-              details: lang === 'ar' ? `زوجين: ${m.nom_epoux_ar} & ${m.nom_epouse_ar}` : `Époux: ${m.nom_epoux_fr} & ${m.nom_epouse_fr}`
+              details: lang === 'ar' ? `زوجين: ${m.nom_epoux} & ${m.nom_epouse}` : `Époux: ${m.nom_epoux} & ${m.nom_epouse}`
             })
           })
         }
@@ -286,6 +286,26 @@ export default function MesDemandesPage() {
     }
   }
 
+  const getRequestPrice = (type: any) => {
+    switch (type) {
+      case 'birth':
+      case 'marriage':
+      case 'death':
+        return '0.500';
+      case 'residence':
+      case 'goudronnage':
+      case 'vocation':
+      case 'inhumation':
+        return '2.000';
+      case 'livret':
+        return '5.000';
+      case 'construction':
+        return '20.000';
+      default:
+        return '2.000';
+    }
+  }
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'birth': return <i className="fas fa-baby text-success"></i>
@@ -390,13 +410,13 @@ export default function MesDemandesPage() {
                       <td className="text-center">
                         <div className="d-flex flex-column align-items-center gap-2">
                            {getStatusBadge(req.status)}
-                           {req.status === 'pending' && !req.isPaid && (
+                           {req.status === 'pending' && !req.isPaid && req.type !== 'birth' && req.type !== 'death' && (
                              <button 
                                 className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
                                 style={{ fontSize: '0.65rem' }}
-                                onClick={() => navigate(`/paiement?amount=2.000&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}`)}
+                                onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}`)}
                              >
-                                <i className="fas fa-credit-card me-1"></i> {t('pay_2dt')}
+                                <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `دفع ${getRequestPrice(req.type)} د.ت` : `Payer ${getRequestPrice(req.type)} DT`}
                              </button>
                            )}
                            {req.isPaid && (
