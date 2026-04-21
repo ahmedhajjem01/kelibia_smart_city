@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation' | 'evenement' | 'raccordement'
   title: string
   status: string
   date: string
@@ -46,7 +46,7 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
@@ -58,6 +58,8 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/api/construction/demandes/'), { headers }),
           fetch(resolveBackendUrl('/api/construction/goudronnage/'), { headers }),
           fetch(resolveBackendUrl('/api/construction/vocation/'), { headers }),
+          fetch(resolveBackendUrl('/api/construction/raccordement/'), { headers }),
+          fetch(resolveBackendUrl('/api/evenements/demande/'), { headers }),
         ])
 
 
@@ -218,6 +220,7 @@ export default function MesDemandesPage() {
               status: g.status,
               date: g.created_at,
               details: g.adresse_residence || '',
+              isPaid: g.is_paid
             })
           })
         }
@@ -233,6 +236,39 @@ export default function MesDemandesPage() {
               status: v.status,
               date: v.created_at,
               details: v.adresse_bien || '',
+              isPaid: v.is_paid
+            })
+          })
+        }
+
+        // 12. Raccordement
+        if (resRaccordement.ok) {
+          const raccordements = await resRaccordement.json()
+          raccordements.forEach((r: any) => {
+            unified.push({
+              id: r.id,
+              type: 'raccordement',
+              title: lang === 'ar' ? 'طلب ربط بشبكة' : 'Demande de Raccordement',
+              status: r.status,
+              date: r.created_at,
+              details: `${r.type_reseau} — ${r.adresse_raccordement}`,
+              isPaid: r.is_paid
+            })
+          })
+        }
+
+        // 13. Evenement
+        if (resEvenement.ok) {
+          const evenements = await resEvenement.json()
+          evenements.forEach((e: any) => {
+            unified.push({
+              id: e.id,
+              type: 'evenement',
+              title: lang === 'ar' ? 'طلب ترخيص تظاهرة' : 'Autorisation d\'événement',
+              status: e.status,
+              date: e.created_at,
+              details: e.titre_evenement,
+              isPaid: e.is_paid
             })
           })
         }
@@ -298,6 +334,7 @@ export default function MesDemandesPage() {
       case 'inhumation':
         return '2.000';
       case 'livret':
+      case 'evenement':
         return '5.000';
       case 'construction':
         return '20.000';
@@ -317,6 +354,8 @@ export default function MesDemandesPage() {
       case 'construction': return <i className="fas fa-hard-hat text-warning"></i>
       case 'goudronnage': return <i className="fas fa-road text-secondary"></i>
       case 'vocation': return <i className="fas fa-building text-info"></i>
+      case 'evenement': return <i className="fas fa-calendar-alt text-danger"></i>
+      case 'raccordement': return <i className="fas fa-plug text-warning"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }

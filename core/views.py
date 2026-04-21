@@ -7,6 +7,8 @@ from attestation_residence.models import DemandeResidence
 from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance
 from extrait_mariage.models import ExtraitMariage
 from extrait_deces.models import ExtraitDeces
+from social_evenements.models import DemandeEvenement
+from maison_construction.models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation, DemandeRaccordement
 
 
 def login_redirect(request):
@@ -55,6 +57,32 @@ def confirm_payment(request):
             obj.save()
         elif req_type == 'death_extract' or req_type == 'deces':
             obj = ExtraitDeces.objects.get(id=req_id, user=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'construction':
+            obj = DemandeConstruction.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'goudronnage':
+            obj = DemandeGoudronnage.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'vocation':
+            obj = DemandeCertificatVocation.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'evenement':
+            obj = DemandeEvenement.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            # Evenement model has is_paid (verbose="Frais de dossier réglés") but not paid_at? 
+            # I checked models.py, it was missing paid_at. Let's just set is_paid.
+            obj.save()
+        elif req_type == 'raccordement':
+            obj = DemandeRaccordement.objects.get(id=req_id, citizen=request.user)
             obj.is_paid = True
             obj.paid_at = now
             obj.save()
