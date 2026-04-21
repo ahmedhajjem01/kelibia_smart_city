@@ -449,15 +449,21 @@ export default function MesDemandesPage() {
                       <td className="text-center">
                         <div className="d-flex flex-column align-items-center gap-2">
                            {getStatusBadge(req.status)}
-                           {req.status === 'pending' && !req.isPaid && req.type !== 'birth' && req.type !== 'death' && (
-                             <button 
-                                className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
-                                style={{ fontSize: '0.65rem' }}
-                                onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}&target=/mes-demandes`)}
-                             >
-                                <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `دفع ${getRequestPrice(req.type)} د.ت` : `Payer ${getRequestPrice(req.type)} DT`}
-                             </button>
-                           )}
+                            {req.status === 'pending' && !req.isPaid && req.type !== 'birth' && req.type !== 'death' && (
+                              <div className="d-flex flex-column gap-2">
+                                <small className="text-warning fw-bold px-2 py-1 rounded bg-warning-light" style={{ fontSize: '0.62rem', backgroundColor: '#fff8e1', border: '1px solid #ffd54f' }}>
+                                   <i className="fas fa-hourglass-half me-1"></i>
+                                   {lang === 'ar' ? 'بانتظار الدفع لتتم معالجة الطلب' : 'En attente de paiement pour traitement'}
+                                </small>
+                                <button 
+                                   className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
+                                   style={{ fontSize: '0.65rem' }}
+                                   onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}&target=/mes-demandes`)}
+                                >
+                                   <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `دفع ${getRequestPrice(req.type)} د.ت` : `Payer ${getRequestPrice(req.type)} DT`}
+                                </button>
+                              </div>
+                            )}
                            {req.isPaid && (
                              <span className="badge bg-light text-success border border-success extra-small" style={{ fontSize: '0.6rem' }}>
                                 {t('paid_label')} <i className="fas fa-check"></i>

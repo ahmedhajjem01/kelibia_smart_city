@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from livret_famille.models import DemandeLivretFamille
 from attestation_residence.models import DemandeResidence
 from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance
-from extrait_mariage.models import ExtraitMariage
-from extrait_deces.models import ExtraitDeces
+from extrait_mariage.models import ExtraitMariage, DemandeMariage
+from extrait_deces.models import ExtraitDeces, DeclarationDeces
 from social_evenements.models import DemandeEvenement
 from maison_construction.models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation, DemandeRaccordement
 
@@ -60,6 +60,11 @@ def confirm_payment(request):
             obj.is_paid = True
             obj.paid_at = now
             obj.save()
+        elif req_type == 'marriage':
+            obj = DemandeMariage.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
         elif req_type == 'construction':
             obj = DemandeConstruction.objects.get(id=req_id, citizen=request.user)
             obj.is_paid = True
@@ -101,27 +106,19 @@ def get_supervisor_services_summary(request):
     Returns counts of pending requests across all administrative services
     for the supervisor dashboard.
     """
-    if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+    if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ['supervisor', 'agent']):
         return Response({"error": "Accès refusé"}, status=403)
 
     summary = {
-        "attestation_residence": DemandeResidence.objects.filter(status='pending').count(),
-        "livret_famille": DemandeLivretFamille.objects.filter(status='pending').count(),
-        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending').count(),
-        # Add others if models have a 'status' field. 
-        # Extraits are usually automatic or pay-and-get, but we check if they have pending status.
+        "attestation_residence": DemandeResidence.objects.filter(status='pending', is_paid=True).count(),
+        "livret_famille": DemandeLivretFamille.objects.filter(status='pending', is_paid=True).count(),
+        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending', is_paid=True).count(),
     }
     
-    # Try getting others if they exist with consistent naming
-    try:
-        from extrait_mariage.models import DeclarationMariage
-        summary["declaration_mariage"] = DeclarationMariage.objects.filter(status='pending').count()
-    except: pass
+    summary["demande_mariage"] = DemandeMariage.objects.filter(status='pending', is_paid=True).count()
     
-    try:
-        from extrait_deces.models import DeclarationDeces
-        summary["declaration_deces"] = DeclarationDeces.objects.filter(status='pending').count()
-    except: pass
+    # Death requests
+    summary["declaration_deces"] = DeclarationDeces.objects.filter(status='pending', is_paid=True).count()
 
     return Response(summary)
 
@@ -131,21 +128,32 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
     """
     Unified view to List, Update status or Delete any administrative request/order.
     """
-    if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+    if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ['supervisor', 'agent']):
         return Response({"error": "Accès refusé"}, status=403)
 
     models_map = {
         'residence': DemandeResidence,
         'livret': DemandeLivretFamille,
         'naissance': DeclarationNaissance,
-        'mariage': ExtraitMariage, # Note: Extrait vs Declaration varies, but here we cover the main ones
-        'deces': ExtraitDeces
+        'mariage': DemandeMariage,
+        'deces': DeclarationDeces,
+        'construction': DemandeConstruction,
+        'goudronnage': DemandeGoudronnage,
+        'vocation': DemandeCertificatVocation,
+        'raccordement': DemandeRaccordement,
+        'evenement': DemandeEvenement
     }
 
     if request.method == 'GET':
         resp = []
         for key, model in models_map.items():
-            objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user').order_by('-created_at')
+            objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user')
+            
+            # SI: Filter out unpaid requests - only show to admin after payment
+            if hasattr(model, 'is_paid'):
+                objs = objs.filter(is_paid=True)
+                
+            objs = objs.order_by('-created_at')
             for o in objs:
                 citizen = getattr(o, 'citizen', getattr(o, 'user', None))
                 # Build extra details depending on type
@@ -174,6 +182,45 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                         "lieu_naissance_fr": getattr(o, 'lieu_naissance_fr', ''),
                         "sexe": getattr(o, 'sexe', ''),
                         "commentaire": getattr(o, 'commentaire', ''),
+                    }
+                elif key == 'mariage':
+                    details = {
+                        "epoux": getattr(o, 'nom_epoux', ''),
+                        "epouse": getattr(o, 'nom_epouse', ''),
+                        "date_mariage": str(getattr(o, 'date_souhaitee', '')),
+                        "regime": getattr(o, 'regime_matrimonial', ''),
+                    }
+                elif key == 'deces':
+                    details = {
+                        "nom_defunt": f"{getattr(o, 'nom_fr', '')} {getattr(o, 'prenom_fr', '')}",
+                        "date_deces": str(getattr(o, 'date_deces', '')),
+                        "lieu_deces": getattr(o, 'lieu_deces_fr', ''),
+                    }
+                elif key == 'construction':
+                    details = {
+                        "adresse": getattr(o, 'adresse_terrain', ''),
+                        "type": getattr(o, 'type_travaux', ''),
+                        "usage": getattr(o, 'usage_batiment', ''),
+                    }
+                elif key == 'goudronnage':
+                    details = {
+                        "adresse": getattr(o, 'adresse_residence', ''),
+                        "rue": getattr(o, 'localisation_rue', ''),
+                    }
+                elif key == 'vocation':
+                    details = {
+                        "adresse": getattr(o, 'adresse_bien', ''),
+                    }
+                elif key == 'raccordement':
+                    details = {
+                        "reseau": getattr(o, 'type_reseau', ''),
+                        "adresse": getattr(o, 'adresse_raccordement', ''),
+                    }
+                elif key == 'evenement':
+                    details = {
+                        "titre": getattr(o, 'titre_evenement', ''),
+                        "lieu": getattr(o, 'lieu_details', ''),
+                        "date": f"{getattr(o, 'date_debut', '')} au {getattr(o, 'date_fin', '')}",
                     }
 
                 resp.append({

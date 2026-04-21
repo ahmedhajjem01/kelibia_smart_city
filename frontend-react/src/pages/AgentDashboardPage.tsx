@@ -2886,7 +2886,7 @@ export default function AgentDashboardPage() {
 
           <div className="ag-sec-title">{t('nav_navigation')}</div>
 
-          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); if(user?.user_type === 'supervisor' || user?.is_staff || user?.is_superuser) { fetchDemandes(); fetchTopics(); } }}>
+          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); if(user?.user_type === 'supervisor' || user?.user_type === 'agent' || user?.is_staff || user?.is_superuser) { fetchDemandes(); fetchTopics(); } }}>
 
             <i className="fas fa-user-circle"></i> {t('nav_profile')}
 
@@ -3888,7 +3888,7 @@ export default function AgentDashboardPage() {
 
                 const q = demandeSearchQ.toLowerCase()
 
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}`, raccordement: `🔌 ${lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}`, evenement: `🎉 ${lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}`, construction: `🏗️ ${lang === 'ar' ? 'رخصة بناء' : 'Construction'}` }
 
                 const filtered = allDemandes.filter((d: any) => {
 
@@ -3968,6 +3968,10 @@ export default function AgentDashboardPage() {
 
                           else if (d.type === 'naissance') summary = d.prenom_fr ? `👶 ${d.prenom_fr} ${d.nom_fr}` : ''
 
+                          else if (d.type === 'mariage') summary = d.epoux ? `💍 ${d.epoux} & ${d.epouse}` : ''
+
+                          else if (d.type === 'deces') summary = d.nom_defunt ? `⚰️ ${d.nom_defunt} (${d.date_deces})` : ''
+
                           else if (d.type === 'transfert') summary = d.nom_defunt ? `🚑 ${d.nom_defunt} → ${d.lieu_inhumation}` : ''
 
                           else if (d.type === 'legalisation') summary = d.type_document ? `✒️ ${d.type_document} (${d.nombre_copies} ex.)` : ''
@@ -3979,6 +3983,8 @@ export default function AgentDashboardPage() {
                           else if (d.type === 'mutation') summary = d.type_mutation ? `🔄 ${d.type_mutation.toUpperCase()}: ${d.nouveau_proprio}` : ''
 
                           else if (d.type === 'vocation') summary = d.vocation_nouvelle ? `🏗️ ${d.vocation_actuelle} → ${d.vocation_nouvelle}` : ''
+                          else if (d.type === 'raccordement') summary = d.reseau ? `🔌 ${d.reseau} @ ${d.adresse}` : ''
+                          else if (d.type === 'evenement') summary = d.titre ? `🎉 ${d.titre} (${d.date})` : ''
 
                           return (
 
@@ -4062,7 +4068,7 @@ export default function AgentDashboardPage() {
 
               {demandeDetail && (() => {
 
-                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
+                const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}`, raccordement: `🔌 ${lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}`, evenement: `🎉 ${lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}`, construction: `🏗️ ${lang === 'ar' ? 'رخصة بناء' : 'Construction'}` }
 
                 return (
 
@@ -4191,19 +4197,36 @@ export default function AgentDashboardPage() {
                           </>)}
 
                           {demandeDetail.type === 'vocation' && (<>
+                             <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة الأصلية' : 'Vocation Actuelle'}</div><div className="det-value">{demandeDetail.vocation_actuelle?.toUpperCase()}</div></div>
+                             <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة المطلوبة' : 'Nouvelle Vocation'}</div><div className="det-value">{demandeDetail.vocation_nouvelle?.toUpperCase()}</div></div>
+                             <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                             <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الهدف / المبررات' : 'Justification'}</div><div className="det-value">{demandeDetail.motif}</div></div>
+                             <div className="col-12"><div className="det-label">{lang === 'ar' ? 'العنوان' : 'Adresse Bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
+                             <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
+                           </>)}
 
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة الأصلية' : 'Vocation Actuelle'}</div><div className="det-value">{demandeDetail.vocation_actuelle?.toUpperCase()}</div></div>
+                          {demandeDetail.type === 'mariage' && (<>
+                            <div className="col-6"><div className="det-label">Époux</div><div className="det-value">{demandeDetail.epoux}</div></div>
+                            <div className="col-6"><div className="det-label">Épouse</div><div className="det-value">{demandeDetail.epouse}</div></div>
+                            <div className="col-6"><div className="det-label">Date mariage</div><div className="det-value">{demandeDetail.date_mariage}</div></div>
+                            <div className="col-6"><div className="det-label">Régime</div><div className="det-value">{demandeDetail.regime}</div></div>
+                          </>)}
 
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الصبغة المطلوبة' : 'Nouvelle Vocation'}</div><div className="det-value">{demandeDetail.vocation_nouvelle?.toUpperCase()}</div></div>
+                          {demandeDetail.type === 'deces' && (<>
+                            <div className="col-6"><div className="det-label">Défunt</div><div className="det-value">{demandeDetail.nom_defunt}</div></div>
+                            <div className="col-6"><div className="det-label">Date décès</div><div className="det-value">{demandeDetail.date_deces}</div></div>
+                            <div className="col-6"><div className="det-label">Lieu décès</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
+                          </>)}
 
-                            <div className="col-6"><div className="det-label">{lang === 'ar' ? 'رقم الرسم العقاري' : 'Titre Foncier'}</div><div className="det-value">{demandeDetail.num_titre_foncier}</div></div>
+                          {demandeDetail.type === 'raccordement' && (<>
+                            <div className="col-6"><div className="det-label">Type réseau</div><div className="det-value">{demandeDetail.reseau}</div></div>
+                            <div className="col-6"><div className="det-label">Adresse raccordement</div><div className="det-value">{demandeDetail.adresse}</div></div>
+                          </>)}
 
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الهدف / المبررات' : 'Justification'}</div><div className="det-value">{demandeDetail.motif}</div></div>
-
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'العنوان' : 'Adresse Bien'}</div><div className="det-value">{demandeDetail.adresse_bien}</div></div>
-
-                            <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
-
+                          {demandeDetail.type === 'evenement' && (<>
+                            <div className="col-12"><div className="det-label">Titre événement</div><div className="det-value">{demandeDetail.titre}</div></div>
+                            <div className="col-12"><div className="det-label">Lieu</div><div className="det-value">{demandeDetail.lieu}</div></div>
+                            <div className="col-12"><div className="det-label">Dates</div><div className="det-value">{demandeDetail.date}</div></div>
                           </>)}
 
 
@@ -6960,7 +6983,7 @@ export default function AgentDashboardPage() {
 
               { tab: 'stats' as const, icon: 'fa-robot', label: t('nav_stats_ia'), badge: 0 },
 
-              ...(user?.user_type === 'supervisor' || user?.is_staff || user?.is_superuser ? [
+              ...(user?.user_type === 'supervisor' || user?.user_type === 'agent' || user?.is_staff || user?.is_superuser ? [
 
                 { tab: 'users' as const, icon: 'fa-users-cog', label: t('nav_managed_users'), badge: managedUsers.filter(u => !u.is_verified).length },
 

@@ -172,6 +172,8 @@ class DemandeMariage(models.Model):
         default='pending',
         verbose_name="Statut"
     )
+    is_paid = models.BooleanField(default=False, verbose_name="Payé")
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Date du paiement")
 
     # For notaire case: Agent uploads the scan of the contract received from the notary
     contrat_recu_scan = models.FileField(

@@ -134,12 +134,17 @@ export default function MesDecesPage() {
                       <div className="d-flex gap-2">
                         {/* Debug: console.log('Deces Paid:', d.is_paid, 'ASD:', user?.has_active_asd) */}
                         {(!d.is_paid && !user?.has_active_asd) ? (
-                            <button
-                              className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
-                              onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.id}&requestType=death_extract&target=/mes-deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
-                            >
-                              <i className="fas fa-lock me-2"></i> Payer 0.500 DT
-                            </button>
+                            <div className="d-flex flex-column gap-2 w-100">
+                              <small className="text-warning fw-bold text-center p-1 rounded" style={{ fontSize: '0.7rem', background: '#fff8e1', border: '1px solid #ffd54f' }}>
+                                {lang === 'ar' ? 'يجب الدفع حتى تظهر الطلب للإدارة' : 'Paiement requis pour traiter la demande'}
+                              </small>
+                              <button
+                                className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
+                                onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.id}&requestType=death_extract&target=/mes-deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
+                              >
+                                <i className="fas fa-lock me-2"></i> Payer 0.500 DT
+                              </button>
+                            </div>
                         ) : (
                             <>
                               <a

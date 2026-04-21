@@ -92,6 +92,7 @@ class DemandeConstruction(models.Model):
     commentaire_agent = models.TextField(blank=True)
     permis_signe = models.FileField(upload_to='construction/permis/', null=True, blank=True)
     is_paid = models.BooleanField(default=False)
+    paid_at = models.DateTimeField(null=True, blank=True)
     is_high_risk = models.BooleanField(default=False)
 
     # Timestamps
