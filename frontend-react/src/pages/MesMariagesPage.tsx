@@ -136,7 +136,8 @@ export default function MesMariagesPage() {
                           {m.date_mariage}
                         </p>
                         <div className="d-flex gap-2">
-                          {!m.is_paid && !user?.has_active_asd ? (
+                          {/* Debug: console.log('Mariage Paid:', m.is_paid, 'ASD:', user?.has_active_asd) */}
+                          {(!m.is_paid && !user?.has_active_asd) ? (
                               <button
                                 className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
                                 onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Mariage&requestId=${m.numero_registre}&requestType=mariage&file_fr=${encodeURIComponent(resolveBackendUrl(m.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(m.url_ar))}`)}

@@ -131,7 +131,8 @@ export default function MesDecesPage() {
                         {d.date_deces}
                       </p>
                       <div className="d-flex gap-2">
-                        {!d.is_paid && !user?.has_active_asd ? (
+                        {/* Debug: console.log('Deces Paid:', d.is_paid, 'ASD:', user?.has_active_asd) */}
+                        {(!d.is_paid && !user?.has_active_asd) ? (
                             <button
                               className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
                               onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.numero_registre}&requestType=deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
