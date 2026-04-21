@@ -239,7 +239,11 @@ export default function DemandeResidencePage() {
                       type="tel"
                       className="form-control form-control-lg bg-light border-0"
                       value={formData.telephone}
-                      onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 8) setFormData({ ...formData, telephone: val });
+                      }}
+                      maxLength={8}
                       required
                       style={{ borderRadius: '12px' }}
                     />
@@ -279,7 +283,11 @@ export default function DemandeResidencePage() {
                             type="text"
                             className="demande-inline-input"
                             value={formData.cin}
-                            onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 8) setFormData({ ...formData, cin: val });
+                            }}
+                            maxLength={8}
                             placeholder={t('cin_placeholder')}
                             required
                           />
@@ -328,7 +336,11 @@ export default function DemandeResidencePage() {
                             type="text"
                             className="demande-inline-input"
                             value={formData.cin}
-                            onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 8) setFormData({ ...formData, cin: val });
+                            }}
+                            maxLength={8}
                             placeholder={t('cin_placeholder')}
                             required
                           />
