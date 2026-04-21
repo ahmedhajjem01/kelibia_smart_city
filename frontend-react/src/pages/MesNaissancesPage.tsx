@@ -31,7 +31,7 @@ export default function MesNaissancesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<MesExtraitsResponse | null>(null)
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -95,7 +95,7 @@ export default function MesNaissancesPage() {
               {extrait.date_naissance}
             </p>
             <div className="d-flex gap-2">
-              {!extrait.is_paid ? (
+              {!extrait.is_paid && !user?.has_active_asd ? (
                 <button
                   className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
                   onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Naissance&requestId=${extrait.id}&requestType=birth_extract&file_fr=${encodeURIComponent(resolveBackendUrl(extrait.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(extrait.url_ar))}`)}

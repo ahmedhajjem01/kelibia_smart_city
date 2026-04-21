@@ -23,7 +23,7 @@ export default function MesMariagesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mariages, setMariages] = useState<ActeMariage[]>([])
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -136,7 +136,7 @@ export default function MesMariagesPage() {
                           {m.date_mariage}
                         </p>
                         <div className="d-flex gap-2">
-                          {!m.is_paid ? (
+                          {!m.is_paid && !user?.has_active_asd ? (
                               <button
                                 className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
                                 onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Mariage&requestId=${m.numero_registre}&requestType=mariage&file_fr=${encodeURIComponent(resolveBackendUrl(m.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(m.url_ar))}`)}
