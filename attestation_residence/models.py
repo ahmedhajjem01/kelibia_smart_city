@@ -1,7 +1,11 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import RegexValidator
 
 class DemandeResidence(models.Model):
+    # Validators
+    numeric_validator = RegexValidator(r'^\d{8}$', 'Ce champ doit contenir exactement 8 chiffres.')
+
     STATUS_CHOICES = [
         ('pending', 'En attente'),
         ('in_progress', 'En cours'),
@@ -20,7 +24,20 @@ class DemandeResidence(models.Model):
     
     # New Information fields
     profession = models.CharField(max_length=100, blank=True, null=True, verbose_name="Profession")
-    telephone = models.CharField(max_length=20, blank=True, null=True, verbose_name="N° de téléphone")
+    cin = models.CharField(
+        max_length=8, 
+        validators=[numeric_validator], 
+        blank=True, 
+        null=True, 
+        verbose_name="N° de CIN"
+    )
+    telephone = models.CharField(
+        max_length=8, 
+        validators=[numeric_validator], 
+        blank=True, 
+        null=True, 
+        verbose_name="N° de téléphone"
+    )
     adresse_demandee = models.TextField(verbose_name="Adresse du domicile à Kélibia")
     motif_demande = models.TextField(blank=True, null=True, verbose_name="Motif de la demande")
     
