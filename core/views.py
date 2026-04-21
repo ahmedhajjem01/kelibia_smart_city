@@ -90,9 +90,9 @@ def confirm_payment(request):
             return Response({"error": "Type de demande inconnu"}, status=400)
 
 
-        return Response({"status": "Success", "message": "Paiement confirmé, statut mis à jour."})
-    except (DemandeLivretFamille.DoesNotExist, DemandeResidence.DoesNotExist, ExtraitNaissance.DoesNotExist, ExtraitMariage.DoesNotExist):
-        return Response({"error": "Demande ou extrait non trouvé"}, status=404)
+        return Response({"status": "Success", "message": "Paiement confirmed, status updated."})
+    except Exception as e:
+        return Response({"error": f"Demande introuvable: {str(e)}"}, status=404)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

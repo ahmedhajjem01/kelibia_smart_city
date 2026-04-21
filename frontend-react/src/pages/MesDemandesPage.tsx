@@ -453,7 +453,7 @@ export default function MesDemandesPage() {
                              <button 
                                 className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
                                 style={{ fontSize: '0.65rem' }}
-                                onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}`)}
+                                onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}&target=/mes-demandes`)}
                              >
                                 <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `دفع ${getRequestPrice(req.type)} د.ت` : `Payer ${getRequestPrice(req.type)} DT`}
                              </button>

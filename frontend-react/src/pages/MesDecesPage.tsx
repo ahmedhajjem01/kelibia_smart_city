@@ -6,6 +6,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
 type ActeDeces = {
+  id: number
   numero_registre: string | number
   annee_acte: string | number
   nom_complet_fr: string
@@ -135,7 +136,7 @@ export default function MesDecesPage() {
                         {(!d.is_paid && !user?.has_active_asd) ? (
                             <button
                               className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
-                              onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.numero_registre}&requestType=deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
+                              onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.id}&requestType=death_extract&target=/mes-deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
                             >
                               <i className="fas fa-lock me-2"></i> Payer 0.500 DT
                             </button>
