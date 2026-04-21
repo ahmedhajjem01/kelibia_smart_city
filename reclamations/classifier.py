@@ -452,8 +452,8 @@ def detect_duplicate(title: str, description: str,
             }
 
         # ── 2. TF-IDF text similarity ────────────────────────────────────────
-        new_text       = _normalize(title + " " + description)
-        existing_texts = [_normalize(r['title'] + " " + r['description']) for r in existing]
+        new_text       = _normalize((title or "") + " " + (description or ""))
+        existing_texts = [_normalize((r['title'] or "") + " " + (r['description'] or "")) for r in existing]
         existing_ids   = [r['id'] for r in existing]
 
         corpus = existing_texts + [new_text]

@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes as pc
 from .models import Reclamation
 from .serializers import ReclamationSerializer
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ReclamationViewSet(viewsets.ModelViewSet):
@@ -21,8 +23,6 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
-        import logging
-        logger = logging.getLogger(__name__)
 
         title         = self.request.data.get('title', '')
         description   = self.request.data.get('description', '')
@@ -94,30 +94,39 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         # We let super().create handle the standard flow (which calls perform_create)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        try:
+            self.perform_create(serializer)
+        except Exception as e:
+            import traceback
+            logger.error(f"Creation failed: {e}\n{traceback.format_exc()}")
+            return Response({"detail": f"Erreur serveur: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         instance = serializer.instance
         data = serializer.data
         
         # Add ML and Duplicate metadata to the response
-        if hasattr(instance, '_ml_result'):
-            ml_result = instance._ml_result
-            data['ml_classification'] = {
-                'category':            ml_result['category'],
-                'priority':            ml_result['priority'],
-                'service_responsable': ml_result['service_responsable'],
-                'confidence':          ml_result.get('confidence', {}),
-            }
-        
-        if hasattr(instance, '_dup_result'):
-            dup_result = instance._dup_result
-            data['duplicate_detection'] = {
-                'is_duplicate':     dup_result.get('is_duplicate', False),
-                'duplicate_of':     dup_result.get('duplicate_of'),
-                'similarity_score': dup_result.get('similarity_score', 0.0),
-                'geo_score':        dup_result.get('geo_score', 0.0),
-                'final_score':      dup_result.get('final_score', 0.0),
-            }
+        try:
+            if hasattr(instance, '_ml_result'):
+                ml_result = instance._ml_result
+                data['ml_classification'] = {
+                    'category':            ml_result.get('category', 'other'),
+                    'priority':            ml_result.get('priority', 'normale'),
+                    'service_responsable': ml_result.get('service_responsable', 'Service Technique Général'),
+                    'confidence':          ml_result.get('confidence', {}),
+                }
+            
+            if hasattr(instance, '_dup_result'):
+                dup_result = instance._dup_result
+                data['duplicate_detection'] = {
+                    'is_duplicate':     dup_result.get('is_duplicate', False),
+                    'duplicate_of':     dup_result.get('duplicate_of'),
+                    'similarity_score': dup_result.get('similarity_score', 0.0),
+                    'geo_score':        dup_result.get('geo_score', 0.0),
+                    'final_score':      dup_result.get('final_score', 0.0),
+                }
+        except Exception as e:
+            logger.error(f"Error enriching response with ML metadata: {e}")
+            # Non-fatal: original data still valid
             
         headers = self.get_success_headers(data)
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
