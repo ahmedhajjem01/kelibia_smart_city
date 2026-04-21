@@ -72,6 +72,7 @@ export default function MariageContractPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const today = new Date().toISOString().split('T')[0]
 
   const [formData, setFormData] = useState({
     type_contrat: 'municipal',
@@ -162,7 +163,7 @@ export default function MariageContractPage() {
 
       if (res.ok) {
         setSuccess(true)
-        setTimeout(() => navigate('/mes-mariages'), 3000)
+        setTimeout(() => navigate('/mes-demandes'), 3000)
       } else {
         const errData = await res.json()
         setError(JSON.stringify(errData))
@@ -300,7 +301,10 @@ export default function MariageContractPage() {
                         type="text"
                         className="form-control form-control-lg bg-light border-0"
                         value={formData.cin_epoux}
-                        onChange={(e) => setFormData({ ...formData, cin_epoux: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 8) setFormData({ ...formData, cin_epoux: val });
+                        }}
                         required
                         maxLength={8}
                         style={{ borderRadius: '12px' }}
@@ -343,7 +347,10 @@ export default function MariageContractPage() {
                         type="text"
                         className="form-control form-control-lg bg-light border-0"
                         value={formData.cin_epouse}
-                        onChange={(e) => setFormData({ ...formData, cin_epouse: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 8) setFormData({ ...formData, cin_epouse: val });
+                        }}
                         required
                         maxLength={8}
                         style={{ borderRadius: '12px' }}
@@ -377,6 +384,7 @@ export default function MariageContractPage() {
                         value={formData.date_souhaitee}
                         onChange={(e) => setFormData({ ...formData, date_souhaitee: e.target.value })}
                         required
+                        min={today}
                         style={{ borderRadius: '12px' }}
                       />
                     </div>
