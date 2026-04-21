@@ -16,6 +16,8 @@ def login_redirect(request):
     """
     return redirect('/login')
 
+from django.utils import timezone
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def confirm_payment(request):
@@ -23,13 +25,14 @@ def confirm_payment(request):
     Simulation PFE : Reçoit un signal de paiement réussi et met à jour la demande correspondante.
     """
     req_id = request.data.get('request_id')
-    req_type = request.data.get('request_type') # 'livret' or 'residence'
+    req_type = request.data.get('request_type')
     paid = request.data.get('paiement_recu', False)
 
     if not paid:
         return Response({"error": "Paiement non reçu"}, status=400)
 
     try:
+        now = timezone.now()
         if req_type == 'livret':
             obj = DemandeLivretFamille.objects.get(id=req_id, citizen=request.user)
             obj.is_paid = True
@@ -43,10 +46,17 @@ def confirm_payment(request):
         elif req_type == 'birth_extract':
             obj = ExtraitNaissance.objects.get(id=req_id, user=request.user)
             obj.is_paid = True
+            obj.paid_at = now
             obj.save()
         elif req_type == 'marriage_extract':
             obj = ExtraitMariage.objects.get(id=req_id, user=request.user)
             obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'death_extract' or req_type == 'deces':
+            obj = ExtraitDeces.objects.get(id=req_id, user=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
             obj.save()
         else:
             return Response({"error": "Type de demande inconnu"}, status=400)

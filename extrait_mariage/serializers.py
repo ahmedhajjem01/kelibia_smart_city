@@ -11,8 +11,20 @@ class ExtraitMariageSerializer(serializers.ModelSerializer):
         model = ExtraitMariage
         fields = [
             'id', 'numero_registre', 'annee_acte', 'date_mariage',
-            'conjoint_fr', 'conjoint_ar', 'url_fr', 'url_ar'
+            'conjoint_fr', 'conjoint_ar', 'url_fr', 'url_ar', 'is_paid'
         ]
+
+    def get_is_paid(self, obj):
+        from django.utils import timezone
+        request = self.context.get('request')
+        # ASD active -> Always paid
+        if request and request.user and getattr(request.user, 'has_active_asd', False):
+            return True
+        # Check 24h validity
+        if obj.is_paid and obj.paid_at:
+            diff = timezone.now() - obj.paid_at
+            return diff.total_seconds() < 86400
+        return False
 
     def get_conjoint_fr(self, obj):
         request = self.context.get('request')

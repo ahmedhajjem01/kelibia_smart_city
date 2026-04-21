@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DeclarationDeces, DemandeInhumation
+from .models import DeclarationDeces, DemandeInhumation, ExtraitDeces
 from extrait_naissance.models import Citoyen
 
 class CitoyenSimpleSerializer(serializers.ModelSerializer):
@@ -51,3 +51,39 @@ class DemandeInhumationSerializer(serializers.ModelSerializer):
             'status', 'created_at'
         ]
         read_only_fields = ['status', 'created_at']
+
+class ExtraitDecesSerializer(serializers.ModelSerializer):
+    nom_complet_fr = serializers.SerializerMethodField()
+    nom_complet_ar = serializers.SerializerMethodField()
+    url_fr = serializers.SerializerMethodField()
+    url_ar = serializers.SerializerMethodField()
+    is_paid = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ExtraitDeces
+        fields = [
+            'id', 'numero_registre', 'annee_acte', 'date_deces',
+            'nom_complet_fr', 'nom_complet_ar', 'url_fr', 'url_ar', 'is_paid'
+        ]
+
+    def get_nom_complet_fr(self, obj):
+        return f"{obj.defunt.prenom_fr} {obj.defunt.nom_fr}"
+
+    def get_nom_complet_ar(self, obj):
+        return f"{obj.defunt.prenom_ar} {obj.defunt.nom_ar}"
+
+    def get_url_fr(self, obj):
+        return f"/extrait-deces/{obj.id}/certificate/fr/"
+
+    def get_url_ar(self, obj):
+        return f"/extrait-deces/{obj.id}/certificate/"
+
+    def get_is_paid(self, obj):
+        from django.utils import timezone
+        request = self.context.get('request')
+        if request and request.user and getattr(request.user, 'has_active_asd', False):
+            return True
+        if obj.is_paid and obj.paid_at:
+            diff = timezone.now() - obj.paid_at
+            return diff.total_seconds() < 86400
+        return False

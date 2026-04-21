@@ -78,6 +78,7 @@ class ExtraitNaissance(models.Model):
     numero_ordre = models.CharField(max_length=50, verbose_name="Numéro d'ordre", blank=True, default="")
     prix = models.DecimalField(max_digits=6, decimal_places=3, verbose_name="Prix", default=0.500)
     is_paid = models.BooleanField(default=False, verbose_name="Payé")
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Date du paiement")
 
 
     created_at = models.DateTimeField(auto_now_add=True)
