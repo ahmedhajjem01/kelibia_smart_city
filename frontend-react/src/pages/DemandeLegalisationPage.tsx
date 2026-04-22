@@ -43,15 +43,32 @@ export default function DemandeLegalisationPage() {
     setLoading(true)
     setError(null)
 
-    // Simulation of payment redirection before final submission
-    // Legalization in Tunisia is usually 0.500 DT per copy
-    const amount = (parseFloat(formData.nombre_copies) * 0.500).toFixed(3)
-    const reason = lang === 'ar' ? `التعريف بالإمضاء - ${formData.type_document}` : `Légalisation de Signature - ${formData.type_document}`
-    
-    // We redirect to payment first
-    // In a real app, we'd save the draft first. Here we'll simulate the flow.
-    const target = `/paiement?amount=${amount}&reason=${encodeURIComponent(reason)}&requestType=legalisation&target=/mes-demandes`
-    navigate(target)
+    // Save pre-demand
+    try {
+      const res = await fetch(resolveBackendUrl('/extrait-naissance/api/legalisation/'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (res.ok) {
+        const savedData = await res.json()
+        const amount = (parseFloat(formData.nombre_copies) * 0.500).toFixed(3)
+        const reason = lang === 'ar' ? `التعريف بالإمضاء - ${formData.type_document}` : `Légalisation de Signature - ${formData.type_document}`
+        const target = `/paiement?amount=${amount}&reason=${encodeURIComponent(reason)}&requestId=${savedData.id}&requestType=legalisation&target=/mes-demandes`
+        navigate(target)
+      } else {
+        const err = await res.json()
+        setError(err.error || 'Erreur lors de l\'enregistrement')
+      }
+    } catch (err) {
+      setError('Erreur de connexion')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

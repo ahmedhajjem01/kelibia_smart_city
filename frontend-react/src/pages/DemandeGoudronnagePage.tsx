@@ -111,7 +111,10 @@ export default function DemandeGoudronnagePage() {
       fd.append('latitude', String(position[0]))
       fd.append('longitude', String(position[1]))
     }
-    if (cinCopie) fd.append('cin_copie', cinCopie)
+    if (cinCopie) {
+      const ext = cinCopie.name.split('.').pop() || 'jpg'
+      fd.append('cin_copie', cinCopie, `cin_copie_${Date.now()}.${ext}`)
+    }
 
     try {
       const res = await fetch(resolveBackendUrl('/api/construction/goudronnage/'), {
@@ -231,7 +234,11 @@ export default function DemandeGoudronnagePage() {
                 <input
                   type="text" className="form-control rounded-3"
                   placeholder="12345678" maxLength={8}
-                  value={form.cin} onChange={e => update('cin', e.target.value.replace(/\D/g, ''))}
+                  value={form.cin}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val.length <= 8) update('cin', val);
+                  }}
                   required
                 />
               </div>

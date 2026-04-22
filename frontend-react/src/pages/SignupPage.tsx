@@ -1562,7 +1562,10 @@ export default function SignupPage() {
 
                   <label className="sg-label">{t('cin_label')}</label>
 
-                  <input className="sg-input" type="text" placeholder="00000000" pattern="[0-9]{8}" maxLength={8} required value={cin} onChange={e => setCin(e.target.value)} />
+                  <input className="sg-input" type="text" placeholder="00000000" maxLength={8} required value={cin} onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val.length <= 8) setCin(val);
+                  }} />
 
                 </div>
 
@@ -1606,7 +1609,10 @@ export default function SignupPage() {
 
                     <label className="sg-label">{t('spouse_cin')}</label>
 
-                    <input className="sg-input" type="text" placeholder="12345678" pattern="[0-9]{8}" maxLength={8} value={spouseCin} onChange={e => setSpouseCin(e.target.value)} required={isMarried} />
+                    <input className="sg-input" type="text" placeholder="12345678" maxLength={8} value={spouseCin} onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      if (val.length <= 8) setSpouseCin(val);
+                    }} required={isMarried} />
 
                   </div>
 
@@ -1730,7 +1736,10 @@ export default function SignupPage() {
 
                     <span className="sg-phone-prefix">+216</span>
 
-                    <input className="sg-input" type="tel" placeholder="00 000 000" pattern="[0-9]{8}" maxLength={8} required value={phone} onChange={e => setPhone(e.target.value)} />
+                    <input className="sg-input" type="tel" placeholder="00 000 000" maxLength={8} required value={phone} onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      if (val.length <= 8) setPhone(val);
+                    }} />
 
                   </div>
 

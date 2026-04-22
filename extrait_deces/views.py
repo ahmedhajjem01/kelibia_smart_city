@@ -4,10 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import ExtraitDeces, DeclarationDeces, DemandeInhumation
+from .models import ExtraitDeces, DeclarationDeces, DemandeInhumation, DemandeTransfertCorps
 from .serializers import (
     DeclarationDecesSerializer, CitoyenSimpleSerializer, 
-    DemandeInhumationSerializer
+    DemandeInhumationSerializer, DemandeTransfertCorpsSerializer
 )
 from extrait_naissance.models import Citoyen
 
@@ -194,5 +194,20 @@ class DemandeInhumationAPIView(APIView):
         serializer = DemandeInhumationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(citizen=request.user, declaration_deces=declaration)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DemandeTransfertCorpsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        my_requests = DemandeTransfertCorps.objects.filter(citizen=request.user).order_by('-created_at')
+        serializer = DemandeTransfertCorpsSerializer(my_requests, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = DemandeTransfertCorpsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(citizen=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

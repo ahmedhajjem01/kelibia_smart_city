@@ -1,9 +1,45 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Webcam from 'react-webcam'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
+
+const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => void; onCancel: () => void }) => {
+  const webcamRef = useRef<Webcam>(null)
+  const [imgSrc, setImgSrc] = useState<string | null>(null)
+  const capture = useCallback(() => {
+    const src = webcamRef.current?.getScreenshot()
+    if (src) setImgSrc(src)
+  }, [])
+  const confirm = () => {
+    if (imgSrc) fetch(imgSrc).then(r => r.blob()).then(b => onCapture(b))
+  }
+  return (
+    <div className="text-center bg-dark p-3 rounded-4 shadow-lg mb-3">
+      {!imgSrc ? (
+        <>
+          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg"
+            className="w-100 rounded-3 mb-3 border border-secondary"
+            videoConstraints={{ facingMode: 'environment' }} />
+          <div className="d-flex justify-content-center gap-3">
+            <button type="button" onClick={capture} className="btn btn-warning rounded-pill px-4 fw-bold"><i className="fas fa-camera me-2"></i> Capturer</button>
+            <button type="button" onClick={onCancel} className="btn btn-outline-light rounded-pill px-4">Annuler</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <img src={imgSrc} alt="Capture" className="w-100 rounded-3 mb-3 border border-success border-3" />
+          <div className="d-flex justify-content-center gap-3">
+            <button type="button" onClick={confirm} className="btn btn-success rounded-pill px-4 fw-bold"><i className="fas fa-check me-2"></i> Confirmer</button>
+            <button type="button" onClick={() => setImgSrc(null)} className="btn btn-outline-warning rounded-pill px-4"><i className="fas fa-undo me-2"></i> Reprendre</button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function DeclarationNaissancePage() {
   const { t } = useI18n()
@@ -21,6 +57,11 @@ export default function DeclarationNaissancePage() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [isDrawing, setIsDrawing] = useState(false)
+  const [cameraActive, setCameraActive] = useState<string | null>(null)
+  const [capturedFiles, setCapturedFiles] = useState<Record<string, File | null>>({
+    cin_pere_scan: null,
+    cin_mere_scan: null
+  })
 
 
   useEffect(() => {
@@ -141,13 +182,13 @@ export default function DeclarationNaissancePage() {
         payload.append('attachment', attachment, `decl_birth_${Date.now()}.${ext}`)
       }
       
-      const pereId = pereIdRef.current?.files?.[0]
+      const pereId = capturedFiles.cin_pere_scan || pereIdRef.current?.files?.[0]
       if (pereId) {
         const ext = pereId.name.split('.').pop() || 'jpg'
         payload.append('cin_pere_scan', pereId, `cin_pere_${Date.now()}.${ext}`)
       }
       
-      const mereId = mereIdRef.current?.files?.[0]
+      const mereId = capturedFiles.cin_mere_scan || mereIdRef.current?.files?.[0]
       if (mereId) {
         const ext = mereId.name.split('.').pop() || 'jpg'
         payload.append('cin_mere_scan', mereId, `cin_mere_${Date.now()}.${ext}`)
@@ -300,20 +341,80 @@ export default function DeclarationNaissancePage() {
                         <label htmlFor="cin_pere" className="form-label">
                           {t('cin_pere')}
                         </label>
-                        <input type="text" className="form-control" id="cin_pere" name="cin_pere" maxLength={8} />
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="cin_pere"
+                          name="cin_pere"
+                          maxLength={8}
+                          onInput={(e) => {
+                            const input = e.currentTarget;
+                            input.value = input.value.replace(/\D/g, '').slice(0, 8);
+                          }}
+                        />
                         <div className="mt-2 text-start">
                           <label className="form-label small text-muted d-block">{t('parent_id_pere')}</label>
-                          <input type="file" ref={pereIdRef} className="form-control form-control-sm" accept="image/*" />
+                          {cameraActive === 'cin_pere_scan' ? (
+                            <WebcamCapture 
+                              onCapture={blob => {
+                                setCapturedFiles(prev => ({ ...prev, cin_pere_scan: new File([blob], 'cin_pere.jpg', { type: 'image/jpeg' }) }))
+                                setCameraActive(null)
+                              }}
+                              onCancel={() => setCameraActive(null)}
+                            />
+                          ) : (
+                            <div className="d-flex gap-2">
+                              <input type="file" ref={pereIdRef} className="form-control form-control-sm" accept="image/*" />
+                              <button type="button" className="btn btn-outline-warning btn-sm shadow-sm" onClick={() => setCameraActive('cin_pere_scan')}>
+                                <i className="fas fa-camera"></i>
+                              </button>
+                            </div>
+                          )}
+                          {(capturedFiles.cin_pere_scan || (pereIdRef.current?.files?.length && pereIdRef.current.files.length > 0)) && (
+                            <div className="text-success small mt-1">
+                              <i className="fas fa-check-circle me-1"></i> {t('document_ready') || 'Document prêt'}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="col-md-6 mb-3">
                         <label htmlFor="cin_mere" className="form-label">
                           {t('cin_mere')}
                         </label>
-                        <input type="text" className="form-control" id="cin_mere" name="cin_mere" maxLength={8} />
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="cin_mere"
+                          name="cin_mere"
+                          maxLength={8}
+                          onInput={(e) => {
+                            const input = e.currentTarget;
+                            input.value = input.value.replace(/\D/g, '').slice(0, 8);
+                          }}
+                        />
                         <div className="mt-2 text-start">
                           <label className="form-label small text-muted d-block">{t('parent_id_mere')}</label>
-                          <input type="file" ref={mereIdRef} className="form-control form-control-sm" accept="image/*" />
+                          {cameraActive === 'cin_mere_scan' ? (
+                            <WebcamCapture 
+                              onCapture={blob => {
+                                setCapturedFiles(prev => ({ ...prev, cin_mere_scan: new File([blob], 'cin_mere.jpg', { type: 'image/jpeg' }) }))
+                                setCameraActive(null)
+                              }}
+                              onCancel={() => setCameraActive(null)}
+                            />
+                          ) : (
+                            <div className="d-flex gap-2">
+                              <input type="file" ref={mereIdRef} className="form-control form-control-sm" accept="image/*" />
+                              <button type="button" className="btn btn-outline-warning btn-sm shadow-sm" onClick={() => setCameraActive('cin_mere_scan')}>
+                                <i className="fas fa-camera"></i>
+                              </button>
+                            </div>
+                          )}
+                          {(capturedFiles.cin_mere_scan || (mereIdRef.current?.files?.length && mereIdRef.current.files.length > 0)) && (
+                            <div className="text-success small mt-1">
+                              <i className="fas fa-check-circle me-1"></i> {t('document_ready') || 'Document prêt'}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -153,7 +153,10 @@ export default function DemandeCertificatVocationPage() {
     fd.append('adresse_bien', form.adresse_bien)
     DOCS.forEach(doc => {
       const f = files[doc.key]
-      if (f) fd.append(doc.key, f)
+      if (f) {
+        const ext = f.name.split('.').pop() || 'bin'
+        fd.append(doc.key, f, `${doc.key}_${Date.now()}.${ext}`)
+      }
     })
 
     try {
@@ -268,7 +271,11 @@ export default function DemandeCertificatVocationPage() {
                 <input
                   type="text" className="form-control rounded-3"
                   placeholder="12345678" maxLength={8}
-                  value={form.cin} onChange={e => update('cin', e.target.value.replace(/\D/g, ''))}
+                  value={form.cin}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val.length <= 8) update('cin', val);
+                  }}
                   required
                 />
                 {form.cin.length > 0 && form.cin.length !== 8 && (

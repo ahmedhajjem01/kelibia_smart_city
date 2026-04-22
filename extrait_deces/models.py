@@ -156,6 +156,44 @@ class DemandeInhumation(models.Model):
         verbose_name = "Demande d'inhumation"
         verbose_name_plural = "Demandes d'inhumation"
 
+
+class DemandeTransfertCorps(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente / قيد الانتظار'),
+        ('approved', 'Approuvée / تمت الموافقة'),
+        ('rejected', 'Refusée / مرفوضة'),
+        ('ready', 'Prêt / جاهز'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="demandes_transfert",
+        verbose_name="Demandeur"
+    )
+    
+    nom_defunt = models.CharField(max_length=200, verbose_name="Nom du défunt")
+    date_deces = models.DateField(verbose_name="Date de décès")
+    lieu_deces = models.CharField(max_length=200, verbose_name="Lieu de décès")
+    lieu_inhumation = models.CharField(max_length=200, verbose_name="Destination d'inhumation")
+    date_transfert = models.DateField(verbose_name="Date prévue du transfert", null=True, blank=True)
+
+    certificat_medical = models.FileField(upload_to='declarations/transfert/medical/', verbose_name="Certificat médical")
+    cin_defunt = models.FileField(upload_to='declarations/transfert/cin/', verbose_name="CIN du défunt")
+
+    is_paid = models.BooleanField(default=False, verbose_name="Payé")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Transfert: {self.nom_defunt} -> {self.lieu_inhumation}"
+
+    class Meta:
+        verbose_name = "Demande de transfert de corps"
+        verbose_name_plural = "Demandes de transfert de corps"
+
 # --- SIGNALS ---
 
 @receiver(post_save, sender=DeclarationDeces)

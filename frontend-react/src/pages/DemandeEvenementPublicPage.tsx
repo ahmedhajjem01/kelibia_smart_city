@@ -148,7 +148,18 @@ export default function DemandeEvenementPublicPage() {
     const data = new FormData()
     Object.entries(form).forEach(([k, v]) => { if (v) data.append(k, v) })
     if (position) { data.append('latitude', String(position[0])); data.append('longitude', String(position[1])) }
-    Object.entries(files).forEach(([k, v]) => { if (v) data.append(k, v as Blob) })
+    Object.entries(files).forEach(([k, v]) => {
+      if (v) {
+        if (v instanceof File) {
+          const extension = v.name.split('.').pop()
+          const newName = `${k}_${Date.now()}.${extension}`
+          const renamedFile = new File([v], newName, { type: v.type })
+          data.append(k, renamedFile)
+        } else {
+          data.append(k, v as Blob)
+        }
+      }
+    })
     try {
       const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), {
         method: 'POST', headers: { Authorization: `Bearer ${access}` }, body: data,
