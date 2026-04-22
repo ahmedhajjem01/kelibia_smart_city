@@ -327,6 +327,7 @@ export default function MesConstructionsPage() {
           )}
         </div>
       </div>
+      </div>
     </MainLayout>
   )
 }
