@@ -1082,6 +1082,26 @@ const CSS = `
 
 }
 
+/* ── RTL overrides ── */
+[dir="rtl"] .ag-sidebar{border-right:none;border-left:1px solid var(--sidebar-border)}
+[dir="rtl"] .ag-nav-item:hover{transform:translateX(-2px)}
+[dir="rtl"] .ag-filter-bar{flex-direction:row-reverse}
+[dir="rtl"] .ag-filter-bar .ag-search-wrap{flex-direction:row-reverse}
+[dir="rtl"] .ag-table thead th,[dir="rtl"] .ag-table tbody td{text-align:right}
+[dir="rtl"] .ag-breadcrumb{flex-direction:row-reverse}
+[dir="rtl"] .ag-hero{flex-direction:row-reverse}
+[dir="rtl"] .ag-hero>div:first-child{text-align:right}
+[dir="rtl"] .ag-navbar{flex-direction:row-reverse}
+[dir="rtl"] .ag-topbar{flex-direction:row-reverse}
+[dir="rtl"] .ag-card-hdr-blue,[dir="rtl"] .ag-card-hdr-green{flex-direction:row-reverse}
+[dir="rtl"] .ag-pag-bar{flex-direction:row-reverse}
+[dir="rtl"] .ag-sec-title{text-align:right}
+[dir="rtl"] .ag-main{direction:rtl}
+[dir="rtl"] .ag-actions{flex-direction:row-reverse}
+[dir="rtl"] .font-arabic{font-family:'Cairo','Amiri','Public Sans',sans-serif!important}
+[dir="rtl"] .ag-row-clickable td{text-align:right}
+[dir="rtl"] .ag-stats-grid .ag-stat{text-align:right;align-items:flex-end}
+
 `
 
 
@@ -2868,7 +2888,7 @@ export default function AgentDashboardPage() {
 
   return (
 
-    <div className="agent-page">
+    <div className={`agent-page${lang === 'ar' ? ' font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
       {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
 
@@ -2876,9 +2896,9 @@ export default function AgentDashboardPage() {
 
       <div className="ag-topbar">
 
-        <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
+        <div><i className={`fas fa-map-marker-alt ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i> {lang === 'ar' ? 'بلدية قليبية — ولاية نابل' : 'Commune de Kélibia — Gouvernorat de Nabeul'}</div>
 
-        <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 296 239</a><a href="#"><i className="fas fa-envelope me-1"></i>webmaster.commune-kelibia@topnet.tn</a></div>
+        <div><a href="#"><i className={`fas fa-phone ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>+216 72 296 239</a><a href="#"><i className={`fas fa-envelope ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>webmaster.commune-kelibia@topnet.tn</a></div>
 
       </div>
 
@@ -2910,7 +2930,7 @@ export default function AgentDashboardPage() {
 
         <div>
 
-          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
+          <div className="greeting"><i className={`fas fa-shield-alt ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
 
           <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
 
@@ -2928,13 +2948,13 @@ export default function AgentDashboardPage() {
 
       <div className="ag-breadcrumb">
 
-        <a href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard'); }}><i className="fas fa-home me-1"></i>{t('nav_home')}</a>
+        <a href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard'); }}><i className={`fas fa-home ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{t('nav_home')}</a>
 
-        <span className="mx-2 text-muted">/</span>
+        <span className="mx-2 text-muted">{lang === 'ar' ? '\\' : '/'}</span>
 
         <span>{t('nav_agent_space_title')}</span>
 
-        <span className="mx-2 text-muted">/</span>
+        <span className="mx-2 text-muted">{lang === 'ar' ? '\\' : '/'}</span>
 
         <span>{t('nav_manage_signalements')}</span>
 
