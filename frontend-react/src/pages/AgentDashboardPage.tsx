@@ -82,6 +82,11 @@ const CSS = `
 
 /* ── New Design System ── */
 
+@keyframes shimmer {
+  0%   { background-position: 200% 0 }
+  100% { background-position: -200% 0 }
+}
+
 :root{
 
   --primary:#F18221;
@@ -3105,18 +3110,18 @@ export default function AgentDashboardPage() {
 
                   {[
 
-                    { val: total, lbl: t('total_reclamations_short'), chipLabel: 'Total', color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check', onClick: undefined },
+                    { val: total,    lbl: t('total_reclamations_short'), chipLabel: lang === 'ar' ? 'الإجمالي'     : 'Total',      color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check',  onClick: undefined },
 
-                    { val: pending, lbl: t('total_pending'), chipLabel: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock', onClick: undefined },
+                    { val: pending,  lbl: t('total_pending'),            chipLabel: lang === 'ar' ? 'قيد الانتظار'  : 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock',       onClick: undefined },
 
-                    { val: inprog, lbl: t('total_in_progress'), chipLabel: 'En cours', color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools', onClick: undefined },
+                    { val: inprog,   lbl: t('total_in_progress'),        chipLabel: lang === 'ar' ? 'قيد التنفيذ'   : 'En cours',   color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools',       onClick: undefined },
 
-                    { val: resolved, lbl: t('total_resolved'), chipLabel: 'Résolus', color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
+                    { val: resolved, lbl: t('total_resolved'),           chipLabel: lang === 'ar' ? 'تمت المعالجة'  : 'Résolus',    color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
 
-                    { val: rejected, lbl: t('total_rejected'), chipLabel: 'Rejetés', color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
+                    { val: rejected, lbl: t('total_rejected'),           chipLabel: lang === 'ar' ? 'مرفوضة'        : 'Rejetés',    color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
 
                     {
-                      val: dupCount, lbl: t('total_duplicates'), chipLabel: 'Doublons', color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
+                      val: dupCount, lbl: t('total_duplicates'),         chipLabel: lang === 'ar' ? 'بلاغات مكررة'  : 'Doublons',   color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
 
                       onClick: () => setShowDupPanel(p => !p)
                     },
@@ -3133,7 +3138,11 @@ export default function AgentDashboardPage() {
 
                       </div>
 
-                      <div className="val">{loading ? '—' : s.val}</div>
+                      <div className="val">
+                        {loading
+                          ? <span style={{ display: 'inline-block', width: 32, height: 28, borderRadius: 6, background: 'linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.2s infinite' }}></span>
+                          : s.val}
+                      </div>
 
                       <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
 
