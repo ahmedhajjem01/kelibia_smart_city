@@ -3544,9 +3544,9 @@ export default function AgentDashboardPage() {
 
                                   </button>
 
-                                  {u.user_type === 'citizen' && (
+                                  {(user?.is_superuser || user?.user_type === 'supervisor') && u.user_type === 'citizen' && (
 
-                                    <button className="btn btn-sm btn-outline-info" title={t('promote_agent')} onClick={(e) => { e.stopPropagation(); if (window.confirm(`Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privilèges de modération.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
+                                    <button className="btn btn-sm btn-outline-info" title={t('promote_agent')} onClick={(e) => { e.stopPropagation(); if (window.confirm(t('promote_to_agent_confirm') || `Êtes-vous sûr de vouloir promouvoir "${u.full_name}" en Agent ? Il recevra des privilèges de modération.`)) handleToggleUserStatus(u.id, 'promote_to_agent') }}><i className="fas fa-briefcase"></i></button>
 
                                   )}
 

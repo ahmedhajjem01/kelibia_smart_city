@@ -286,11 +286,15 @@ class UserVerificationView(APIView):
                 target_user.delete()
                 return Response({"message": "Utilisateur supprimé avec succès."})
             elif action == 'promote_to_agent':
+                if getattr(request.user, 'user_type', '') != 'supervisor' and not request.user.is_superuser:
+                    return Response({"error": "Seul un superviseur peut promouvoir un citoyen en agent."}, status=403)
                 target_user.user_type = 'agent'
                 target_user.is_staff = True
                 target_user.save()
                 return Response({"message": "L'utilisateur a été promu au rang d'Agent."})
             elif action == 'promote_to_supervisor':
+                if getattr(request.user, 'user_type', '') != 'supervisor' and not request.user.is_superuser:
+                    return Response({"error": "Seul un superviseur peut promouvoir un utilisateur en superviseur."}, status=403)
                 target_user.user_type = 'supervisor'
                 target_user.is_staff = True
                 target_user.is_superuser = True
