@@ -133,6 +133,19 @@ export default function DemandeTransfertCorpsPage() {
                         <input type="text" name="lieu_deces" className="form-control form-control-lg bg-light border-0 shadow-sm" required />
                       </div>
                       <div className="col-md-6 mb-4">
+                        <label className="form-label fw-bold">{lang === 'ar' ? 'تاريخ النقل المطلوب' : 'Date prévue du transfert'}</label>
+                        <input 
+                          type="date" 
+                          name="date_transfert" 
+                          className="form-control form-control-lg bg-light border-0 shadow-sm" 
+                          required 
+                          min={new Date().toISOString().split('T')[0]}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row">
+                      <div className="col-12 mb-4">
                         <label className="form-label fw-bold">{lang === 'ar' ? 'مكان الدفن (الوجهة)' : 'Lieu d\'inhumation (Destination)'}</label>
                         <input type="text" name="lieu_inhumation" className="form-control form-control-lg bg-light border-0 shadow-sm" required />
                       </div>

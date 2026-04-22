@@ -188,7 +188,7 @@ export default function MesDemandesPage() {
               title: lang === 'ar' ? 'رخصة نقل جثة' : 'Permis de Transfert de Corps',
               status: t_req.status,
               date: t_req.created_at,
-              details: lang === 'ar' ? `المتوفى: ${t_req.nom_defunt} -> ${t_req.lieu_inhumation}` : `Défunt: ${t_req.nom_defunt} -> ${t_req.lieu_inhumation}`,
+              details: lang === 'ar' ? `المتوفى: ${t_req.nom_defunt} -> ${t_req.lieu_inhumation} (${t_req.date_transfert || ''})` : `Défunt: ${t_req.nom_defunt} -> ${t_req.lieu_inhumation} (${t_req.date_transfert || ''})`,
               isPaid: t_req.is_paid
             })
           })

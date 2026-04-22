@@ -4175,6 +4175,7 @@ export default function AgentDashboardPage() {
                 <div className="col-6"><div className="det-label">{lang === 'ar' ? 'مكان الوفاة' : 'Lieu décès'}</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
 
                 <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الوجهة' : 'Destination'}</div><div className="det-value">{demandeDetail.lieu_inhumation}</div></div>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'تاريخ النقل' : 'Date de transfert'}</div><div className="det-value">{demandeDetail.date_transfert || '—'}</div></div>
 
               </>)}
 

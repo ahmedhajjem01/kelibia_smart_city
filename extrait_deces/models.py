@@ -176,6 +176,7 @@ class DemandeTransfertCorps(models.Model):
     date_deces = models.DateField(verbose_name="Date de décès")
     lieu_deces = models.CharField(max_length=200, verbose_name="Lieu de décès")
     lieu_inhumation = models.CharField(max_length=200, verbose_name="Destination d'inhumation")
+    date_transfert = models.DateField(verbose_name="Date prévue du transfert", null=True, blank=True)
 
     certificat_medical = models.FileField(upload_to='declarations/transfert/medical/', verbose_name="Certificat médical")
     cin_defunt = models.FileField(upload_to='declarations/transfert/cin/', verbose_name="CIN du défunt")
