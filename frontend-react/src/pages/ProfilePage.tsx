@@ -43,9 +43,9 @@ function initials(u: UserInfo | null) {
   return ((u.first_name?.[0] || '') + (u.last_name?.[0] || '')).toUpperCase() || u.email?.[0]?.toUpperCase() || '?'
 }
 
-function formatDate(iso?: string) {
+function formatDate(iso: string | undefined, lang: string) {
   if (!iso) return '—'
-  try { return new Date(iso).toLocaleDateString('fr-TN', { day: '2-digit', month: 'long', year: 'numeric' }) }
+  try { return new Date(iso).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-TN', { day: '2-digit', month: 'long', year: 'numeric' }) }
   catch { return iso }
 }
 
@@ -158,19 +158,34 @@ export default function ProfilePage() {
       mariages:     resolveBackendUrl('/extrait-mariage/demandes/'),
       permis:       resolveBackendUrl('/api/construction/demandes/'),
       livrets:      resolveBackendUrl('/livret-famille/demandes/'),
+      extraits:     resolveBackendUrl('/extrait-naissance/api/mes-extraits/'),
     }
     
-    Promise.allSettled(Object.entries(endpoints).map(([key, url]) =>
-      fetch(url, { headers: h }).then(r => r.ok ? r.json() : null).then(data => ({ key, data }))
-    )).then(results => {
-      setStats(prev => prev.map(card => {
-        const result = results.find(r => r.status === 'fulfilled' && (r as PromiseFulfilledResult<{key: string; data: unknown}>).value?.key === card.key)
-        if (!result || result.status !== 'fulfilled') return card
-        const raw = (result as PromiseFulfilledResult<{key: string; data: unknown}>).value.data
-        if (!raw) return card
-        const items: Record<string, string>[] = Array.isArray(raw) ? raw : ((raw as {results?: unknown[]}).results || [])
-        return { ...card, total: items.length, pending: items.filter(i => ['pending','en_attente','soumis','instruction'].includes(i.status||i.statut||'')).length, approved: items.filter(i => ['approved','resolved','approuve','signe','favorable','permis_delivre'].includes(i.status||i.statut||'')).length }
-      }))
+    Object.entries(endpoints).forEach(([key, url]) => {
+      fetch(url, { headers: h })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          if (!data) throw new Error()
+          let items: any[] = []
+          if (key === 'extraits') {
+            // extraits response is usually { mon_extrait: ..., enfants: [...] }
+            if (data.mon_extrait) items.push(data.mon_extrait)
+            if (data.enfants) items = [...items, ...data.enfants]
+          } else {
+            items = Array.isArray(data) ? data : (data.results || [])
+          }
+          const pending = items.filter(i => ['pending','en_attente','soumis','instruction'].includes(i.status||i.statut||'')).length
+          const approved = items.filter(i => ['approved','resolved','approuve','signe','favorable','permis_delivre'].includes(i.status||i.statut||'')).length
+          
+          setStats(prev => prev.map(card => 
+            card.key === key ? { ...card, total: items.length, pending, approved } : card
+          ))
+        })
+        .catch(() => {
+          setStats(prev => prev.map(card => 
+            card.key === key ? { ...card, total: 0, pending: 0, approved: 0 } : card
+          ))
+        })
     })
   }, [])
 
@@ -307,7 +322,7 @@ export default function ProfilePage() {
               {/* Date of birth */}
               <div className="pf-field">
                 <label className="pf-label"><i className={`fas fa-birthday-cake ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{t('date_of_birth')}</label>
-                <div className="pf-value pf-readonly">{formatDate(user?.date_of_birth)}<i className="fas fa-lock" style={{ fontSize: '.65rem', color: '#d1d5db', marginLeft: lang === 'ar' ? '0' : 'auto', marginRight: lang === 'ar' ? 'auto' : '0' }}></i></div>
+                <div className="pf-value pf-readonly">{formatDate(user?.date_of_birth, lang)}<i className="fas fa-lock" style={{ fontSize: '.65rem', color: '#d1d5db', marginLeft: lang === 'ar' ? '0' : 'auto', marginRight: lang === 'ar' ? 'auto' : '0' }}></i></div>
               </div>
               {/* Address */}
               <div className="pf-field pf-field-full">

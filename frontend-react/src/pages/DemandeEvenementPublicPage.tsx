@@ -15,37 +15,7 @@ const DefaultIcon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow, iconS
 L.Marker.prototype.options.icon = DefaultIcon
 const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 
-// Public-only types
-const PUBLIC_TYPE_OPTIONS = [
-  { value: 'concert',    label: '🎵 Concert / حفلة موسيقية' },
-  { value: 'culturel',   label: '🎭 Événement culturel / حدث ثقافي' },
-  { value: 'sportif',    label: '⚽ Événement sportif / حدث رياضي' },
-  { value: 'marche',     label: '🛍️ Marché / سوق' },
-  { value: 'association',label: '🤝 Activité associative / نشاط جمعوي' },
-  { value: 'religieux',  label: '🕌 Événement religieux / تظاهرة دينية' },
-  { value: 'commercial', label: '💼 Événement commercial / حدث تجاري' },
-  { value: 'politique',  label: '🏛️ Meeting politique / تجمع سياسي' },
-  { value: 'charite',    label: '❤️ Événement caritatif / نشاط خيري' },
-  { value: 'autre',      label: '📋 Autre (préciser) / أخرى (تحديد)' },
-]
-
-const LIEU_OPTIONS = [
-  { value: 'espace_public', label: 'Espace public (rue, place) / فضاء عمومي' },
-  { value: 'salle_fetes',   label: 'Salle des fêtes municipale / قاعة الأفراح البلدية' },
-  { value: 'stade',         label: 'Stade / ملعب' },
-  { value: 'plage',         label: 'Plage / شاطئ' },
-  { value: 'autre',         label: 'Autre lieu / مكان آخر' },
-]
-
-type GpsStatus = 'none' | 'manual' | 'gps' | 'loading'
-const GPS_CONFIG: Record<GpsStatus, { color: string; bg: string; icon: string; text: string }> = {
-  none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',       text: 'Aucune localisation' },
-  manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',              text: 'Position sur la carte' },
-  gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',       text: 'Position GPS détectée' },
-  loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: 'Récupération...' },
-}
-
-const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => void; onCancel: () => void }) => {
+const WebcamCapture = ({ onCapture, onCancel, lang }: { onCapture: (blob: Blob) => void; onCancel: () => void; lang?: string }) => {
   const ref = useRef<Webcam>(null)
   const [img, setImg] = useState<string | null>(null)
   const capture = useCallback(() => { const s = ref.current?.getScreenshot(); if (s) setImg(s) }, [])
@@ -56,16 +26,16 @@ const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => voi
           <Webcam audio={false} ref={ref} screenshotFormat="image/jpeg"
             className="w-100 rounded-3 mb-3" videoConstraints={{ facingMode: 'environment' }} />
           <div className="d-flex justify-content-center gap-3">
-            <button type="button" onClick={capture} className="btn btn-warning rounded-pill px-4 fw-bold"><i className="fas fa-camera me-2"></i>Capturer</button>
-            <button type="button" onClick={onCancel} className="btn btn-outline-light rounded-pill px-4">Annuler</button>
+            <button type="button" onClick={capture} className="btn btn-warning rounded-pill px-4 fw-bold"><i className={`fas fa-camera ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'التقاط' : 'Capturer'}</button>
+            <button type="button" onClick={onCancel} className="btn btn-outline-light rounded-pill px-4">{lang === 'ar' ? 'إلغاء' : 'Annuler'}</button>
           </div>
         </>
       ) : (
         <>
           <img src={img} alt="cap" className="w-100 rounded-3 mb-3 border border-success border-3" />
           <div className="d-flex justify-content-center gap-3">
-            <button type="button" onClick={() => fetch(img).then(r => r.blob()).then(b => onCapture(b))} className="btn btn-success rounded-pill px-4 fw-bold"><i className="fas fa-check me-2"></i>Confirmer</button>
-            <button type="button" onClick={() => setImg(null)} className="btn btn-outline-warning rounded-pill px-4"><i className="fas fa-undo me-2"></i>Reprendre</button>
+            <button type="button" onClick={() => fetch(img).then(r => r.blob()).then(b => onCapture(b))} className="btn btn-success rounded-pill px-4 fw-bold"><i className={`fas fa-check ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'تأكيد' : 'Confirmer'}</button>
+            <button type="button" onClick={() => setImg(null)} className="btn btn-outline-warning rounded-pill px-4"><i className={`fas fa-undo ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'إعادة' : 'Reprendre'}</button>
           </div>
         </>
       )}
@@ -88,6 +58,35 @@ export default function DemandeEvenementPublicPage() {
   const [cameraActive, setCameraActive] = useState<string | null>(null)
   const [position, setPosition] = useState<[number, number] | null>(null)
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>('none')
+
+  const PUBLIC_TYPE_OPTIONS = [
+    { value: 'concert',    label: lang === 'ar' ? '🎵 حفلة موسيقية' : '🎵 Concert' },
+    { value: 'culturel',   label: lang === 'ar' ? '🎭 حدث ثقافي' : '🎭 Événement culturel' },
+    { value: 'sportif',    label: lang === 'ar' ? '⚽ حدث رياضي' : '⚽ Événement sportif' },
+    { value: 'marche',     label: lang === 'ar' ? '🛍️ سوق' : '🛍️ Marché' },
+    { value: 'association',label: lang === 'ar' ? '🤝 نشاط جمعوي' : '🤝 Activité associative' },
+    { value: 'religieux',  label: lang === 'ar' ? '🕌 تظاهرة دينية' : '🕌 Événement religieux' },
+    { value: 'commercial', label: lang === 'ar' ? '💼 حدث تجاري' : '💼 Événement commercial' },
+    { value: 'politique',  label: lang === 'ar' ? '🏛️ تجمع سياسي' : '🏛️ Meeting politique' },
+    { value: 'charite',    label: lang === 'ar' ? '❤️ نشاط خيري' : '❤️ Événement caritatif' },
+    { value: 'autre',      label: lang === 'ar' ? '📋 أخرى (تحديد)' : '📋 Autre (préciser)' },
+  ]
+
+  const LIEU_OPTIONS = [
+    { value: 'espace_public', label: lang === 'ar' ? 'فضاء عمومي (شارع، ساحة)' : 'Espace public (rue, place)' },
+    { value: 'salle_fetes',   label: lang === 'ar' ? 'قاعة الأفراح البلدية' : 'Salle des fêtes municipale' },
+    { value: 'stade',         label: lang === 'ar' ? 'ملعب' : 'Stade' },
+    { value: 'plage',         label: lang === 'ar' ? 'شاطئ' : 'Plage' },
+    { value: 'autre',         label: lang === 'ar' ? 'مكان آخر' : 'Autre lieu' },
+  ]
+
+  type GpsStatus = 'none' | 'manual' | 'gps' | 'loading'
+  const GPS_CONFIG: Record<GpsStatus, { color: string; bg: string; icon: string; text: string }> = {
+    none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',       text: lang === 'ar' ? 'لا يوجد موقع' : 'Aucune localisation' },
+    manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',              text: lang === 'ar' ? 'موقع على الخريطة' : 'Position sur la carte' },
+    gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',       text: lang === 'ar' ? 'موقع تم تحديده' : 'Position GPS détectée' },
+    loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: lang === 'ar' ? 'جاري التحميل...' : 'Récupération...' },
+  }
 
   const [form, setForm] = useState({
     titre_evenement: '',
@@ -202,10 +201,10 @@ export default function DemandeEvenementPublicPage() {
   return (
     <MainLayout user={user} onLogout={() => navigate('/login')}
       breadcrumbs={[
-        { label: "Demande d'événement", link: '/demande-evenement' },
-        { label: 'Événement public' }
+        { label: lang === 'ar' ? 'طلب تنظيم فعالية' : "Demande d'événement", link: '/demande-evenement' },
+        { label: lang === 'ar' ? 'فعالية عمومية' : 'Événement public' }
       ]}>
-      <div className="container py-2 pb-5">
+      <div className={`container py-2 pb-5 ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="row justify-content-center">
           <div className="col-12 col-xl-10">
 
@@ -233,15 +232,15 @@ export default function DemandeEvenementPublicPage() {
                 {success ? (
                   <div className="text-center py-5">
                     <i className="fas fa-check-circle fa-5x mb-4" style={{ color: '#6f42c1' }}></i>
-                    <h3 className="fw-bold mb-2">Demande envoyée !</h3>
-                    <p className="text-muted">Votre demande est en cours de traitement par la municipalité.</p>
-                    <p className="text-muted small">Redirection en cours...</p>
+                    <h3 className="fw-bold mb-2">{lang === 'ar' ? 'تم إرسال الطلب!' : 'Demande envoyée !'}</h3>
+                    <p className="text-muted">{lang === 'ar' ? 'طلبك قيد المعالجة من قبل البلدية.' : 'Votre demande est en cours de traitement par la municipalité.'}</p>
+                    <p className="text-muted small">{lang === 'ar' ? 'جاري التوجيه...' : 'Redirection en cours...'}</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit}>
                     {error && (
                       <div className="alert alert-danger rounded-3 mb-4 d-flex gap-2">
-                        <i className="fas fa-exclamation-triangle mt-1"></i> {error}
+                        <i className={`fas fa-exclamation-triangle mt-1 ${lang === 'ar' ? 'ms-2' : ''}`}></i> {error}
                       </div>
                     )}
 
@@ -259,16 +258,16 @@ export default function DemandeEvenementPublicPage() {
                           <label className={lc}>
                             {lang === 'ar' ? 'عنوان الفعالية' : "Intitulé de l'événement"} <span className="text-danger">*</span>
                           </label>
-                          <input type="text" className={ic} style={is} required
+                          <input type="text" className={ic} style={is} required dir="auto"
                             value={form.titre_evenement} onChange={e => set('titre_evenement', e.target.value)}
-                            placeholder="Ex: Festival de musique de Kélibia 2025" />
+                            placeholder={lang === 'ar' ? 'مثال: مهرجان قليبية الموسيقي 2025' : "Ex: Festival de musique de Kélibia 2025"} />
                         </div>
 
                         <div className="col-md-6">
                           <label className={lc}>
                             {lang === 'ar' ? 'نوع الفعالية' : "Type d'événement"} <span className="text-danger">*</span>
                           </label>
-                          <select className={ic} style={is} required
+                          <select className={ic} style={is} required dir="auto"
                             value={form.type_evenement} onChange={e => set('type_evenement', e.target.value)}>
                             {PUBLIC_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                           </select>
@@ -278,26 +277,26 @@ export default function DemandeEvenementPublicPage() {
                           <label className={lc}>
                             {lang === 'ar' ? 'عدد المشاركين المتوقع' : 'Nombre de participants estimé'} <span className="text-danger">*</span>
                           </label>
-                          <input type="number" min={1} className={ic} style={is} required
+                          <input type="number" min={1} className={ic} style={is} required dir="ltr"
                             value={form.nombre_participants} onChange={e => set('nombre_participants', e.target.value)}
                             placeholder="Ex: 500" />
                         </div>
 
                         {form.type_evenement === 'autre' && (
                           <div className="col-12">
-                            <label className={lc}>Précisez le type <span className="text-danger">*</span></label>
-                            <input type="text" className={ic} style={is} required
+                            <label className={lc}>{lang === 'ar' ? 'تحديد النوع' : 'Précisez le type'} <span className="text-danger">*</span></label>
+                            <input type="text" className={ic} style={is} required dir="auto"
                               value={form.type_evenement_libre} onChange={e => set('type_evenement_libre', e.target.value)}
-                              placeholder="Ex: Exposition de peinture, Tournoi de pétanque..." />
+                              placeholder={lang === 'ar' ? 'مثال: معرض رسم، دورة كرة حديدية...' : "Ex: Exposition de peinture, Tournoi de pétanque..."} />
                           </div>
                         )}
 
                         {form.type_evenement === 'association' && (
                           <div className="col-12">
-                            <label className={lc}>Nom de l'association</label>
-                            <input type="text" className={ic} style={is}
+                            <label className={lc}>{lang === 'ar' ? 'اسم الجمعية' : "Nom de l'association"}</label>
+                            <input type="text" className={ic} style={is} dir="auto"
                               value={form.association_nom} onChange={e => set('association_nom', e.target.value)}
-                              placeholder="Nom officiel de l'association" />
+                              placeholder={lang === 'ar' ? 'الاسم الرسمي للجمعية' : "Nom officiel de l'association"} />
                           </div>
                         )}
 
@@ -306,9 +305,9 @@ export default function DemandeEvenementPublicPage() {
                             {lang === 'ar' ? 'وصف الفعالية' : "Description de l'événement"} <span className="text-danger">*</span>
                           </label>
                           <textarea className="form-control bg-light border-0 shadow-sm" rows={4}
-                            style={{ borderRadius: '12px', resize: 'vertical' }} required
+                            style={{ borderRadius: '12px', resize: 'vertical' }} required dir="auto"
                             value={form.description} onChange={e => set('description', e.target.value)}
-                            placeholder="Décrivez le programme, les activités, le public cible, les artistes invités..." />
+                            placeholder={lang === 'ar' ? 'صف البرنامج، الأنشطة، الجمهور المستهدف، الفنانين المدعوين...' : "Décrivez le programme, les activités, le public cible, les artistes invités..."} />
                         </div>
                       </div>
                     </div>
@@ -324,65 +323,65 @@ export default function DemandeEvenementPublicPage() {
                       </div>
                       <div className="row g-3">
                         <div className="col-md-6">
-                          <label className={lc}>Type de lieu <span className="text-danger">*</span></label>
-                          <select className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'نوع المكان' : 'Type de lieu'} <span className="text-danger">*</span></label>
+                          <select className={ic} style={is} required dir="auto"
                             value={form.lieu_type} onChange={e => set('lieu_type', e.target.value)}>
                             {LIEU_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                           </select>
                         </div>
                         <div className="col-md-6">
-                          <label className={lc}>Adresse précise <span className="text-danger">*</span></label>
-                          <input type="text" className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'العنوان بالتفصيل' : 'Adresse précise'} <span className="text-danger">*</span></label>
+                          <input type="text" className={ic} style={is} required dir="auto"
                             value={form.lieu_details} onChange={e => set('lieu_details', e.target.value)}
-                            placeholder="Ex: Place de l'Indépendance, Kélibia" />
+                            placeholder={lang === 'ar' ? "مثال: ساحة الاستقلال، قليبية" : "Ex: Place de l'Indépendance, Kélibia"} />
                         </div>
                         <div className="col-md-3">
-                          <label className={lc}>Date début <span className="text-danger">*</span></label>
-                          <input type="date" className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'تاريخ البدء' : 'Date début'} <span className="text-danger">*</span></label>
+                          <input type="date" className={ic} style={is} required dir="ltr"
                             value={form.date_debut} onChange={e => set('date_debut', e.target.value)} />
                         </div>
                         <div className="col-md-3">
-                          <label className={lc}>Heure début <span className="text-danger">*</span></label>
-                          <input type="time" className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'ساعة البدء' : 'Heure début'} <span className="text-danger">*</span></label>
+                          <input type="time" className={ic} style={is} required dir="ltr"
                             value={form.heure_debut} onChange={e => set('heure_debut', e.target.value)} />
                         </div>
                         <div className="col-md-3">
-                          <label className={lc}>Date fin <span className="text-danger">*</span></label>
-                          <input type="date" className={ic} style={is} required min={form.date_debut}
+                          <label className={lc}>{lang === 'ar' ? 'تاريخ الانتهاء' : 'Date fin'} <span className="text-danger">*</span></label>
+                          <input type="date" className={ic} style={is} required min={form.date_debut} dir="ltr"
                             value={form.date_fin} onChange={e => set('date_fin', e.target.value)} />
                         </div>
                         <div className="col-md-3">
-                          <label className={lc}>Heure fin <span className="text-danger">*</span></label>
-                          <input type="time" className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'ساعة الانتهاء' : 'Heure fin'} <span className="text-danger">*</span></label>
+                          <input type="time" className={ic} style={is} required dir="ltr"
                             value={form.heure_fin} onChange={e => set('heure_fin', e.target.value)} />
                         </div>
                       </div>
 
                       {/* Map */}
                       <div className="mt-4">
-                        <label className={lc}>Localisation GPS (optionnel)</label>
+                        <label className={lc}>{lang === 'ar' ? 'الموقع الجغرافي (اختياري)' : 'Localisation GPS (optionnel)'}</label>
                         <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
                           {(() => { const c = GPS_CONFIG[gpsStatus]; return (
                             <span className="badge rounded-pill px-3 py-2 fw-normal"
-                              style={{ background: c.bg, color: c.color, border: `1px solid ${c.color}33`, fontSize: '.82rem' }}>
-                              <i className={`fas ${c.icon} me-1`}></i>{c.text}
+                              style={{ background: c.bg, color: c.color, border: `1px solid ${c.color}33`, fontSize: '.82rem' }} dir="ltr">
+                              <i className={`fas ${c.icon} ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{c.text}
                             </span>
                           )})()}
-                          {position && <span className="text-muted small">{position[0].toFixed(5)}, {position[1].toFixed(5)}</span>}
+                          {position && <span className="text-muted small" dir="ltr">{position[0].toFixed(5)}, {position[1].toFixed(5)}</span>}
                         </div>
                         <div className="d-flex gap-2 mb-3">
                           <button type="button" onClick={getLocation}
                             className={`btn rounded-pill px-4 ${gpsStatus === 'loading' ? 'btn-warning disabled' : 'btn-outline-success'}`}>
-                            <i className="fas fa-crosshairs me-2"></i>Ma position
+                            <i className={`fas fa-crosshairs ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'موقعي' : 'Ma position'}
                           </button>
                           {position && (
                             <button type="button" className="btn btn-outline-secondary rounded-pill px-4"
                               onClick={() => { setPosition(null); setGpsStatus('none') }}>
-                              <i className="fas fa-times me-2"></i>Effacer
+                              <i className={`fas fa-times ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'مسح' : 'Effacer'}
                             </button>
                           )}
                         </div>
-                        <div className="rounded-4 overflow-hidden shadow-sm" style={{ height: 300, border: '2px solid #dee2e6' }}>
+                        <div className="rounded-4 overflow-hidden shadow-sm" style={{ height: 300, border: '2px solid #dee2e6' }} dir="ltr">
                           <MapContainer center={position || KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                             <LocationMarker position={position} onMapClick={p => { setPosition(p); setGpsStatus('manual') }} />
@@ -402,20 +401,20 @@ export default function DemandeEvenementPublicPage() {
                       </div>
                       <div className="row g-3">
                         <div className="col-md-6">
-                          <label className={lc}>Nom complet <span className="text-danger">*</span></label>
-                          <input type="text" className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'الاسم الكامل' : 'Nom complet'} <span className="text-danger">*</span></label>
+                          <input type="text" className={ic} style={is} required dir="auto"
                             value={form.nom_organisateur} onChange={e => set('nom_organisateur', e.target.value)}
-                            placeholder="Prénom & Nom" />
+                            placeholder={lang === 'ar' ? 'الاسم واللقب' : "Prénom & Nom"} />
                         </div>
                         <div className="col-md-3">
-                          <label className={lc}>CIN <span className="text-danger">*</span></label>
-                          <input type="text" className={ic} style={is} required maxLength={8}
+                          <label className={lc}>{lang === 'ar' ? 'بطاقة التعريف' : 'CIN'} <span className="text-danger">*</span></label>
+                          <input type="text" className={ic} style={is} required maxLength={8} dir="ltr"
                             value={form.cin_organisateur} onChange={e => set('cin_organisateur', e.target.value)}
                             placeholder="12345678" />
                         </div>
                         <div className="col-md-3">
-                          <label className={lc}>Téléphone <span className="text-danger">*</span></label>
-                          <input type="tel" className={ic} style={is} required
+                          <label className={lc}>{lang === 'ar' ? 'رقم الهاتف' : 'Téléphone'} <span className="text-danger">*</span></label>
+                          <input type="tel" className={ic} style={is} required dir="ltr"
                             value={form.telephone_organisateur} onChange={e => set('telephone_organisateur', e.target.value)}
                             placeholder="XX XXX XXX" />
                         </div>
@@ -441,23 +440,23 @@ export default function DemandeEvenementPublicPage() {
                       {/* Public events require more docs */}
                       <div className="alert border-0 rounded-3 mb-4 d-flex gap-2"
                         style={{ background: '#fff3e0', color: '#e65100', fontSize: '.85rem' }}>
-                        <i className="fas fa-exclamation-circle mt-1"></i>
+                        <i className={`fas fa-exclamation-circle mt-1 ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
                         <span>
-                          <strong>Événement public :</strong> Un plan de sécurité et une attestation d'assurance sont <strong>fortement recommandés</strong> pour les événements accueillant plus de 100 personnes.
+                          <strong>{lang === 'ar' ? 'فعالية عمومية:' : 'Événement public :'}</strong> {lang === 'ar' ? 'يوصى بشدة بتوفير خطة أمن وشهادة تأمين للفعاليات التي تضم أكثر من 100 شخص.' : "Un plan de sécurité et une attestation d'assurance sont fortement recommandés pour les événements accueillant plus de 100 personnes."}
                         </span>
                       </div>
 
-                      <FileControl field="programme_evenement" label="Programme de l'événement (PDF)" />
-                      <FileControl field="plan_lieu" label="Plan / Carte du lieu" />
-                      <FileControl field="attestation_assurance" label="Attestation d'assurance responsabilité civile" />
-                      <FileControl field="plan_securite" label="Plan de sécurité" />
+                      <FileControl field="programme_evenement" label={lang === 'ar' ? 'برنامج الفعالية (PDF)' : "Programme de l'événement (PDF)"} />
+                      <FileControl field="plan_lieu" label={lang === 'ar' ? 'خريطة المكان' : "Plan / Carte du lieu"} />
+                      <FileControl field="attestation_assurance" label={lang === 'ar' ? 'شهادة تأمين' : "Attestation d'assurance responsabilité civile"} />
+                      <FileControl field="plan_securite" label={lang === 'ar' ? 'خطة أمن' : "Plan de sécurité"} />
                       {form.type_evenement === 'association' && (
-                        <FileControl field="attestation_association" label="Attestation d'enregistrement de l'association" />
+                        <FileControl field="attestation_association" label={lang === 'ar' ? 'شهادة تسجيل الجمعية' : "Attestation d'enregistrement de l'association"} />
                       )}
 
                       <div className="alert alert-info rounded-3 mt-2 d-flex gap-2 align-items-start" style={{ fontSize: '.85rem' }}>
-                        <i className="fas fa-info-circle mt-1"></i>
-                        <span>Les documents marqués <strong className="text-danger">*</strong> sont obligatoires. Les autres peuvent être apportés à la mairie.</span>
+                        <i className={`fas fa-info-circle mt-1 ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
+                        <span>{lang === 'ar' ? 'الوثائق التي تحمل علامة ' : 'Les documents marqués '}<strong className="text-danger">*</strong>{lang === 'ar' ? ' إلزامية. يمكن تقديم باقي الوثائق إلى البلدية.' : ' sont obligatoires. Les autres peuvent être apportés à la mairie.'}</span>
                       </div>
                     </div>
 
@@ -467,11 +466,11 @@ export default function DemandeEvenementPublicPage() {
                         className="btn btn-lg rounded-pill py-3 fw-bold shadow-lg text-white"
                         style={{ background: 'linear-gradient(135deg,#6f42c1,#0d6efd)', border: 'none' }}>
                         {loading
-                          ? <><span className="spinner-border spinner-border-sm me-3"></span>Envoi en cours...</>
-                          : <><i className="fas fa-paper-plane me-3"></i>Soumettre la demande</>}
+                          ? <><span className="spinner-border spinner-border-sm me-3"></span>{lang === 'ar' ? 'جاري الإرسال...' : 'Envoi en cours...'}</>
+                          : <><i className={`fas fa-paper-plane ${lang === 'ar' ? 'ms-3' : 'me-3'}`}></i>{lang === 'ar' ? 'إرسال الطلب' : 'Soumettre la demande'}</>}
                       </button>
                       <Link to="/demande-evenement" className="btn btn-link text-muted text-decoration-none text-center">
-                        <i className="fas fa-arrow-left me-2"></i>Retour au choix
+                        <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'الرجوع للاختيار' : 'Retour au choix'}
                       </Link>
                     </div>
                   </form>

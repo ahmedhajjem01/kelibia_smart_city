@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useI18n } from '../i18n/LanguageProvider';
 
 interface TopNavProps {
@@ -9,6 +9,7 @@ interface TopNavProps {
 
 const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
   const { t, setLang, lang } = useI18n();
+  const navigate = useNavigate();
 
   const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
   const displayName = user
@@ -21,28 +22,34 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
     : '?';
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="flex justify-between items-center px-8 py-2 max-w-full mx-auto">
-
-        {/* Left: Logo + Nav Links */}
-        <div className="flex items-center gap-8">
+    <header className="fixed top-0 w-full z-50 shadow-sm" style={{ backgroundColor: '#1a73e8', color: 'white' }}>
+      <div className={`flex justify-between items-center px-4 py-3 max-w-full mx-auto ${lang === 'ar' ? 'flex-row-reverse font-arabic' : ''}`}>
+        
+        {/* Logo / Brand (Right in RTL, Left in LTR) */}
+        <div className="flex items-center gap-6">
           <Link
             to={isAgentOrAdmin ? '/agent-dashboard' : '/dashboard'}
-            className="flex items-center gap-3 no-underline"
+            className="flex items-center gap-2 no-underline text-white hover:text-gray-100"
           >
-            <i className="fas fa-city text-2xl" style={{ color: '#c61f2c' }}></i>
-            <span className="text-xl font-bold uppercase tracking-tight" style={{ color: '#c61f2c', fontFamily: 'Public Sans, sans-serif' }}>
-              {lang === 'ar' ? 'بلدية قليبية' : 'Ville de Kélibia'}
-            </span>
+            {lang === 'ar' ? (
+              <>
+                <span className="text-xl font-bold">{t('smart_city_portal') || 'بوابة المدينة الذكية'}</span>
+                <i className="fas fa-city text-2xl"></i>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-city text-2xl"></i>
+                <span className="text-xl font-bold">Portail de la Ville Intelligente</span>
+              </>
+            )}
           </Link>
 
-          {/* Horizontal nav links — hidden on mobile, shown for citizen */}
           {!isAgentOrAdmin && (
-            <nav className="hidden md:flex items-center gap-6">
+             <nav className={`hidden md:flex items-center gap-6 ${lang === 'ar' ? 'mr-6 flex-row-reverse' : 'ml-6'}`}>
               <NavLink
                 to="/dashboard"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
+                  `text-sm font-medium transition-colors no-underline px-2 py-1 ${isActive ? 'text-white border-b-2 border-white' : 'text-blue-100 hover:text-white'}`
                 }
               >
                 {lang === 'ar' ? 'الرئيسية' : 'Accueil'}
@@ -50,7 +57,7 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
               <NavLink
                 to="/services"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
+                  `text-sm font-medium transition-colors no-underline px-2 py-1 ${isActive ? 'text-white border-b-2 border-white' : 'text-blue-100 hover:text-white'}`
                 }
               >
                 {t('admin_services')}
@@ -58,74 +65,71 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
               <NavLink
                 to="/news"
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
+                  `text-sm font-medium transition-colors no-underline px-2 py-1 ${isActive ? 'text-white border-b-2 border-white' : 'text-blue-100 hover:text-white'}`
                 }
               >
                 {t('news_title')}
-              </NavLink>
-              <NavLink
-                to="/forum"
-                className={({ isActive }) =>
-                  `text-sm font-medium transition-colors no-underline ${isActive ? 'text-red-700 border-b-2 border-red-700 pb-1' : 'text-slate-600 hover:text-red-600'}`
-                }
-              >
-                {t('forum_link') || 'Forum'}
-              </NavLink>
-              <NavLink
-                to="/dashboard"
-                end={false}
-                className="text-sm font-bold no-underline"
-                style={{ color: '#c61f2c' }}
-              >
-                {t('my_space') || 'Mon Espace'}
               </NavLink>
             </nav>
           )}
         </div>
 
-        {/* Right: lang toggle + user pill + logout */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setLang('fr')}
-              className={`text-xs font-black uppercase tracking-widest cursor-pointer transition-colors border-0 bg-transparent px-1 ${lang === 'fr' ? 'text-slate-900' : 'text-slate-400 hover:text-red-600'}`}
+        {/* Actions (Left in RTL, Right in LTR) */}
+        <div className={`flex items-center gap-4 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
+          
+          {/* Citizen Forum Button */}
+          {!isAgentOrAdmin && (
+            <Link 
+              to="/forum" 
+              className={`flex items-center gap-2 px-3 py-1 border border-white/50 rounded hover:bg-white/10 transition-colors no-underline text-white text-sm font-medium ${lang === 'ar' ? 'flex-row-reverse' : ''}`}
             >
-              FR
-            </button>
-            <span className="text-slate-300 text-xs">|</span>
+              <span>{lang === 'ar' ? 'منتدى المواطن' : 'Forum Citoyen'}</span>
+              <i className={`fas ${lang === 'ar' ? 'fa-arrow-left' : 'fa-arrow-right'} text-xs`}></i>
+            </Link>
+          )}
+
+          {/* Lang toggle (Flags) */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setLang('ar')}
-              className={`text-xs font-black uppercase tracking-widest cursor-pointer transition-colors border-0 bg-transparent px-1 ${lang === 'ar' ? 'text-slate-900' : 'text-slate-400 hover:text-red-600'}`}
+              className={`p-0 border overflow-hidden rounded-sm transition-opacity cursor-pointer flex items-center justify-center ${lang === 'ar' ? 'border-white opacity-100 ring-2 ring-white ring-offset-1 ring-offset-[#1a73e8]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              style={{ width: '28px', height: '20px', background: 'transparent' }}
+              title="العربية"
             >
-              AR
+              <img src="https://flagcdn.com/w40/tn.png" alt="Tunisia Flag" className="w-full h-full object-cover" />
+            </button>
+            <button
+              onClick={() => setLang('fr')}
+              className={`p-0 border overflow-hidden rounded-sm transition-opacity cursor-pointer flex items-center justify-center ${lang === 'fr' ? 'border-white opacity-100 ring-2 ring-white ring-offset-1 ring-offset-[#1a73e8]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              style={{ width: '28px', height: '20px', background: 'transparent' }}
+              title="Français"
+            >
+              <img src="https://flagcdn.com/w40/fr.png" alt="France Flag" className="w-full h-full object-cover" />
             </button>
           </div>
 
-          <div className="h-8 w-px bg-slate-200 mx-1"></div>
+          <div className="h-6 w-px bg-white/30 mx-1"></div>
 
-          {/* User pill */}
-          <div className="hidden sm:flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">
-            <div className="text-right">
-              <p className="text-xs font-bold text-slate-900 leading-none">{displayName}</p>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+          {/* User Profile */}
+          <div className={`hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 transition-colors cursor-pointer ${lang === 'ar' ? 'flex-row-reverse' : ''}`} onClick={() => navigate('/profile')}>
+             <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white text-[#1a73e8] font-bold text-sm shadow-sm">
+              {initials}
+            </div>
+            <div className={lang === 'ar' ? 'text-right' : 'text-left'}>
+              <p className="text-sm font-bold text-white leading-none mb-1">{displayName}</p>
+              <p className="text-[10px] text-blue-100 uppercase tracking-widest leading-none">
                 {isAgentOrAdmin ? (user?.user_type === 'supervisor' ? t('role_supervisor') : t('role_agent')) : t('citoyen_role')}
               </p>
-            </div>
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: '#c61f2c' }}
-            >
-              {initials}
             </div>
           </div>
 
           {/* Logout */}
           <button
             onClick={onLogout}
-            className="p-2 hover:bg-slate-100 rounded-full transition-colors cursor-pointer border-0 bg-transparent active:scale-90"
+            className="p-2 hover:bg-white/20 rounded-full transition-colors cursor-pointer border-0 bg-transparent active:scale-90 text-white"
             title={t('logout')}
           >
-            <i className="fas fa-sign-out-alt text-slate-600"></i>
+            <i className="fas fa-sign-out-alt"></i>
           </button>
         </div>
       </div>
@@ -134,3 +138,4 @@ const TopNav: React.FC<TopNavProps> = ({ user, onLogout }) => {
 };
 
 export default TopNav;
+
