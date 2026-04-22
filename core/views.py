@@ -257,9 +257,9 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                     details = {
                         "titre": getattr(o, 'titre_evenement', ''),
                         "lieu": getattr(o, 'lieu_details', ''),
+                        "date": f"{getattr(o, 'date_debut', '')} au {getattr(o, 'date_fin', '')}",
                     }
-                }
-
+                
                 resp.append({
                     "id": o.id,
                     "type": key,
