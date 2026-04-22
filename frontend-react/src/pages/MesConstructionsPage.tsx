@@ -4,6 +4,8 @@ import { getAccessToken } from '../lib/authStorage'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
+import { useI18n } from '../i18n/LanguageProvider'
+
 type Demande = {
   id: number
   type_travaux: string
@@ -32,7 +34,7 @@ type Demande = {
   updated_at: string
 }
 
-type UserInfo = { first_name: string; last_name: string; email: string; is_verified: boolean }
+type UserInfo = { first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd?: boolean }
 
 const STATUS_CONFIG: Record<string, { cls: string; icon: string }> = {
   pending:              { cls: 'bg-primary text-white',  icon: 'fa-clock' },
@@ -57,6 +59,7 @@ const TYPE_EMOJI: Record<string, string> = {
 }
 
 export default function MesConstructionsPage() {
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
   const [demandes, setDemandes] = useState<Demande[]>([])
   const [loading, setLoading] = useState(true)
@@ -84,61 +87,64 @@ export default function MesConstructionsPage() {
   }, [navigate])
 
   const fmt = (d: string) => d
-    ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+    ? new Date(d).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—'
 
   return (
     <MainLayout user={user} onLogout={() => navigate('/login')}
-      breadcrumbs={[{ label: 'Mes permis de construire' }]}>
+      breadcrumbs={[{ label: lang === 'ar' ? 'رخص البناء الخاصة بي' : 'Mes permis de construire' }]}>
 
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-          <h2 className="fw-bold text-primary m-0" style={{ fontSize: '1.2rem' }}>
-            <i className="fas fa-hard-hat me-2"></i>Mes Permis de Construire
-          </h2>
-          <p className="text-muted small mb-0">طلبات رخصة البناء</p>
-        </div>
-        <Link to="/demande-construction" className="btn btn-primary rounded-pill shadow-sm px-4">
-          <i className="fas fa-plus me-2"></i>Nouvelle demande
-        </Link>
-      </div>
-
-      {user && !user.is_verified && (
-        <div 
-          className="p-4 mb-4 d-flex align-items-center shadow-sm"
-          style={{ 
-            background: '#FFF4CD', 
-            borderRadius: '20px', 
-            border: 'none',
-            gap: '20px'
-          }}
-        >
-          <div className="text-warning">
-            <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
-          </div>
+      <div className={`py-4 ${lang === 'ar' ? 'text-end font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
-            <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>Compte en attente de vérification</h5>
-            <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>Votre compte doit être vérifié par l'administration pour accéder à ce service.</p>
+            <h2 className="fw-bold text-primary m-0" style={{ fontSize: '1.2rem' }}>
+              <i className={`fas fa-hard-hat ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
+              {lang === 'ar' ? 'طلبات رخص البناء الخاصة بي' : 'Mes Permis de Construire'}
+            </h2>
+            <p className="text-muted small mb-0">{lang === 'ar' ? 'سجل طلبات رخص البناء والتهيئة.' : 'Historique de vos demandes de permis de construire.'}</p>
           </div>
+          <Link to="/demande-construction" className="btn btn-primary rounded-pill shadow-sm px-4">
+            <i className={`fas fa-plus ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{t('new_request')}
+          </Link>
         </div>
-      )}
 
-      <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-        <div className="card-body p-0">
-          {loading ? (
-            <div className="text-center p-5">
-              <div className="spinner-border text-primary" role="status"></div>
-              <p className="mt-3 text-muted">Chargement...</p>
+        {user && !user.is_verified && (
+          <div 
+            className="p-4 mb-4 d-flex align-items-center shadow-sm"
+            style={{ 
+              background: '#FFF4CD', 
+              borderRadius: '20px', 
+              border: 'none',
+              gap: '20px'
+            }}
+          >
+            <div className="text-warning">
+              <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
             </div>
-          ) : demandes.length === 0 ? (
-            <div className="text-center p-5">
-              <i className="fas fa-hard-hat fa-3x text-muted opacity-25 mb-3 d-block"></i>
-              <p className="text-muted mb-3">Aucune demande de permis trouvée.</p>
-              <Link to="/demande-construction" className="btn btn-primary rounded-pill px-4">
-                <i className="fas fa-plus me-2"></i>Soumettre une demande
-              </Link>
+            <div>
+              <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>{t('account_pending_verification')}</h5>
+              <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>{t('account_pending_verification_desc')}</p>
             </div>
-          ) : (
+          </div>
+        )}
+
+        <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+          <div className="card-body p-0">
+            {loading ? (
+              <div className="text-center p-5">
+                <div className="spinner-border text-primary" role="status"></div>
+                <p className="mt-3 text-muted">{t('loading')}</p>
+              </div>
+            ) : demandes.length === 0 ? (
+              <div className="text-center py-5 card border-0 shadow-none">
+                <i className="fas fa-hard-hat fa-3x text-muted opacity-25 mb-3 d-block"></i>
+                <h4 className="fw-bold text-muted">{lang === 'ar' ? 'لم يتم العثور على أي طلب' : 'Aucune demande trouvée'}</h4>
+                <p className="text-muted mb-4">{lang === 'ar' ? 'لم تقم بتقديم أي طلب رخصة بناء بعد.' : 'Vous n\'avez soumis aucune demande de permis de construire pour le moment.'}</p>
+                <Link to="/demande-construction" className="btn btn-outline-primary rounded-pill px-4">
+                  {t('make_first_request')}
+                </Link>
+              </div>
+            ) : (
             <div className="p-3 p-md-4 d-flex flex-column gap-3">
               {demandes.map(d => {
                 const sc = STATUS_CONFIG[d.status] || { cls: 'bg-secondary text-white', icon: 'fa-question' }
@@ -151,7 +157,7 @@ export default function MesConstructionsPage() {
                       <div className="px-4 py-2 d-flex align-items-center gap-2"
                         style={{ background: '#fff3e0', borderBottom: '1px solid #ffcc02', fontSize: '.82rem', color: '#e65100' }}>
                         <i className="fas fa-exclamation-triangle"></i>
-                        <strong>Dossier haute priorité</strong> — Inspection technique sur site requise
+                        <strong>{lang === 'ar' ? 'ملف ذو أولوية قصوى' : 'Dossier haute priorité'}</strong> — {lang === 'ar' ? 'يتطلب معاينة ميدانية' : 'Inspection technique sur site requise'}
                       </div>
                     )}
 
@@ -169,24 +175,24 @@ export default function MesConstructionsPage() {
                             <span className="text-muted small">— {d.type_travaux_libre}</span>
                           )}
                           <span className={`badge rounded-pill ${sc.cls}`} style={{ fontSize: '.72rem' }}>
-                            <i className={`fas ${sc.icon} me-1`}></i>{d.status_display}
+                            <i className={`fas ${sc.icon} ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{d.status_display}
                           </span>
                           {d.priorite === 'haute' && (
                             <span className="badge bg-danger rounded-pill" style={{ fontSize: '.72rem' }}>
-                              <i className="fas fa-exclamation-triangle me-1"></i>Haute priorité
+                              <i className={`fas fa-exclamation-triangle ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{lang === 'ar' ? 'أولوية قصوى' : 'Haute priorité'}
                             </span>
                           )}
                           {d.is_paid && (
                             <span className="badge bg-success bg-opacity-10 text-success rounded-pill" style={{ fontSize: '.7rem' }}>
-                              <i className="fas fa-check-circle me-1"></i>Frais réglés
+                              <i className={`fas fa-check-circle ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{lang === 'ar' ? 'خالص' : 'Frais réglés'}
                             </span>
                           )}
                         </div>
                         <div className="d-flex gap-3 flex-wrap" style={{ fontSize: '.82rem', color: '#777' }}>
-                          <span><i className="fas fa-map-marker-alt me-1 text-primary opacity-75"></i>{d.adresse_terrain}</span>
-                          <span><i className="fas fa-expand me-1 text-success opacity-75"></i>{d.surface_construite} m²</span>
-                          <span><i className="fas fa-layer-group me-1 text-warning opacity-75"></i>{d.nombre_etages} étage{d.nombre_etages > 1 ? 's' : ''}</span>
-                          <span><i className="fas fa-calendar me-1 text-info opacity-75"></i>{fmt(d.created_at)}</span>
+                          <span><i className={`fas fa-map-marker-alt ${lang === 'ar' ? 'ms-1' : 'me-1'} text-primary opacity-75`}></i>{d.adresse_terrain}</span>
+                          <span><i className={`fas fa-expand ${lang === 'ar' ? 'ms-1' : 'me-1'} text-success opacity-75`}></i>{d.surface_construite} {lang === 'ar' ? 'م²' : 'm²'}</span>
+                          <span><i className={`fas fa-layer-group ${lang === 'ar' ? 'ms-1' : 'me-1'} text-warning opacity-75`}></i>{d.nombre_etages} {lang === 'ar' ? 'طوابق' : (d.nombre_etages > 1 ? 'étages' : 'étage')}</span>
+                          <span><i className={`fas fa-calendar ${lang === 'ar' ? 'ms-1' : 'me-1'} text-info opacity-75`}></i>{fmt(d.created_at)}</span>
                         </div>
                       </div>
                       <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-muted`} style={{ marginTop: 4 }}></i>
@@ -196,45 +202,45 @@ export default function MesConstructionsPage() {
                       <div className="px-4 pb-4 border-top" style={{ background: '#fafbfc' }}>
                         <div className="row g-3 mt-2">
                           <div className="col-md-6">
-                            <div className="text-muted small text-uppercase fw-bold mb-1">Usage</div>
+                            <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'نوع الاستعمال' : 'Usage'}</div>
                             <div>{d.usage_batiment_display}</div>
                           </div>
                           {d.numero_parcelle && (
                             <div className="col-md-6">
-                              <div className="text-muted small text-uppercase fw-bold mb-1">N° Parcelle</div>
+                              <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'رقم القطعة' : 'N° Parcelle'}</div>
                               <div>{d.numero_parcelle}</div>
                             </div>
                           )}
                           <div className="col-md-4">
-                            <div className="text-muted small text-uppercase fw-bold mb-1">Surface terrain</div>
-                            <div>{d.surface_terrain} m²</div>
+                            <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'مساحة الأرض' : 'Surface terrain'}</div>
+                            <div>{d.surface_terrain} {lang === 'ar' ? 'م²' : 'm²'}</div>
                           </div>
                           <div className="col-md-4">
-                            <div className="text-muted small text-uppercase fw-bold mb-1">Date début prévue</div>
+                            <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'تاريخ البدء المتوقع' : 'Date début prévue'}</div>
                             <div>{fmt(d.date_debut_prevue)}</div>
                           </div>
                           <div className="col-md-4">
-                            <div className="text-muted small text-uppercase fw-bold mb-1">Durée travaux</div>
-                            <div>{d.duree_travaux_mois} mois</div>
+                            <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'مدة الأشغال' : 'Durée travaux'}</div>
+                            <div>{d.duree_travaux_mois} {lang === 'ar' ? 'أشهر' : 'mois'}</div>
                           </div>
                           {d.cout_estime && (
                             <div className="col-md-6">
-                              <div className="text-muted small text-uppercase fw-bold mb-1">Coût estimatif</div>
-                              <div>{parseFloat(d.cout_estime).toLocaleString('fr-FR')} DT</div>
+                              <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'التكلفة التقديرية' : 'Coût estimatif'}</div>
+                              <div>{parseFloat(d.cout_estime).toLocaleString(lang === 'ar' ? 'ar-TN' : 'fr-FR')} {lang === 'ar' ? 'د.ت' : 'DT'}</div>
                             </div>
                           )}
                           {d.nom_entrepreneur && (
                             <div className="col-md-6">
-                              <div className="text-muted small text-uppercase fw-bold mb-1">Entrepreneur</div>
+                              <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'المقاول' : 'Entrepreneur'}</div>
                               <div>{d.nom_entrepreneur}</div>
                             </div>
                           )}
                           <div className="col-md-6">
-                            <div className="text-muted small text-uppercase fw-bold mb-1">Propriétaire</div>
+                            <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'المالك' : 'Propriétaire'}</div>
                             <div>{d.nom_proprietaire}</div>
                           </div>
                           <div className="col-md-6">
-                            <div className="text-muted small text-uppercase fw-bold mb-1">Mis à jour</div>
+                            <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'تاريخ التحديث' : 'Mis à jour'}</div>
                             <div>{fmt(d.updated_at)}</div>
                           </div>
 
@@ -242,12 +248,11 @@ export default function MesConstructionsPage() {
                             <div className="col-12">
                               <div className="p-3 rounded-3 d-flex gap-2 align-items-start"
                                 style={{ background: '#fff8e1', border: '2px solid #f9a825', fontSize: '.88rem' }}>
-                                <i className="fas fa-edit mt-1" style={{ color: '#f57f17' }}></i>
+                                <i className={`fas fa-edit mt-1 ${lang === 'ar' ? 'ms-2' : 'me-2'}`} style={{ color: '#f57f17' }}></i>
                                 <div>
-                                  <strong style={{ color: '#e65100' }}>L'agent vous demande des modifications</strong>
+                                  <strong style={{ color: '#e65100' }}>{lang === 'ar' ? 'يطلب منكم العون إجراء تعديلات' : 'L\'agent vous demande des modifications'}</strong>
                                   <p className="mb-0 mt-1 text-muted small">
-                                    Veuillez consulter le commentaire ci-dessous et soumettre une nouvelle demande corrigée.
-                                    <br />يطلب منكم العون إجراء تعديلات. يرجى الاطلاع على التعليق أدناه وإعادة تقديم الطلب.
+                                    {lang === 'ar' ? 'يرجى الاطلاع على التعليق أدناه وإعادة تقديم الطلب.' : 'Veuillez consulter le commentaire ci-dessous et soumettre une nouvelle demande corrigée.'}
                                   </p>
                                 </div>
                               </div>
@@ -258,12 +263,11 @@ export default function MesConstructionsPage() {
                             <div className="col-12">
                               <div className="p-3 rounded-3 d-flex gap-2 align-items-start"
                                 style={{ background: '#e3f9f5', border: '2px solid #20c997', fontSize: '.88rem' }}>
-                                <i className="fas fa-thumbs-up mt-1 text-success"></i>
+                                <i className={`fas fa-thumbs-up mt-1 text-success ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
                                 <div>
-                                  <strong className="text-success">Avis favorable</strong>
+                                  <strong className="text-success">{lang === 'ar' ? 'رأي إيجابي' : 'Avis favorable'}</strong>
                                   <p className="mb-0 mt-1 text-muted small">
-                                    Votre dossier a reçu un avis favorable. Le permis officiel sera bientôt délivré.
-                                    <br />تمّ إبداء رأي إيجابي. سيتم تسليم الرخصة قريباً.
+                                    {lang === 'ar' ? 'تم إبداء رأي إيجابي حول ملفكم. سيتم تسليم الرخصة قريباً.' : 'Votre dossier a reçu un avis favorable. Le permis officiel sera bientôt délivré.'}
                                   </p>
                                 </div>
                               </div>
@@ -272,23 +276,45 @@ export default function MesConstructionsPage() {
 
                           {d.commentaire_agent && (
                             <div className="col-12">
-                              <div className="text-muted small text-uppercase fw-bold mb-1">Commentaire de l'agent</div>
+                              <div className="text-muted small text-uppercase fw-bold mb-1">{lang === 'ar' ? 'تعليق العون' : 'Commentaire de l\'agent'}</div>
                               <div className="p-3 rounded-3 border" style={{ background: '#fff', fontSize: '.88rem' }}>
-                                <i className="fas fa-comment-dots me-2 text-primary"></i>{d.commentaire_agent}
+                                <i className={`fas fa-comment-dots ${lang === 'ar' ? 'ms-2' : 'me-2'} text-primary`}></i>{d.commentaire_agent}
                               </div>
                             </div>
                           )}
 
                           <div className="col-12">
+                            {d.status === 'pending' && !d.is_paid && !user?.has_active_asd && (
+                              <div className="p-3 mt-2 rounded-3 d-flex flex-wrap align-items-center justify-content-between gap-3"
+                                style={{ background: '#f8f9fa', border: '1px solid #dee2e6' }}>
+                                <div className="d-flex align-items-center gap-3">
+                                  <div className="text-warning" style={{ fontSize: '1.5rem' }}>
+                                    <i className="fas fa-file-invoice-dollar"></i>
+                                  </div>
+                                  <div>
+                                    <strong className="d-block">{lang === 'ar' ? 'يجب دفع معلوم دراسة الملف' : 'Frais de dossier requis'}</strong>
+                                    <span className="text-muted small">{lang === 'ar' ? 'الرجاء دفع 50.000 د.ت لمعالجة الطلب.' : 'Veuillez régler 50.000 DT pour le traitement du dossier.'}</span>
+                                  </div>
+                                </div>
+                                <button 
+                                  className="btn btn-primary rounded-pill px-4 animate__animated animate__pulse animate__infinite"
+                                  onClick={() => navigate(`/paiement?amount=50.000&reason=${encodeURIComponent(d.type_travaux_display)}&requestId=${d.id}&requestType=construction&target=/mes-constructions`)}
+                                >
+                                  <i className={`fas fa-credit-card ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
+                                  {lang === 'ar' ? 'دفع 50.000 د.ت' : 'Payer 50.000 DT'}
+                                </button>
+                              </div>
+                            )}
+
                             {d.permis_signe ? (
                               <a href={resolveBackendUrl(d.permis_signe)} target="_blank" rel="noopener noreferrer"
-                                className="btn btn-success rounded-pill px-4 shadow-sm">
-                                <i className="fas fa-file-contract me-2"></i>Télécharger le permis signé
+                                className="btn btn-success rounded-pill px-4 shadow-sm mt-3">
+                                <i className={`fas fa-file-contract ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'تحميل الرخصة' : 'Télécharger le permis'}
                               </a>
                             ) : d.status === 'permis_delivre' ? (
-                              <span className="text-muted small">
-                                <i className="fas fa-hourglass-half me-1"></i>Document en cours de préparation...
-                              </span>
+                              <div className="mt-3 text-muted small">
+                                <i className={`fas fa-hourglass-half ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{lang === 'ar' ? 'وثيقة في طور الإعداد...' : 'Document en cours de préparation...'}
+                              </div>
                             ) : null}
                           </div>
                         </div>
