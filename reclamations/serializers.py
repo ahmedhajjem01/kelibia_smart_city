@@ -61,3 +61,44 @@ class ReclamationSerializer(serializers.ModelSerializer):
         read_only_fields = ['citizen', 'status', 'agent', 'created_at', 'updated_at',
                             'priority', 'service_responsable',
                             'is_duplicate', 'similarity_score']
+
+
+class ReclamationGeoJSONSerializer(serializers.BaseSerializer):
+    """
+    Sérialise une Reclamation comme GeoJSON Feature (RFC 7946).
+    geometry: Point [longitude, latitude] — null si coordonnées manquantes.
+    N'appelle pas le classifieur ML (trop lent pour un export en masse).
+    """
+
+    def to_representation(self, instance):
+        if instance.latitude is not None and instance.longitude is not None:
+            geometry = {
+                "type": "Point",
+                "coordinates": [instance.longitude, instance.latitude],  # RFC 7946: lon, lat
+            }
+        else:
+            geometry = None
+
+        try:
+            cname = instance.citizen.get_full_name().strip()
+            citizen_name = cname if cname else instance.citizen.email
+        except Exception:
+            citizen_name = None
+
+        return {
+            "type": "Feature",
+            "geometry": geometry,
+            "properties": {
+                "id":                  instance.id,
+                "title":               instance.title,
+                "description":         instance.description,
+                "category":            instance.category,
+                "status":              instance.status,
+                "priority":            instance.priority,
+                "service_responsable": instance.service_responsable,
+                "is_duplicate":        instance.is_duplicate,
+                "created_at":          instance.created_at.isoformat(),
+                "updated_at":          instance.updated_at.isoformat(),
+                "citizen_name":        citizen_name,
+            },
+        }

@@ -2492,54 +2492,114 @@ export default function AgentDashboardPage() {
 
     markersLayer.current = L.layerGroup().addTo(m)
 
-    L.control.layers(
+    // ── Couches SIG GeoJSON (Agent uniquement) ────────────────────────────
+    const sigOverlays: Record<string, any> = {}
 
-      { '🗺️ OpenStreetMap': osm, '🛰️ Satellite (Esri)': sat, '🏔️ Topographique (WMS)': topo },
-
-      { '📍 Signalements': markersLayer.current },
-
-      { position: 'topright', collapsed: false }
-
-    ).addTo(m)
-
-    const legend = L.control({ position: 'bottomleft' })
-
-    legend.onAdd = function () {
-
-      const div = L.DomUtil.create('div')
-
-      div.style.cssText = 'background:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:12px;min-width:170px;'
-
-      div.innerHTML = `<div style="font-weight:700;margin-bottom:6px;color:#1a3a5c;border-bottom:1px solid #eee;padding-bottom:4px;">📋 Légende</div>
-
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Statut des signalements</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#e65100;display:inline-block;"></span> En attente</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:12px;height:12px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> Résolu</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejeté</div>
-
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Couches SIG (3 couches)</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:18px;height:10px;background:#e3f2fd;border:1px solid #90caf9;display:inline-block;border-radius:2px;"></span> OSM Standard</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:18px;height:10px;background:#795548;border:1px solid #5d4037;display:inline-block;border-radius:2px;"></span> Satellite Esri</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="width:18px;height:10px;background:#e8f5e9;border:1px solid #81c784;display:inline-block;border-radius:2px;"></span> Topographique WMS</div>
-
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Overlays GeoJSON</div>
-
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="width:20px;height:4px;background:#1565c0;opacity:.5;display:inline-block;border:1px solid #1565c0;"></span> Zones</div>
-
-        <div style="display:flex;align-items:center;gap:6px;"><span style="width:20px;height:3px;background:#424242;display:inline-block;"></span> Routes</div>`
-
-      return div
-
+    const loadGeoJSON = (url: string, style: any, onEachFeature?: (f: any, layer: any) => void) => {
+      const layer = L.geoJSON(null, { style, onEachFeature })
+      fetch(url)
+        .then(r => r.json())
+        .then(data => layer.addData(data))
+        .catch(() => {/* fichier absent — silencieux */})
+      return layer
     }
 
+    // Routes — couleur selon état
+    const routesStyle = (feature: any) => {
+      const etat = feature?.properties?.etat
+      const color = etat === 'bonne' ? '#2e7d32' : etat === 'dégradée' ? '#e65100' : etat === 'travaux' ? '#f9a825' : '#757575'
+      const weight = feature?.properties?.type === 'principale' ? 4 : 2
+      return { color, weight, opacity: 0.85 }
+    }
+    const routesPopup = (feature: any, layer: any) => {
+      if (feature.properties) {
+        layer.bindPopup(
+          `<b>🛣️ ${feature.properties.nom}</b><br/>
+           État : <b style="color:${routesStyle(feature).color}">${feature.properties.etat}</b><br/>
+           Type : ${feature.properties.type}`
+        )
+      }
+    }
+    sigOverlays['🛣️ Routes'] = loadGeoJSON('/layers/routes.geojson', routesStyle, routesPopup)
+
+    // Drainage — bleu
+    const drainageStyle = (feature: any) => {
+      const etat = feature?.properties?.etat
+      const color = etat === 'obstrué' ? '#b71c1c' : etat === 'risque' ? '#ff6f00' : '#0277bd'
+      const isZone = feature?.geometry?.type === 'Polygon'
+      return isZone
+        ? { color: '#ff6f00', weight: 1, fillColor: '#fff3e0', fillOpacity: 0.4 }
+        : { color, weight: 2, opacity: 0.8, dashArray: '5,4' }
+    }
+    const drainagePopup = (feature: any, layer: any) => {
+      if (feature.properties) {
+        layer.bindPopup(
+          `<b>🚰 ${feature.properties.nom}</b><br/>
+           Type : ${feature.properties.type}<br/>
+           État : <b>${feature.properties.etat}</b>
+           ${feature.properties.diametre_mm ? `<br/>Ø ${feature.properties.diametre_mm} mm` : ''}`
+        )
+      }
+    }
+    sigOverlays['🚰 Drainage / Réseau eau'] = loadGeoJSON('/layers/drainage.geojson', drainageStyle, drainagePopup)
+
+    // Zones vertes — vert
+    const zonesVertesStyle = () => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.45 })
+    const zonesVertesPopup = (feature: any, layer: any) => {
+      if (feature.properties) {
+        layer.bindPopup(
+          `<b>🌳 ${feature.properties.nom}</b><br/>
+           Type : ${feature.properties.type}<br/>
+           Surface : ${feature.properties.superficie_m2?.toLocaleString()} m²<br/>
+           Équipements : ${feature.properties.equipements}`
+        )
+      }
+    }
+    sigOverlays['🌳 Zones vertes'] = loadGeoJSON('/layers/zones_vertes.geojson', zonesVertesStyle, zonesVertesPopup)
+
+    // Zones industrielles — orange/gris
+    const industrielStyle = () => ({ color: '#5d4037', weight: 1.5, fillColor: '#ffccbc', fillOpacity: 0.5 })
+    const industrielPopup = (feature: any, layer: any) => {
+      if (feature.properties) {
+        layer.bindPopup(
+          `<b>🏭 ${feature.properties.nom}</b><br/>
+           Activité : ${feature.properties.activite}<br/>
+           Entreprises : ${feature.properties.nb_entreprises}<br/>
+           Impact : <span style="color:#b71c1c">${feature.properties.impact}</span>`
+        )
+      }
+    }
+    sigOverlays['🏭 Zones industrielles'] = loadGeoJSON('/layers/industriel.geojson', industrielStyle, industrielPopup)
+
+    L.control.layers(
+      { '🗺️ OpenStreetMap': osm, '🛰️ Satellite (Esri)': sat, '🏔️ Topographique': topo },
+      { '📍 Signalements': markersLayer.current, ...sigOverlays },
+      { position: 'topright', collapsed: true }
+    ).addTo(m)
+
+    // ── Légende ───────────────────────────────────────────────────────────
+    const legend = L.control({ position: 'bottomleft' })
+    legend.onAdd = function () {
+      const div = L.DomUtil.create('div')
+      div.style.cssText = 'background:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:12px;min-width:180px;'
+      div.innerHTML = `
+        <div style="font-weight:700;margin-bottom:6px;color:#1a3a5c;border-bottom:1px solid #eee;padding-bottom:4px;">📋 Légende</div>
+        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Signalements</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#e65100;display:inline-block;"></span> En attente</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> Résolu</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejeté</div>
+        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Routes</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#2e7d32;display:inline-block;"></span> Bonne</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#e65100;display:inline-block;"></span> Dégradée</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="width:20px;height:3px;background:#f9a825;display:inline-block;"></span> Travaux</div>
+        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Couches SIG</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#a5d6a7;border:1px solid #2e7d32;display:inline-block;border-radius:2px;"></span> Zones vertes</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#ffccbc;border:1px solid #5d4037;display:inline-block;border-radius:2px;"></span> Industriel</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#0277bd;border-top:2px dashed #0277bd;display:inline-block;"></span> Drainage</div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:18px;height:8px;background:#fff3e0;border:1px solid #ff6f00;display:inline-block;border-radius:2px;"></span> Zone inondable</div>`
+      return div
+    }
     legend.addTo(m)
 
     leafletMap.current = m

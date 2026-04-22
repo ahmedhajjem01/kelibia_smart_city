@@ -12,7 +12,9 @@ class ReclamationViewSet(viewsets.ModelViewSet):
     queryset = Reclamation.objects.all()
 
     def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve', 'classify_preview', 'ml_stats', 'reclassify', 'update_status', 'explain_text', 'explain_priority']:
+        if self.action in ['create', 'list', 'retrieve', 'classify_preview', 'ml_stats',
+                           'reclassify', 'update_status', 'explain_text', 'explain_priority',
+                           'nearby', 'geojson']:
             return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
@@ -486,3 +488,103 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         # Trier par distance (le queryset perd l'ordre SQL)
         sorted_data = sorted(serializer.data, key=lambda x: x['distance_m'])
         return Response(sorted_data)
+
+    # ── geojson export (QGIS-compatible, sans GeoDjango/GDAL) ────────────────
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def geojson(self, request):
+        """
+        GET /api/reclamations/geojson/
+
+        Retourne un GeoJSON FeatureCollection compatible QGIS/Leaflet.
+        Params optionnels:
+          ?status=pending|in_progress|resolved|rejected
+          ?category=lighting|trash|roads|noise|other
+          ?priority=faible|normale|urgente
+          ?has_coords=true          (exclut les réclamations sans coordonnées)
+          ?bbox=minLon,minLat,maxLon,maxLat  (WGS-84, degrés décimaux)
+
+        Content-Type: application/geo+json (RFC 7946)
+        Aucune dépendance GDAL/GeoDjango — fonctionne sur Vercel.
+        """
+        import json
+        from django.http import HttpResponse
+        from .serializers import ReclamationGeoJSONSerializer
+
+        user = request.user
+        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent':
+            qs = Reclamation.objects.all()
+        else:
+            qs = Reclamation.objects.filter(citizen=user)
+
+        # ── Filtres optionnels ────────────────────────────────────────────────
+        status_param   = request.query_params.get('status')
+        category_param = request.query_params.get('category')
+        priority_param = request.query_params.get('priority')
+        bbox_param     = request.query_params.get('bbox')
+        has_coords     = request.query_params.get('has_coords', '').lower() == 'true'
+
+        valid_statuses   = [c[0] for c in Reclamation.STATUS_CHOICES]
+        valid_categories = [c[0] for c in Reclamation.CATEGORY_CHOICES]
+        valid_priorities = [c[0] for c in Reclamation.PRIORITY_CHOICES]
+
+        if status_param:
+            if status_param not in valid_statuses:
+                return Response({"detail": f"Statut invalide. Valeurs acceptées: {valid_statuses}"}, status=400)
+            qs = qs.filter(status=status_param)
+
+        if category_param:
+            if category_param not in valid_categories:
+                return Response({"detail": f"Catégorie invalide. Valeurs acceptées: {valid_categories}"}, status=400)
+            qs = qs.filter(category=category_param)
+
+        if priority_param:
+            if priority_param not in valid_priorities:
+                return Response({"detail": f"Priorité invalide. Valeurs acceptées: {valid_priorities}"}, status=400)
+            qs = qs.filter(priority=priority_param)
+
+        if has_coords:
+            qs = qs.filter(latitude__isnull=False, longitude__isnull=False)
+
+        if bbox_param:
+            try:
+                parts = [float(x.strip()) for x in bbox_param.split(',')]
+                if len(parts) != 4:
+                    raise ValueError("4 valeurs requises")
+                min_lon, min_lat, max_lon, max_lat = parts
+                if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180):
+                    raise ValueError("Longitude hors plage [-180, 180]")
+                if not (-90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+                    raise ValueError("Latitude hors plage [-90, 90]")
+                if min_lon > max_lon or min_lat > max_lat:
+                    raise ValueError("min doit être inférieur à max")
+            except ValueError as e:
+                return Response(
+                    {"detail": f"Paramètre bbox invalide: {e}. Format: minLon,minLat,maxLon,maxLat"},
+                    status=400
+                )
+            qs = qs.filter(
+                longitude__gte=min_lon, longitude__lte=max_lon,
+                latitude__gte=min_lat,  latitude__lte=max_lat,
+            )
+
+        # ── Sérialisation GeoJSON ─────────────────────────────────────────────
+        qs = qs.select_related('citizen')
+        serializer = ReclamationGeoJSONSerializer(qs, many=True)
+
+        feature_collection = {
+            "type": "FeatureCollection",
+            "features": serializer.data,
+            "metadata": {
+                "count": len(serializer.data),
+                "filters": {
+                    "status":     status_param,
+                    "category":   category_param,
+                    "priority":   priority_param,
+                    "bbox":       bbox_param,
+                    "has_coords": has_coords,
+                },
+            },
+        }
+
+        content = json.dumps(feature_collection, ensure_ascii=False)
+        return HttpResponse(content, content_type='application/geo+json; charset=utf-8')

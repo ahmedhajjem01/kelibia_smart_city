@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { Link, useNavigate } from 'react-router-dom'
 
-import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, GeoJSON } from 'react-leaflet'
 
 import L from 'leaflet'
 
@@ -295,7 +295,25 @@ export default function DashboardPage() {
 
   const [newsItems, setNewsItems] = useState<{ id: number; title: string; created_at: string }[]>([])
 
+  const [sigLayers, setSigLayers] = useState<{ routes: any; zonesVertes: any; industriel: any }>({
+    routes: null, zonesVertes: null, industriel: null,
+  })
 
+  // Charger les couches SIG GeoJSON statiques (citoyen : routes optionnel + zones vertes + industriel optionnel)
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [routesRes, zvRes, indRes] = await Promise.all([
+          fetch('/layers/routes.geojson'),
+          fetch('/layers/zones_vertes.geojson'),
+          fetch('/layers/industriel.geojson'),
+        ])
+        const [routes, zonesVertes, industriel] = await Promise.all([routesRes.json(), zvRes.json(), indRes.json()])
+        setSigLayers({ routes, zonesVertes, industriel })
+      } catch {/* silencieux si fichiers absents */}
+    }
+    load()
+  }, [])
 
   useEffect(() => {
 
@@ -787,16 +805,53 @@ export default function DashboardPage() {
               <LayersControl position="topright">
 
                 <LayersControl.BaseLayer checked name={t('map_osm')}>
-
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
                 </LayersControl.BaseLayer>
 
                 <LayersControl.BaseLayer name={t('map_satellite')}>
-
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-
                 </LayersControl.BaseLayer>
+
+                {/* Couches SIG — citoyen */}
+                {sigLayers.routes && (
+                  <LayersControl.Overlay name="🛣️ Routes">
+                    <GeoJSON
+                      data={sigLayers.routes}
+                      style={(feature: any) => {
+                        const etat = feature?.properties?.etat
+                        const color = etat === 'bonne' ? '#2e7d32' : etat === 'dégradée' ? '#e65100' : etat === 'travaux' ? '#f9a825' : '#757575'
+                        return { color, weight: feature?.properties?.type === 'principale' ? 4 : 2, opacity: 0.8 }
+                      }}
+                      onEachFeature={(feature, layer) => {
+                        if (feature.properties) layer.bindPopup(`<b>🛣️ ${feature.properties.nom}</b><br/>État : ${feature.properties.etat}`)
+                      }}
+                    />
+                  </LayersControl.Overlay>
+                )}
+
+                {sigLayers.zonesVertes && (
+                  <LayersControl.Overlay checked name="🌳 Zones vertes">
+                    <GeoJSON
+                      data={sigLayers.zonesVertes}
+                      style={() => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.45 })}
+                      onEachFeature={(feature, layer) => {
+                        if (feature.properties) layer.bindPopup(`<b>🌳 ${feature.properties.nom}</b><br/>${feature.properties.equipements}`)
+                      }}
+                    />
+                  </LayersControl.Overlay>
+                )}
+
+                {sigLayers.industriel && (
+                  <LayersControl.Overlay name="🏭 Zones industrielles">
+                    <GeoJSON
+                      data={sigLayers.industriel}
+                      style={() => ({ color: '#5d4037', weight: 1.5, fillColor: '#ffccbc', fillOpacity: 0.4 })}
+                      onEachFeature={(feature, layer) => {
+                        if (feature.properties) layer.bindPopup(`<b>🏭 ${feature.properties.nom}</b><br/>${feature.properties.activite}`)
+                      }}
+                    />
+                  </LayersControl.Overlay>
+                )}
 
               </LayersControl>
 
