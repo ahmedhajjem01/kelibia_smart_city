@@ -169,7 +169,14 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
     if request.method == 'GET':
         resp = []
         for key, model in models_map.items():
-            objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user')
+            if hasattr(model, 'citizen'):
+                objs = model.objects.all().select_related('citizen')
+            elif hasattr(model, 'user'):
+                objs = model.objects.all().select_related('user')
+            elif hasattr(model, 'declarant'):
+                objs = model.objects.all().select_related('declarant')
+            else:
+                objs = model.objects.all()
             
             # SI: Filter out unpaid requests - only show to admin after payment
             if hasattr(model, 'is_paid'):
@@ -177,7 +184,7 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                 
             objs = objs.order_by('-created_at')
             for o in objs:
-                citizen = getattr(o, 'citizen', getattr(o, 'user', None))
+                citizen = getattr(o, 'citizen', getattr(o, 'user', getattr(o, 'declarant', None)))
                 # Build extra details depending on type
                 details = {}
                 if key == 'residence':
