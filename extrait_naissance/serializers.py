@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from .models import DeclarationNaissance, Citoyen, ExtraitNaissance, DemandeLegalisation
 
 class DemandeLegalisationSerializer(serializers.ModelSerializer):
