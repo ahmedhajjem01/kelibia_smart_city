@@ -84,6 +84,14 @@ export default function MesExtraitsPage() {
           <div className="text-center py-5">
             <div className="spinner-border text-primary" role="status"></div>
           </div>
+        ) : !user?.is_verified ? (
+          <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
+            <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+            <div>
+              <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
+              <p className="mb-0">{t('account_verification_required')}</p>
+            </div>
+          </div>
         ) : (
           <div className="row g-4">
             {categories.map((cat) => (

@@ -7,10 +7,21 @@ from rest_framework import status
 from .models import Citoyen, ExtraitNaissance, DeclarationNaissance
 from .serializers import DeclarationNaissanceSerializer
 
+from django.utils import timezone
+
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitNaissance, pk=pk)
-    if not extrait.is_paid:
+    
+    # Vérification de la validité du paiement (24h)
+    is_valid = False
+    if extrait.is_paid and extrait.paid_at:
+        diff = timezone.now() - extrait.paid_at
+        if diff.total_seconds() < 86400: # 24 heures
+            is_valid = True
+            
+    if not is_valid:
         return render(request, 'errors/unpaid.html', {'extrait': extrait})
+        
     if lang == 'fr':
         template = 'extrait_naissance/certificate_fr.html'
     else:
@@ -47,6 +58,13 @@ class MesExtraitsAPIView(APIView):
             models.Q(titulaire__enfants_pere__mere=citoyen)
         ).distinct()
         
+        now = timezone.now()
+        
+        def check_paid_validity(obj):
+            if not obj.is_paid or not obj.paid_at:
+                return False
+            return (now - obj.paid_at).total_seconds() < 86400
+
         data = {
             "mon_extrait": {
                 "id": mon_extrait.id,
@@ -56,11 +74,10 @@ class MesExtraitsAPIView(APIView):
                 "date_naissance": mon_extrait.titulaire.date_naissance,
                 "url_ar": f"/extrait-naissance/{mon_extrait.id}/certificate/",
                 "url_fr": f"/extrait-naissance/{mon_extrait.id}/certificate/fr/",
-                "is_paid": mon_extrait.is_paid
+                "is_paid": check_paid_validity(mon_extrait)
             } if mon_extrait else None,
             "enfants": [],
             "conjoints": []
-
         }
         
         for enfant in enfants_extraits:
@@ -72,9 +89,8 @@ class MesExtraitsAPIView(APIView):
                 "date_naissance": enfant.titulaire.date_naissance,
                 "url_ar": f"/extrait-naissance/{enfant.id}/certificate/",
                 "url_fr": f"/extrait-naissance/{enfant.id}/certificate/fr/",
-                "is_paid": enfant.is_paid
+                "is_paid": check_paid_validity(enfant)
             })
-
 
         for conjoint in conjoints_extraits:
             data["conjoints"].append({
@@ -85,7 +101,7 @@ class MesExtraitsAPIView(APIView):
                 "date_naissance": conjoint.titulaire.date_naissance,
                 "url_ar": f"/extrait-naissance/{conjoint.id}/certificate/",
                 "url_fr": f"/extrait-naissance/{conjoint.id}/certificate/fr/",
-                "is_paid": conjoint.is_paid
+                "is_paid": check_paid_validity(conjoint)
             })
             
         return Response(data)

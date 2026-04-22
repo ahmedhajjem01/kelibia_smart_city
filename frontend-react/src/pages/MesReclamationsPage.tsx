@@ -85,7 +85,7 @@ export default function MesReclamationsPage() {
     try {
       const userRes = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       if (userRes.ok) setUser(await userRes.json())
-      const res = await fetch('/api/reclamations/', { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } })
       if (res.ok) setReclamations(await res.json())
       else setError(t('retrieval_error'))
     } catch { setError(t('error_msg')) }

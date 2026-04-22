@@ -11,8 +11,25 @@ from .serializers import (
 )
 from extrait_naissance.models import Citoyen
 
+from django.utils import timezone
+from .serializers import (
+    DeclarationDecesSerializer, CitoyenSimpleSerializer, 
+    DemandeInhumationSerializer, ExtraitDecesSerializer
+)
+
 def deces_certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitDeces, pk=pk)
+    
+    # Vérification de la validité du paiement (24h)
+    is_valid = False
+    if extrait.is_paid and extrait.paid_at:
+        diff = timezone.now() - extrait.paid_at
+        if diff.total_seconds() < 86400: # 24 heures
+            is_valid = True
+            
+    if not is_valid:
+        return render(request, 'errors/unpaid.html', {'extrait': extrait})
+
     template_name = 'extrait_deces/certificate.html' if lang == 'ar' else 'extrait_deces/certificate_fr.html'
     return render(request, template_name, {'extrait': extrait})
 
@@ -62,20 +79,8 @@ class MesDecesAPIView(APIView):
             models.Q(defunt__mere=citoyen)
         ).distinct()
         
-        results = []
-        for d in deces_qs:
-            results.append({
-                "id": d.id,
-                "numero_registre": d.numero_registre,
-                "annee_acte": d.annee_acte,
-                "nom_complet_fr": f"{d.defunt.prenom_fr} {d.defunt.nom_fr}",
-                "nom_complet_ar": f"{d.defunt.prenom_ar} {d.defunt.nom_ar}",
-                "date_deces": d.date_deces.strftime("%d/%m/%Y"),
-                "url_ar": f"/extrait-deces/{d.id}/certificate/",
-                "url_fr": f"/extrait-deces/{d.id}/certificate/fr/"
-            })
-            
-        return Response({"deces": results})
+        serializer = ExtraitDecesSerializer(deces_qs, many=True, context={'request': request})
+        return Response({"deces": serializer.data})
 
 from .serializers import DeclarationDecesSerializer, CitoyenSimpleSerializer
 

@@ -6,6 +6,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
 
 type ActeDeces = {
+  id: number
   numero_registre: string | number
   annee_acte: string | number
   nom_complet_fr: string
@@ -13,16 +14,17 @@ type ActeDeces = {
   date_deces: string
   url_fr: string
   url_ar: string
+  is_paid?: boolean
 }
 
 export default function MesDecesPage() {
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actes, setActes] = useState<ActeDeces[]>([])
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -99,6 +101,14 @@ export default function MesDecesPage() {
           <div className="spinner-border text-primary" role="status" />
           <p className="mt-2 text-muted">Recherche des actes de décès en cours...</p>
         </div>
+      ) : !user?.is_verified ? (
+        <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
+          <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+          <div>
+            <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
+            <p className="mb-0">{t('account_verification_required')}</p>
+          </div>
+        </div>
       ) : error ? (
         <div className="alert alert-danger">{error}</div>
       ) : (
@@ -122,22 +132,39 @@ export default function MesDecesPage() {
                         {d.date_deces}
                       </p>
                       <div className="d-flex gap-2">
-                        <a
-                          href={resolveBackendUrl(d.url_fr)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-dark flex-fill fw-bold"
-                        >
-                          <i className="fas fa-print me-1" /> Version FR
-                        </a>
-                        <a
-                          href={resolveBackendUrl(d.url_ar)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-outline-dark flex-fill arabic-font fw-bold"
-                        >
-                          <i className="fas fa-print me-1" /> النسخة العربية
-                        </a>
+                        {/* Debug: console.log('Deces Paid:', d.is_paid, 'ASD:', user?.has_active_asd) */}
+                        {(!d.is_paid && !user?.has_active_asd) ? (
+                            <div className="d-flex flex-column gap-2 w-100">
+                              <small className="text-warning fw-bold text-center p-1 rounded" style={{ fontSize: '0.7rem', background: '#fff8e1', border: '1px solid #ffd54f' }}>
+                                {lang === 'ar' ? 'يجب الدفع حتى تظهر الطلب للإدارة' : 'Paiement requis pour traiter la demande'}
+                              </small>
+                              <button
+                                className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
+                                onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.id}&requestType=death_extract&target=/mes-deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
+                              >
+                                <i className="fas fa-lock me-2"></i> Payer 0.500 DT
+                              </button>
+                            </div>
+                        ) : (
+                            <>
+                              <a
+                                href={resolveBackendUrl(d.url_fr)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-dark flex-fill fw-bold"
+                              >
+                                <i className="fas fa-print me-1" /> Version FR
+                              </a>
+                              <a
+                                href={resolveBackendUrl(d.url_ar)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-outline-dark flex-fill arabic-font fw-bold"
+                              >
+                                <i className="fas fa-print me-1" /> النسخة العربية
+                              </a>
+                            </>
+                        )}
                       </div>
                     </div>
                   </div>

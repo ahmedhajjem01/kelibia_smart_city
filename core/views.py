@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from livret_famille.models import DemandeLivretFamille
 from attestation_residence.models import DemandeResidence
 from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance
-from extrait_mariage.models import ExtraitMariage
-from extrait_deces.models import ExtraitDeces
+from extrait_mariage.models import ExtraitMariage, DemandeMariage
+from extrait_deces.models import ExtraitDeces, DeclarationDeces
 from eau_lumiere_egouts.models import DemandeEau
 from argent_impots.models import DemandeImpot
 from boutiques_commerces.models import DemandeCommerce
+from social_evenements.models import DemandeEvenement
+from maison_construction.models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation, DemandeRaccordement
 
 
 def login_redirect(request):
@@ -19,6 +21,8 @@ def login_redirect(request):
     """
     return redirect('/login')
 
+from django.utils import timezone
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def confirm_payment(request):
@@ -26,13 +30,14 @@ def confirm_payment(request):
     Simulation PFE : Reçoit un signal de paiement réussi et met à jour la demande correspondante.
     """
     req_id = request.data.get('request_id')
-    req_type = request.data.get('request_type') # 'livret' or 'residence'
+    req_type = request.data.get('request_type')
     paid = request.data.get('paiement_recu', False)
 
     if not paid:
         return Response({"error": "Paiement non reçu"}, status=400)
 
     try:
+        now = timezone.now()
         if req_type == 'livret':
             obj = DemandeLivretFamille.objects.get(id=req_id, citizen=request.user)
             obj.is_paid = True
@@ -46,18 +51,56 @@ def confirm_payment(request):
         elif req_type == 'birth_extract':
             obj = ExtraitNaissance.objects.get(id=req_id, user=request.user)
             obj.is_paid = True
+            obj.paid_at = now
             obj.save()
         elif req_type == 'marriage_extract':
             obj = ExtraitMariage.objects.get(id=req_id, user=request.user)
             obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'death_extract' or req_type == 'deces':
+            obj = ExtraitDeces.objects.get(id=req_id, user=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'marriage':
+            obj = DemandeMariage.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'construction':
+            obj = DemandeConstruction.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'goudronnage':
+            obj = DemandeGoudronnage.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'vocation':
+            obj = DemandeCertificatVocation.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
+            obj.save()
+        elif req_type == 'evenement':
+            obj = DemandeEvenement.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            # Evenement model has is_paid (verbose="Frais de dossier réglés") but not paid_at? 
+            # I checked models.py, it was missing paid_at. Let's just set is_paid.
+            obj.save()
+        elif req_type == 'raccordement':
+            obj = DemandeRaccordement.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.paid_at = now
             obj.save()
         else:
             return Response({"error": "Type de demande inconnu"}, status=400)
 
 
-        return Response({"status": "Success", "message": "Paiement confirmé, statut mis à jour."})
-    except (DemandeLivretFamille.DoesNotExist, DemandeResidence.DoesNotExist, ExtraitNaissance.DoesNotExist, ExtraitMariage.DoesNotExist):
-        return Response({"error": "Demande ou extrait non trouvé"}, status=404)
+        return Response({"status": "Success", "message": "Paiement confirmed, status updated."})
+    except Exception as e:
+        return Response({"error": f"Demande introuvable: {str(e)}"}, status=404)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -66,27 +109,19 @@ def get_supervisor_services_summary(request):
     Returns counts of pending requests across all administrative services
     for the supervisor dashboard.
     """
-    if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+    if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ['supervisor', 'agent']):
         return Response({"error": "Accès refusé"}, status=403)
 
     summary = {
-        "attestation_residence": DemandeResidence.objects.filter(status='pending').count(),
-        "livret_famille": DemandeLivretFamille.objects.filter(status='pending').count(),
-        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending').count(),
-        # Add others if models have a 'status' field. 
-        # Extraits are usually automatic or pay-and-get, but we check if they have pending status.
+        "attestation_residence": DemandeResidence.objects.filter(status='pending', is_paid=True).count(),
+        "livret_famille": DemandeLivretFamille.objects.filter(status='pending', is_paid=True).count(),
+        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending', is_paid=True).count(),
     }
     
-    # Try getting others if they exist with consistent naming
-    try:
-        from extrait_mariage.models import DeclarationMariage
-        summary["declaration_mariage"] = DeclarationMariage.objects.filter(status='pending').count()
-    except: pass
+    summary["demande_mariage"] = DemandeMariage.objects.filter(status='pending', is_paid=True).count()
     
-    try:
-        from extrait_deces.models import DeclarationDeces
-        summary["declaration_deces"] = DeclarationDeces.objects.filter(status='pending').count()
-    except: pass
+    # Death requests
+    summary["declaration_deces"] = DeclarationDeces.objects.filter(status='pending', is_paid=True).count()
 
     summary["eau"] = DemandeEau.objects.filter(status='pending').count()
     summary["impots"] = DemandeImpot.objects.filter(status='pending').count()
@@ -100,24 +135,37 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
     """
     Unified view to List, Update status or Delete any administrative request/order.
     """
-    if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+    if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ['supervisor', 'agent']):
         return Response({"error": "Accès refusé"}, status=403)
 
     models_map = {
         'residence': DemandeResidence,
         'livret': DemandeLivretFamille,
         'naissance': DeclarationNaissance,
-        'mariage': ExtraitMariage,
-        'deces': ExtraitDeces,
+        'mariage_extrait': ExtraitMariage,
+        'deces_extrait': ExtraitDeces,
+        'mariage': DemandeMariage,
+        'deces': DeclarationDeces,
         'eau': DemandeEau,
         'impots': DemandeImpot,
         'commerce': DemandeCommerce,
+        'construction': DemandeConstruction,
+        'goudronnage': DemandeGoudronnage,
+        'vocation': DemandeCertificatVocation,
+        'raccordement': DemandeRaccordement,
+        'evenement': DemandeEvenement
     }
 
     if request.method == 'GET':
         resp = []
         for key, model in models_map.items():
-            objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user').order_by('-created_at')
+            objs = model.objects.all().select_related('citizen' if hasattr(model, 'citizen') else 'user')
+            
+            # SI: Filter out unpaid requests - only show to admin after payment
+            if hasattr(model, 'is_paid'):
+                objs = objs.filter(is_paid=True)
+                
+            objs = objs.order_by('-created_at')
             for o in objs:
                 citizen = getattr(o, 'citizen', getattr(o, 'user', None))
                 # Build extra details depending on type
@@ -171,6 +219,46 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                         "adresse_commerce": getattr(o, 'adresse_commerce', ''),
                         "description": getattr(o, 'description', ''),
                         "commentaire_agent": getattr(o, 'commentaire_agent', ''),
+                    }
+                elif key == 'mariage':
+                    details = {
+                        "epoux": getattr(o, 'nom_epoux', ''),
+                        "epouse": getattr(o, 'nom_epouse', ''),
+                        "date_mariage": str(getattr(o, 'date_souhaitee', '')),
+                        "regime": getattr(o, 'regime_matrimonial', ''),
+                    }
+                elif key == 'deces':
+                    details = {
+                        "nom_defunt": f"{getattr(o, 'nom_fr', '')} {getattr(o, 'prenom_fr', '')}",
+                        "date_deces": str(getattr(o, 'date_deces', '')),
+                        "lieu_deces": getattr(o, 'lieu_deces_fr', ''),
+                    }
+                elif key == 'construction':
+                    details = {
+                        "adresse": getattr(o, 'adresse_terrain', ''),
+                        "type": getattr(o, 'type_travaux', ''),
+                        "usage": getattr(o, 'usage_batiment', ''),
+                    }
+                elif key == 'goudronnage':
+                    details = {
+                        "adresse": getattr(o, 'adresse_residence', ''),
+                        "rue": getattr(o, 'localisation_rue', ''),
+                    }
+                elif key == 'vocation':
+                    details = {
+                        "adresse": getattr(o, 'adresse_bien', ''),
+                    }
+                elif key == 'raccordement':
+                    details = {
+                        "reseau": getattr(o, 'type_reseau', ''),
+                        "adresse": getattr(o, 'adresse_raccordement', ''),
+                    }
+                elif key == 'evenement':
+                    details = {
+                        "titre": getattr(o, 'titre_evenement', ''),
+                        "lieu": getattr(o, 'lieu_details', ''),
+                        "date": f"{getattr(o, 'date_debut', '')} au {getattr(o, 'date_fin', '')}",
+                    }
                     }
 
                 resp.append({

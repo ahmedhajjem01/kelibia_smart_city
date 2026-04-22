@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation
+from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation, DemandeRaccordement
 
 
 class DemandeConstructionSerializer(serializers.ModelSerializer):
@@ -14,7 +14,7 @@ class DemandeConstructionSerializer(serializers.ModelSerializer):
         model = DemandeConstruction
         fields = '__all__'
         read_only_fields = ['citizen', 'status', 'priorite', 'commentaire_agent',
-                            'permis_signe', 'is_paid', 'is_high_risk', 'created_at', 'updated_at']
+                            'permis_signe', 'is_paid', 'paid_at', 'is_high_risk', 'created_at', 'updated_at']
 
     def get_citizen_name(self, obj):
         return f"{obj.citizen.first_name} {obj.citizen.last_name}".strip() or obj.citizen.email
@@ -36,7 +36,7 @@ class DemandeGoudronnageSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeGoudronnage
         fields = '__all__'
-        read_only_fields = ['citizen', 'status', 'commentaire_agent', 'created_at', 'updated_at']
+        read_only_fields = ['citizen', 'status', 'is_paid', 'paid_at', 'commentaire_agent', 'created_at', 'updated_at']
 
     def get_citizen_name(self, obj):
         return f"{obj.citizen.first_name} {obj.citizen.last_name}".strip() or obj.citizen.email
@@ -53,7 +53,25 @@ class DemandeCertificatVocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeCertificatVocation
         fields = '__all__'
-        read_only_fields = ['citizen', 'status', 'commentaire_agent', 'certificat_signe', 'created_at', 'updated_at']
+        read_only_fields = ['citizen', 'status', 'is_paid', 'paid_at', 'commentaire_agent', 'certificat_signe', 'created_at', 'updated_at']
+
+    def get_citizen_name(self, obj):
+        return f"{obj.citizen.first_name} {obj.citizen.last_name}".strip() or obj.citizen.email
+
+    def get_citizen_email(self, obj):
+        return obj.citizen.email
+
+
+class DemandeRaccordementSerializer(serializers.ModelSerializer):
+    citizen_name = serializers.SerializerMethodField()
+    citizen_email = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    type_reseau_display = serializers.CharField(source='get_type_reseau_display', read_only=True)
+
+    class Meta:
+        model = DemandeRaccordement
+        fields = '__all__'
+        read_only_fields = ['citizen', 'status', 'is_paid', 'paid_at', 'devis_montant', 'devis_pdf', 'date_visite', 'commentaire_agent', 'created_at', 'updated_at']
 
     def get_citizen_name(self, obj):
         return f"{obj.citizen.first_name} {obj.citizen.last_name}".strip() or obj.citizen.email

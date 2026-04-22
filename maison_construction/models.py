@@ -92,6 +92,7 @@ class DemandeConstruction(models.Model):
     commentaire_agent = models.TextField(blank=True)
     permis_signe = models.FileField(upload_to='construction/permis/', null=True, blank=True)
     is_paid = models.BooleanField(default=False)
+    paid_at = models.DateTimeField(null=True, blank=True)
     is_high_risk = models.BooleanField(default=False)
 
     # Timestamps
@@ -135,6 +136,8 @@ class DemandeGoudronnage(models.Model):
     longitude = models.FloatField(null=True, blank=True)
     cin_copie = models.ImageField(upload_to='goudronnage/cin/', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_paid = models.BooleanField(default=False)
+    paid_at = models.DateTimeField(null=True, blank=True)
     commentaire_agent = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -170,6 +173,8 @@ class DemandeCertificatVocation(models.Model):
     plan_cadastral = models.FileField(upload_to='vocation/cadastral/', null=True, blank=True)
     plan_situation = models.FileField(upload_to='vocation/situation/', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_paid = models.BooleanField(default=False)
+    paid_at = models.DateTimeField(null=True, blank=True)
     commentaire_agent = models.TextField(blank=True)
     certificat_signe = models.FileField(upload_to='vocation/delivre/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -180,5 +185,53 @@ class DemandeCertificatVocation(models.Model):
         verbose_name = 'Demande de certificat de vocation'
         verbose_name_plural = 'Demandes de certificat de vocation'
 
+
+class DemandeRaccordement(models.Model):
+    TYPE_RESEAU_CHOICES = [
+        ('eau', 'Eau (SONEDE)'),
+        ('electricite', 'Électricité (STEG)'),
+        ('assainissement', 'Assainissement (ONAS)'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('visite_programmee', 'Visite programmée'),
+        ('devis_envoye', 'Devis envoyé'),
+        ('paye', 'Devis payé'),
+        ('termine', 'Terminé / Branché'),
+        ('rejete', 'Rejeté'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='demandes_raccordement'
+    )
+    type_reseau = models.CharField(max_length=20, choices=TYPE_RESEAU_CHOICES)
+    adresse_raccordement = models.CharField(max_length=300)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
+    # Documents
+    cin_copie = models.FileField(upload_to='raccordement/cin/', null=True, blank=True)
+    titre_propriete = models.FileField(upload_to='raccordement/propriete/', null=True, blank=True)
+    permis_batir = models.FileField(upload_to='raccordement/permis/', null=True, blank=True)
+    plan_situation = models.FileField(upload_to='raccordement/situation/', null=True, blank=True)
+    
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending')
+    is_paid = models.BooleanField(default=False)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    devis_montant = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    devis_pdf = models.FileField(upload_to='raccordement/devis/', null=True, blank=True)
+    date_visite = models.DateTimeField(null=True, blank=True)
+    commentaire_agent = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Demande de raccordement'
+        verbose_name_plural = 'Demandes de raccordement'
+
     def __str__(self):
-        return f"Certificat vocation — {self.adresse_bien} ({self.citizen.email})"
+        return f"Raccordement {self.get_type_reseau_display()} — {self.adresse_raccordement} ({self.citizen.email})"

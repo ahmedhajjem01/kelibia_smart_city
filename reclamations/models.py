@@ -35,16 +35,14 @@ class Reclamation(models.Model):
     citizen = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
-        related_name='my_reclamations',
-        limit_choices_to={'user_type': 'citizen'}
+        related_name='my_reclamations'
     )
     agent = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 
-        related_name='assigned_reclamations',
-        limit_choices_to={'user_type': 'agent'}
+        related_name='assigned_reclamations'
     )
     title       = models.CharField(max_length=200, verbose_name="Titre")
     description = models.TextField(verbose_name="Description")

@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getAccessToken } from '../lib/authStorage'
@@ -39,7 +40,7 @@ function Avatar({ user }: { user: Author }) {
 
 export default function ForumTopicPage() {
   const { id } = useParams<{ id: string }>()
-  const { setLang } = useI18n()
+  const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
 
   const [topic, setTopic]         = useState<TopicDetail | null>(null)
@@ -65,8 +66,8 @@ export default function ForumTopicPage() {
   }
 
   async function fetchMe() {
-    const res = await fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
-    if (res.ok) setCurrentUser((await res.json()) as { user_type?: string; is_staff?: boolean; is_superuser?: boolean })
+    const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
+    if (res.ok) setCurrentUser((await res.json()) as { user_type?: string; is_staff?: boolean; is_superuser?: boolean; is_verified?: boolean })
   }
 
   async function submitReply() {
@@ -257,13 +258,22 @@ export default function ForumTopicPage() {
             <h6 className="fw-bold mb-3" style={{ color: '#1a1a2e' }}>
               <i className="fas fa-reply me-2" style={{ color: '#1565c0' }}></i>Votre réponse
             </h6>
-            {error && <div className="alert alert-danger py-2 mb-3">{error}</div>}
-            <textarea className="form-control mb-3" rows={4} value={replyText}
-              onChange={e => setReplyText(e.target.value)}
-              placeholder="Écrivez votre réponse ici..." />
-            <button onClick={submitReply} className="btn btn-primary" disabled={sending}>
-              {sending ? <><span className="spinner-border spinner-border-sm me-2"></span>Envoi...</> : <><i className="fas fa-paper-plane me-2"></i>Envoyer la réponse</>}
-            </button>
+            {currentUser && !currentUser.is_verified ? (
+              <div className="alert alert-info border-0 shadow-sm rounded-4 text-center py-4">
+                <i className="fas fa-user-clock fs-3 mb-3 text-info d-block"></i>
+                <h6 className="fw-bold">{t('account_pending_verification')}</h6>
+                <p className="small mb-0 opacity-75">{t('account_pending_verification_desc')}</p>
+              </div>
+            ) : (
+              <>
+                <textarea className="form-control mb-3" rows={4} value={replyText}
+                  onChange={e => setReplyText(e.target.value)}
+                  placeholder="Écrivez votre réponse ici..." />
+                <button onClick={submitReply} className="btn btn-primary" disabled={sending}>
+                  {sending ? <><span className="spinner-border spinner-border-sm me-2"></span>Envoi...</> : <><i className="fas fa-paper-plane me-2"></i>Envoyer la réponse</>}
+                </button>
+              </>
+            )}
           </div>
         </div>
 

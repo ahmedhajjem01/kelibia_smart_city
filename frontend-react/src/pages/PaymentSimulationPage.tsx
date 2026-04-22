@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getAccessToken } from '../lib/authStorage'
@@ -28,11 +29,11 @@ export default function PaymentSimulationPage() {
   useEffect(() => {
     const access = getAccessToken()
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.json()).then(data => setUser(data))
     
     // Fetch Saved Cards
-    fetch('/api/accounts/cards/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/cards/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.json()).then(data => {
         setSavedCards(data)
         if (data.length > 0) setSelectedCardId(data[0].id)
@@ -53,24 +54,28 @@ export default function PaymentSimulationPage() {
         await new Promise(resolve => setTimeout(resolve, 2000))
 
         if (requestId && requestType) {
-            const res = await fetch('/api/payments/confirm/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${access}`
-                },
-                body: JSON.stringify({
-                    request_id: requestId,
-                    request_type: requestType,
-                    paiement_recu: true
+            if (requestType === 'tax') {
+                localStorage.setItem(`tax_paid_${requestId}`, 'true');
+            } else {
+                const res = await fetch(resolveBackendUrl('/api/payments/confirm/'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${access}`
+                    },
+                    body: JSON.stringify({
+                        request_id: requestId,
+                        request_type: requestType,
+                        paiement_recu: true
+                    })
                 })
-            })
-            if (!res.ok) console.error('Failed to update backend payment status')
+                if (!res.ok) console.error('Failed to update backend payment status')
+            }
         }
 
         // Save card if requested and it's a new card
         if (selectedCardId === 'new' && saveCard) {
-            await fetch('/api/accounts/cards/', {
+            await fetch(resolveBackendUrl('/api/accounts/cards/'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,7 +106,7 @@ export default function PaymentSimulationPage() {
                 {/* Left Side: Summary */}
                 <div className="col-md-5 bg-primary text-white p-4 p-lg-5 d-flex flex-column justify-content-between">
                   <div>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/100px-Flag_of_Tunisia.svg.png" width="40" className="rounded mb-4 shadow-sm" alt="TN" />
+                    <img src="https://flagcdn.com/w40/tn.png" width="40" className="rounded mb-4 shadow-sm" alt="TN" />
                     <h3 className="fw-bold mb-4">{lang === 'ar' ? 'تفاصيل الدفع' : 'Récapitulatif'}</h3>
                     
                     <div className="mb-4">
@@ -251,10 +256,20 @@ export default function PaymentSimulationPage() {
                       </div>
 
                       <div className="d-grid gap-2">
-                         <button className="btn btn-dark btn-lg rounded-pill fw-bold" onClick={() => window.print()}>
+                         {queryParams.get('file_fr') && queryParams.get('file_ar') && (
+                            <div className="d-flex gap-2 mb-2 no-print">
+                                <a href={queryParams.get('file_fr') || '#'} target="_blank" rel="noreferrer" className="btn btn-success flex-grow-1 rounded-pill fw-bold">
+                                    <i className="fas fa-file-pdf me-2"></i> Extrait (FR)
+                                </a>
+                                <a href={queryParams.get('file_ar') || '#'} target="_blank" rel="noreferrer" className="btn btn-success flex-grow-1 rounded-pill fw-bold arabic-font">
+                                    <i className="fas fa-file-pdf me-2"></i> مضمون (Ar)
+                                </a>
+                            </div>
+                         )}
+                         <button className="btn btn-dark btn-lg rounded-pill fw-bold no-print" onClick={() => window.print()}>
                             <i className="fas fa-receipt me-2"></i> {lang === 'ar' ? 'طباعة الوصل' : 'Télécharger le reçu'}
                          </button>
-                         <button className="btn btn-outline-primary rounded-pill border-2 fw-bold" onClick={() => navigate(targetUrl)}>
+                         <button className="btn btn-outline-primary rounded-pill border-2 fw-bold no-print" onClick={() => navigate(targetUrl)}>
                             {targetUrl === '/dashboard' ? (lang === 'ar' ? 'العودة للمنظومة' : 'Retour au portail') : (lang === 'ar' ? 'الدخول للخدمة الآن ⚡' : 'Accéder au service maintenant ⚡')}
                          </button>
                       </div>
@@ -276,8 +291,10 @@ export default function PaymentSimulationPage() {
         .cursor-not-allowed { cursor: not-allowed; }
         .cursor-pointer { cursor: pointer; }
         @media print {
-           .ag-navbar, .ag-sidebar, .btn-outline-primary { display: none !important; }
-           .card { border: none !important; shadow: none !important; }
+           body * { visibility: hidden; }
+           .card, .card *, .shadow-lg { visibility: visible; }
+           .card { position: fixed; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important; margin: 0; padding: 0; }
+           .no-print, .btn, .ag-navbar, .ag-sidebar { display: none !important; }
         }
       `}</style>
     </MainLayout>

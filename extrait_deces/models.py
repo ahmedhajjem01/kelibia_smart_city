@@ -42,6 +42,8 @@ class ExtraitDeces(models.Model):
     
     numero_ordre = models.CharField(max_length=50, verbose_name="Numéro d'ordre", blank=True, default="")
     prix = models.DecimalField(max_digits=6, decimal_places=3, verbose_name="Prix", default=0.500)
+    is_paid = models.BooleanField(default=False, verbose_name="Payé")
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Date du paiement")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -103,6 +105,8 @@ class DeclarationDeces(models.Model):
         verbose_name="Rapport de police (si suspect)"
     )
     
+    is_paid = models.BooleanField(default=False, verbose_name="Payé")
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Date du paiement")
     commentaire = models.TextField(blank=True, verbose_name="Commentaire / ملاحظات")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     

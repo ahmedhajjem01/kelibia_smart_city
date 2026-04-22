@@ -38,7 +38,7 @@ export default function MesResidencesPage() {
           setUser(userData)
         }
 
-        const res = await fetch('/api/residence/demande/', {
+        const res = await fetch(resolveBackendUrl('/api/residence/demande/'), {
           headers: { Authorization: `Bearer ${access}` },
         })
         const data = await res.json()
@@ -92,6 +92,14 @@ export default function MesResidencesPage() {
             <div className="text-center p-5">
               <div className="spinner-border text-primary" role="status"></div>
               <p className="mt-3 text-muted">{t('loading')}</p>
+            </div>
+          ) : !user?.is_verified ? (
+            <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center m-4" style={{ borderRadius: '15px' }}>
+              <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+              <div>
+                <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
+                <p className="mb-0">{t('account_verification_required')}</p>
+              </div>
             </div>
           ) : demandes.length === 0 ? (
             <div className="text-center p-5">

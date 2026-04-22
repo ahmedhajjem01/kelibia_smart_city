@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView, UserVerificationView, AdminUserCreateView
+from accounts.views import MyTokenObtainPairView, admin_logout, SavedCardView, UserVerificationView, AdminUserCreateView, ConfigView
 from rest_framework_simplejwt.views import TokenRefreshView
 from core.views import login_redirect, confirm_payment, get_supervisor_services_summary, manage_supervisor_orders
 
@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/accounts/cards/', SavedCardView.as_view(), name='saved_cards'),
     path('api/accounts/verify-citizens/', UserVerificationView.as_view(), name='verify_citizens'),
     path('api/accounts/admin-create/', AdminUserCreateView.as_view(), name='admin_create_user'),
+    path('api/accounts/config/', ConfigView.as_view(), name='site_config'),
 
 
 

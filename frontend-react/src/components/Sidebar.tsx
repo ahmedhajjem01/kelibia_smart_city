@@ -50,12 +50,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
 
       {/* ── Brand ── */}
       <div className="px-4 pt-5 pb-4 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,.12)' }}>
-        <img src={logo} alt="Logo Kélibia" style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
+        <img src={logo} alt="Logo National" style={{ width: 54, height: 54, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
         <div>
           <div style={{ color: '#fff', fontWeight: 900, fontSize: '.78rem', letterSpacing: '.3px', lineHeight: 1.2, textTransform: 'uppercase' }}>
-            Ville de Kélibia
+            Smart City Portal
           </div>
-          <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, lineHeight: 1.2 }}>بلدية قليبية</div>
+          <div style={{ color: '#d4aa8d', fontSize: '.65rem', fontWeight: 700, lineHeight: 1.2 }}>الجمهورية التونسية</div>
         </div>
       </div>
 
@@ -88,10 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
               <i className="fas fa-newspaper" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('news_title')}</span>
             </NavLink>
-            <a className={navItem(false)} href="#mapCard" onClick={scrollToMap}>
-              <i className="fas fa-map-marked-alt" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
-              <span>{t('gis_map')}</span>
-            </a>
             <NavLink to="/mes-demandes" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-tasks" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('my_requests')}</span>

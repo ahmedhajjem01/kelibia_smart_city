@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation' | 'evenement' | 'raccordement'
   title: string
   status: string
   date: string
@@ -46,7 +46,7 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
@@ -58,6 +58,8 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/api/construction/demandes/'), { headers }),
           fetch(resolveBackendUrl('/api/construction/goudronnage/'), { headers }),
           fetch(resolveBackendUrl('/api/construction/vocation/'), { headers }),
+          fetch(resolveBackendUrl('/api/construction/raccordement/'), { headers }),
+          fetch(resolveBackendUrl('/api/evenements/demande/'), { headers }),
         ])
 
 
@@ -105,7 +107,7 @@ export default function MesDemandesPage() {
               title: t('mariage_contract_title'),
               status: m.status,
               date: m.created_at,
-              details: lang === 'ar' ? `زوجين: ${m.nom_epoux_ar} & ${m.nom_epouse_ar}` : `Époux: ${m.nom_epoux_fr} & ${m.nom_epouse_fr}`
+              details: lang === 'ar' ? `زوجين: ${m.nom_epoux} & ${m.nom_epouse}` : `Époux: ${m.nom_epoux} & ${m.nom_epouse}`
             })
           })
         }
@@ -218,6 +220,7 @@ export default function MesDemandesPage() {
               status: g.status,
               date: g.created_at,
               details: g.adresse_residence || '',
+              isPaid: g.is_paid
             })
           })
         }
@@ -233,6 +236,39 @@ export default function MesDemandesPage() {
               status: v.status,
               date: v.created_at,
               details: v.adresse_bien || '',
+              isPaid: v.is_paid
+            })
+          })
+        }
+
+        // 12. Raccordement
+        if (resRaccordement.ok) {
+          const raccordements = await resRaccordement.json()
+          raccordements.forEach((r: any) => {
+            unified.push({
+              id: r.id,
+              type: 'raccordement',
+              title: lang === 'ar' ? 'طلب ربط بشبكة' : 'Demande de Raccordement',
+              status: r.status,
+              date: r.created_at,
+              details: `${r.type_reseau} — ${r.adresse_raccordement}`,
+              isPaid: r.is_paid
+            })
+          })
+        }
+
+        // 13. Evenement
+        if (resEvenement.ok) {
+          const evenements = await resEvenement.json()
+          evenements.forEach((e: any) => {
+            unified.push({
+              id: e.id,
+              type: 'evenement',
+              title: lang === 'ar' ? 'طلب ترخيص تظاهرة' : 'Autorisation d\'événement',
+              status: e.status,
+              date: e.created_at,
+              details: e.titre_evenement,
+              isPaid: e.is_paid
             })
           })
         }
@@ -286,6 +322,27 @@ export default function MesDemandesPage() {
     }
   }
 
+  const getRequestPrice = (type: any) => {
+    switch (type) {
+      case 'birth':
+      case 'marriage':
+      case 'death':
+        return '0.500';
+      case 'residence':
+      case 'goudronnage':
+      case 'vocation':
+      case 'inhumation':
+        return '2.000';
+      case 'livret':
+      case 'evenement':
+        return '5.000';
+      case 'construction':
+        return '20.000';
+      default:
+        return '2.000';
+    }
+  }
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'birth': return <i className="fas fa-baby text-success"></i>
@@ -297,6 +354,8 @@ export default function MesDemandesPage() {
       case 'construction': return <i className="fas fa-hard-hat text-warning"></i>
       case 'goudronnage': return <i className="fas fa-road text-secondary"></i>
       case 'vocation': return <i className="fas fa-building text-info"></i>
+      case 'evenement': return <i className="fas fa-calendar-alt text-danger"></i>
+      case 'raccordement': return <i className="fas fa-plug text-warning"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }
@@ -319,6 +378,26 @@ export default function MesDemandesPage() {
             <i className="fas fa-plus me-2"></i> {t('new_request')}
           </Link>
         </div>
+
+        {user && !user.is_verified && (
+          <div 
+            className="p-4 mb-4 d-flex align-items-center animate__animated animate__fadeInDown shadow-sm"
+            style={{ 
+              background: '#FFF4CD', 
+              borderRadius: '20px', 
+              border: 'none',
+              gap: '20px'
+            }}
+          >
+            <div className="text-warning">
+              <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
+            </div>
+            <div>
+              <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>{t('account_pending_verification')}</h5>
+              <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>{t('account_pending_verification_desc')}</p>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="d-flex flex-column align-items-center justify-content-center p-5 card shadow-sm border-0 rounded-4">
@@ -370,15 +449,21 @@ export default function MesDemandesPage() {
                       <td className="text-center">
                         <div className="d-flex flex-column align-items-center gap-2">
                            {getStatusBadge(req.status)}
-                           {req.status === 'pending' && !req.isPaid && (
-                             <button 
-                                className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
-                                style={{ fontSize: '0.65rem' }}
-                                onClick={() => navigate(`/paiement?amount=2.000&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}`)}
-                             >
-                                <i className="fas fa-credit-card me-1"></i> {t('pay_2dt')}
-                             </button>
-                           )}
+                            {req.status === 'pending' && !req.isPaid && req.type !== 'birth' && req.type !== 'death' && (
+                              <div className="d-flex flex-column gap-2">
+                                <small className="text-warning fw-bold px-2 py-1 rounded bg-warning-light" style={{ fontSize: '0.62rem', backgroundColor: '#fff8e1', border: '1px solid #ffd54f' }}>
+                                   <i className="fas fa-hourglass-half me-1"></i>
+                                   {lang === 'ar' ? 'بانتظار الدفع لتتم معالجة الطلب' : 'En attente de paiement pour traitement'}
+                                </small>
+                                <button 
+                                   className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
+                                   style={{ fontSize: '0.65rem' }}
+                                   onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}&target=/mes-demandes`)}
+                                >
+                                   <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `دفع ${getRequestPrice(req.type)} د.ت` : `Payer ${getRequestPrice(req.type)} DT`}
+                                </button>
+                              </div>
+                            )}
                            {req.isPaid && (
                              <span className="badge bg-light text-success border border-success extra-small" style={{ fontSize: '0.6rem' }}>
                                 {t('paid_label')} <i className="fas fa-check"></i>

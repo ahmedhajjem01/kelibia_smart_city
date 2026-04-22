@@ -7,7 +7,7 @@ class DemandeResidenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeResidence
         fields = [
-            'id', 'citizen', 'citizen_name', 'profession', 'telephone',
+            'id', 'citizen', 'citizen_name', 'profession', 'cin', 'telephone',
             'adresse_demandee', 'motif_demande',
             'cin_recto', 'cin_verso', 'cin_copy', 
             'quitus_municipal', 'acte_deces_conjoint',

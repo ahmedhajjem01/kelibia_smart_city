@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
@@ -108,7 +109,7 @@ export default function DemandeConstructionPage() {
   useEffect(() => {
     const access = getAccessToken()
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null).then(d => { if (d) setUser(d) })
   }, [navigate])
 
@@ -147,7 +148,7 @@ export default function DemandeConstructionPage() {
   }
 
   const canStep1 = !!(form.type_travaux && form.usage_batiment && form.description_travaux.trim().length >= 10)
-  const canStep2 = !!(form.adresse_terrain.trim() && form.surface_terrain && form.surface_construite && form.date_debut_prevue && form.duree_travaux_mois)
+  const canStep2 = !!(form.adresse_terrain.trim() && form.surface_terrain && form.surface_construite && Number(form.surface_terrain) >= Number(form.surface_construite) && form.date_debut_prevue && form.duree_travaux_mois)
   const canStep3 = !!(form.nom_proprietaire.trim() && form.cin_proprietaire.length === 8 && form.telephone_proprietaire.trim())
 
   const handleSubmit = async () => {
@@ -157,8 +158,13 @@ export default function DemandeConstructionPage() {
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v) })
       if (position) { fd.append('latitude', String(position[0])); fd.append('longitude', String(position[1])) }
-      Object.entries(files).forEach(([k, f]) => { if (f) fd.append(k, f) })
-      const res = await fetch('/api/construction/demandes/', {
+      Object.entries(files).forEach(([k, f]) => {
+        if (f) {
+          const ext = f.name.split('.').pop() || 'bin'
+          fd.append(k, f, `${k}_${Date.now()}.${ext}`)
+        }
+      })
+      const res = await fetch(resolveBackendUrl('/api/construction/demandes/'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${access}` },
         body: fd,
@@ -228,6 +234,26 @@ export default function DemandeConstructionPage() {
           </h2>
           <p className="text-muted small mb-0">رخصة البناء — Kelibia Municipality</p>
         </div>
+
+        {user && !user.is_verified && (
+          <div 
+            className="p-4 mb-4 d-flex align-items-center shadow-sm"
+            style={{ 
+              background: '#FFF4CD', 
+              borderRadius: '20px', 
+              border: 'none',
+              gap: '20px'
+            }}
+          >
+            <div className="text-warning">
+              <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
+            </div>
+            <div>
+              <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>Compte en attente de vérification</h5>
+              <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>Votre compte doit être vérifié par l'administration pour accéder à ce service.</p>
+            </div>
+          </div>
+        )}
 
         {/* Step wizard */}
         <div className="cst-wizard">
@@ -324,6 +350,9 @@ export default function DemandeConstructionPage() {
                   <label className="form-label fw-semibold small">Surface à construire (m²) <span className="text-danger">*</span></label>
                   <input type="number" className="form-control rounded-3" placeholder="Ex: 150" min="1"
                     value={form.surface_construite} onChange={e => update('surface_construite', e.target.value)} />
+                  {form.surface_terrain && form.surface_construite && Number(form.surface_construite) > Number(form.surface_terrain) && (
+                    <small className="text-danger fw-semibold d-block mt-1">⚠️ Ne peut pas dépasser la surface du terrain</small>
+                  )}
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold small">Nbre d'étages <span className="text-danger">*</span></label>

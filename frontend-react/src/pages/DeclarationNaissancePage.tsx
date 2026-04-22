@@ -134,15 +134,24 @@ export default function DeclarationNaissancePage() {
         }
       }
 
-      // Files
+      // Files with consistent names to stay below 100 character limit
       const attachment = attachmentRef.current?.files?.[0]
-      if (attachment) payload.append('attachment', attachment)
+      if (attachment) {
+        const ext = attachment.name.split('.').pop() || 'jpg'
+        payload.append('attachment', attachment, `decl_birth_${Date.now()}.${ext}`)
+      }
       
       const pereId = pereIdRef.current?.files?.[0]
-      if (pereId) payload.append('cin_pere_scan', pereId)
+      if (pereId) {
+        const ext = pereId.name.split('.').pop() || 'jpg'
+        payload.append('cin_pere_scan', pereId, `cin_pere_${Date.now()}.${ext}`)
+      }
       
       const mereId = mereIdRef.current?.files?.[0]
-      if (mereId) payload.append('cin_mere_scan', mereId)
+      if (mereId) {
+        const ext = mereId.name.split('.').pop() || 'jpg'
+        payload.append('cin_mere_scan', mereId, `cin_mere_${Date.now()}.${ext}`)
+      }
 
       // Signature to Blob
       if (canvasRef.current) {
@@ -391,4 +400,3 @@ export default function DeclarationNaissancePage() {
     </MainLayout>
   )
 }
-

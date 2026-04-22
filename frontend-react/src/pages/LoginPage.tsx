@@ -1,8 +1,10 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
+import tunisiaLogo from '../assets/tunisia_log.png'
 
 type TokenResponse = {
   access: string
@@ -12,7 +14,11 @@ type TokenResponse = {
   user_type?: 'agent' | string
 }
 
-const CSS = `
+export default function LoginPage() {
+  const navigate = useNavigate()
+  const { t, lang, setLang } = useI18n()
+
+  const CSS = `
 /* ── Root ── */
 .lp-root {
   min-height: 100vh;
@@ -23,6 +29,7 @@ const CSS = `
   position: relative;
   overflow: hidden;
   font-family: "Public Sans", "Segoe UI", sans-serif;
+  background: #0f1117;
 }
 
 /* ── Background image ── */
@@ -35,37 +42,12 @@ const CSS = `
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0.4;
 }
 .lp-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(23,94,173,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%);
-}
-
-/* ── Glow blobs ── */
-.lp-blob-br {
-  position: fixed;
-  bottom: -100px;
-  right: -100px;
-  width: 400px;
-  height: 400px;
-  background: rgba(149,74,0,.12);
-  border-radius: 50%;
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
-}
-.lp-blob-tl {
-  position: fixed;
-  top: -100px;
-  left: -100px;
-  width: 400px;
-  height: 400px;
-  background: rgba(23,94,173,.1);
-  border-radius: 50%;
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
+  background: linear-gradient(135deg, rgba(149,74,0,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%);
 }
 
 /* ── Container ── */
@@ -87,9 +69,8 @@ const CSS = `
 /* ── Hero side ── */
 .lp-hero {
   display: none;
-  background: rgba(23,94,173,.82);
+  background: rgba(149,74,0,.82);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   padding: 48px 44px;
   flex-direction: column;
   justify-content: space-between;
@@ -98,126 +79,36 @@ const CSS = `
 @media (min-width: 768px) {
   .lp-hero { display: flex; }
 }
-.lp-hero-brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.lp-hero-brand { display: flex; align-items: center; gap: 14px; }
 .lp-hero-logo { height: 56px; width: auto; }
-.lp-hero-brand-name {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -.5px;
-  text-transform: uppercase;
-  line-height: 1.1;
-}
-.lp-hero-brand-sub {
-  font-size: .72rem;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  opacity: .8;
-  margin-top: 2px;
-}
-.lp-hero-headline {
-  font-size: 2.8rem;
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -.5px;
-}
-.lp-hero-accent { color: #ffb785; }
-.lp-hero-desc {
-  font-size: 1rem;
-  opacity: .82;
-  line-height: 1.65;
-  max-width: 380px;
-  margin-top: 18px;
-}
-.lp-hero-badges {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-.lp-hero-badge {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: .8rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  opacity: .9;
-}
-.lp-hero-badge i { color: #ffb785; font-size: 1rem; }
+.lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
+.lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+.lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
+.lp-hero-accent { color: #ffb785; white-space: nowrap; }
+.lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
+.lp-hero-badges { display: flex; align-items: center; gap: 28px; }
+.lp-hero-badge { display: flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 700; text-transform: uppercase; opacity: .9; }
+.lp-hero-badge i { color: #ffb785; }
 
 /* ── Form side ── */
 .lp-form-side {
-  background: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.94);
   backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  padding: 40px 36px 36px;
+  padding: 40px 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-
-/* ── Language toggle ── */
-.lp-lang-wrap {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 28px;
-}
-.lp-lang-pill {
-  background: #e7e7f1;
-  border-radius: 999px;
-  padding: 4px;
-  display: flex;
-  gap: 2px;
-}
-.lp-lang-opt {
-  border: none;
-  background: none;
-  border-radius: 999px;
-  padding: 5px 16px;
-  font-size: .75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .2s;
-  color: #6b7280;
-  font-family: inherit;
-}
-.lp-lang-opt.active {
-  background: #175ead;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(23,94,173,.25);
-}
-
-/* ── Mobile logo ── */
-.lp-mobile-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
+.lp-lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 28px; }
+.lp-lang-pill { background: #e7e7f1; border-radius: 999px; padding: 4px; display: flex; }
+.lp-lang-opt { border: none; background: none; border-radius: 999px; padding: 5px 16px; font-size: .75rem; font-weight: 700; cursor: pointer; color: #6b7280; }
+.lp-lang-opt.active { background: #954a00; color: #fff; }
+.lp-mobile-logo { display: flex; justify-content: center; margin-bottom: 20px; }
 .lp-mobile-logo img { height: 44px; }
 @media (min-width: 768px) { .lp-mobile-logo { display: none; } }
-
-/* ── Greeting ── */
-.lp-greeting {
-  margin-bottom: 28px;
-}
-.lp-greeting h2 {
-  font-size: 1.55rem;
-  font-weight: 800;
-  color: #191b22;
-  margin: 0 0 6px;
-}
-.lp-greeting p {
-  font-size: .88rem;
-  color: #564336;
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* ── Fields ── */
+.lp-greeting { margin-bottom: 28px; }
+.lp-greeting h2 { font-size: 1.55rem; font-weight: 800; color: #191b22; margin-bottom: 6px; }
+.lp-greeting p { font-size: .88rem; color: #6b7280; margin: 0; }
 .lp-field { margin-bottom: 18px; }
 .lp-label {
   display: flex;
@@ -229,8 +120,16 @@ const CSS = `
   text-transform: uppercase;
   color: #564336;
   margin-bottom: 7px;
+  transition: color 0.2s;
 }
-.lp-label i { color: #954a00; font-size: .85rem; }
+.lp-label i {
+  color: #564336;
+  font-size: .85rem;
+  transition: color 0.2s;
+}
+.lp-field:focus-within .lp-label i {
+  color: #954a00;
+}
 .lp-input {
   width: 100%;
   background: #e7e7f1;
@@ -242,116 +141,20 @@ const CSS = `
   outline: none;
   box-sizing: border-box;
   transition: box-shadow .2s, background .2s;
-  font-family: inherit;
 }
 .lp-input::placeholder { color: #9ca3af; }
-.lp-input:focus {
-  background: #fff;
-  box-shadow: 0 0 0 2px #954a00;
-}
+.lp-input:focus { background: #fff; box-shadow: 0 0 0 2px #954a00; }
 .lp-input-wrap { position: relative; }
-.lp-input-wrap .lp-input { padding-right: 46px; }
-.lp-eye {
-  position: absolute;
-  right: 13px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #897364;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  font-size: .95rem;
-}
-
-/* ── Remember / Forgot ── */
-.lp-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 22px;
-  gap: 8px;
-}
-.lp-remember {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  cursor: pointer;
-}
-.lp-remember input[type=checkbox] {
-  accent-color: #954a00;
-  width: 15px;
-  height: 15px;
-  cursor: pointer;
-}
-.lp-remember span {
-  font-size: .82rem;
-  color: #6b7280;
-  user-select: none;
-}
-.lp-forgot {
-  font-size: .82rem;
-  color: #175ead;
-  font-weight: 700;
-  text-decoration: none;
-}
-.lp-forgot:hover { text-decoration: underline; }
-
-/* ── Submit button ── */
-.lp-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #954a00 0%, #f18221 100%);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 14px 20px;
-  font-size: .95rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: opacity .2s, transform .1s;
-  box-shadow: 0 4px 20px rgba(149,74,0,.3);
-  letter-spacing: .5px;
-  font-family: inherit;
-}
-.lp-btn:hover:not(:disabled) { opacity: .9; }
-.lp-btn:active:not(:disabled) { transform: scale(.98); }
-.lp-btn:disabled { opacity: .6; cursor: not-allowed; }
-
-/* ── Error ── */
-.lp-error {
-  background: #ffdad6;
-  border: 1px solid #ba1a1a;
-  border-radius: 10px;
-  padding: 11px 15px;
-  color: #93000a;
-  font-size: .83rem;
-  margin-top: 14px;
-}
-
-/* ── Divider ── */
-.lp-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 24px 0;
-}
-.lp-divider-line { flex: 1; height: 1px; background: rgba(137,115,100,.2); }
-.lp-divider-txt {
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: #897364;
-  white-space: nowrap;
-}
-
-/* ── Alt login buttons ── */
+.lp-eye { position: absolute; ${lang === 'ar' ? 'left: 13px;' : 'right: 13px;'} top: 50%; transform: translateY(-50%); background: none; border: none; color: #897364; cursor: pointer; }
+.lp-input-wrap .lp-input { padding-${lang === 'ar' ? 'left' : 'right'}: 44px; }
+.lp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.lp-remember { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: .82rem; color: #6b7280; }
+.lp-forgot { font-size: .82rem; color: #954a00; font-weight: 700; text-decoration: none; }
+.lp-btn { width: 100%; background: linear-gradient(135deg, #954a00 0%, #f18221 100%); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: .95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.lp-error { background: #ffdad6; border: 1px solid #ba1a1a; border-radius: 10px; padding: 11px; color: #93000a; font-size: .83rem; margin-top: 14px; }
+.lp-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+.lp-divider-line { flex: 1; height: 1px; background: rgba(0,0,0,.1); }
+.lp-divider-txt { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: #897364; }
 .lp-alt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .lp-alt-btn {
   display: flex;
@@ -359,7 +162,7 @@ const CSS = `
   justify-content: center;
   gap: 8px;
   padding: 11px 14px;
-  border: 1.5px solid rgba(137,115,100,.2);
+  border: 1.5px solid rgba(137,115,100,.3);
   border-radius: 10px;
   background: none;
   font-size: .82rem;
@@ -373,24 +176,11 @@ const CSS = `
 .lp-alt-btn i { font-size: 1rem; }
 .lp-alt-btn .icon-blue { color: #175ead; }
 .lp-alt-btn .icon-orange { color: #954a00; }
-
-/* ── Footer ── */
-.lp-footer {
-  margin-top: 28px;
-  text-align: center;
-}
-.lp-footer p { font-size: .73rem; color: #9ca3af; margin: 0 0 6px; }
-.lp-footer-links { display: flex; justify-content: center; gap: 16px; }
-.lp-footer-links a { font-size: .73rem; color: #9ca3af; text-decoration: none; }
-.lp-footer-links a:hover { color: #175ead; }
-.lp-signup-link { font-size: .85rem; color: #564336; margin-top: 14px; }
-.lp-signup-link a { color: #175ead; font-weight: 700; text-decoration: none; }
-.lp-signup-link a:hover { text-decoration: underline; }
+.lp-footer { margin-top: 20px; text-align: center; }
+.lp-footer p { font-size: .72rem; color: #9ca3af; margin: 4px 0; }
+.lp-signup-link { font-size: .78rem; color: #6b7280; }
+.lp-signup-link a { color: #954a00; font-weight: 600; text-decoration: none; }
 `
-
-export default function LoginPage() {
-  const navigate = useNavigate()
-  const { t, lang, setLang } = useI18n()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -415,7 +205,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/token/', {
+      const res = await fetch(resolveBackendUrl('/api/token/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -461,12 +251,10 @@ export default function LoginPage() {
       <div className="lp-bg">
         <img
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOK4NOsrgsp-7XZZsRks3tpwcQfxiLaK9BLKPLGysOqi9B4Be--eGvYLPbbIFV6dc7-hLPuvXRlY7HheSreAP2qvCU3wDdMA9a-3Dv_SOFTwoO8MNLu_9aYbUk6Bo-rKqMzo3ff_7xbYsWzYNXbw1eDkJlsYtce8Q1KTjckP2T3NM2wpEJxpP3EpzSd3jeKl8P0tiK4lbHLRLfrJ_PEBUUKum0kOSE15G0rCmPfJ-VM3fGpC3qVjB2bLMWS1sP-rhdl-cvddrc9IbZ"
-          alt="Kélibia coastline"
+          alt="Background"
         />
         <div className="lp-bg-overlay"></div>
       </div>
-      <div className="lp-blob-br"></div>
-      <div className="lp-blob-tl"></div>
 
       {/* Card */}
       <div className="lp-container">
@@ -476,32 +264,31 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src={logo}
-              alt="Ville de Kélibia"
+              src={tunisiaLogo}
+              alt="Logo"
             />
             <div>
-              <div className="lp-hero-brand-name">Ville de Kélibia</div>
-              <div className="lp-hero-brand-sub">Smart City Portal</div>
+              <div className="lp-hero-brand-name">{t('republic_of_tunisia')}</div>
+              <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
 
           <div>
             <div className="lp-hero-headline">
-              Votre ville,<br />
-              <span className="lp-hero-accent">Connectée &amp; Durable.</span>
+              {t('hero_headline_1')}<br />
+              <span className="lp-hero-accent">{t('hero_headline_2')}</span>
             </div>
             <p className="lp-hero-desc">
-              Accédez à vos services municipaux, suivez vos demandes en temps
-              réel et participez à l'évolution de notre cité méditerranéenne.
+              {t('hero_desc')}
             </p>
           </div>
 
           <div className="lp-hero-badges">
             <div className="lp-hero-badge">
-              <i className="fas fa-shield-alt"></i> Sécurisé
+              <i className="fas fa-shield-alt"></i> {t('secure')}
             </div>
             <div className="lp-hero-badge">
-              <i className="fas fa-language"></i> Multilingue
+              <i className="fas fa-language"></i> {t('multilingual')}
             </div>
           </div>
         </div>
@@ -519,20 +306,20 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={logo} alt="Kélibia Smart City" />
+            <img src={tunisiaLogo} alt="Logo" />
           </div>
 
           {/* Greeting */}
           <div className="lp-greeting">
-            <h2>Bon retour !</h2>
-            <p>Connectez-vous pour accéder à votre espace citoyen.</p>
+            <h2>{t('welcome_title')}</h2>
+            <p>{t('welcome_subtitle')}</p>
           </div>
 
           <form onSubmit={onSubmit}>
             {/* Email */}
             <div className="lp-field">
               <label className="lp-label" htmlFor="email">
-                <i className="fas fa-at"></i> Adresse Email
+                <i className="fas fa-at"></i> {t('email')}
               </label>
               <input
                 id="email"
@@ -548,7 +335,7 @@ export default function LoginPage() {
             {/* Password */}
             <div className="lp-field">
               <label className="lp-label" htmlFor="password">
-                <i className="fas fa-lock-open"></i> Mot de Passe
+                <i className="fas fa-lock"></i> {t('password_label')}
               </label>
               <div className="lp-input-wrap">
                 <input
@@ -578,7 +365,7 @@ export default function LoginPage() {
             {/* Submit */}
             <button className="lp-btn" type="submit" disabled={loading}>
               {loading && <span className="spinner-border spinner-border-sm" role="status" />}
-              SE CONNECTER <i className="fas fa-arrow-right"></i>
+              {t('login_btn').toUpperCase()} <i className="fas fa-arrow-right"></i>
             </button>
 
             {error && <div className="lp-error">{error}</div>}
@@ -587,27 +374,27 @@ export default function LoginPage() {
           {/* Alt login */}
           <div className="lp-divider">
             <div className="lp-divider-line"></div>
-            <span className="lp-divider-txt">Ou continuer avec</span>
+            <span className="lp-divider-txt">{lang === 'ar' ? 'أو' : 'Ou'}</span>
             <div className="lp-divider-line"></div>
           </div>
           <div className="lp-alt-grid">
             <button className="lp-alt-btn">
-              <i className="fas fa-id-card icon-blue"></i> Tunisie ID
+              <i className="fas fa-id-card icon-blue"></i> {t('tunisia_id')}
             </button>
             <button className="lp-alt-btn">
-              <i className="fas fa-qrcode icon-orange"></i> Scan QR
+              <i className="fas fa-qrcode icon-orange"></i> {t('scan_qr')}
             </button>
           </div>
 
           {/* Footer */}
           <div className="lp-footer">
             <p className="lp-signup-link">
-              Pas encore inscrit ? <Link to="/signup">{t('create_account')}</Link>
+              {t('not_registered_yet')} <Link to="/signup">{t('create_account')}</Link>
             </p>
-            <p>© 2024 Commune de Kélibia — Smart City Portal</p>
-            <div className="lp-footer-links">
-              <a href="#">Confidentialité</a>
-              <a href="#">Assistance</a>
+            <p>{t('footer_text')}</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>{t('privacy')}</a>
+              <a href="#" style={{ fontSize: '.7rem', color: '#9ca3af', textDecoration: 'none' }}>{t('assistance')}</a>
             </div>
           </div>
 

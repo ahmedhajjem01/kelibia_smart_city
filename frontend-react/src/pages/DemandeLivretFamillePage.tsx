@@ -138,7 +138,11 @@ export default function DemandeLivretFamillePage() {
     })
 
     Object.entries(files).forEach(([key, value]) => {
-      if (value) data.append(key, value)
+      if (value) {
+        const ext = ('name' in value) ? value.name.split('.').pop() : 'jpg'
+        const shortName = `${key}_${Date.now()}.${ext}`
+        data.append(key, value, shortName)
+      }
     })
 
     try {

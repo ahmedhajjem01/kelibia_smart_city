@@ -155,10 +155,16 @@ export default function DemandeEvenementPage() {
     const data = new FormData()
     Object.entries(form).forEach(([k, v]) => { if (v) data.append(k, v) })
     if (position) { data.append('latitude', String(position[0])); data.append('longitude', String(position[1])) }
-    Object.entries(files).forEach(([k, v]) => { if (v) data.append(k, v as Blob) })
+    Object.entries(files).forEach(([k, v]) => {
+      if (v) {
+        const ext = ('name' in v) ? v.name.split('.').pop() : 'jpg'
+        const shortName = `${k}_${Date.now()}.${ext}`
+        data.append(k, v, shortName)
+      }
+    })
 
     try {
-      const res = await fetch('/api/evenements/demande/', {
+      const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${access}` },
         body: data,

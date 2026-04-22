@@ -448,6 +448,41 @@ class AgentCitizenVerificationView(APIView):
             })
 
 
+
+class ConfigView(APIView):
+    """
+    API to manage global site settings (site_name, maintenance_mode, etc.)
+    Only reachable by Supervisors or Staff.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+            return Response({"error": "Accès refusé."}, status=403)
+        
+        from .models import SiteConfiguration
+        config, _ = SiteConfiguration.objects.get_or_create(id=1)
+        return Response({
+            "site_name": config.site_name,
+            "contact_email": config.contact_email,
+            "maintenance_mode": config.maintenance_mode
+        })
+
+    def post(self, request):
+        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
+            return Response({"error": "Accès refusé."}, status=403)
+        
+        from .models import SiteConfiguration
+        config, _ = SiteConfiguration.objects.get_or_create(id=1)
+        
+        config.site_name = request.data.get('site_name', config.site_name)
+        config.contact_email = request.data.get('contact_email', config.contact_email)
+        config.maintenance_mode = request.data.get('maintenance_mode', config.maintenance_mode)
+        config.save()
+        
+        return Response({"message": "Configuration enregistrée avec succès."})
+
+
 def admin_logout(request):
 
 

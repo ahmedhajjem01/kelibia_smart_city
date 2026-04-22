@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes as pc
 from .models import Reclamation
 from .serializers import ReclamationSerializer
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ReclamationViewSet(viewsets.ModelViewSet):
@@ -21,12 +23,12 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
-        from .classifier import classify, detect_duplicate
-        title       = self.request.data.get('title', '')
-        description = self.request.data.get('description', '')
-        category    = self.request.data.get('category', 'other')
 
-        # Parse GPS coords (may be None if citizen didn't share location)
+        title         = self.request.data.get('title', '')
+        description   = self.request.data.get('description', '')
+        category_hint = self.request.data.get('category', 'other')
+
+        # GPS coords
         try:
             latitude  = float(self.request.data.get('latitude'))
         except (TypeError, ValueError):
@@ -36,62 +38,98 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             longitude = None
 
-        # ── ML classification ────────────────────────────────────────────────
-        result = classify(title, description, category)
+        # ML Classification — safe fallback if models are missing or crash
+        SERVICE_MAP_FALLBACK = {
+            'lighting': 'Service Eclairage Public',
+            'trash':    'Service Hygiene & Proprete',
+            'roads':    'Service Voirie & Infrastructure',
+            'noise':    'Service Ordre & Tranquillite',
+            'other':    'Service Technique General',
+        }
+        ml_result = {
+            'category':            category_hint if category_hint in SERVICE_MAP_FALLBACK else 'other',
+            'priority':            'normale',
+            'service_responsable': SERVICE_MAP_FALLBACK.get(category_hint, 'Service Technique General'),
+            'confidence':          {},
+        }
+        try:
+            from .classifier import classify
+            ml_result = classify(title, description, category_hint)
+        except Exception as e:
+            logger.warning(f"ML classify() failed, using defaults: {e}")
 
-        # ── Duplicate detection (texte + GPS) ────────────────────────────────
-        dup_result   = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
-        is_duplicate = dup_result['is_duplicate']
+        # Duplicate Detection — safe fallback
+        dup_result = {'is_duplicate': False, 'duplicate_of': None, 'final_score': 0.0}
+        try:
+            from .classifier import detect_duplicate
+            dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
+        except Exception as e:
+            logger.warning(f"detect_duplicate() failed, skipping: {e}")
+
+        is_duplicate = dup_result.get('is_duplicate', False)
         duplicate_of = None
-        if is_duplicate and dup_result['duplicate_of']:
+        if is_duplicate and dup_result.get('duplicate_of'):
             try:
+                from .models import Reclamation
                 duplicate_of = Reclamation.objects.get(pk=dup_result['duplicate_of'])
-            except Reclamation.DoesNotExist:
+            except Exception:
                 duplicate_of = None
 
-        serializer.save(
+        # Save the instance
+        instance = serializer.save(
             citizen=self.request.user,
-            priority=result['priority'],
-            service_responsable=result['service_responsable'],
-            category=result['category'],
+            priority=ml_result.get('priority', 'normale'),
+            service_responsable=ml_result.get('service_responsable', SERVICE_MAP_FALLBACK.get(category_hint, 'Service Technique General')),
+            category=ml_result.get('category', category_hint),
             is_duplicate=is_duplicate,
             duplicate_of=duplicate_of,
-            similarity_score=dup_result['final_score'],
+            similarity_score=dup_result.get('final_score', 0.0),
         )
 
+        # Attach results to the instance so create() can use them for response metadata
+        instance._ml_result = ml_result
+        instance._dup_result = dup_result
+
     def create(self, request, *args, **kwargs):
-        from .classifier import classify, detect_duplicate
-        title       = request.data.get('title', '')
-        description = request.data.get('description', '')
-        category    = request.data.get('category', 'other')
-
+        # We let super().create handle the standard flow (which calls perform_create)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         try:
-            latitude  = float(request.data.get('latitude'))
-        except (TypeError, ValueError):
-            latitude  = None
+            self.perform_create(serializer)
+        except Exception as e:
+            import traceback
+            logger.error(f"Creation failed: {e}\n{traceback.format_exc()}")
+            return Response({"detail": f"Erreur serveur: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        instance = serializer.instance
+        data = serializer.data
+        
+        # Add ML and Duplicate metadata to the response
         try:
-            longitude = float(request.data.get('longitude'))
-        except (TypeError, ValueError):
-            longitude = None
-
-        ml_result  = classify(title, description, category)
-        dup_result = detect_duplicate(title, description, latitude=latitude, longitude=longitude)
-
-        response = super().create(request, *args, **kwargs)
-        response.data['ml_classification'] = {
-            'category':            ml_result['category'],
-            'priority':            ml_result['priority'],
-            'service_responsable': ml_result['service_responsable'],
-            'confidence':          ml_result.get('confidence', {}),
-        }
-        response.data['duplicate_detection'] = {
-            'is_duplicate':     dup_result['is_duplicate'],
-            'duplicate_of':     dup_result['duplicate_of'],
-            'similarity_score': dup_result['similarity_score'],
-            'geo_score':        dup_result['geo_score'],
-            'final_score':      dup_result['final_score'],
-        }
-        return response
+            if hasattr(instance, '_ml_result'):
+                ml_result = instance._ml_result
+                data['ml_classification'] = {
+                    'category':            ml_result.get('category', 'other'),
+                    'priority':            ml_result.get('priority', 'normale'),
+                    'service_responsable': ml_result.get('service_responsable', 'Service Technique Général'),
+                    'confidence':          ml_result.get('confidence', {}),
+                }
+            
+            if hasattr(instance, '_dup_result'):
+                dup_result = instance._dup_result
+                data['duplicate_detection'] = {
+                    'is_duplicate':     dup_result.get('is_duplicate', False),
+                    'duplicate_of':     dup_result.get('duplicate_of'),
+                    'similarity_score': dup_result.get('similarity_score', 0.0),
+                    'geo_score':        dup_result.get('geo_score', 0.0),
+                    'final_score':      dup_result.get('final_score', 0.0),
+                }
+        except Exception as e:
+            logger.error(f"Error enriching response with ML metadata: {e}")
+            # Non-fatal: original data still valid
+            
+        headers = self.get_success_headers(data)
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
     # ── classify_preview ──────────────────────────────────────────────────────
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -174,11 +212,37 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         new_status = request.data.get('status')
         if new_status in dict(Reclamation.STATUS_CHOICES):
             rec.status = new_status
-            if getattr(user, 'user_type', '') == 'agent':
+            if getattr(user, 'user_type', '') == 'agent' and rec.agent is None:
                 rec.agent = user
             rec.save()
             return Response({"status": "Statut mis a jour."})
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ── assign_agent (Supervisor only) ───────────────────────────────────────
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def assign_agent(self, request, pk=None):
+        """
+        POST /api/reclamations/{id}/assign_agent/
+        Body: { "agent_id": 123 }
+        """
+        rec  = self.get_object()
+        user = request.user
+        # Only supervisors or staff can assign agents
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'supervisor'):
+            return Response({"detail": "Seuls les superviseurs peuvent affecter des agents."}, status=status.HTTP_403_FORBIDDEN)
+        
+        agent_id = request.data.get('agent_id')
+        if not agent_id:
+            return Response({"detail": "ID de l'agent requis."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        from accounts.models import CustomUser
+        try:
+            agent = CustomUser.objects.get(pk=agent_id, user_type='agent')
+            rec.agent = agent
+            rec.save()
+            return Response({"status": f"Agent {agent.first_name} {agent.last_name} affecté avec succès."})
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "Agent introuvable ou n'est pas un agent municipal."}, status=status.HTTP_404_NOT_FOUND)
 
     # ── ml_stats ──────────────────────────────────────────────────────────────
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])

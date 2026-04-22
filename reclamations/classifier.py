@@ -24,7 +24,10 @@ _MODEL_DIR  = os.path.join(_THIS_DIR, "ml_models")
 _CAT_MODEL  = os.path.join(_MODEL_DIR, "category_model.joblib")
 _PRIO_MODEL = os.path.join(_MODEL_DIR, "priority_model.joblib")
 
-os.makedirs(_MODEL_DIR, exist_ok=True)
+try:
+    os.makedirs(_MODEL_DIR, exist_ok=True)
+except Exception as e:
+    logger.warning(f"Could not create model directory {_MODEL_DIR}: {e}")
 
 # ─── Singleton cache ──────────────────────────────────────────────────────────
 _category_model = None
@@ -452,8 +455,8 @@ def detect_duplicate(title: str, description: str,
             }
 
         # ── 2. TF-IDF text similarity ────────────────────────────────────────
-        new_text       = _normalize(title + " " + description)
-        existing_texts = [_normalize(r['title'] + " " + r['description']) for r in existing]
+        new_text       = _normalize((title or "") + " " + (description or ""))
+        existing_texts = [_normalize((r['title'] or "") + " " + (r['description'] or "")) for r in existing]
         existing_ids   = [r['id'] for r in existing]
 
         corpus = existing_texts + [new_text]

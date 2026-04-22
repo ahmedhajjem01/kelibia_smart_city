@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Webcam from 'react-webcam'
@@ -106,7 +107,7 @@ export default function DemandeEvenementPrivePage() {
   useEffect(() => {
     const access = getAccessToken()
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null).then(d => d && setUser(d)).catch(() => {})
   }, [navigate])
 
@@ -139,7 +140,7 @@ export default function DemandeEvenementPrivePage() {
     if (position) { data.append('latitude', String(position[0])); data.append('longitude', String(position[1])) }
     Object.entries(files).forEach(([k, v]) => { if (v) data.append(k, v as Blob) })
     try {
-      const res = await fetch('/api/evenements/demande/', {
+      const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), {
         method: 'POST', headers: { Authorization: `Bearer ${access}` }, body: data,
       })
       if (res.ok) { setSuccess(true); setTimeout(() => navigate('/mes-evenements'), 3000) }

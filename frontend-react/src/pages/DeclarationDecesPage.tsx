@@ -104,7 +104,7 @@ export default function DeclarationDecesPage() {
         setFetchError(e.message || t('err_eligible_members'))
       }
     })()
-  }, [navigate, lang])
+  }, [navigate, lang, t])
 
 
   async function onSubmit(e: React.FormEvent) {
@@ -117,7 +117,18 @@ export default function DeclarationDecesPage() {
     setSubmitting(true)
     try {
       const form = e.currentTarget as HTMLFormElement
-      const fd = new FormData(form)
+      const rawFd = new FormData(form)
+
+      // Process FormData to shorten all filenames and preserve other fields
+      const fd = new FormData()
+      rawFd.forEach((value, key) => {
+        if (value instanceof File && value.name) {
+          const ext = value.name.split('.').pop() || 'jpg'
+          fd.append(key, value, `${key}_${Date.now()}.${ext}`)
+        } else {
+          fd.append(key, value)
+        }
+      })
 
       // Manual date validation (72h rule)
       const dateDecesStr = fd.get('date_deces') as string
@@ -145,7 +156,7 @@ export default function DeclarationDecesPage() {
       const fileInput = form.querySelector<HTMLInputElement>('#police_report')
       const hasManualFile = fileInput && fileInput.files && fileInput.files.length > 0
       if (capturedFile && !hasManualFile) {
-        fd.set('police_report', capturedFile, capturedFile.name)
+        fd.set('police_report', capturedFile, `police_report_${Date.now()}.jpg`)
       }
 
       const response = await fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), {
@@ -176,9 +187,9 @@ export default function DeclarationDecesPage() {
       }
 
       setSubmitted(true)
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      alert(t('error_msg'))
+      alert(err.message || t('error_msg'))
     } finally {
       setSubmitting(false)
     }
@@ -337,7 +348,7 @@ export default function DeclarationDecesPage() {
                        <p className="small text-muted mb-2">
                         <i className="fas fa-info-circle me-1 text-primary"></i>
                         <strong>{t('next_step_label')}</strong> {t('next_step_inhumation')}
-                      </p>
+                       </p>
                       <Link to="/demande-inhumation" className="btn btn-link btn-sm p-0 text-success fw-bold text-decoration-none">
                         {t('go_to_inhumation')} <i className="fas fa-arrow-right ms-1"></i>
                       </Link>
@@ -384,4 +395,3 @@ export default function DeclarationDecesPage() {
     </MainLayout>
   )
 }
-

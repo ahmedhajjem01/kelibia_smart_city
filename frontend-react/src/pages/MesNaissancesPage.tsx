@@ -25,13 +25,13 @@ type MesExtraitsResponse = {
 }
 
 export default function MesNaissancesPage() {
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<MesExtraitsResponse | null>(null)
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -95,10 +95,11 @@ export default function MesNaissancesPage() {
               {extrait.date_naissance}
             </p>
             <div className="d-flex gap-2">
-              {!extrait.is_paid ? (
+              {/* Debug: console.log('Extrait:', extrait.nom_complet_fr, 'Paid:', extrait.is_paid, 'ASD:', user?.has_active_asd) */}
+              {(!extrait.is_paid && !user?.has_active_asd) ? (
                 <button
                   className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
-                  onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait de Naissance&requestId=${extrait.id}&requestType=birth_extract`)}
+                  onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Naissance&requestId=${extrait.id}&requestType=birth_extract&target=/mes-naissances&file_fr=${encodeURIComponent(resolveBackendUrl(extrait.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(extrait.url_ar))}`)}
                 >
                   <i className="fas fa-lock me-2"></i> Payer 0.500 DT
                 </button>
@@ -156,6 +157,14 @@ export default function MesNaissancesPage() {
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status" />
           <p className="mt-2 text-muted">Vérification de votre identité et recherche des actes en cours...</p>
+        </div>
+      ) : !user?.is_verified ? (
+        <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
+          <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+          <div>
+            <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
+            <p className="mb-0">{t('account_verification_required')}</p>
+          </div>
         </div>
       ) : error ? (
         <div className="alert alert-danger">{error}</div>

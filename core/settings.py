@@ -114,7 +114,10 @@ STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
 
 # Media files
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+if os.getenv("VERCEL"):
+    MEDIA_ROOT = Path("/tmp/media")
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
 
 # CORS & CSRF Configuration
 CORS_ALLOWED_ORIGINS = [

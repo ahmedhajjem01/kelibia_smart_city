@@ -83,6 +83,7 @@ class DemandeEvenement(models.Model):
     commentaire_agent = models.TextField(blank=True, verbose_name="Commentaire de l'agent")
     autorisation_signee = models.FileField(upload_to='autorisations/evenements/', blank=True, null=True, verbose_name="Autorisation signée")
     is_paid = models.BooleanField(default=False, verbose_name="Frais de dossier réglés")
+    paid_at = models.DateTimeField(null=True, blank=True)
 
     # --- Conflict detection (set by backend) ---
     has_conflict = models.BooleanField(default=False, verbose_name="Conflit détecté")

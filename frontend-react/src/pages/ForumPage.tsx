@@ -1,3 +1,4 @@
+import { resolveBackendUrl } from '../lib/backendUrl'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAccessToken, clearTokens } from '../lib/authStorage'
@@ -68,7 +69,7 @@ export default function ForumPage() {
 
   useEffect(() => {
     if (!access) { navigate('/login'); return }
-    fetch('/api/accounts/me/', { headers: { Authorization: `Bearer ${access}` } })
+    fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setUser(data) })
     Promise.all([fetchTopics(), fetchStats(), fetchTags(), fetchNotifCount()])
@@ -94,7 +95,7 @@ export default function ForumPage() {
   }
 
   async function fetchStats() {
-    const res = await fetch('/api/forum/stats/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/forum/stats/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) {
       const data = await res.json()
       setStats(Array.isArray(data) ? data[0] : (data.results ? data.results[0] : data))
@@ -102,12 +103,12 @@ export default function ForumPage() {
   }
 
   async function fetchTags() {
-    const res = await fetch('/api/forum/tags/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/forum/tags/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) setTags(await res.json())
   }
 
   async function fetchNotifCount() {
-    const res = await fetch('/api/forum/notifications/', { headers: { Authorization: `Bearer ${access}` } })
+    const res = await fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) {
       const data = await res.json()
       const list = Array.isArray(data) ? data : (data.results || [])
@@ -119,7 +120,7 @@ export default function ForumPage() {
     if (!newTitle.trim() || !newContent.trim()) { setCreateError('Titre et contenu requis.'); return }
     setCreating(true); setCreateError('')
     const tagNames = newTags.split(',').map((tt: string) => tt.trim()).filter(Boolean)
-    const res = await fetch('/api/forum/topics/', {
+    const res = await fetch(resolveBackendUrl('/api/forum/topics/'), {
       method: 'POST',
       headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTitle, content: newContent, category: newCategory, tag_names: tagNames }),
@@ -160,14 +161,29 @@ export default function ForumPage() {
     <div className="space-y-4 pt-4">
       {/* Launch discussion button */}
       <button
-        onClick={() => setShowModal(true)}
-        className="w-full py-3 text-white font-black text-sm tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer"
-        style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', boxShadow: '0 10px 30px rgba(180,122,80,0.3)' }}
+        onClick={() => {
+          if (!user?.is_verified) {
+            alert(t('account_pending_verification_desc'))
+            return
+          }
+          setShowModal(true)
+        }}
+        className={`w-full py-3 text-white font-black text-sm tracking-wide rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform relative overflow-hidden border-0 cursor-pointer ${!user?.is_verified ? 'opacity-70 grayscale' : ''}`}
+        style={{ 
+          background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)', 
+          boxShadow: user?.is_verified ? '0 10px 30px rgba(180,122,80,0.3)' : 'none' 
+        }}
       >
         <span>{lang === 'ar' ? 'ابدأ نقاشاً' : 'Lancer une discussion'}</span>
         {lang !== 'ar' && <span className="text-sm opacity-80" dir="rtl">ابدأ نقاشاً</span>}
         <i className="fas fa-comment-plus absolute right-6 opacity-20 text-2xl"></i>
       </button>
+
+      {user && !user.is_verified && (
+        <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-amber-800 text-[11px] font-medium animate-pulse">
+           <i className="fas fa-info-circle me-1"></i> {t('account_pending_verification_desc')}
+        </div>
+      )}
 
       {/* Categories */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">

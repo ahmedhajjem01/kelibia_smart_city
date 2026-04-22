@@ -138,13 +138,16 @@ export default function DemandeResidencePage() {
       : `Je soussigné ${formData.nom_prenom}, titulaire de la CIN n° ${formData.cin}, exerçant la profession de ${formData.profession}, demeurant à ${formData.adresse_demandee}, sollicite par la présente l'obtention d'un certificat de résidence pour ${formData.motif_demande}.`
     data.append('motif_demande', `${formData.motif_demande}\n\n Texte de la Demande:\n${demandeText}`)
 
-    if (files.cin_recto) data.append('cin_recto', files.cin_recto as Blob)
-    if (files.cin_verso) data.append('cin_verso', files.cin_verso as Blob)
-    if (files.quitus_municipal) data.append('quitus_municipal', files.quitus_municipal as Blob)
-    if (files.acte_deces_conjoint) data.append('acte_deces_conjoint', files.acte_deces_conjoint as Blob)
+    Object.entries(files).forEach(([k, f]) => {
+      if (f) {
+        const ext = ('name' in f) ? f.name.split('.').pop() : 'jpg'
+        const shortName = `${k}_${Date.now()}.${ext}`
+        data.append(k, f, shortName)
+      }
+    })
 
     try {
-      const res = await fetch('/api/residence/demande/', {
+      const res = await fetch(resolveBackendUrl('/api/residence/demande/'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${access}`,
@@ -236,7 +239,11 @@ export default function DemandeResidencePage() {
                       type="tel"
                       className="form-control form-control-lg bg-light border-0"
                       value={formData.telephone}
-                      onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 8) setFormData({ ...formData, telephone: val });
+                      }}
+                      maxLength={8}
                       required
                       style={{ borderRadius: '12px' }}
                     />
@@ -276,7 +283,11 @@ export default function DemandeResidencePage() {
                             type="text"
                             className="demande-inline-input"
                             value={formData.cin}
-                            onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 8) setFormData({ ...formData, cin: val });
+                            }}
+                            maxLength={8}
                             placeholder={t('cin_placeholder')}
                             required
                           />
@@ -325,7 +336,11 @@ export default function DemandeResidencePage() {
                             type="text"
                             className="demande-inline-input"
                             value={formData.cin}
-                            onChange={(e) => setFormData({ ...formData, cin: e.target.value })}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 8) setFormData({ ...formData, cin: val });
+                            }}
+                            maxLength={8}
                             placeholder={t('cin_placeholder')}
                             required
                           />
