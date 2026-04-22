@@ -448,8 +448,7 @@ export default function DashboardPage() {
   /* ── Right sidebar ── */
 
   const rightSidebar = (
-
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 8 }} dir={lang === 'ar' ? 'rtl' : 'ltr'} className={lang === 'ar' ? 'font-arabic' : ''}>
 
       <style>{CSS}</style>
 
@@ -482,28 +481,19 @@ export default function DashboardPage() {
         </div>
 
         <div>
-
           <div className="db-stat-row" style={{ borderBottom: 'none' }}>
-            <span style={{ color: '#5b403d' }}>Mes Dossiers</span>
-            <span className="db-stat-badge">{String(reclamations.length).padStart(2, '0')}</span>
+            <span style={{ color: '#5b403d' }}>{t('my_files_label')}</span>
+            <span className="db-stat-badge" style={{ [lang === 'ar' ? 'marginRight' : 'marginLeft']: 'auto' }}>{String(reclamations.length).padStart(2, '0')}</span>
           </div>
-
         </div>
 
         <Link
-
           to="/profile"
-
           style={{ display: 'block', width: '100%', marginTop: 18, padding: '10px', textAlign: 'center', background: '#e8e8e8', color: '#1a1c1c', fontWeight: 800, fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', transition: 'background .2s' }}
-
           onMouseEnter={e => (e.currentTarget.style.background = '#dadada')}
-
           onMouseLeave={e => (e.currentTarget.style.background = '#e8e8e8')}
-
         >
-
-          Mon Compte
-
+          {t('my_account_btn')}
         </Link>
 
       </div>
@@ -511,13 +501,9 @@ export default function DashboardPage() {
 
 
       {/* Big red CTA */}
-
       <Link to="/nouvelle-reclamation" className="db-signalement-btn">
-
         <i className="fas fa-plus-circle"></i>
-
-        NOUVEAU SIGNALEMENT
-
+        {t('new_signalement_btn')}
       </Link>
 
 
@@ -537,15 +523,10 @@ export default function DashboardPage() {
           {newsItems.length > 0 ? newsItems.map(item => (
 
             <Link key={item.id} to="/news" className="db-news-item" style={{ textDecoration: 'none' }}>
-
               <span className="db-news-time">
-
-                {new Date(item.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
-
+                {new Date(item.created_at).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
               </span>
-
               <div className="db-news-headline">{item.title}</div>
-
             </Link>
 
           )) : (
@@ -575,15 +556,10 @@ export default function DashboardPage() {
         </div>
 
         <Link
-
           to="/news"
-
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 20, fontSize: '.72rem', fontWeight: 800, color: '#d4aa8d', textDecoration: 'none', textTransform: 'uppercase', borderBottom: '2px solid rgba(212,170,141,.2)', paddingBottom: 2 }}
-
         >
-
-          Voir tout le flux <i className="fas fa-arrow-right" style={{ fontSize: '.7rem' }}></i>
-
+          {t('see_all_news')} <i className={`fas ${lang === 'ar' ? 'fa-arrow-left' : 'fa-arrow-right'}`} style={{ fontSize: '.7rem' }}></i>
         </Link>
 
       </div>

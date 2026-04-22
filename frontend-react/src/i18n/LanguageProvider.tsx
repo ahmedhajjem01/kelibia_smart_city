@@ -649,6 +649,10 @@ const translations: Record<Lang, Record<string, string>> = {
     no_users_found: 'Aucun utilisateur trouvé.',
     no_services_tab_msg: 'Aucun service configuré.',
     results_count: 'résultat(s)',
+    my_files_label: 'Mes Dossiers',
+    my_account_btn: 'Mon Compte',
+    new_signalement_btn: 'NOUVEAU SIGNALEMENT',
+    see_all_news: 'Voir tout le flux',
     
     // Forum additional keys
     start_discussion: 'Lancer une discussion',
@@ -1531,6 +1535,10 @@ const translations: Record<Lang, Record<string, string>> = {
     no_users_found: 'لم يتم العثور على أي مستخدم.',
     no_services_tab_msg: 'لم يتم تهيئة أي خدمة.',
     results_count: 'نتيجة',
+    my_files_label: 'ملفاتي',
+    my_account_btn: 'حسابي',
+    new_signalement_btn: 'بلاغ جديد',
+    see_all_news: 'عرض كل الأخبار',
     
     // Forum additional keys
     start_discussion: 'ابدأ نقاشاً',
