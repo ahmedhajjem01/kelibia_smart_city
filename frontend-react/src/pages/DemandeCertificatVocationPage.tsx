@@ -271,7 +271,11 @@ export default function DemandeCertificatVocationPage() {
                 <input
                   type="text" className="form-control rounded-3"
                   placeholder="12345678" maxLength={8}
-                  value={form.cin} onChange={e => update('cin', e.target.value.replace(/\D/g, ''))}
+                  value={form.cin}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val.length <= 8) update('cin', val);
+                  }}
                   required
                 />
                 {form.cin.length > 0 && form.cin.length !== 8 && (

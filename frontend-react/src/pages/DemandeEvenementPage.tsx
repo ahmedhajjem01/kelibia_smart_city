@@ -464,14 +464,24 @@ export default function DemandeEvenementPage() {
                         </div>
                         <div className="col-md-3">
                           <label className={labelClass}>CIN <span className="text-danger">*</span></label>
-                          <input type="text" className={inputClass} style={inputStyle} maxLength={8}
-                            value={form.cin_organisateur} onChange={e => handleField('cin_organisateur', e.target.value)}
+                          <input type="text" className={inputClass} style={inputStyle}
+                            value={form.cin_organisateur}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 8) handleField('cin_organisateur', val);
+                            }}
+                            maxLength={8}
                             placeholder="12345678" required />
                         </div>
                         <div className="col-md-3">
                           <label className={labelClass}>Téléphone <span className="text-danger">*</span></label>
                           <input type="tel" className={inputClass} style={inputStyle}
-                            value={form.telephone_organisateur} onChange={e => handleField('telephone_organisateur', e.target.value)}
+                            value={form.telephone_organisateur}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              if (val.length <= 8) handleField('telephone_organisateur', val);
+                            }}
+                            maxLength={8}
                             placeholder="XX XXX XXX" required />
                         </div>
                       </div>

@@ -277,7 +277,10 @@ export default function DemandeLivretFamillePage() {
                           type="text"
                           className="form-control form-control-lg bg-light border-0 shadow-sm"
                           value={formData.cin_epoux}
-                          onChange={(e) => setFormData({ ...formData, cin_epoux: e.target.value })}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 8) setFormData({ ...formData, cin_epoux: val });
+                          }}
                           maxLength={8}
                           required
                           style={{ borderRadius: '12px' }}
@@ -289,7 +292,10 @@ export default function DemandeLivretFamillePage() {
                           type="text"
                           className="form-control form-control-lg bg-light border-0 shadow-sm"
                           value={formData.cin_epouse}
-                          onChange={(e) => setFormData({ ...formData, cin_epouse: e.target.value })}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 8) setFormData({ ...formData, cin_epouse: val });
+                          }}
                           maxLength={8}
                           required
                           style={{ borderRadius: '12px' }}

@@ -426,12 +426,20 @@ export default function DemandeConstructionPage() {
                   <div className="col-md-3">
                     <label className="form-label fw-semibold small">CIN (8 chiffres) <span className="text-danger">*</span></label>
                     <input className="form-control rounded-3" placeholder="12345678" maxLength={8}
-                      value={form.cin_proprietaire} onChange={e => update('cin_proprietaire', e.target.value.replace(/\D/g, ''))} />
+                      value={form.cin_proprietaire}
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 8) update('cin_proprietaire', val);
+                      }} />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold small">Téléphone <span className="text-danger">*</span></label>
-                    <input className="form-control rounded-3" placeholder="Ex: 25123456"
-                      value={form.telephone_proprietaire} onChange={e => update('telephone_proprietaire', e.target.value)} />
+                    <input className="form-control rounded-3" placeholder="Ex: 25123456" maxLength={8}
+                      value={form.telephone_proprietaire}
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 8) update('telephone_proprietaire', val);
+                      }} />
                   </div>
                 </div>
               </div>

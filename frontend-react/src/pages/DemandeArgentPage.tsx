@@ -1,8 +1,44 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Webcam from 'react-webcam'
 import { getAccessToken } from '../lib/authStorage'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
+
+const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => void; onCancel: () => void }) => {
+  const webcamRef = useRef<Webcam>(null)
+  const [imgSrc, setImgSrc] = useState<string | null>(null)
+  const capture = useCallback(() => {
+    const src = webcamRef.current?.getScreenshot()
+    if (src) setImgSrc(src)
+  }, [])
+  const confirm = () => {
+    if (imgSrc) fetch(imgSrc).then(r => r.blob()).then(b => onCapture(b))
+  }
+  return (
+    <div className="text-center bg-dark p-3 rounded-4 shadow-lg mb-3">
+      {!imgSrc ? (
+        <>
+          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg"
+            className="w-100 rounded-3 mb-3 border border-secondary"
+            videoConstraints={{ facingMode: 'environment' }} />
+          <div className="d-flex justify-content-center gap-2">
+            <button type="button" onClick={capture} className="btn btn-warning btn-sm rounded-pill px-3 fw-bold"><i className="fas fa-camera me-1"></i> Capturer</button>
+            <button type="button" onClick={onCancel} className="btn btn-outline-light btn-sm rounded-pill px-3">Annuler</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <img src={imgSrc} alt="Capture" className="w-100 rounded-3 mb-3 border border-success border-3" />
+          <div className="d-flex justify-content-center gap-2">
+            <button type="button" onClick={confirm} className="btn btn-success btn-sm rounded-pill px-3 fw-bold"><i className="fas fa-check me-1"></i> Confirmer</button>
+            <button type="button" onClick={() => setImgSrc(null)} className="btn btn-outline-warning btn-sm rounded-pill px-3"><i className="fas fa-undo me-1"></i> Reprendre</button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 const SERVICE_TYPES = [
   { value: 'enregistrement_bien', label: "Enregistrement d'un bien (Rez-de-chaussée, étage, garage)" },
@@ -20,6 +56,7 @@ export default function DemandeArgentPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [cameraActive, setCameraActive] = useState<string | null>(null)
   const cinRectoRef = useRef<HTMLInputElement>(null)
   const cinVersoRef = useRef<HTMLInputElement>(null)
   const docProprieteRef = useRef<HTMLInputElement>(null)
@@ -38,6 +75,12 @@ export default function DemandeArgentPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof typeof files) => {
     if (e.target.files?.[0]) setFiles(prev => ({ ...prev, [key]: e.target.files![0] }))
+  }
+
+  const handleCapture = (blob: Blob, key: keyof typeof files) => {
+    const file = new File([blob], `${key}.jpg`, { type: 'image/jpeg' })
+    setFiles(prev => ({ ...prev, [key]: file }))
+    setCameraActive(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,25 +185,43 @@ export default function DemandeArgentPage() {
                   <div className="row g-3 mb-3">
                     <div className="col-md-6">
                       <label className="form-label fw-semibold">CIN Recto</label>
-                      <div className="border rounded-3 p-3 text-center bg-light" style={{ cursor: 'pointer' }}
-                        onClick={() => cinRectoRef.current?.click()}>
-                        {files.cin_recto
-                          ? <><i className="fas fa-check-circle text-success me-2"></i><span className="text-success small">{files.cin_recto.name}</span></>
-                          : <><i className="fas fa-id-card fa-2x text-muted mb-2 d-block"></i><span className="text-muted small">Cliquer pour uploader</span></>}
-                        <input ref={cinRectoRef} type="file" accept="image/*" className="d-none"
-                          onChange={e => handleFileChange(e, 'cin_recto')} />
-                      </div>
+                      {cameraActive === 'cin_recto' ? (
+                        <WebcamCapture onCapture={b => handleCapture(b, 'cin_recto')} onCancel={() => setCameraActive(null)} />
+                      ) : (
+                        <div className="d-flex gap-2 align-items-center">
+                          <div className="border rounded-3 p-3 text-center bg-light flex-grow-1" style={{ cursor: 'pointer' }}
+                            onClick={() => cinRectoRef.current?.click()}>
+                            {files.cin_recto
+                              ? <><i className="fas fa-check-circle text-success me-2"></i><span className="text-success small">{files.cin_recto.name}</span></>
+                              : <><i className="fas fa-id-card fa-2x text-muted mb-2 d-block"></i><span className="text-muted small">Cliquer pour uploader</span></>}
+                            <input ref={cinRectoRef} type="file" accept="image/*" className="d-none"
+                              onChange={e => handleFileChange(e, 'cin_recto')} />
+                          </div>
+                          <button type="button" className="btn btn-warning rounded-3" onClick={() => setCameraActive('cin_recto')}>
+                            <i className="fas fa-camera"></i>
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-semibold">CIN Verso</label>
-                      <div className="border rounded-3 p-3 text-center bg-light" style={{ cursor: 'pointer' }}
-                        onClick={() => cinVersoRef.current?.click()}>
-                        {files.cin_verso
-                          ? <><i className="fas fa-check-circle text-success me-2"></i><span className="text-success small">{files.cin_verso.name}</span></>
-                          : <><i className="fas fa-id-card fa-2x text-muted mb-2 d-block"></i><span className="text-muted small">Cliquer pour uploader</span></>}
-                        <input ref={cinVersoRef} type="file" accept="image/*" className="d-none"
-                          onChange={e => handleFileChange(e, 'cin_verso')} />
-                      </div>
+                      {cameraActive === 'cin_verso' ? (
+                        <WebcamCapture onCapture={b => handleCapture(b, 'cin_verso')} onCancel={() => setCameraActive(null)} />
+                      ) : (
+                        <div className="d-flex gap-2 align-items-center">
+                          <div className="border rounded-3 p-3 text-center bg-light flex-grow-1" style={{ cursor: 'pointer' }}
+                            onClick={() => cinVersoRef.current?.click()}>
+                            {files.cin_verso
+                              ? <><i className="fas fa-check-circle text-success me-2"></i><span className="text-success small">{files.cin_verso.name}</span></>
+                              : <><i className="fas fa-id-card fa-2x text-muted mb-2 d-block"></i><span className="text-muted small">Cliquer pour uploader</span></>}
+                            <input ref={cinVersoRef} type="file" accept="image/*" className="d-none"
+                              onChange={e => handleFileChange(e, 'cin_verso')} />
+                          </div>
+                          <button type="button" className="btn btn-warning rounded-3" onClick={() => setCameraActive('cin_verso')}>
+                            <i className="fas fa-camera"></i>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 

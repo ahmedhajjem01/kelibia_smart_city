@@ -1,9 +1,45 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Webcam from 'react-webcam'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
+
+const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => void; onCancel: () => void }) => {
+  const webcamRef = useRef<Webcam>(null)
+  const [imgSrc, setImgSrc] = useState<string | null>(null)
+  const capture = useCallback(() => {
+    const src = webcamRef.current?.getScreenshot()
+    if (src) setImgSrc(src)
+  }, [])
+  const confirm = () => {
+    if (imgSrc) fetch(imgSrc).then(r => r.blob()).then(b => onCapture(b))
+  }
+  return (
+    <div className="text-center bg-dark p-3 rounded-4 shadow-lg mb-4">
+      {!imgSrc ? (
+        <>
+          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg"
+            className="w-100 rounded-3 mb-3 border border-secondary"
+            videoConstraints={{ facingMode: 'environment' }} />
+          <div className="d-flex justify-content-center gap-3">
+            <button type="button" onClick={capture} className="btn btn-warning rounded-pill px-4 fw-bold"><i className="fas fa-camera me-2"></i> Capturer</button>
+            <button type="button" onClick={onCancel} className="btn btn-outline-light rounded-pill px-4">Annuler</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <img src={imgSrc} alt="Capture" className="w-100 rounded-3 mb-3 border border-success border-3" />
+          <div className="d-flex justify-content-center gap-3">
+            <button type="button" onClick={confirm} className="btn btn-success rounded-pill px-4 fw-bold"><i className="fas fa-check me-2"></i> Confirmer</button>
+            <button type="button" onClick={() => setImgSrc(null)} className="btn btn-outline-warning rounded-pill px-4"><i className="fas fa-undo me-2"></i> Reprendre</button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function DemandeTransfertCorpsPage() {
   const { t, lang } = useI18n()
@@ -13,6 +49,9 @@ export default function DemandeTransfertCorpsPage() {
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [cameraActive, setCameraActive] = useState(false)
+  const [capturedCin, setCapturedCin] = useState<File | null>(null)
+  const cinInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -49,6 +88,10 @@ export default function DemandeTransfertCorpsPage() {
         formData.append(key, value)
       }
     })
+
+    if (capturedCin && !formData.has('cin_defunt')) {
+      formData.append('cin_defunt', capturedCin, `cin_defunt_${Date.now()}.jpg`)
+    }
     
     // Instead of building a complex backend app, since this is a frontend form flow, 
     // we assume there's an API or we just mock the success if the backend doesn't exist yet.
@@ -161,7 +204,23 @@ export default function DemandeTransfertCorpsPage() {
 
                     <div className="mb-4">
                       <label className="form-label fw-bold small text-uppercase text-muted">{lang === 'ar' ? 'نسخة من بطاقة تعريف المتوفي' : 'Copie CIN du défunt'}</label>
-                      <input type="file" name="cin_defunt" className="form-control form-control-lg bg-light border-0 shadow-sm" accept="image/*,application/pdf" required />
+                      {cameraActive ? (
+                        <WebcamCapture 
+                          onCapture={b => {
+                            setCapturedCin(new File([b], 'cin_defunt.jpg', { type: 'image/jpeg' }))
+                            setCameraActive(false)
+                          }}
+                          onCancel={() => setCameraActive(false)}
+                        />
+                      ) : (
+                        <div className="d-flex gap-2 align-items-center">
+                          <input type="file" ref={cinInputRef} name="cin_defunt" className="form-control form-control-lg bg-light border-0 shadow-sm" accept="image/*,application/pdf" required={!capturedCin} />
+                          <button type="button" className="btn btn-warning py-2 shadow-sm" onClick={() => setCameraActive(true)}>
+                            <i className="fas fa-camera"></i>
+                          </button>
+                        </div>
+                      )}
+                      {capturedCin && !cameraActive && <div className="text-success small mt-1"><i className="fas fa-check-circle me-1"></i> Photo capturée</div>}
                     </div>
 
                     <div className="d-grid gap-2 pt-3">
