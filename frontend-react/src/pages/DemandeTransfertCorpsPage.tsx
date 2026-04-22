@@ -54,7 +54,7 @@ export default function DemandeTransfertCorpsPage() {
     // we assume there's an API or we just mock the success if the backend doesn't exist yet.
     // Let's try sending to a generic request endpoint or simulate it.
     try {
-      const res = await fetch(resolveBackendUrl('/api/transfert-corps/demandes/'), {
+      const res = await fetch(resolveBackendUrl('/extrait-deces/api/transfert-corps/'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`

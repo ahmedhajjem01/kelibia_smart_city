@@ -56,9 +56,18 @@ export default function DemandeArgentPage() {
       data.append('service_type', formData.service_type)
       data.append('adresse_bien', formData.adresse_bien)
       data.append('description', formData.description)
-      if (files.cin_recto) data.append('cin_recto', files.cin_recto)
-      if (files.cin_verso) data.append('cin_verso', files.cin_verso)
-      if (files.document_propriete) data.append('document_propriete', files.document_propriete)
+      if (files.cin_recto) {
+        const ext = files.cin_recto.name.split('.').pop() || 'jpg'
+        data.append('cin_recto', files.cin_recto, `cin_recto_${Date.now()}.${ext}`)
+      }
+      if (files.cin_verso) {
+        const ext = files.cin_verso.name.split('.').pop() || 'jpg'
+        data.append('cin_verso', files.cin_verso, `cin_verso_${Date.now()}.${ext}`)
+      }
+      if (files.document_propriete) {
+        const ext = files.document_propriete.name.split('.').pop() || 'bin'
+        data.append('document_propriete', files.document_propriete, `doc_prop_${Date.now()}.${ext}`)
+      }
 
       const res = await fetch('/api/impots/demande/', {
         method: 'POST',

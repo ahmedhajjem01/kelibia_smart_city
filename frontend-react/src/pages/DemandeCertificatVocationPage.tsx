@@ -153,7 +153,10 @@ export default function DemandeCertificatVocationPage() {
     fd.append('adresse_bien', form.adresse_bien)
     DOCS.forEach(doc => {
       const f = files[doc.key]
-      if (f) fd.append(doc.key, f)
+      if (f) {
+        const ext = f.name.split('.').pop() || 'bin'
+        fd.append(doc.key, f, `${doc.key}_${Date.now()}.${ext}`)
+      }
     })
 
     try {

@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import Citoyen, ExtraitNaissance, DeclarationNaissance
-from .serializers import DeclarationNaissanceSerializer
+from .models import Citoyen, ExtraitNaissance, DeclarationNaissance, DemandeLegalisation
+from .serializers import DeclarationNaissanceSerializer, DemandeLegalisationSerializer
 
 from django.utils import timezone
 
@@ -150,3 +150,18 @@ class DeclarationNaissanceDetailAPIView(APIView):
 def verify_birth_certificate_view(request, cert_uuid):
     extrait = get_object_or_404(ExtraitNaissance, uuid=cert_uuid)
     return render(request, 'extrait_naissance/verify.html', {'extrait': extrait})
+
+class DemandeLegalisationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        my_requests = DemandeLegalisation.objects.filter(citizen=request.user).order_by('-created_at')
+        serializer = DemandeLegalisationSerializer(my_requests, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = DemandeLegalisationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(citizen=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

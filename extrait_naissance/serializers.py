@@ -1,5 +1,10 @@
-from rest_framework import serializers
-from .models import DeclarationNaissance, Citoyen, ExtraitNaissance
+from .models import DeclarationNaissance, Citoyen, ExtraitNaissance, DemandeLegalisation
+
+class DemandeLegalisationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DemandeLegalisation
+        fields = '__all__'
+        read_only_fields = ['citizen', 'status', 'created_at', 'is_paid']
 
 class DeclarationNaissanceSerializer(serializers.ModelSerializer):
     class Meta:

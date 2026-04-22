@@ -46,7 +46,7 @@ export default function MesDemandesPage() {
         }
 
         // Parallel fetching
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement, resTransfert, resLegalisation] = await Promise.all([
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
           fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
@@ -60,6 +60,8 @@ export default function MesDemandesPage() {
           fetch(resolveBackendUrl('/api/construction/vocation/'), { headers }),
           fetch(resolveBackendUrl('/api/construction/raccordement/'), { headers }),
           fetch(resolveBackendUrl('/api/evenements/demande/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-deces/api/transfert-corps/'), { headers }),
+          fetch(resolveBackendUrl('/extrait-naissance/api/legalisation/'), { headers }),
         ])
 
 
@@ -172,6 +174,38 @@ export default function MesDemandesPage() {
               status: i.status,
               date: i.created_at,
               details: i.declaration_detail ? (lang === 'ar' ? `المتوفى: ${i.declaration_detail.defunt_detail.prenom_ar}` : `Défunt: ${i.declaration_detail.defunt_detail.prenom_fr}`) : '---'
+            })
+          })
+        }
+
+        // 7.5 Transfert Corps
+        if (resTransfert.ok) {
+          const transferts = await resTransfert.json()
+          transferts.forEach((t_req: any) => {
+            unified.push({
+              id: t_req.id,
+              type: 'transfert',
+              title: lang === 'ar' ? 'رخصة نقل جثة' : 'Permis de Transfert de Corps',
+              status: t_req.status,
+              date: t_req.created_at,
+              details: lang === 'ar' ? `المتوفى: ${t_req.nom_defunt} -> ${t_req.lieu_inhumation}` : `Défunt: ${t_req.nom_defunt} -> ${t_req.lieu_inhumation}`,
+              isPaid: t_req.is_paid
+            })
+          })
+        }
+
+        // 7.7 Légalisation
+        if (resLegalisation.ok) {
+          const legals = await resLegalisation.json()
+          legals.forEach((l: any) => {
+            unified.push({
+              id: l.id,
+              type: 'legalisation',
+              title: lang === 'ar' ? 'التعريف بالإمضاء' : 'Légalisation de Signature',
+              status: l.status,
+              date: l.created_at,
+              details: `${l.type_document} (${l.nombre_copies} copies)`,
+              isPaid: l.is_paid
             })
           })
         }
@@ -335,6 +369,8 @@ export default function MesDemandesPage() {
         return '2.000';
       case 'livret':
       case 'evenement':
+      case 'transfert':
+      case 'legalisation':
         return '5.000';
       case 'construction':
         return '20.000';
@@ -355,6 +391,8 @@ export default function MesDemandesPage() {
       case 'goudronnage': return <i className="fas fa-road text-secondary"></i>
       case 'vocation': return <i className="fas fa-building text-info"></i>
       case 'evenement': return <i className="fas fa-calendar-alt text-danger"></i>
+      case 'transfert': return <i className="fas fa-ambulance text-danger"></i>
+      case 'legalisation': return <i className="fas fa-signature text-primary"></i>
       case 'raccordement': return <i className="fas fa-plug text-warning"></i>
       default: return <i className="fas fa-file-alt"></i>
     }

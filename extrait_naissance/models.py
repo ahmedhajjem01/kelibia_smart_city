@@ -162,3 +162,34 @@ class DeclarationNaissance(models.Model):
     class Meta:
         verbose_name = "Déclaration de Naissance"
         verbose_name_plural = "Déclarations de Naissance"
+
+class DemandeLegalisation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente / قيد الانتظار'),
+        ('paid', 'Payé / تم الدفع'),
+        ('completed', 'Signé / تم الإمضاء'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="demandes_legalisation",
+        verbose_name="Demandeur"
+    )
+    
+    type_document = models.CharField(max_length=200, verbose_name="Type de document")
+    nombre_copies = models.IntegerField(default=1, verbose_name="Nombre de copies")
+    motif = models.TextField(blank=True, verbose_name="Motif / Usage")
+
+    is_paid = models.BooleanField(default=False, verbose_name="Payé")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Légalisation: {self.type_document} ({self.citizen.username})"
+
+    class Meta:
+        verbose_name = "Demande de légalisation"
+        verbose_name_plural = "Demandes de légalisation"

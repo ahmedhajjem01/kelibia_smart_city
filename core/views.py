@@ -4,9 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from livret_famille.models import DemandeLivretFamille
 from attestation_residence.models import DemandeResidence
-from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance
+from extrait_naissance.models import ExtraitNaissance, DeclarationNaissance, DemandeLegalisation
 from extrait_mariage.models import ExtraitMariage, DemandeMariage
-from extrait_deces.models import ExtraitDeces, DeclarationDeces
+from extrait_deces.models import ExtraitDeces, DeclarationDeces, DemandeTransfertCorps
 from eau_lumiere_egouts.models import DemandeEau
 from argent_impots.models import DemandeImpot
 from boutiques_commerces.models import DemandeCommerce
@@ -83,11 +83,19 @@ def confirm_payment(request):
             obj.is_paid = True
             obj.paid_at = now
             obj.save()
+        elif req_type == 'transfert':
+            obj = DemandeTransfertCorps.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.status = 'approved' # For PFE, let's say it's approved after payment
+            obj.save()
         elif req_type == 'evenement':
             obj = DemandeEvenement.objects.get(id=req_id, citizen=request.user)
             obj.is_paid = True
-            # Evenement model has is_paid (verbose="Frais de dossier réglés") but not paid_at? 
-            # I checked models.py, it was missing paid_at. Let's just set is_paid.
+            obj.save()
+        elif req_type == 'legalisation':
+            obj = DemandeLegalisation.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.status = 'paid'
             obj.save()
         elif req_type == 'raccordement':
             obj = DemandeRaccordement.objects.get(id=req_id, citizen=request.user)
@@ -153,7 +161,9 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
         'goudronnage': DemandeGoudronnage,
         'vocation': DemandeCertificatVocation,
         'raccordement': DemandeRaccordement,
-        'evenement': DemandeEvenement
+        'evenement': DemandeEvenement,
+        'transfert': DemandeTransfertCorps,
+        'legalisation': DemandeLegalisation
     }
 
     if request.method == 'GET':

@@ -55,9 +55,18 @@ export default function DemandeCommercePage() {
       data.append('nom_commerce', formData.nom_commerce)
       data.append('adresse_commerce', formData.adresse_commerce)
       data.append('description', formData.description)
-      if (files.cin_recto) data.append('cin_recto', files.cin_recto)
-      if (files.cin_verso) data.append('cin_verso', files.cin_verso)
-      if (files.photo_enseigne) data.append('photo_enseigne', files.photo_enseigne)
+      if (files.cin_recto) {
+        const ext = files.cin_recto.name.split('.').pop() || 'jpg'
+        data.append('cin_recto', files.cin_recto, `cin_recto_${Date.now()}.${ext}`)
+      }
+      if (files.cin_verso) {
+        const ext = files.cin_verso.name.split('.').pop() || 'jpg'
+        data.append('cin_verso', files.cin_verso, `cin_verso_${Date.now()}.${ext}`)
+      }
+      if (files.photo_enseigne) {
+        const ext = files.photo_enseigne.name.split('.').pop() || 'jpg'
+        data.append('photo_enseigne', files.photo_enseigne, `enseigne_${Date.now()}.${ext}`)
+      }
 
       const res = await fetch('/api/commerce/demande/', {
         method: 'POST',

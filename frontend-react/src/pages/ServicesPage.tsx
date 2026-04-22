@@ -450,6 +450,18 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-commerce',
       }
+    } else if (nameLower.includes('transfert') || nameAr.includes('نقل')) {
+      requestButton = {
+        kind: 'declare_death',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-transfert-corps',
+      }
+    } else if (nameLower.includes('légalisation') || nameAr.includes('تعريف')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-legalisation',
+      }
     } else {
 
       requestButton = {

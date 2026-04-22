@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DeclarationDeces, DemandeInhumation, ExtraitDeces
+from .models import DeclarationDeces, DemandeInhumation, ExtraitDeces, DemandeTransfertCorps
 from extrait_naissance.models import Citoyen
 
 class CitoyenSimpleSerializer(serializers.ModelSerializer):
@@ -87,3 +87,9 @@ class ExtraitDecesSerializer(serializers.ModelSerializer):
             diff = timezone.now() - obj.paid_at
             return diff.total_seconds() < 86400
         return False
+
+class DemandeTransfertCorpsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DemandeTransfertCorps
+        fields = '__all__'
+        read_only_fields = ['citizen', 'status', 'created_at', 'is_paid']
