@@ -1121,15 +1121,15 @@ export default function AgentDashboardPage() {
 
   const CAT: Record<string, { label: string; cls: string }> = {
 
-    lighting: { label: `💡 ${t('lighting')}`, cls: 'cat-lighting' },
+    lighting: { label: `💡 ${t('category_lighting')}`, cls: 'cat-lighting' },
 
-    trash: { label: `🗑️ ${t('trash')}`, cls: 'cat-trash' },
+    trash: { label: `🗑️ ${t('category_trash')}`, cls: 'cat-trash' },
 
-    roads: { label: `🛣️ ${t('roads')}`, cls: 'cat-roads' },
+    roads: { label: `🛣️ ${t('category_roads')}`, cls: 'cat-roads' },
 
-    noise: { label: `🔊 ${t('noise')}`, cls: 'cat-noise' },
+    noise: { label: `🔊 ${t('category_noise')}`, cls: 'cat-noise' },
 
-    other: { label: `📌 ${t('other')}`, cls: 'cat-other' },
+    other: { label: `📌 ${t('category_other')}`, cls: 'cat-other' },
 
   }
 
@@ -1147,12 +1147,24 @@ export default function AgentDashboardPage() {
 
   const PRIORITY: Record<string, { label: string; cls: string }> = {
 
-    urgente: { label: `🔴 ${t('urgent')}`, cls: 'priority-urgente' },
+    urgente: { label: `🔴 ${t('priority_urgente')}`, cls: 'priority-urgente' },
 
-    normale: { label: `🔵 ${t('normal')}`, cls: 'priority-normale' },
+    normale: { label: `🔵 ${t('priority_normale')}`, cls: 'priority-normale' },
 
-    faible: { label: `🟣 ${t('low')}`, cls: 'priority-faible' },
+    faible: { label: `🟣 ${t('priority_faible')}`, cls: 'priority-faible' },
 
+  }
+
+  const translateService = (svc: string) => {
+    if (lang !== 'ar') return svc;
+    const map: Record<string, string> = {
+      'Service Éclairage Public': 'مصلحة التنوير العمومي',
+      'Service Voirie & Infrastructure': 'مصلحة الطرقات والبنية التحتية',
+      'Service Hygiène & Propreté': 'مصلحة النظافة والعناية بالبيئة',
+      'Service Ordre & Tranquillité': 'مصلحة حفظ النظام والراحة العامة',
+      'Service Technique Général': 'المصلحة الفنية العامة'
+    };
+    return map[svc] || svc;
   }
 
   const access = getAccessToken()
@@ -3269,7 +3281,7 @@ export default function AgentDashboardPage() {
 
                             const prio = PRIORITY[r.priority] || PRIORITY.normale
 
-                            const svc = r.service_responsable || '—'
+                            const svc = translateService(r.service_responsable || '—')
 
                             return (
 
