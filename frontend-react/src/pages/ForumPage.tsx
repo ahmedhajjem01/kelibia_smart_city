@@ -158,7 +158,7 @@ export default function ForumPage() {
 
   /* ── Right sidebar ── */
   const rightSidebar = (
-    <div className="space-y-4 pt-4">
+    <div className={`space-y-4 pt-4 ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       {/* Launch discussion button */}
       <button
         onClick={() => {
@@ -174,9 +174,8 @@ export default function ForumPage() {
           boxShadow: user?.is_verified ? '0 10px 30px rgba(180,122,80,0.3)' : 'none' 
         }}
       >
-        <span>{lang === 'ar' ? 'ابدأ نقاشاً' : 'Lancer une discussion'}</span>
-        {lang !== 'ar' && <span className="text-sm opacity-80" dir="rtl">ابدأ نقاشاً</span>}
-        <i className="fas fa-comment-plus absolute right-6 opacity-20 text-2xl"></i>
+        <span>{t('start_discussion')}</span>
+        <i className={`fas fa-comment-plus absolute ${lang === 'ar' ? 'left-6' : 'right-6'} opacity-20 text-2xl`}></i>
       </button>
 
       {user && !user.is_verified && (
@@ -188,13 +187,13 @@ export default function ForumPage() {
       {/* Categories */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
         <h4 className="font-bold text-slate-900 border-b border-slate-100 pb-4 mb-4 uppercase tracking-widest text-xs">
-          {lang === 'ar' ? 'الأصناف' : 'Catégories'}
+          {t('category_label')}
         </h4>
         <ul className="space-y-3 list-none p-0 m-0">
           {[
-            { key: 'questions', icon: 'fas fa-landmark', label: 'Questions aux agents', count: topics.filter(t => t.category === 'questions').length },
-            { key: 'suggestions', icon: 'fas fa-lightbulb', label: 'Suggestions', count: topics.filter(t => t.category === 'suggestions').length },
-            { key: 'debates', icon: 'fas fa-comments', label: 'Débats citoyens', count: topics.filter(t => t.category === 'debates').length },
+            { key: 'questions', icon: 'fas fa-landmark', label: t('questions_agents'), count: topics.filter(t => t.category === 'questions').length },
+            { key: 'suggestions', icon: 'fas fa-lightbulb', label: t('suggestions_amelioration'), count: topics.filter(t => t.category === 'suggestions').length },
+            { key: 'debates', icon: 'fas fa-comments', label: t('debates_citoyens'), count: topics.filter(t => t.category === 'debates').length },
           ].map(cat => (
             <li key={cat.key}
               className="flex items-center justify-between cursor-pointer group"
@@ -205,7 +204,7 @@ export default function ForumPage() {
                 <i className={`${cat.icon} w-5 text-center text-slate-400`}></i>
                 <span>{cat.label}</span>
               </div>
-              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-600">{cat.count}</span>
+              <span className={`text-xs font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-600 ${lang === 'ar' ? 'mr-auto' : 'ml-auto'}`}>{cat.count}</span>
             </li>
           ))}
         </ul>
@@ -215,13 +214,13 @@ export default function ForumPage() {
       {stats && (
         <div className="p-4 rounded-xl text-white" style={{ backgroundColor: '#1e293b' }}>
           <h4 className="font-bold border-b border-white/10 pb-4 mb-4 uppercase tracking-widest text-xs">
-            {lang === 'ar' ? 'إحصاءات المنتدى' : 'Statistiques du Forum'}
+            {t('forum_stats')}
           </h4>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { val: stats.total_topics, label: lang === 'ar' ? 'المواضيع' : 'Sujets Totaux' },
-              { val: stats.active_members, label: lang === 'ar' ? 'أعضاء نشطون' : 'Membres Actifs' },
-              { val: stats.total_replies, label: lang === 'ar' ? 'الردود' : 'Réponses', wide: true },
+              { val: stats.total_topics, label: t('total_topics_stats') },
+              { val: stats.active_members, label: t('active_members_stats') },
+              { val: stats.total_replies, label: t('total_replies_stats'), wide: true },
             ].map(s => (
               <div key={s.label} className={`rounded-xl p-3 ${s.wide ? 'col-span-2' : ''}`} style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
                 <span className="text-lg font-black" style={{ color: '#d4aa8d' }}>{s.val}</span>
@@ -236,7 +235,7 @@ export default function ForumPage() {
       {notifCount > 0 && (
         <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3">
           <i className="fas fa-bell" style={{ color: '#d4aa8d' }}></i>
-          <span className="text-sm font-bold" style={{ color: '#b87a50' }}>{notifCount} notification{notifCount > 1 ? 's' : ''} non lue{notifCount > 1 ? 's' : ''}</span>
+          <span className="text-sm font-bold" style={{ color: '#b87a50' }}>{notifCount} {t('notifications')}</span>
         </div>
       )}
     </div>
@@ -250,329 +249,326 @@ export default function ForumPage() {
       showHero={false}
       rightSidebar={rightSidebar}
     >
-      {/* ── HERO BANNER ── */}
-      <div className="relative w-full overflow-hidden rounded-xl mb-4" style={{ height: '160px' }}>
-        <img src={fortImg} alt="Forum" className="w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,28,58,0.4), rgba(0,28,58,0.72))' }}></div>
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h1 className="font-black text-white uppercase tracking-tight mb-0"
-            style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(1rem, 2.5vw, 1.4rem)' }}>
-            Forum Communautaire
-          </h1>
-          <h2 className="font-bold text-white mb-2"
-            dir="rtl"
-            style={{ fontFamily: 'Cairo, Tajawal, sans-serif', fontSize: 'clamp(.85rem, 1.5vw, 1rem)', opacity: 0.9 }}>
-            المنتدى المجتمعي
-          </h2>
-          <p className="text-white uppercase tracking-widest" style={{ opacity: 0.75, fontSize: '.68rem' }}>
-            Posez vos questions, partagez vos suggestions, débattez avec la communauté
-          </p>
-        </div>
-      </div>
-
-      {/* ── SEARCH & FILTERS ── */}
-      <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-4 flex flex-col md:flex-row gap-3 items-center">
-        <div className="relative flex-1 w-full">
-          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input
-            type="text"
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border-0 rounded-xl text-xs focus:ring-2 focus:outline-none"
-            style={{ '--tw-ring-color': 'rgba(241,130,33,0.2)' } as any}
-            placeholder="Rechercher une discussion..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {([
-            { key: '', label: lang === 'ar' ? 'الكل' : 'Tous' },
-            { key: 'recent', label: lang === 'ar' ? 'الأحدث' : 'Récents', isSortBtn: true, sortVal: 'recent' as SortKey },
-            { key: 'votes', label: lang === 'ar' ? 'الأكثر تصويتاً' : 'Populaires', isSortBtn: true, sortVal: 'votes' as SortKey },
-          ] as any[]).map(btn => (
-            <button
-              key={btn.key}
-              onClick={() => btn.isSortBtn ? setSortBy(btn.sortVal) : setCategory(btn.key)}
-              className="px-3 py-1 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
-              style={
-                (btn.isSortBtn ? sortBy === btn.sortVal : category === btn.key)
-                  ? { backgroundColor: '#d4aa8d', color: 'white' }
-                  : { backgroundColor: '#f1f5f9', color: '#475569' }
-              }
-            >
-              {btn.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── CATEGORY FILTER BUTTONS ── */}
-      <div className="flex gap-2 flex-wrap mb-4">
-        {[
-          { key: '', label: '📋 Tous', color: '#64748b' },
-          { key: 'questions', label: '🏛️ Questions', color: '#1e40af' },
-          { key: 'suggestions', label: '💡 Suggestions', color: '#166534' },
-          { key: 'debates', label: '🗣️ Débats', color: '#6b21a8' },
-        ].map(c => (
-          <button
-            key={c.key}
-            onClick={() => setCategory(c.key)}
-            className="px-3 py-1 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
-            style={
-              category === c.key
-                ? { backgroundColor: c.color, color: 'white' }
-                : { backgroundColor: '#f1f5f9', color: c.color }
-            }
-          >
-            {c.label}
-          </button>
-        ))}
-
-        {/* Sort buttons */}
-        <div className="flex items-center gap-1 ms-auto">
-          <span className="text-xs text-slate-400 me-1"><i className="fas fa-sort me-1"></i>Trier :</span>
-          {([
-            { key: 'recent', label: 'Récent' },
-            { key: 'replies', label: 'Plus actif' },
-          ] as { key: SortKey; label: string }[]).map(s => (
-            <button
-              key={s.key}
-              onClick={() => setSortBy(s.key)}
-              className="px-3 py-1 rounded-lg text-xs font-bold border-0 cursor-pointer"
-              style={sortBy === s.key ? { backgroundColor: '#d4aa8d', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── TAGS ── */}
-      {tags.length > 0 && (
-        <div className="flex gap-2 flex-wrap mb-4">
-          {tags.slice(0, 15).map(tag => (
-            <span
-              key={tag.id}
-              onClick={() => setActiveTag(activeTag === tag.name ? '' : tag.name)}
-              className="px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-colors"
-              style={
-                activeTag === tag.name
-                  ? { backgroundColor: '#d4aa8d', color: 'white' }
-                  : { backgroundColor: '#dbeafe', color: '#1e40af' }
-              }
-            >
-              #{tag.name}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* ── TOPICS LIST ── */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="spinner-border text-primary mb-3"></div>
-          <p className="text-slate-400 text-sm">Chargement du forum...</p>
-        </div>
-      ) : sortedTopics.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
-          <i className="fas fa-inbox text-5xl opacity-30 block mb-3"></i>
-          <p>Aucun sujet pour le moment.</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {sortedTopics.map((topic, idx) => {
-            const catColor = CATEGORY_COLORS[topic.category] || { bg: '#dbeafe', text: '#1e40af' }
-            return (
-              <Link
-                key={topic.id}
-                to={`/forum/${topic.id}`}
-                className="block no-underline"
-              >
-                <div
-                  className="bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-blue-200 transition-all group"
-                  style={{ borderLeft: `4px solid ${catColor.text}` }}
-                >
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                    <div className="flex-1 space-y-2">
-                      {/* Badges row */}
-                      <div className="flex flex-wrap gap-2">
-                        {topic.is_pinned && (
-                          <span className="px-2 py-1 rounded text-[10px] font-bold" style={{ backgroundColor: '#fff3e0', color: '#e65100' }}>📌 Épinglé</span>
-                        )}
-                        {topic.is_resolved && (
-                          <span className="px-2 py-1 rounded text-[10px] font-bold" style={{ backgroundColor: '#e8f5e9', color: '#1b5e20' }}>✅ Résolu</span>
-                        )}
-                        <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider"
-                          style={{ backgroundColor: catColor.bg, color: catColor.text }}>
-                          {CATEGORY_LABELS[topic.category] || topic.category}
-                        </span>
-                        {/* Rank badge */}
-                        {sortBy === 'votes' && idx < 3 && (
-                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                            style={{ backgroundColor: ['#d97706', '#9ca3af', '#92400e'][idx] }}>
-                            #{idx + 1}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
-                        {topic.title}
-                      </h3>
-
-                      {/* Author + meta */}
-                      <div className="flex flex-wrap gap-4 text-xs text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <i className="fas fa-user"></i>
-                          {topic.author.first_name} {topic.author.last_name}
-                          {topic.author.user_type === 'agent' && (
-                            <span className="ms-1 px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>Agent</span>
-                          )}
-                        </span>
-                        <span className="flex items-center gap-1"><i className="fas fa-calendar"></i>{formatDate(topic.created_at)}</span>
-                        <span className="flex items-center gap-1"><i className="fas fa-eye"></i>{topic.views}</span>
-                      </div>
-
-                      {/* Tags */}
-                      {topic.tags.length > 0 && (
-                        <div className="flex gap-1 flex-wrap mt-2">
-                          {topic.tags.map(tag => (
-                            <span key={tag.id} className="px-2 py-0.5 rounded text-[11px] font-bold"
-                              style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
-                              #{tag.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right: votes + replies + join button */}
-                    <div className="flex flex-row md:flex-col items-center gap-3 md:min-w-[80px]">
-                      <button
-                        onClick={e => voteTopic(topic.id, e)}
-                        className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
-                        style={topic.has_voted
-                          ? { backgroundColor: '#d4aa8d', color: 'white' }
-                          : { backgroundColor: 'rgba(212,170,141,.1)', color: '#d4aa8d' }
-                        }
-                      >
-                        <i className="fas fa-thumbs-up"></i>{topic.votes_count}
-                      </button>
-                      <div className="text-xs text-slate-400 flex items-center gap-1">
-                        <i className="fas fa-comment"></i>{topic.replies_count}
-                      </div>
-                      <span className="text-xs font-bold uppercase tracking-tighter hover:underline"
-                        style={{ color: '#d4aa8d', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
-                        {lang === 'ar' ? 'انضم' : 'Rejoindre'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
-      )}
-
-      {/* ── CREATE TOPIC MODAL ── */}
-      {showModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-5"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-          onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
-        >
-          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" style={{ maxHeight: '90vh' }}>
-            {/* Modal header */}
-            <div className="px-6 py-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)' }}>
-              <h5 className="font-bold text-white mb-0 flex items-center gap-2">
-                <i className="fas fa-plus-circle"></i>
-                {lang === 'ar' ? 'موضوع جديد' : 'Nouveau sujet'}
-              </h5>
-              <button
-                className="bg-transparent border-0 text-white opacity-80 hover:opacity-100 cursor-pointer text-xl"
-                onClick={() => setShowModal(false)}
-              >×</button>
-            </div>
-
-            {/* Modal body */}
-            <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
-              {createError && (
-                <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>
-                  {createError}
-                </div>
-              )}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Titre *</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2"
-                    style={{ '--tw-ring-color': 'rgba(241,130,33,0.3)' } as any}
-                    value={newTitle}
-                    onChange={e => setNewTitle(e.target.value)}
-                    placeholder="Ex: Quand seront réparés les lampadaires du port ?"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Catégorie *</label>
-                  <select
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none"
-                    value={newCategory}
-                    onChange={e => setNewCategory(e.target.value)}
-                  >
-                    <option value="questions">🏛️ Questions aux agents municipaux</option>
-                    <option value="suggestions">💡 Suggestions amélioration</option>
-                    <option value="debates">🗣️ Débats citoyens</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Contenu *</label>
-                  <textarea
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none resize-none"
-                    rows={5}
-                    value={newContent}
-                    onChange={e => setNewContent(e.target.value)}
-                    placeholder="Décrivez votre sujet en détail..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Tags <span className="text-slate-400 font-normal">(séparés par virgules)</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none"
-                    value={newTags}
-                    onChange={e => setNewTags(e.target.value)}
-                    placeholder="Ex: voirie, éclairage, port"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Modal footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-              <button
-                className="px-6 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-600 border-0 cursor-pointer hover:bg-slate-200 transition-colors"
-                onClick={() => setShowModal(false)}
-              >
-                {lang === 'ar' ? 'إلغاء' : 'Annuler'}
-              </button>
-              <button
-                className="px-6 py-2 rounded-xl text-sm font-bold text-white border-0 cursor-pointer flex items-center gap-2 transition-opacity"
-                style={{ backgroundColor: '#d4aa8d', opacity: creating ? 0.7 : 1 }}
-                onClick={createTopic}
-                disabled={creating}
-              >
-                {creating ? (
-                  <><span className="spinner-border spinner-border-sm me-1"></span>{lang === 'ar' ? 'إرسال...' : 'Envoi...'}</>
-                ) : (
-                  <><i className="fas fa-paper-plane"></i>{lang === 'ar' ? 'نشر' : 'Publier'}</>
-                )}
-              </button>
-            </div>
+      <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className={lang === 'ar' ? 'font-arabic' : ''}>
+        {/* ── HERO BANNER ── */}
+        <div className="relative w-full overflow-hidden rounded-xl mb-4" style={{ height: '160px' }}>
+          <img src={fortImg} alt="Forum" className="w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,28,58,0.4), rgba(0,28,58,0.72))' }}></div>
+          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+            <h1 className="font-black text-white uppercase tracking-tight mb-0"
+              style={{ fontFamily: 'Public Sans, sans-serif', fontSize: 'clamp(1rem, 2.5vw, 1.4rem)' }}>
+              {lang === 'ar' ? 'المنتدى المجتمعي' : 'Forum Communautaire'}
+            </h1>
+            <p className="text-white uppercase tracking-widest mt-2" style={{ opacity: 0.75, fontSize: '.68rem' }}>
+              {t('forum_desc')}
+            </p>
           </div>
         </div>
-      )}
+
+        {/* ── SEARCH & FILTERS ── */}
+        <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-4 flex flex-col md:flex-row gap-3 items-center">
+          <div className="relative flex-1 w-full">
+            <i className={`fas fa-search absolute ${lang === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-slate-400 text-xs`}></i>
+            <input
+              type="text"
+              className={`w-full ${lang === 'ar' ? 'pr-9 pl-4' : 'pl-9 pr-4'} py-2 bg-slate-50 border-0 rounded-xl text-xs focus:ring-2 focus:outline-none`}
+              style={{ '--tw-ring-color': 'rgba(241,130,33,0.2)' } as any}
+              placeholder={t('search_topics_placeholder')}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {([
+              { key: '', label: t('all_label') },
+              { key: 'recent', label: t('recent_topics'), isSortBtn: true, sortVal: 'recent' as SortKey },
+              { key: 'votes', label: t('popular_topics'), isSortBtn: true, sortVal: 'votes' as SortKey },
+            ] as any[]).map(btn => (
+              <button
+                key={btn.key}
+                onClick={() => btn.isSortBtn ? setSortBy(btn.sortVal) : setCategory(btn.key)}
+                className="px-3 py-1 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
+                style={
+                  (btn.isSortBtn ? sortBy === btn.sortVal : category === btn.key)
+                    ? { backgroundColor: '#d4aa8d', color: 'white' }
+                    : { backgroundColor: '#f1f5f9', color: '#475569' }
+                }
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── CATEGORY FILTER BUTTONS ── */}
+        <div className="flex gap-2 flex-wrap mb-4">
+          {[
+            { key: '', label: `📋 ${t('all_label')}`, color: '#64748b' },
+            { key: 'questions', label: `🏛️ ${t('questions_agents')}`, color: '#1e40af' },
+            { key: 'suggestions', label: `💡 ${t('suggestions_amelioration')}`, color: '#166534' },
+            { key: 'debates', label: `🗣️ ${t('debates_citoyens')}`, color: '#6b21a8' },
+          ].map(c => (
+            <button
+              key={c.key}
+              onClick={() => setCategory(c.key)}
+              className="px-3 py-1 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
+              style={
+                category === c.key
+                  ? { backgroundColor: c.color, color: 'white' }
+                  : { backgroundColor: '#f1f5f9', color: c.color }
+              }
+            >
+              {c.label}
+            </button>
+          ))}
+
+          {/* Sort buttons */}
+          <div className={`flex items-center gap-1 ${lang === 'ar' ? 'me-auto' : 'ms-auto'}`}>
+            <span className="text-xs text-slate-400 me-1"><i className="fas fa-sort me-1"></i>{t('sort_by')}</span>
+            {([
+              { key: 'recent', label: t('recent_topics') },
+              { key: 'replies', label: t('most_active') },
+            ] as { key: SortKey; label: string }[]).map(s => (
+              <button
+                key={s.key}
+                onClick={() => setSortBy(s.key)}
+                className="px-3 py-1 rounded-lg text-xs font-bold border-0 cursor-pointer"
+                style={sortBy === s.key ? { backgroundColor: '#d4aa8d', color: 'white' } : { backgroundColor: '#f1f5f9', color: '#475569' }}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── TAGS ── */}
+        {tags.length > 0 && (
+          <div className="flex gap-2 flex-wrap mb-4">
+            {tags.slice(0, 15).map(tag => (
+              <span
+                key={tag.id}
+                onClick={() => setActiveTag(activeTag === tag.name ? '' : tag.name)}
+                className="px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-colors"
+                style={
+                  activeTag === tag.name
+                    ? { backgroundColor: '#d4aa8d', color: 'white' }
+                    : { backgroundColor: '#dbeafe', color: '#1e40af' }
+                }
+              >
+                #{tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* ── TOPICS LIST ── */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="spinner-border text-primary mb-3"></div>
+            <p className="text-slate-400 text-sm">{t('loading_forum')}</p>
+          </div>
+        ) : sortedTopics.length === 0 ? (
+          <div className="text-center py-12 text-slate-400">
+            <i className="fas fa-inbox text-5xl opacity-30 block mb-3"></i>
+            <p>{t('no_topics_found')}</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {sortedTopics.map((topic, idx) => {
+              const catColor = CATEGORY_COLORS[topic.category] || { bg: '#dbeafe', text: '#1e40af' }
+              return (
+                <Link
+                  key={topic.id}
+                  to={`/forum/${topic.id}`}
+                  className="block no-underline"
+                >
+                  <div
+                    className="bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-blue-200 transition-all group"
+                    style={{ [lang === 'ar' ? 'borderRight' : 'borderLeft']: `4px solid ${catColor.text}` }}
+                  >
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                      <div className="flex-1 space-y-2 w-full">
+                        {/* Badges row */}
+                        <div className="flex flex-wrap gap-2">
+                          {topic.is_pinned && (
+                            <span className="px-2 py-1 rounded text-[10px] font-bold" style={{ backgroundColor: '#fff3e0', color: '#e65100' }}>📌 {t('pinned')}</span>
+                          )}
+                          {topic.is_resolved && (
+                            <span className="px-2 py-1 rounded text-[10px] font-bold" style={{ backgroundColor: '#e8f5e9', color: '#1b5e20' }}>✅ {t('resolved')}</span>
+                          )}
+                          <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider"
+                            style={{ backgroundColor: catColor.bg, color: catColor.text }}>
+                            {t(topic.category === 'questions' ? 'questions_agents' : topic.category === 'suggestions' ? 'suggestions_amelioration' : 'debates_citoyens') || topic.category}
+                          </span>
+                          {/* Rank badge */}
+                          {sortBy === 'votes' && idx < 3 && (
+                            <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                              style={{ backgroundColor: ['#d97706', '#9ca3af', '#92400e'][idx] }}>
+                              #{idx + 1}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
+                          {topic.title}
+                        </h3>
+
+                        {/* Author + meta */}
+                        <div className="flex flex-wrap gap-4 text-xs text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <i className="fas fa-user"></i>
+                            {topic.author.first_name} {topic.author.last_name}
+                            {topic.author.user_type === 'agent' && (
+                              <span className="ms-1 px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>{t('agent_badge')}</span>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-1"><i className="fas fa-calendar"></i>{formatDate(topic.created_at)}</span>
+                          <span className="flex items-center gap-1"><i className="fas fa-eye"></i>{topic.views}</span>
+                        </div>
+
+                        {/* Tags */}
+                        {topic.tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mt-2">
+                            {topic.tags.map(tag => (
+                              <span key={tag.id} className="px-2 py-0.5 rounded text-[11px] font-bold"
+                                style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                                #{tag.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: votes + replies + join button */}
+                      <div className={`flex flex-row md:flex-col items-center gap-3 md:min-w-[80px] ${lang === 'ar' ? 'mr-auto' : 'ml-auto'}`}>
+                        <button
+                          onClick={e => voteTopic(topic.id, e)}
+                          className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
+                          style={topic.has_voted
+                            ? { backgroundColor: '#d4aa8d', color: 'white' }
+                            : { backgroundColor: 'rgba(212,170,141,.1)', color: '#d4aa8d' }
+                          }
+                        >
+                          <i className="fas fa-thumbs-up"></i>{topic.votes_count}
+                        </button>
+                        <div className="text-xs text-slate-400 flex items-center gap-1">
+                          <i className="fas fa-comment"></i>{topic.replies_count}
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-tighter hover:underline"
+                          style={{ color: '#d4aa8d', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
+                          {t('join_discussion')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ── CREATE TOPIC MODAL ── */}
+        {showModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-5"
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+            onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
+          >
+            <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden" style={{ maxHeight: '90vh' }}>
+              {/* Modal header */}
+              <div className="px-6 py-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg,#b87a50 0%,#d4aa8d 100%)' }}>
+                <h5 className="font-bold text-white mb-0 flex items-center gap-2">
+                  <i className="fas fa-plus-circle"></i>
+                  {t('new_topic')}
+                </h5>
+                <button
+                  className="bg-transparent border-0 text-white opacity-80 hover:opacity-100 cursor-pointer text-xl"
+                  onClick={() => setShowModal(false)}
+                >×</button>
+              </div>
+
+              {/* Modal body */}
+              <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 130px)' }}>
+                {createError && (
+                  <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>
+                    {t('create_error')}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">{t('topic_title')} *</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2"
+                      style={{ '--tw-ring-color': 'rgba(241,130,33,0.3)' } as any}
+                      value={newTitle}
+                      onChange={e => setNewTitle(e.target.value)}
+                      placeholder={t('reclamation_placeholder_title')}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">{t('topic_category')} *</label>
+                    <select
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none"
+                      value={newCategory}
+                      onChange={e => setNewCategory(e.target.value)}
+                    >
+                      <option value="questions">🏛️ {t('questions_agents')}</option>
+                      <option value="suggestions">💡 {t('suggestions_amelioration')}</option>
+                      <option value="debates">🗣️ {t('debates_citoyens')}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">{t('topic_content')} *</label>
+                    <textarea
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none resize-none"
+                      rows={5}
+                      value={newContent}
+                      onChange={e => setNewContent(e.target.value)}
+                      placeholder={t('topic_content_placeholder')}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      {t('tags')} <span className="text-slate-400 font-normal">({t('add_tags')})</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none"
+                      value={newTags}
+                      onChange={e => setNewTags(e.target.value)}
+                      placeholder={t('tags_placeholder')}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal footer */}
+              <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button
+                  className="px-6 py-2 rounded-xl text-sm font-bold bg-slate-100 text-slate-600 border-0 cursor-pointer hover:bg-slate-200 transition-colors"
+                  onClick={() => setShowModal(false)}
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  className="px-6 py-2 rounded-xl text-sm font-bold text-white border-0 cursor-pointer flex items-center gap-2 transition-opacity"
+                  style={{ backgroundColor: '#d4aa8d', opacity: creating ? 0.7 : 1 }}
+                  onClick={createTopic}
+                  disabled={creating}
+                >
+                  {creating ? (
+                    <><span className="spinner-border spinner-border-sm me-1"></span>{t('sending')}</>
+                  ) : (
+                    <><i className="fas fa-paper-plane"></i>{t('publish')}</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </MainLayout>
   )
 }

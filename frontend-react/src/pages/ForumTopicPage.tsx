@@ -113,19 +113,19 @@ export default function ForumTopicPage() {
 
   if (!topic) return (
     <div className="container mt-5 text-center">
-      <p className="text-muted">Sujet introuvable.</p>
-      <Link to="/forum" className="btn btn-primary">Retour au forum</Link>
+      <p className="text-muted">{t('topic_not_found')}</p>
+      <Link to="/forum" className="btn btn-primary">{t('back_to_forum_btn')}</Link>
     </div>
   )
 
   return (
-    <div>
+    <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className={lang === 'ar' ? 'font-arabic' : ''}>
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div className="container">
           <Link className="navbar-brand fw-bold" to={isAgentOrAdmin ? "/agent-dashboard" : "/dashboard"}>
-            <i className="fas fa-city me-2"></i>Kelibia Smart City
+            <i className="fas fa-city me-2"></i>{t('portal_title')}
           </Link>
-          <div className="d-flex align-items-center gap-2">
+          <div className={`d-flex align-items-center gap-2 ${lang === 'ar' ? 'ms-auto' : ''}`}>
             <div className="btn-group me-2">
               <button className='btn btn-sm btn-outline-light' onClick={() => setLang('fr')}>
                 <img src="https://flagcdn.com/w40/fr.png" width="20" alt="FR" />
@@ -135,7 +135,7 @@ export default function ForumTopicPage() {
               </button>
             </div>
             <Link to="/forum" className="btn btn-outline-light btn-sm">
-              <i className="fas fa-arrow-left me-1"></i>Forum
+              <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-1`}></i>{t('forum')}
             </Link>
           </div>
         </div>
@@ -145,9 +145,9 @@ export default function ForumTopicPage() {
 
         {/* BREADCRUMB */}
         <nav className="mb-3" style={{ fontSize: '.82rem' }}>
-          <Link to={isAgentOrAdmin ? "/agent-dashboard" : "/dashboard"} style={{ color: '#1565c0' }}>{isAgentOrAdmin ? "Accueil Agent" : "Accueil"}</Link>
+          <Link to={isAgentOrAdmin ? "/agent-dashboard" : "/dashboard"} style={{ color: '#1565c0' }}>{isAgentOrAdmin ? t('nav_agent_space') : t('home')}</Link>
           <span className="mx-2 text-muted">/</span>
-          <Link to="/forum" style={{ color: '#1565c0' }}>Forum</Link>
+          <Link to="/forum" style={{ color: '#1565c0' }}>{t('forum')}</Link>
           <span className="mx-2 text-muted">/</span>
           <span className="text-muted">{topic.title.slice(0, 40)}{topic.title.length > 40 ? '...' : ''}</span>
         </nav>
@@ -159,17 +159,19 @@ export default function ForumTopicPage() {
               <Avatar user={topic.author} />
               <div className="flex-grow-1">
                 <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
-                  {topic.is_pinned && <span className='badge' style={{ background: '#fff3e0', color: '#e65100' }}>📌 Épinglé</span>}
-                  {topic.is_resolved && <span className='badge' style={{ background: '#e8f5e9', color: '#1b5e20' }}>✅ Résolu</span>}
-                  <span className="badge bg-primary">{CATEGORY_LABELS[topic.category] || topic.category}</span>
+                  {topic.is_pinned && <span className='badge' style={{ background: '#fff3e0', color: '#e65100' }}>📌 {t('pinned')}</span>}
+                  {topic.is_resolved && <span className='badge' style={{ background: '#e8f5e9', color: '#1b5e20' }}>✅ {t('resolved')}</span>}
+                  <span className="badge bg-primary">
+                    {t(topic.category === 'questions' ? 'questions_agents' : topic.category === 'suggestions' ? 'suggestions_amelioration' : 'debates_citoyens') || topic.category}
+                  </span>
                 </div>
                 <h2 className="fw-bold mb-2" style={{ fontSize: '1.3rem', color: '#1a1a2e' }}>{topic.title}</h2>
                 <div className="d-flex gap-3 mb-3" style={{ fontSize: '.78rem', color: '#888' }}>
                   <span><i className="fas fa-user me-1"></i>{topic.author.first_name} {topic.author.last_name}
-                    {topic.author.user_type === 'agent' && <span className='badge ms-1' style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.65rem' }}>Agent</span>}
+                    {topic.author.user_type === 'agent' && <span className='badge ms-1' style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.65rem' }}>{t('agent_badge')}</span>}
                   </span>
                   <span><i className="fas fa-calendar me-1"></i>{formatDate(topic.created_at)}</span>
-                  <span><i className="fas fa-eye me-1"></i>{topic.views} vues</span>
+                  <span><i className="fas fa-eye me-1"></i>{topic.views} {t('views_label')}</span>
                 </div>
                 {topic.tags.length > 0 && (
                   <div className="d-flex gap-1 flex-wrap mb-3">
@@ -184,19 +186,19 @@ export default function ForumTopicPage() {
               <div className="d-flex gap-2 align-items-center">
                 <button onClick={voteTopic} className="btn btn-sm"
                   style={{ background: topic.has_voted ? '#1565c0' : '#e3f2fd', color: topic.has_voted ? '#fff' : '#1565c0', border: 'none', borderRadius: '8px' }}>
-                  <i className="fas fa-thumbs-up me-1"></i>{topic.votes_count} j’aime
+                  <i className="fas fa-thumbs-up me-1"></i>{topic.votes_count} {t('likes')}
                 </button>
                 <span style={{ fontSize: '.78rem', color: '#888' }}>
-                  <i className="fas fa-comment me-1"></i>{topic.replies_count} réponse(s)
+                  <i className="fas fa-comment me-1"></i>{topic.replies_count} {t('replies_count_label')}
                 </span>
               </div>
               {isAgentOrAdmin && (
                 <div className="d-flex gap-2">
                   <button onClick={togglePin} className={`btn btn-sm ${topic.is_pinned ? 'btn-warning' : 'btn-outline-warning'}`}>
-                    <i className="fas fa-thumbtack me-1"></i>{topic.is_pinned ? 'Désépingler' : 'Épingler'}
+                    <i className="fas fa-thumbtack me-1"></i>{topic.is_pinned ? t('unpin_btn') : t('pin_btn')}
                   </button>
                   <button onClick={toggleResolve} className={`btn btn-sm ${topic.is_resolved ? 'btn-success' : 'btn-outline-success'}`}>
-                    <i className="fas fa-check-circle me-1"></i>{topic.is_resolved ? 'Non résolu' : 'Marquer résolu'}
+                    <i className="fas fa-check-circle me-1"></i>{topic.is_resolved ? t('mark_unresolved_btn') : t('mark_resolved_btn')}
                   </button>
                 </div>
               )}
@@ -207,13 +209,13 @@ export default function ForumTopicPage() {
         {/* REPLIES */}
         <h5 className="fw-bold mb-3" style={{ color: '#1a1a2e' }}>
           <i className="fas fa-comments me-2" style={{ color: '#1565c0' }}></i>
-          {topic.replies.length} Réponse(s)
+          {topic.replies.length} {t('replies_count_label')}
         </h5>
 
         {topic.replies.length === 0 ? (
           <div className="text-center py-4 text-muted mb-4" style={{ background: '#f8f9fa', borderRadius: '12px' }}>
             <i className="fas fa-comment-slash" style={{ fontSize: '2rem', opacity: .3, display: 'block', marginBottom: '8px' }}></i>
-            Aucune réponse pour le moment. Soyez le premier à répondre !
+            {t('no_replies')}
           </div>
         ) : (
           <div className="d-flex flex-column gap-3 mb-4">
@@ -229,7 +231,7 @@ export default function ForumTopicPage() {
                         </span>
                         {reply.author.user_type === 'agent' && (
                           <span className='badge' style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '.65rem' }}>
-                            <i className="fas fa-id-badge me-1"></i>Agent Municipal
+                            <i className="fas fa-id-badge me-1"></i>{t('agent_badge')}
                           </span>
                         )}
                         <span style={{ fontSize: '.72rem', color: '#aaa' }}>#{index + 1}</span>
@@ -256,7 +258,7 @@ export default function ForumTopicPage() {
         <div className="card border-0 shadow-sm">
           <div className="card-body p-4">
             <h6 className="fw-bold mb-3" style={{ color: '#1a1a2e' }}>
-              <i className="fas fa-reply me-2" style={{ color: '#1565c0' }}></i>Votre réponse
+              <i className="fas fa-reply me-2" style={{ color: '#1565c0' }}></i>{t('your_reply')}
             </h6>
             {currentUser && !currentUser.is_verified ? (
               <div className="alert alert-info border-0 shadow-sm rounded-4 text-center py-4">
@@ -268,9 +270,9 @@ export default function ForumTopicPage() {
               <>
                 <textarea className="form-control mb-3" rows={4} value={replyText}
                   onChange={e => setReplyText(e.target.value)}
-                  placeholder="Écrivez votre réponse ici..." />
+                  placeholder={t('write_reply_placeholder')} />
                 <button onClick={submitReply} className="btn btn-primary" disabled={sending}>
-                  {sending ? <><span className="spinner-border spinner-border-sm me-2"></span>Envoi...</> : <><i className="fas fa-paper-plane me-2"></i>Envoyer la réponse</>}
+                  {sending ? <><span className="spinner-border spinner-border-sm me-2"></span>{t('sending')}</> : <><i className="fas fa-paper-plane me-2"></i>{t('send_reply_btn')}</>}
                 </button>
               </>
             )}
