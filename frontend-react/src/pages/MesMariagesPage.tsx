@@ -77,22 +77,22 @@ export default function MesMariagesPage() {
     <MainLayout
       user={user}
       onLogout={logout}
-      breadcrumbs={[{ label: 'Mes Actes de Mariage' }]}
+      breadcrumbs={[{ label: t('marriage_acts_title') }]}
     >
-      <div className="row mb-4">
+      <div className={`row mb-4 ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="col d-flex justify-content-between align-items-center">
           <div>
             <h2 className="fw-bold section-title">
               <i className="fas fa-ring me-2" />
-              Mes Actes de Mariage
+              {t('marriage_acts_title')}
             </h2>
             <p className="text-muted">
-              Extraction numérique immédiate connectée au registre d'État Civil.
+              {t('extraction_desc')}
             </p>
           </div>
           <Link to="/services" className="btn btn-outline-secondary">
-            <i className="fas fa-arrow-left me-2" />
-            Retour aux services
+            <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`} />
+            {t('back_to_services') || 'Retour aux services'}
           </Link>
         </div>
       </div>
@@ -100,11 +100,11 @@ export default function MesMariagesPage() {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2 text-muted">Recherche de vos actes de mariage en cours...</p>
+          <p className="mt-2 text-muted">{t('loading')}</p>
         </div>
       ) : !user?.is_verified ? (
-        <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
-          <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+        <div className={`alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'} style={{ borderRadius: '15px' }}>
+          <i className={`fas fa-exclamation-triangle fa-2x ${lang === 'ar' ? 'ms-3' : 'me-3'} text-warning`}></i>
           <div>
             <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
             <p className="mb-0">{t('account_verification_required')}</p>
@@ -113,8 +113,8 @@ export default function MesMariagesPage() {
       ) : error ? (
         <div className="alert alert-danger">{error}</div>
       ) : (
-        <div>
-          <h4 className="mb-3 border-bottom pb-2">Mes Actes de Mariage</h4>
+        <div className={lang === 'ar' ? 'font-arabic text-end' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <h4 className="mb-3 border-bottom pb-2">{t('marriage_acts_title')}</h4>
           {mariages.length > 0 ? (
             <div className="row mb-5">
               {mariages.map((m) => {
@@ -128,7 +128,7 @@ export default function MesMariagesPage() {
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <i className="fas fa-ring fa-2x text-warning opacity-50" />
                           <span className="badge bg-warning text-dark rounded-pill">
-                            Acte N° {m.numero_registre} / {m.annee_acte}
+                            {t('id_label') || 'Acte N°'} {m.numero_registre} / {m.annee_acte}
                           </span>
                         </div>
                         <h5 className="card-title fw-bold">{label}</h5>
@@ -141,13 +141,13 @@ export default function MesMariagesPage() {
                           {(!m.is_paid && !user?.has_active_asd) ? (
                               <div className="d-flex flex-column gap-2 w-100">
                                 <small className="text-warning fw-bold text-center p-1 rounded" style={{ fontSize: '0.7rem', background: '#fff8e1', border: '1px solid #ffd54f' }}>
-                                  {lang === 'ar' ? 'يجب الدفع حتى تظهر الطلب للإدارة' : 'Paiement requis pour traiter la demande'}
+                                  {t('payment_required_msg')}
                                 </small>
                                 <button
                                   className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
                                   onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Mariage&requestId=${m.id}&requestType=marriage_extract&target=/mes-mariages&file_fr=${encodeURIComponent(resolveBackendUrl(m.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(m.url_ar))}`)}
                                 >
-                                  <i className="fas fa-lock me-2"></i> Payer 0.500 DT
+                                  <i className="fas fa-lock me-2"></i> {t('pay_2dt') || 'Payer 0.500 DT'}
                                 </button>
                               </div>
                           ) : (
@@ -158,7 +158,7 @@ export default function MesMariagesPage() {
                                   rel="noreferrer"
                                   className="btn btn-warning flex-fill fw-bold"
                                 >
-                                  <i className="fas fa-print me-1" /> Version Française
+                                  <i className="fas fa-print me-1" /> {lang === 'ar' ? 'الفرنسية' : 'Version Française'}
                                 </a>
                                 <a
                                   href={resolveBackendUrl(m.url_ar)}
@@ -166,7 +166,7 @@ export default function MesMariagesPage() {
                                   rel="noreferrer"
                                   className="btn btn-outline-warning flex-fill arabic-font fw-bold"
                                 >
-                                  <i className="fas fa-print me-1" /> النسخة العربية
+                                  <i className="fas fa-print me-1" /> {t('version_ar')}
                                 </a>
                               </>
                           )}
@@ -179,7 +179,7 @@ export default function MesMariagesPage() {
             </div>
           ) : (
             <div className="alert alert-secondary text-muted">
-              Aucun acte de mariage trouvé pour votre profil.
+              {t('no_marriage_act_found')}
             </div>
           )}
         </div>

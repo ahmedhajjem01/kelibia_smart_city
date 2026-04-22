@@ -76,22 +76,22 @@ export default function MesDecesPage() {
     <MainLayout
       user={user}
       onLogout={logout}
-      breadcrumbs={[{ label: 'Mes Actes de Décès' }]}
+      breadcrumbs={[{ label: t('death_acts_title') }]}
     >
-      <div className="row mb-4">
+      <div className={`row mb-4 ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="col d-flex justify-content-between align-items-center">
           <div>
             <h2 className="fw-bold section-title">
               <i className="fas fa-file-invoice me-2" />
-              Mes Actes de Décès (Famille)
+              {t('death_acts_title')}
             </h2>
             <p className="text-muted">
-              Extraction numérique immédiate des actes de décès des membres rattachés à votre profil.
+              {t('death_extraction_desc')}
             </p>
           </div>
           <Link to="/services" className="btn btn-outline-secondary">
-            <i className="fas fa-arrow-left me-2" />
-            Retour aux services
+            <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`} />
+            {t('back_to_services') || 'Retour aux services'}
           </Link>
         </div>
       </div>
@@ -99,11 +99,11 @@ export default function MesDecesPage() {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2 text-muted">Recherche des actes de décès en cours...</p>
+          <p className="mt-2 text-muted">{t('loading')}</p>
         </div>
       ) : !user?.is_verified ? (
-        <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
-          <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+        <div className={`alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'} style={{ borderRadius: '15px' }}>
+          <i className={`fas fa-exclamation-triangle fa-2x ${lang === 'ar' ? 'ms-3' : 'me-3'} text-warning`}></i>
           <div>
             <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
             <p className="mb-0">{t('account_verification_required')}</p>
@@ -112,73 +112,75 @@ export default function MesDecesPage() {
       ) : error ? (
         <div className="alert alert-danger">{error}</div>
       ) : (
-        <div className="row">
-          {actes.length > 0 ? (
-            actes.map((d) => {
-              const nomComplet = lang === 'ar' ? d.nom_complet_ar : d.nom_complet_fr
-              return (
-                <div key={`${d.numero_registre}-${d.annee_acte}`} className="col-md-6 col-lg-4 mb-4">
-                  <div className="card shadow-sm h-100 border-dark" style={{ borderWidth: 2 }}>
-                    <div className="card-body">
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <i className="fas fa-file-invoice fa-2x text-dark opacity-50" />
-                        <span className="badge bg-dark rounded-pill">
-                          Acte N° {d.numero_registre} / {d.annee_acte}
-                        </span>
-                      </div>
-                      <h5 className="card-title fw-bold">{nomComplet}</h5>
-                      <p className="card-text text-muted mb-4">
-                        <i className="fas fa-calendar-times me-2" />
-                        {d.date_deces}
-                      </p>
-                      <div className="d-flex gap-2">
-                        {/* Debug: console.log('Deces Paid:', d.is_paid, 'ASD:', user?.has_active_asd) */}
-                        {(!d.is_paid && !user?.has_active_asd) ? (
-                            <div className="d-flex flex-column gap-2 w-100">
-                              <small className="text-warning fw-bold text-center p-1 rounded" style={{ fontSize: '0.7rem', background: '#fff8e1', border: '1px solid #ffd54f' }}>
-                                {lang === 'ar' ? 'يجب الدفع حتى تظهر الطلب للإدارة' : 'Paiement requis pour traiter la demande'}
-                              </small>
-                              <button
-                                className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
-                                onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.id}&requestType=death_extract&target=/mes-deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
-                              >
-                                <i className="fas fa-lock me-2"></i> Payer 0.500 DT
-                              </button>
-                            </div>
-                        ) : (
-                            <>
-                              <a
-                                href={resolveBackendUrl(d.url_fr)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-dark flex-fill fw-bold"
-                              >
-                                <i className="fas fa-print me-1" /> Version FR
-                              </a>
-                              <a
-                                href={resolveBackendUrl(d.url_ar)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-outline-dark flex-fill arabic-font fw-bold"
-                              >
-                                <i className="fas fa-print me-1" /> النسخة العربية
-                              </a>
-                            </>
-                        )}
+        <div className={lang === 'ar' ? 'font-arabic text-end' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="row">
+            {actes.length > 0 ? (
+              actes.map((d) => {
+                const nomComplet = lang === 'ar' ? d.nom_complet_ar : d.nom_complet_fr
+                return (
+                  <div key={`${d.numero_registre}-${d.annee_acte}`} className="col-md-6 col-lg-4 mb-4">
+                    <div className="card shadow-sm h-100 border-dark" style={{ borderWidth: 2 }}>
+                      <div className="card-body">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <i className="fas fa-file-invoice fa-2x text-dark opacity-50" />
+                          <span className="badge bg-dark rounded-pill">
+                            {t('id_label') || 'Acte N°'} {d.numero_registre} / {d.annee_acte}
+                          </span>
+                        </div>
+                        <h5 className="card-title fw-bold">{nomComplet}</h5>
+                        <p className="card-text text-muted mb-4">
+                          <i className="fas fa-calendar-times me-2" />
+                          {d.date_deces}
+                        </p>
+                        <div className="d-flex gap-2">
+                          {/* Debug: console.log('Deces Paid:', d.is_paid, 'ASD:', user?.has_active_asd) */}
+                          {(!d.is_paid && !user?.has_active_asd) ? (
+                              <div className="d-flex flex-column gap-2 w-100">
+                                <small className="text-warning fw-bold text-center p-1 rounded" style={{ fontSize: '0.7rem', background: '#fff8e1', border: '1px solid #ffd54f' }}>
+                                  {t('payment_required_msg')}
+                                </small>
+                                <button
+                                  className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
+                                  onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Décès&requestId=${d.id}&requestType=death_extract&target=/mes-deces&file_fr=${encodeURIComponent(resolveBackendUrl(d.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(d.url_ar))}`)}
+                                >
+                                  <i className="fas fa-lock me-2"></i> {t('pay_2dt') || 'Payer 0.500 DT'}
+                                </button>
+                              </div>
+                          ) : (
+                              <>
+                                <a
+                                  href={resolveBackendUrl(d.url_fr)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-dark flex-fill fw-bold"
+                                >
+                                  <i className="fas fa-print me-1" /> {lang === 'ar' ? 'الفرنسية' : 'Version FR'}
+                                </a>
+                                <a
+                                  href={resolveBackendUrl(d.url_ar)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-outline-dark flex-fill arabic-font fw-bold"
+                                >
+                                  <i className="fas fa-print me-1" /> {t('version_ar')}
+                                </a>
+                              </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
+                )
+              })
+            ) : (
+              <div className="col-12">
+                <div className="alert alert-secondary text-muted">
+                  <i className="fas fa-info-circle me-2" />
+                  {t('no_death_act_found')}
                 </div>
-              )
-            })
-          ) : (
-            <div className="col-12">
-              <div className="alert alert-secondary text-muted">
-                <i className="fas fa-info-circle me-2" />
-                Aucun acte de décès trouvé pour votre famille.
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </MainLayout>

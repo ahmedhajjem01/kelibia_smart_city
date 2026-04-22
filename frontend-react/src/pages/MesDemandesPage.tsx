@@ -22,7 +22,7 @@ export default function MesDemandesPage() {
   const [requests, setRequests] = useState<UnifiedRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
 
   useEffect(() => {
     const token = getAccessToken()
@@ -404,16 +404,16 @@ export default function MesDemandesPage() {
       onLogout={() => navigate('/login')}
       breadcrumbs={[{ label: t('my_requests') }]}
     >
-      <div className={`py-4 ${lang === 'ar' ? 'text-end' : ''}`}>
+      <div className={`py-4 ${lang === 'ar' ? 'text-end font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
           <div>
             <h1 className="fw-bold section-title mb-1">
-              <i className="fas fa-tasks me-2"></i> {t('my_requests')}
+              <i className={`fas fa-tasks ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i> {t('my_requests')}
             </h1>
             <p className="text-muted mb-0">{t('my_requests_desc')}</p>
           </div>
           <Link to="/services" className="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i className="fas fa-plus me-2"></i> {t('new_request')}
+            <i className={`fas fa-plus ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i> {t('new_request')}
           </Link>
         </div>
 
@@ -465,7 +465,7 @@ export default function MesDemandesPage() {
                   <tr>
                     <th className="px-4 py-3 border-0">{t('request_label')}</th>
                     <th className="py-3 border-0">{t('details_label')}</th>
-                    <th className="py-3 border-0 text-center">{t('date')}</th>
+                    <th className="py-3 border-0 text-center">{t('date_label')}</th>
                     <th className="py-3 border-0 text-center">{t('status_label')}</th>
                   </tr>
                 </thead>
@@ -487,18 +487,18 @@ export default function MesDemandesPage() {
                       <td className="text-center">
                         <div className="d-flex flex-column align-items-center gap-2">
                            {getStatusBadge(req.status)}
-                            {req.status === 'pending' && !req.isPaid && req.type !== 'birth' && req.type !== 'death' && (
+                            {req.status === 'pending' && !req.isPaid && !user?.has_active_asd && req.type !== 'birth' && req.type !== 'death' && (
                               <div className="d-flex flex-column gap-2">
                                 <small className="text-warning fw-bold px-2 py-1 rounded bg-warning-light" style={{ fontSize: '0.62rem', backgroundColor: '#fff8e1', border: '1px solid #ffd54f' }}>
                                    <i className="fas fa-hourglass-half me-1"></i>
-                                   {lang === 'ar' ? 'بانتظار الدفع لتتم معالجة الطلب' : 'En attente de paiement pour traitement'}
+                                   {t('payment_required_msg')}
                                 </small>
                                 <button 
                                    className="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill shadow-sm animate__animated animate__pulse animate__infinite" 
                                    style={{ fontSize: '0.65rem' }}
                                    onClick={() => navigate(`/paiement?amount=${getRequestPrice(req.type)}&reason=${encodeURIComponent(req.title)}&requestId=${req.id}&requestType=${req.type}&target=/mes-demandes`)}
                                 >
-                                   <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `دفع ${getRequestPrice(req.type)} د.ت` : `Payer ${getRequestPrice(req.type)} DT`}
+                                   <i className="fas fa-credit-card me-1"></i> {lang === 'ar' ? `${getRequestPrice(req.type)} د.ت` : `${getRequestPrice(req.type)} DT`} {t('pay_label') || 'Payer'}
                                 </button>
                               </div>
                             )}

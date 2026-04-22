@@ -101,7 +101,7 @@ export default function MesNaissancesPage() {
                   className="btn btn-warning w-100 rounded-pill fw-bold animate__animated animate__pulse animate__infinite shadow-sm"
                   onClick={() => navigate(`/paiement?amount=0.500&reason=Extrait+de+Naissance&requestId=${extrait.id}&requestType=birth_extract&target=/mes-naissances&file_fr=${encodeURIComponent(resolveBackendUrl(extrait.url_fr))}&file_ar=${encodeURIComponent(resolveBackendUrl(extrait.url_ar))}`)}
                 >
-                  <i className="fas fa-lock me-2"></i> Payer 0.500 DT
+                  <i className="fas fa-lock me-2"></i> {t('pay_2dt') || 'Payer 0.500 DT'}
                 </button>
               ) : (
                 <>
@@ -111,7 +111,7 @@ export default function MesNaissancesPage() {
                     rel="noreferrer"
                     className="btn btn-outline-primary flex-fill"
                   >
-                    <i className="fas fa-print me-1" /> FR
+                    <i className="fas fa-print me-1" /> {lang === 'ar' ? 'الفرنسية' : 'FR'}
                   </a>
                   <a
                     href={resolveBackendUrl(extrait.url_ar)}
@@ -119,7 +119,7 @@ export default function MesNaissancesPage() {
                     rel="noreferrer"
                     className="btn btn-primary flex-fill arabic-font"
                   >
-                    <i className="fas fa-print me-1" /> بالعربية
+                    <i className="fas fa-print me-1" /> {t('version_ar')}
                   </a>
                 </>
               )}
@@ -135,20 +135,20 @@ export default function MesNaissancesPage() {
     <MainLayout
       user={user}
       onLogout={logout}
-      breadcrumbs={[{ label: lang === 'ar' ? 'مضامين الولادة' : 'Mes Extraits de Naissance' }]}
+      breadcrumbs={[{ label: t('birth_extracts') }]}
     >
-      <div className="row mb-4">
+      <div className={`row mb-4 ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="col d-flex justify-content-between align-items-center">
           <div>
             <h2 className="fw-bold section-title">
               <i className="fas fa-baby me-2" />
-              {lang === 'ar' ? 'مضامين الولادة' : 'Mes Extraits de Naissance'}
+              {t('birth_extracts')}
             </h2>
-            <p className="text-muted">{lang === 'ar' ? 'استخراج رقمي فوري مرتبط بسجل الحالة المدنية.' : "Extraction numérique immédiate connectée au registre d'État Civil."}</p>
+            <p className="text-muted">{t('extraction_desc')}</p>
           </div>
           <Link to="/services" className="btn btn-outline-secondary">
-            <i className="fas fa-arrow-left me-2" />
-            Retour aux services
+            <i className={`fas ${lang === 'ar' ? 'fa-arrow-right' : 'fa-arrow-left'} me-2`} />
+            {t('back_to_services') || 'Retour aux services'}
           </Link>
         </div>
       </div>
@@ -156,11 +156,11 @@ export default function MesNaissancesPage() {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2 text-muted">Vérification de votre identité et recherche des actes en cours...</p>
+          <p className="mt-2 text-muted">{t('loading_identity')}</p>
         </div>
       ) : !user?.is_verified ? (
-        <div className="alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center" style={{ borderRadius: '15px' }}>
-          <i className="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+        <div className={`alert alert-warning border-0 shadow-sm p-4 d-flex align-items-center ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'} style={{ borderRadius: '15px' }}>
+          <i className={`fas fa-exclamation-triangle fa-2x ${lang === 'ar' ? 'ms-3' : 'me-3'} text-warning`}></i>
           <div>
             <h5 className="fw-bold mb-1">{t('unverified_title')}</h5>
             <p className="mb-0">{t('account_verification_required')}</p>
@@ -169,21 +169,21 @@ export default function MesNaissancesPage() {
       ) : error ? (
         <div className="alert alert-danger">{error}</div>
       ) : (
-        <div>
-          <h4 className="mb-3 border-bottom pb-2">{lang === 'ar' ? 'مضمون الولادة الخاص بي' : 'Mon Extrait de Naissance'}</h4>
+        <div className={lang === 'ar' ? 'font-arabic text-end' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <h4 className="mb-3 border-bottom pb-2">{t('my_birth_extract') || 'Mon Extrait de Naissance'}</h4>
           <div className="row mb-5">
             {data?.mon_extrait ? (
               card(data.mon_extrait)
             ) : (
               <div className="col-12">
                 <div className="alert alert-secondary">
-                  {lang === 'ar' ? 'لم يتم العثور على أي مضمون ولادة مطابق لملفك الشخصي مرتبط بحسابك.' : "Aucun extrait de naissance correspondant à votre profil n'a été trouvé rattaché à votre compte."}
+                  {t('no_birth_extract_found')}
                 </div>
               </div>
             )}
           </div>
 
-          <h4 className="mb-3 border-bottom pb-2 mt-4">Extraits de mes enfants</h4>
+          <h4 className="mb-3 border-bottom pb-2 mt-4">{t('my_children_extracts')}</h4>
           <div className="row">
             {data?.enfants && data.enfants.length > 0 ? (
               data.enfants.map((enf) => card(enf))
@@ -191,7 +191,7 @@ export default function MesNaissancesPage() {
               <div className="col-12">
                 <div className="alert alert-secondary text-muted">
                   <i className="fas fa-info-circle me-2" />
-                  {lang === 'ar' ? 'لم يتم العثور على أي مضمون ولادة لأطفالك مرتبط برقم بطاقة تعريفك.' : "Aucun acte de naissance d'enfant n'est rattaché à votre CIN."}
+                  {t('no_child_birth_extract_found')}
                 </div>
               </div>
             )}
@@ -199,7 +199,7 @@ export default function MesNaissancesPage() {
 
           {data?.conjoints && data.conjoints.length > 0 ? (
             <div className="mt-4">
-              <h4 className="mb-3 border-bottom pb-2">Extrait de mon conjoint</h4>
+              <h4 className="mb-3 border-bottom pb-2">{t('my_spouse_extracts')}</h4>
               <div className="row" id="conjointsList">
                 {data.conjoints.map((c) => card(c))}
               </div>

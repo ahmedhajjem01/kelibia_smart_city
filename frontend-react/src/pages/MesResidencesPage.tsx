@@ -9,6 +9,7 @@ type Demande = {
   id: number
   adresse_demandee: string
   status: 'pending' | 'approved' | 'rejected'
+  is_paid: boolean
   issued_document: string | null
   commentaire_agent: string
   created_at: string
@@ -19,7 +20,8 @@ export default function MesResidencesPage() {
   const navigate = useNavigate()
   const [demandes, setDemandes] = useState<Demande[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean } | null>(null)
+  const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
+  
   useEffect(() => {
     const access = getAccessToken()
     if (!access) {
@@ -53,8 +55,11 @@ export default function MesResidencesPage() {
     fetchAll()
   }, [navigate])
 
-  const getStatusBadge = (status: Demande['status']) => {
-    switch (status) {
+  const getStatusBadge = (d: Demande) => {
+    if (!d.is_paid && !user?.has_active_asd) {
+      return <span className="badge bg-secondary text-white">{t('status_unpaid') || 'Non payé'}</span>
+    }
+    switch (d.status) {
       case 'pending':
         return <span className="badge bg-warning text-dark">{t('status_pending')}</span>
       case 'approved':
@@ -62,7 +67,7 @@ export default function MesResidencesPage() {
       case 'rejected':
         return <span className="badge bg-danger">{t('status_rejected')}</span>
       default:
-        return <span className="badge bg-secondary">{status}</span>
+        return <span className="badge bg-secondary">{d.status}</span>
     }
   }
 
@@ -72,13 +77,13 @@ export default function MesResidencesPage() {
       onLogout={() => navigate('/login')}
       breadcrumbs={[{ label: t('mes_residences') }]}
     >
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className={`d-flex justify-content-between align-items-center mb-4 ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div>
           <h2 className="section-title text-primary text-uppercase fw-bold m-0">
             <i className="fas fa-home me-2"></i>
             {t('mes_residences')}
           </h2>
-          <p className="text-muted small">Historique de vos attestations de résidence.</p>
+          <p className="text-muted small">{t('residence_history_desc')}</p>
         </div>
         <Link to="/demande-residence" className="btn btn-primary rounded-pill shadow-sm">
           <i className="fas fa-plus me-2"></i>
@@ -86,7 +91,7 @@ export default function MesResidencesPage() {
         </Link>
       </div>
 
-      <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+      <div className={`card shadow-sm border-0 rounded-4 overflow-hidden ${lang === 'ar' ? 'font-arabic' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="card-body p-0">
           {loading ? (
             <div className="text-center p-5">
@@ -104,17 +109,17 @@ export default function MesResidencesPage() {
           ) : demandes.length === 0 ? (
             <div className="text-center p-5">
               <i className="fas fa-folder-open fa-3x text-light mb-3"></i>
-              <p className="text-muted mb-0">Aucune demande trouvée.</p>
+              <p className="text-muted mb-0">{t('no_requests_found')}</p>
             </div>
           ) : (
             <div className="table-responsive">
               <table className="table table-hover align-middle mb-0">
                 <thead className="bg-light">
                   <tr>
-                    <th className="border-0 px-4 py-3">Date</th>
-                    <th className="border-0 py-3">Adresse</th>
-                    <th className="border-0 py-3 text-center">Statut</th>
-                    <th className="border-0 px-4 py-3 text-end">Actions</th>
+                    <th className="border-0 px-4 py-3">{t('date_label')}</th>
+                    <th className="border-0 py-3">{t('address_label') || 'Adresse'}</th>
+                    <th className="border-0 py-3 text-center">{t('status_label')}</th>
+                    <th className="border-0 px-4 py-3 text-end">{t('actions_label')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -124,9 +129,14 @@ export default function MesResidencesPage() {
                         {new Date(d.created_at).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')}
                       </td>
                       <td className="fw-bold text-dark">{d.adresse_demandee}</td>
-                      <td className="text-center">{getStatusBadge(d.status)}</td>
+                      <td className="text-center">{getStatusBadge(d)}</td>
                       <td className="px-4 text-end">
-                        {d.issued_document ? (
+                        {(!d.is_paid && !user?.has_active_asd) ? (
+                           <Link to={`/paiement-simulation?type=residence&id=${d.id}`} className="btn btn-sm btn-primary rounded-pill fw-bold">
+                             <i className="fas fa-credit-card me-1"></i>
+                             {t('pay_2dt') || 'Payer'}
+                           </Link>
+                        ) : d.issued_document ? (
                           <a
                             href={d.issued_document}
                             target="_blank"
