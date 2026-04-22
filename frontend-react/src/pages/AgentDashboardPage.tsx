@@ -4962,11 +4962,11 @@ export default function AgentDashboardPage() {
 
     <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg,#e65100,#f57f17)' }}>
 
-      <span><i className="fas fa-hard-hat me-2"></i>Permis de Construire — Gestion des dossiers</span>
+      <span><i className={`fas fa-hard-hat ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رخص البناء — إدارة الملفات' : 'Permis de Construire — Gestion des dossiers'}</span>
 
       <button className="btn btn-sm btn-light rounded-pill px-3" style={{ fontSize: '.78rem' }} onClick={fetchConstructions}>
 
-        <i className="fas fa-sync-alt me-1"></i>Actualiser
+        <i className={`fas fa-sync-alt ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{lang === 'ar' ? 'تحديث' : 'Actualiser'}
 
       </button>
 
@@ -4982,15 +4982,15 @@ export default function AgentDashboardPage() {
 
           {[
 
-            { lbl: 'Total', val: constructionStats.total, color: '#1a237e', bg: '#e8eaf6' },
+            { lbl: lang === 'ar' ? 'الإجمالي' : 'Total',           val: constructionStats.total,          color: '#1a237e', bg: '#e8eaf6' },
 
-            { lbl: 'En attente', val: constructionStats.pending, color: '#e65100', bg: '#fff3e0' },
+            { lbl: lang === 'ar' ? 'قيد الانتظار' : 'En attente',      val: constructionStats.pending,        color: '#e65100', bg: '#fff3e0' },
 
-            { lbl: 'En instruction', val: constructionStats.en_cours, color: '#1565c0', bg: '#e3f2fd' },
+            { lbl: lang === 'ar' ? 'في الدراسة' : 'En instruction',  val: constructionStats.en_cours,       color: '#1565c0', bg: '#e3f2fd' },
 
-            { lbl: 'Permis délivrés', val: constructionStats.permis_delivre, color: '#2e7d32', bg: '#e8f5e9' },
+            { lbl: lang === 'ar' ? 'رخص مسلمة' : 'Permis délivrés', val: constructionStats.permis_delivre, color: '#2e7d32', bg: '#e8f5e9' },
 
-            { lbl: 'Rejetés', val: constructionStats.rejet, color: '#c62828', bg: '#ffebee' },
+            { lbl: lang === 'ar' ? 'مرفوضة' : 'Rejetés',         val: constructionStats.rejet,          color: '#c62828', bg: '#ffebee' },
 
           ].map(s => (
 
@@ -5022,7 +5022,7 @@ export default function AgentDashboardPage() {
 
           <i className="fas fa-search"></i>
 
-          <input className="ag-search-input" placeholder="Rechercher par nom, adresse..." value={constructionSearch} onChange={e => setConstructionSearch(e.target.value)} />
+          <input className="ag-search-input" placeholder={lang === 'ar' ? 'بحث بالاسم، العنوان...' : 'Rechercher par nom, adresse...'} value={constructionSearch} onChange={e => setConstructionSearch(e.target.value)} />
 
         </div>
 
@@ -5032,7 +5032,7 @@ export default function AgentDashboardPage() {
 
             onClick={() => setConstructionFilter(f)} style={{ fontSize: '.75rem' }}>
 
-            {f === 'all' ? 'Tous' : f === 'pending' ? 'En attente' : f === 'en_cours_instruction' ? 'En instruction' : f === 'permis_delivre' ? 'Permis délivré' : f === 'rejet_definitif' ? 'Rejeté' : 'Modif. demandées'}
+            {f === 'all' ? (lang === 'ar' ? 'الكل' : 'Tous') : f === 'pending' ? (lang === 'ar' ? 'قيد الانتظار' : 'En attente') : f === 'en_cours_instruction' ? (lang === 'ar' ? 'في الدراسة' : 'En instruction') : f === 'permis_delivre' ? (lang === 'ar' ? 'رخصة مسلمة' : 'Permis délivré') : f === 'rejet_definitif' ? (lang === 'ar' ? 'مرفوض' : 'Rejeté') : (lang === 'ar' ? 'تعديلات مطلوبة' : 'Modif. demandées')}
 
           </button>
 
@@ -6585,7 +6585,7 @@ export default function AgentDashboardPage() {
 
           <div className="modal-header">
 
-            <h5 className="modal-title">{editingArticle ? 'Modifier l\'article' : 'Ajouter un article'}</h5>
+            <h5 className="modal-title">{editingArticle ? (lang === 'ar' ? 'تعديل المقال' : "Modifier l'article") : (lang === 'ar' ? 'إضافة خبر' : 'Ajouter un article')}</h5>
 
             <button type="button" className="btn-close" onClick={() => setShowAddArticleModal(false)}></button>
 
@@ -6595,7 +6595,7 @@ export default function AgentDashboardPage() {
 
             <div className="mb-3">
 
-              <label className="form-label">Titre</label>
+              <label className="form-label">{lang === 'ar' ? 'العنوان' : 'Titre'}</label>
 
               <input className="form-control" value={articleForm.title} onChange={e => setArticleForm({ ...articleForm, title: e.target.value })} />
 
@@ -6603,7 +6603,7 @@ export default function AgentDashboardPage() {
 
             <div className="mb-3">
 
-              <label className="form-label">Image de couverture</label>
+              <label className="form-label">{lang === 'ar' ? 'صورة الغلاف' : 'Image de couverture'}</label>
 
               <input type="file" className="form-control" onChange={e => setArticleImage(e.target.files?.[0] || null)} />
 
@@ -6611,7 +6611,7 @@ export default function AgentDashboardPage() {
 
             <div className="mb-3">
 
-              <label className="form-label">Contenu</label>
+              <label className="form-label">{lang === 'ar' ? 'المحتوى' : 'Contenu'}</label>
 
               <textarea className="form-control" rows={5} value={articleForm.content} onChange={e => setArticleForm({ ...articleForm, content: e.target.value })}></textarea>
 
@@ -6621,7 +6621,7 @@ export default function AgentDashboardPage() {
 
               <input className="form-check-input" type="checkbox" checked={articleForm.is_published} onChange={e => setArticleForm({ ...articleForm, is_published: e.target.checked })} />
 
-              <label className="form-check-label">Publier immédiatement</label>
+              <label className="form-check-label">{lang === 'ar' ? 'نشر فورياً' : 'Publier immédiatement'}</label>
 
             </div>
 
@@ -6629,9 +6629,9 @@ export default function AgentDashboardPage() {
 
           <div className="modal-footer">
 
-            <button className="btn btn-secondary" onClick={() => setShowAddArticleModal(false)}>Annuler</button>
+            <button className="btn btn-secondary" onClick={() => setShowAddArticleModal(false)}>{lang === 'ar' ? 'إلغاء' : 'Annuler'}</button>
 
-            <button className="btn btn-primary" onClick={handleSaveArticle}>Enregistrer</button>
+            <button className="btn btn-primary" onClick={handleSaveArticle}>{lang === 'ar' ? 'حفظ' : 'Enregistrer'}</button>
 
           </div>
 
@@ -7435,7 +7435,7 @@ export default function AgentDashboardPage() {
 
         <div className="ag-modal-hdr" style={{ background: '#004d40' }}>
 
-          <div className="title"><i className="fas fa-user-check me-2"></i>Vérification d'Identité : {selectedUser.full_name}</div>
+          <div className="title"><i className={`fas fa-user-check ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'التحقق من الهوية: ' : "Vérification d'Identité : "}{selectedUser.full_name}</div>
 
           <button className="ag-close-btn" onClick={() => setSelectedUser(null)}><i className="fas fa-times"></i></button>
 
@@ -7451,13 +7451,13 @@ export default function AgentDashboardPage() {
 
               <div className="p-4 bg-white rounded shadow-sm">
 
-                <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-info-circle me-2"></i>Données de l'inscription</h6>
+                <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className={`fas fa-info-circle ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'بيانات التسجيل' : "Données de l'inscription"}</h6>
 
 
 
                 <div className="row mb-3">
 
-                  <div className="col-5 text-muted small">Nom & Prénom</div>
+                  <div className="col-5 text-muted small">{lang === 'ar' ? 'الاسم واللقب' : 'Nom & Prénom'}</div>
 
                   <div className="col-7 fw-bold">{selectedUser.full_name}</div>
 
@@ -7465,7 +7465,7 @@ export default function AgentDashboardPage() {
 
                 <div className="row mb-3">
 
-                  <div className="col-5 text-muted small">CIN Citoyen</div>
+                  <div className="col-5 text-muted small">{lang === 'ar' ? 'رقم بطاقة التعريف' : 'CIN Citoyen'}</div>
 
                   <div className="col-7 fw-bold" style={{ letterSpacing: 2 }}>{selectedUser.cin}</div>
 
@@ -7473,13 +7473,13 @@ export default function AgentDashboardPage() {
 
                 <div className="row mb-3">
 
-                  <div className="col-5 text-muted small">Naissance</div>
+                  <div className="col-5 text-muted small">{lang === 'ar' ? 'تاريخ الميلاد' : 'Naissance'}</div>
 
                   <div className="col-7">
 
                     {selectedUser.date_of_birth ? <div>{selectedUser.date_of_birth}</div> : <i className="text-muted">—</i>}
 
-                    <div className="small text-muted">{selectedUser.place_of_birth || 'Lieu inconnu'}</div>
+                    <div className="small text-muted">{selectedUser.place_of_birth || (lang === 'ar' ? 'مكان غير معروف' : 'Lieu inconnu')}</div>
 
                   </div>
 
@@ -7493,7 +7493,7 @@ export default function AgentDashboardPage() {
 
                     <i className={`fas ${selectedUser.is_married ? 'fa-ring' : 'fa-user'}`}></i>
 
-                    <span className="small fw-bold">{selectedUser.is_married ? 'MARIÉ(E)' : 'CÉLIBATAIRE'}</span>
+                    <span className="small fw-bold">{selectedUser.is_married ? (lang === 'ar' ? 'متزوج(ة)' : 'MARIÉ(E)') : (lang === 'ar' ? 'أعزب' : 'CÉLIBATAIRE')}</span>
 
                   </div>
 
@@ -7501,7 +7501,7 @@ export default function AgentDashboardPage() {
 
                     <div className="mt-2 text-dark bg-light p-2 rounded border small">
 
-                      <div className="fw-bold text-muted mb-1" style={{ fontSize: '10px', textTransform: 'uppercase' }}>Conjoint(e)</div>
+                      <div className="fw-bold text-muted mb-1" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{lang === 'ar' ? 'الزوج(ة)' : 'Conjoint(e)'}</div>
 
                       <div>{selectedUser.spouse_first_name} {selectedUser.spouse_last_name}</div>
 
@@ -7521,7 +7521,7 @@ export default function AgentDashboardPage() {
 
                     <button className="btn btn-success" onClick={() => handleToggleUserStatus(selectedUser.id, 'verify')}>
 
-                      <i className="fas fa-check-circle me-2"></i>Valider l'identité
+                      <i className={`fas fa-check-circle ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'تأكيد الهوية' : "Valider l'identité"}
 
                     </button>
 
@@ -7529,7 +7529,7 @@ export default function AgentDashboardPage() {
 
                     <div className="alert alert-success d-flex align-items-center mb-0 py-2">
 
-                      <i className="fas fa-check-double me-2"></i>Identité Validée
+                      <i className={`fas fa-check-double ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'تم التحقق من الهوية' : 'Identité Validée'}
 
                     </div>
 
@@ -7539,7 +7539,7 @@ export default function AgentDashboardPage() {
 
                     <i className={`fas ${selectedUser.is_active ? 'fa-user-slash' : 'fa-user-check'} me-2 rotate-hover`}></i>
 
-                    {selectedUser.is_active ? 'Bloquer ce compte' : 'Débloquer maintenant'}
+                    {selectedUser.is_active ? (lang === 'ar' ? 'حجب هذا الحساب' : 'Bloquer ce compte') : (lang === 'ar' ? 'إلغاء الحجب' : 'Débloquer maintenant')}
 
                   </button>
 
@@ -7557,13 +7557,13 @@ export default function AgentDashboardPage() {
 
               <div className="p-4 bg-white rounded shadow-sm h-100">
 
-                <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className="fas fa-id-card me-2"></i>Documents CIN à vérifier</h6>
+                <h6 className="fw-bold text-success border-bottom pb-2 mb-3"><i className={`fas fa-id-card ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'وثائق بطاقة التعريف للتحقق' : 'Documents CIN à vérifier'}</h6>
 
                 <div className="row g-2">
 
                   <div className="col-12">
 
-                    <label className="small text-muted mb-1">FACE AVANT (RECTO)</label>
+                    <label className="small text-muted mb-1">{lang === 'ar' ? 'الوجه الأمامي' : 'FACE AVANT (RECTO)'}</label>
 
                     <div className="ag-cin-preview mb-3">
 
@@ -7577,7 +7577,7 @@ export default function AgentDashboardPage() {
 
                       ) : (
 
-                        <div className="p-5 text-center bg-light text-muted small rounded">Non fournie</div>
+                        <div className="p-5 text-center bg-light text-muted small rounded">{lang === 'ar' ? 'غير مجهزة' : 'Non fournie'}</div>
 
                       )}
 
@@ -7587,7 +7587,7 @@ export default function AgentDashboardPage() {
 
                   <div className="col-12">
 
-                    <label className="small text-muted mb-1">FACE ARRIÈRE (VERSO)</label>
+                    <label className="small text-muted mb-1">{lang === 'ar' ? 'الوجه الخلفي' : 'FACE ARRIÈRE (VERSO)'}</label>
 
                     <div className="ag-cin-preview">
 
