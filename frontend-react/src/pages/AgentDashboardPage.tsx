@@ -3203,6 +3203,17 @@ export default function AgentDashboardPage() {
 
                     <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> {t('urgent_only')}</button>
 
+                    {(search || filterStatus || filterCategory || filterPriority || urgentOnly) && (
+                      <button
+                        className="ag-filter-btn"
+                        style={{ background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a' }}
+                        onClick={() => { setSearch(''); setFilterStatus(''); setFilterCategory(''); setFilterPriority(''); setUrgentOnly(false) }}
+                        title="Effacer tous les filtres"
+                      >
+                        <i className="fas fa-times me-1"></i>{lang === 'ar' ? 'مسح الفلاتر' : 'Effacer filtres'}
+                      </button>
+                    )}
+
                     <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} {t('results_count')}</span>
 
                   </div>
