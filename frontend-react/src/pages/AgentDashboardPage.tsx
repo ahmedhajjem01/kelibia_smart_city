@@ -4179,13 +4179,32 @@ export default function AgentDashboardPage() {
               </>)}
 
               {demandeDetail.type === 'legalisation' && (<>
-
                 <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نوع الوثيقة' : 'Type de document'}</div><div className="det-value">{demandeDetail.type_document}</div></div>
-
                 <div className="col-6"><div className="det-label">{lang === 'ar' ? 'عدد النسخ' : 'Nombre de copies'}</div><div className="det-value">{demandeDetail.nombre_copies}</div></div>
-
                 {demandeDetail.motif && <div className="col-12"><div className="det-label">{t('motif')}</div><div className="det-value">{demandeDetail.motif}</div></div>}
-
+                
+                {/* Documents photos for the agent */}
+                <div className="col-12 mt-3">
+                  <div className="det-label mb-2"><i className="fas fa-id-card me-1"></i>Pièces d'identité (Photos)</div>
+                  <div className="row g-2">
+                    {demandeDetail.cin_recto && (
+                      <div className="col-6">
+                        <div className="small text-muted mb-1 text-center">Recto</div>
+                        <a href={demandeDetail.cin_recto} target="_blank" rel="noreferrer">
+                          <img src={demandeDetail.cin_recto} alt="CIN Recto" style={{ width: '100%', height: 'auto', borderRadius: 8, border: '1px solid #ccc' }} />
+                        </a>
+                      </div>
+                    )}
+                    {demandeDetail.cin_verso && (
+                      <div className="col-6">
+                        <div className="small text-muted mb-1 text-center">Verso</div>
+                        <a href={demandeDetail.cin_verso} target="_blank" rel="noreferrer">
+                          <img src={demandeDetail.cin_verso} alt="CIN Verso" style={{ width: '100%', height: 'auto', borderRadius: 8, border: '1px solid #ccc' }} />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </>)}
 
               {demandeDetail.type === 'goudronnage' && (<>

@@ -444,23 +444,29 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-argent',
       }
-    } else if (nameLower.includes('enseigne') || nameLower.includes('licence') || nameLower.includes('commerce') || nameLower.includes('boutique') || nameAr.includes('لافتة') || nameAr.includes('رخصة') || nameAr.includes('تجارة')) {
-      requestButton = {
-        kind: 'declare_birth',
-        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
-        target: '/demande-commerce',
-      }
     } else if (nameLower.includes('transfert') || nameAr.includes('نقل')) {
       requestButton = {
         kind: 'declare_death',
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-transfert-corps',
       }
+    } else if (nameLower.includes('enseigne') || nameLower.includes('licence') || nameLower.includes('commerce') || nameLower.includes('boutique') || nameAr.includes('لافتة') || nameAr.includes('رخصة') || nameAr.includes('تجارة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-commerce',
+      }
     } else if (nameLower.includes('légalisation') || nameAr.includes('تعريف')) {
       requestButton = {
         kind: 'declare_birth',
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-legalisation',
+      }
+    } else if (nameLower.includes('livret') || nameAr.includes('دفتر') || nameAr.includes('عالة')) {
+      requestButton = {
+        kind: 'declare_birth',
+        label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
+        target: '/demande-livret-famille',
       }
     } else {
 
