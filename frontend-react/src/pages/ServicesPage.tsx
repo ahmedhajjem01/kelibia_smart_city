@@ -78,13 +78,7 @@ type ServiceCategory = {
 type RequestButtonState =
 
   | { kind: 'extract_now'; label: string; target: '/mes-extraits' | '/mes-mariages' | '/mes-deces' }
-<<<<<<< HEAD
   | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' | '/demande-eau' | '/demande-argent' | '/demande-commerce' }
-=======
-
-  | { kind: 'declare_birth'; label: string; target: '/declaration-naissance' | '/demande-mariage' | '/demande-livret-famille' | '/demande-evenement' | '/demande-evenement-public' | '/demande-evenement-prive' | '/demande-construction' | '/demande-goudronnage' | '/demande-certificat-vocation' }
-
->>>>>>> my-updates
   | { kind: 'declare_death'; label: string; target: '/declaration-deces' | '/demande-inhumation' }
 
   | { kind: 'disabled'; label: string }
@@ -438,7 +432,6 @@ export default function ServicesPage() {
         target: '/demande-construction',
 
       }
-<<<<<<< HEAD
     } else if (nameLower.includes('raccordement') || nameLower.includes('compteur') || nameLower.includes('eau') || nameLower.includes('électricité') || nameLower.includes('égout') || nameAr.includes('ربط') || nameAr.includes('عداد') || nameAr.includes('ماء') || nameAr.includes('كهرباء')) {
       requestButton = {
         kind: 'declare_birth',
@@ -457,9 +450,6 @@ export default function ServicesPage() {
         label: lang === 'ar' ? 'تقديم طلب' : 'Demander en ligne',
         target: '/demande-commerce',
       }
-=======
-
->>>>>>> my-updates
     } else {
 
       requestButton = {
