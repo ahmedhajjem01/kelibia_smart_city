@@ -25,9 +25,19 @@ def notify_citizen(instance, title_prefix, link='/dashboard'):
             link=link
         )
         
-        subject = f"Mise à jour: {title_prefix} - Kelibia Smart City"
-        email_message = f"Bonjour {instance.citizen.first_name},\n\nLe statut de votre demande de {title_prefix} a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
-        send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [instance.citizen.email], fail_silently=True)
+        if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+            import threading
+            citizen_name = instance.citizen.first_name
+            citizen_email = instance.citizen.email
+            from_email = settings.DEFAULT_FROM_EMAIL
+            def _send():
+                try:
+                    subject = f"Mise à jour: {title_prefix} - Kelibia Smart City"
+                    msg = f"Bonjour {citizen_name},\n\nLe statut de votre demande de {title_prefix} a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
+                    send_mail(subject, msg, from_email, [citizen_email], fail_silently=True)
+                except Exception as ex:
+                    print(f"Background email failed for {title_prefix}: {ex}")
+            threading.Thread(target=_send).start()
     except Exception as e:
         print(f"Failed to send notification for {title_prefix}: {e}")
 

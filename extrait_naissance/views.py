@@ -163,8 +163,18 @@ class DeclarationNaissanceDetailAPIView(APIView):
                 )
                 
                 subject = "Mise à jour: Déclaration de Naissance - Kelibia Smart City"
-                email_message = f"Bonjour {declaration.declarant.first_name},\n\nLe statut de votre déclaration de naissance a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
-                send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [declaration.declarant.email], fail_silently=True)
+                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                    import threading
+                    _n = declaration.declarant.first_name
+                    _e = declaration.declarant.email
+                    _s = status_display
+                    _f = settings.DEFAULT_FROM_EMAIL
+                    def _send_birth():
+                        try:
+                            send_mail(subject, f"Bonjour {_n},\n\nLe statut de votre déclaration de naissance a été mis à jour.\nNouveau statut : {_s}.\n\nCordialement,\nL'équipe Kelibia Smart City", _f, [_e], fail_silently=True)
+                        except Exception as ex:
+                            print(f"Background birth email failed: {ex}")
+                    threading.Thread(target=_send_birth).start()
             except Exception as e:
                 print(f"Failed to send notification for birth decl: {e}")
 

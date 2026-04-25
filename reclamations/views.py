@@ -235,7 +235,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             
             # --- Send Notifications ---
             try:
-                # 1. In-app notification
+                # 1. In-app notification (synchronous — fast DB write)
                 Notification.objects.create(
                     recipient=rec.citizen,
                     title=f"Mise à jour de votre signalement: {rec.title}",
@@ -244,13 +244,22 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                     link='/mes-reclamations'
                 )
 
-                # 2. Email notification
-                subject = f"Mise à jour de votre signalement - Kelibia Smart City"
-                message = f"Bonjour {rec.citizen.first_name},\n\nLe statut de votre signalement '{rec.title}' a été mis à jour.\nNouveau statut : {rec.get_status_display()}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City"
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [rec.citizen.email]
-                
-                send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+                # 2. Email notification — run in background thread to avoid timeout
+                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                    import threading
+                    citizen_name = rec.citizen.first_name
+                    citizen_email = rec.citizen.email
+                    rec_title = rec.title
+                    status_display = rec.get_status_display()
+                    from_email = settings.DEFAULT_FROM_EMAIL
+                    def _send_status_email():
+                        try:
+                            subject = f"Mise à jour de votre signalement - Kelibia Smart City"
+                            msg = f"Bonjour {citizen_name},\n\nLe statut de votre signalement '{rec_title}' a été mis à jour.\nNouveau statut : {status_display}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City"
+                            send_mail(subject, msg, from_email, [citizen_email], fail_silently=True)
+                        except Exception as ex:
+                            logger.error(f"Background email send failed: {ex}")
+                    threading.Thread(target=_send_status_email).start()
             except Exception as e:
                 logger.error(f"Error sending notifications: {e}")
 

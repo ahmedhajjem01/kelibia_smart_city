@@ -331,10 +331,25 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                             link='/mes-demandes' if t in ['residence', 'livret', 'naissance', 'mariage', 'deces', 'legalisation'] else '/dashboard'
                         )
                         
-                        # Email
-                        subject = f"Mise à jour de votre demande - Kelibia Smart City"
-                        email_message = f"Bonjour {citizen.first_name},\n\nLe statut de votre demande ({type_label}) a été mis à jour.\nNouveau statut : {status_display}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City"
-                        send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [citizen.email], fail_silently=True)
+                        # Email — background thread to avoid Vercel timeouts
+                        if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                            import threading
+                            _cn = citizen.first_name
+                            _ce = citizen.email
+                            _tl = type_label
+                            _sd = status_display
+                            _fe = settings.DEFAULT_FROM_EMAIL
+                            _lk = '/mes-demandes' if t in ['residence', 'livret', 'naissance', 'mariage', 'deces', 'legalisation'] else '/dashboard'
+                            def _send_core():
+                                try:
+                                    send_mail(
+                                        f"Mise à jour de votre demande - Kelibia Smart City",
+                                        f"Bonjour {_cn},\n\nLe statut de votre demande ({_tl}) a été mis à jour.\nNouveau statut : {_sd}.\n\nCordialement,\nL'équipe Kelibia Smart City",
+                                        _fe, [_ce], fail_silently=True
+                                    )
+                                except Exception as ex:
+                                    print(f"Background core email failed: {ex}")
+                            threading.Thread(target=_send_core).start()
                 except Exception as e:
                     print(f"Failed to send notification in core: {e}")
 

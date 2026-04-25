@@ -71,7 +71,18 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
             
             subject = "Mise à jour: Demande d'Événement - Kelibia Smart City"
             email_message = f"Bonjour {demande.citizen.first_name},\n\nLe statut de votre demande d'événement a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
-            send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [demande.citizen.email], fail_silently=True)
+            if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                import threading
+                _n = demande.citizen.first_name
+                _e = demande.citizen.email
+                _s = status_display
+                _f = settings.DEFAULT_FROM_EMAIL
+                def _send_ev():
+                    try:
+                        send_mail(subject, f"Bonjour {_n},\n\nLe statut de votre demande d'événement a été mis à jour.\nNouveau statut : {_s}.\n\nCordialement,\nL'équipe Kelibia Smart City", _f, [_e], fail_silently=True)
+                    except Exception as ex:
+                        print(f"Background event email failed: {ex}")
+                threading.Thread(target=_send_ev).start()
         except Exception as e:
             print(f"Failed to send notification for event: {e}")
 
