@@ -22,6 +22,9 @@ def login_redirect(request):
     return redirect('/login')
 
 from django.utils import timezone
+from notifications.models import Notification
+from django.core.mail import send_mail
+from django.conf import settings
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -309,6 +312,32 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
             if hasattr(o, 'status'):
                 o.status = nst
                 o.save()
+                
+                # --- Send Notification ---
+                try:
+                    citizen = getattr(o, 'citizen', getattr(o, 'user', getattr(o, 'declarant', None)))
+                    if citizen:
+                        type_label = m._meta.verbose_name
+                        status_display = nst
+                        if hasattr(o, 'get_status_display'):
+                            status_display = o.get_status_display()
+                        
+                        # In-app
+                        Notification.objects.create(
+                            recipient=citizen,
+                            title=f"Mise à jour: {type_label}",
+                            message=f"Le statut de votre demande '{type_label} #{o.id}' a été mis à jour: {status_display}.",
+                            notification_type='success' if nst in ['resolved', 'validated', 'ready', 'approved', 'permis_delivre'] else 'info',
+                            link='/mes-demandes' if t in ['residence', 'livret', 'naissance', 'mariage', 'deces', 'legalisation'] else '/dashboard'
+                        )
+                        
+                        # Email
+                        subject = f"Mise à jour de votre demande - Kelibia Smart City"
+                        email_message = f"Bonjour {citizen.first_name},\n\nLe statut de votre demande ({type_label}) a été mis à jour.\nNouveau statut : {status_display}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City"
+                        send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [citizen.email], fail_silently=True)
+                except Exception as e:
+                    print(f"Failed to send notification in core: {e}")
+
                 return Response({"message": "Statut mis à jour !"})
             return Response({"error": "No status field!"}, status=400)
         except: return Response({"error": "Not found"}, status=404)

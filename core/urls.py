@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/residence/', include('attestation_residence.urls')),
     path('api/evenements/', include('social_evenements.urls')),
     path('api/forum/', include('forum.urls')),
+    path('api/notifications/', include('notifications.urls')),
     path('login/', login_redirect, name='login'),
     path('api/construction/', include('maison_construction.urls')),
     path('livret-famille/', include('livret_famille.urls')),

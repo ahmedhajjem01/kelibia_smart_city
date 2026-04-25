@@ -4,6 +4,9 @@ from rest_framework.decorators import action, api_view, permission_classes as pc
 from .models import Reclamation
 from .serializers import ReclamationSerializer
 import logging
+from django.core.mail import send_mail
+from django.conf import settings
+from notifications.models import Notification
 logger = logging.getLogger(__name__)
 
 
@@ -91,6 +94,18 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         # Attach results to the instance so create() can use them for response metadata
         instance._ml_result = ml_result
         instance._dup_result = dup_result
+
+        # Notification for citizen
+        try:
+            Notification.objects.create(
+                recipient=self.request.user,
+                title="Nouveau signalement enregistré",
+                message=f"Votre signalement '{instance.title}' a été enregistré avec succès.",
+                notification_type='info',
+                link='/mes-reclamations'
+            )
+        except Exception as e:
+            logger.warning(f"Failed to create creation notification: {e}")
 
     def create(self, request, *args, **kwargs):
         # We let super().create handle the standard flow (which calls perform_create)
@@ -217,6 +232,28 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             if getattr(user, 'user_type', '') == 'agent' and rec.agent is None:
                 rec.agent = user
             rec.save()
+            
+            # --- Send Notifications ---
+            try:
+                # 1. In-app notification
+                Notification.objects.create(
+                    recipient=rec.citizen,
+                    title=f"Mise à jour de votre signalement: {rec.title}",
+                    message=f"Le statut de votre signalement '{rec.title}' est passé à : {rec.get_status_display()}.",
+                    notification_type='success' if new_status == 'resolved' else 'info',
+                    link='/mes-reclamations'
+                )
+
+                # 2. Email notification
+                subject = f"Mise à jour de votre signalement - Kelibia Smart City"
+                message = f"Bonjour {rec.citizen.first_name},\n\nLe statut de votre signalement '{rec.title}' a été mis à jour.\nNouveau statut : {rec.get_status_display()}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City"
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [rec.citizen.email]
+                
+                send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+            except Exception as e:
+                logger.error(f"Error sending notifications: {e}")
+
             return Response({"status": "Statut mis a jour."})
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
 

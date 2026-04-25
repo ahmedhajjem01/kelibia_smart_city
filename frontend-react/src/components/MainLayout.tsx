@@ -3,6 +3,9 @@ import { useI18n } from '../i18n/LanguageProvider';
 import Sidebar from './Sidebar';
 import HeroSection from './HeroSection';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getAccessToken } from '../lib/authStorage';
+import { resolveBackendUrl } from '../lib/backendUrl';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -22,6 +25,30 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   rightSidebar
 }) => {
   const { t, lang, setLang } = useI18n();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const access = getAccessToken();
+      if (!access) return;
+      try {
+        const res = await fetch(resolveBackendUrl('/api/notifications/'), {
+          headers: { Authorization: `Bearer ${access}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.filter((n: any) => !n.is_read).length);
+        }
+      } catch (e) {
+        console.error("Failed to fetch notifications", e);
+      }
+    };
+
+    fetchNotifications();
+    // Refresh every minute
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
 
@@ -69,6 +96,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             <i className="fas fa-user-circle" style={{ fontSize: '1rem' }}></i>
             {user?.first_name || t('profile')}
           </Link>
+          
+          {/* Notifications count */}
+          {!isAgentOrAdmin && (
+            <Link to="/dashboard" style={{ marginLeft: 16, color: unreadCount > 0 ? '#1a73e8' : '#6b7280', fontSize: '.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, position: 'relative' }}>
+              <i className="fas fa-bell" style={{ fontSize: '1rem' }}></i>
+              {unreadCount > 0 && (
+                <span style={{ 
+                  position: 'absolute', top: -5, right: -5, 
+                  background: '#ef4444', color: 'white', 
+                  borderRadius: '50%', width: 14, height: 14, 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  fontSize: '9px', fontWeight: 700 
+                }}>
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
+
         </div>
 
         {/* Hero */}

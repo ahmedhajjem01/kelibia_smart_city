@@ -8,6 +8,9 @@ from .models import Citoyen, ExtraitNaissance, DeclarationNaissance, DemandeLega
 from .serializers import DeclarationNaissanceSerializer, DemandeLegalisationSerializer
 
 from django.utils import timezone
+from notifications.models import Notification
+from django.core.mail import send_mail
+from django.conf import settings
 
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitNaissance, pk=pk)
@@ -144,6 +147,27 @@ class DeclarationNaissanceDetailAPIView(APIView):
         if new_status in ['validated', 'rejected']:
             declaration.status = new_status
             declaration.save()
+            
+            # --- Send Notification ---
+            try:
+                status_display = declaration.status
+                if hasattr(declaration, 'get_status_display'):
+                    status_display = declaration.get_status_display()
+                
+                Notification.objects.create(
+                    recipient=declaration.declarant,
+                    title="Mise à jour: Déclaration de Naissance",
+                    message=f"Le statut de votre déclaration de naissance #{declaration.id} a été mis à jour: {status_display}.",
+                    notification_type='success' if declaration.status == 'validated' else 'info',
+                    link='/mes-demandes'
+                )
+                
+                subject = "Mise à jour: Déclaration de Naissance - Kelibia Smart City"
+                email_message = f"Bonjour {declaration.declarant.first_name},\n\nLe statut de votre déclaration de naissance a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
+                send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [declaration.declarant.email], fail_silently=True)
+            except Exception as e:
+                print(f"Failed to send notification for birth decl: {e}")
+
             return Response({"status": declaration.status})
         return Response({"error": "Statut invalide"}, status=400)
 

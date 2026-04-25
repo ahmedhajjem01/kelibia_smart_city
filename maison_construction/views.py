@@ -7,6 +7,29 @@ from .serializers import (
     DemandeConstructionSerializer, DemandeGoudronnageSerializer, 
     DemandeCertificatVocationSerializer, DemandeRaccordementSerializer
 )
+from notifications.models import Notification
+from django.core.mail import send_mail
+from django.conf import settings
+
+def notify_citizen(instance, title_prefix, link='/dashboard'):
+    try:
+        status_display = instance.status
+        if hasattr(instance, 'get_status_display'):
+            status_display = instance.get_status_display()
+        
+        Notification.objects.create(
+            recipient=instance.citizen,
+            title=f"Mise à jour: {title_prefix}",
+            message=f"Le statut de votre demande '{title_prefix} #{instance.id}' a été mis à jour: {status_display}.",
+            notification_type='success' if instance.status in ['permis_delivre', 'ready', 'approved', 'resolved', 'travaux_termines'] else 'info',
+            link=link
+        )
+        
+        subject = f"Mise à jour: {title_prefix} - Kelibia Smart City"
+        email_message = f"Bonjour {instance.citizen.first_name},\n\nLe statut de votre demande de {title_prefix} a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
+        send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [instance.citizen.email], fail_silently=True)
+    except Exception as e:
+        print(f"Failed to send notification for {title_prefix}: {e}")
 
 
 class IsAgentOrAdmin(permissions.BasePermission):
@@ -51,6 +74,7 @@ class DemandeConstructionViewSet(viewsets.ModelViewSet):
         if 'is_paid' in request.data:
             demande.is_paid = request.data['is_paid'] in [True, 'true', '1']
         demande.save()
+        notify_citizen(demande, "Permis de Construire", link='/mes-demandes')
         return Response(DemandeConstructionSerializer(demande).data)
 
     @action(detail=False, methods=['get'], url_path='stats')
@@ -98,6 +122,7 @@ class DemandeGoudronnageViewSet(viewsets.ModelViewSet):
         if 'commentaire_agent' in request.data:
             demande.commentaire_agent = request.data['commentaire_agent']
         demande.save()
+        notify_citizen(demande, "Goudronnage", link='/mes-demandes')
         return Response(DemandeGoudronnageSerializer(demande).data)
 
 
@@ -130,6 +155,7 @@ class DemandeCertificatVocationViewSet(viewsets.ModelViewSet):
         if 'certificat_signe' in request.FILES:
             demande.certificat_signe = request.FILES['certificat_signe']
         demande.save()
+        notify_citizen(demande, "Certificat de Vocation", link='/mes-demandes')
         return Response(DemandeCertificatVocationSerializer(demande).data)
 
 
@@ -166,4 +192,5 @@ class DemandeRaccordementViewSet(viewsets.ModelViewSet):
         if 'devis_pdf' in request.FILES:
             demande.devis_pdf = request.FILES['devis_pdf']
         demande.save()
+        notify_citizen(demande, "Raccordement", link='/mes-demandes')
         return Response(DemandeRaccordementSerializer(demande).data)

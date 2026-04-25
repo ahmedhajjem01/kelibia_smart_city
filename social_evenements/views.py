@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from django.db.models import Q
 from .models import DemandeEvenement
 from .serializers import DemandeEvenementSerializer, DemandeEvenementPublicSerializer
+from notifications.models import Notification
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class DemandeEvenementViewSet(viewsets.ModelViewSet):
@@ -51,6 +54,27 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
             demande.detect_conflict()
 
         demande.save()
+        
+        # --- Send Notification ---
+        try:
+            status_display = demande.status
+            if hasattr(demande, 'get_status_display'):
+                status_display = demande.get_status_display()
+            
+            Notification.objects.create(
+                recipient=demande.citizen,
+                title="Mise à jour: Événement",
+                message=f"Le statut de votre demande d'événement '{demande.titre_evenement}' a été mis à jour: {status_display}.",
+                notification_type='success' if demande.status == 'approved' else 'info',
+                link='/mes-evenements'
+            )
+            
+            subject = "Mise à jour: Demande d'Événement - Kelibia Smart City"
+            email_message = f"Bonjour {demande.citizen.first_name},\n\nLe statut de votre demande d'événement a été mis à jour.\nNouveau statut : {status_display}.\n\nCordialement,\nL'équipe Kelibia Smart City"
+            send_mail(subject, email_message, settings.DEFAULT_FROM_EMAIL, [demande.citizen.email], fail_silently=True)
+        except Exception as e:
+            print(f"Failed to send notification for event: {e}")
+
         return Response(self.get_serializer(demande).data)
 
     @action(detail=False, methods=['get'], url_path='conflicts', permission_classes=[permissions.IsAuthenticated])

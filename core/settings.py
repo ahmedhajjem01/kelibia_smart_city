@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "eau_lumiere_egouts",
     "argent_impots",
     "boutiques_commerces",
+    "notifications",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

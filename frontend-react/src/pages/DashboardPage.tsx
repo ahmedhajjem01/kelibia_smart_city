@@ -294,6 +294,7 @@ export default function DashboardPage() {
   const [loadingMap, setLoadingMap] = useState(true)
 
   const [newsItems, setNewsItems] = useState<{ id: number; title: string; created_at: string }[]>([])
+  const [genericNotifications, setGenericNotifications] = useState<any[]>([])
 
   const [sigLayers, setSigLayers] = useState<{ routes: any; zonesVertes: any; industriel: any }>({
     routes: null, zonesVertes: null, industriel: null,
@@ -370,6 +371,9 @@ export default function DashboardPage() {
         const lRes = await fetch('/livret-famille/demandes/', { headers: { Authorization: `Bearer ${access}` } })
 
         if (lRes.ok) { const d = await lRes.json(); setLivretNotifications(d.filter((x: any) => x.status === 'ready')) }
+
+        const gnRes = await fetch(resolveBackendUrl('/api/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
+        if (gnRes.ok) { setGenericNotifications(await gnRes.json()) }
 
       } catch (e) { console.error(e) }
 
@@ -651,27 +655,47 @@ export default function DashboardPage() {
 
 
       {livretNotifications.map((notif: any) => (
-
         <div key={notif.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', marginBottom: 16, background: '#f0fdf4', borderLeft: '4px solid #22c55e', borderRadius: 2 }}>
-
           <i className="fas fa-book-open" style={{ color: '#16a34a' }}></i>
-
           <div style={{ flex: 1 }}>
-
             <div style={{ fontWeight: 700, color: '#166534' }}>{t('livret_famille_ready')}</div>
-
             <div style={{ fontSize: '.78rem', color: '#15803d' }}>{t('livret_famille_ready_msg').replace('{guichet}', notif.guichet_recuperation || '..')}</div>
-
           </div>
-
           <Link to="/mes-demandes" style={{ padding: '6px 16px', background: '#166534', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', borderRadius: 999 }}>
-
             {t('view_requests')}
-
           </Link>
-
         </div>
+      ))}
 
+      {genericNotifications.filter(n => !n.is_read).map((notif: any) => (
+        <div key={notif.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', marginBottom: 16, background: '#fff', borderLeft: '4px solid #1a73e8', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <i className={`fas ${notif.notification_type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}`} style={{ color: notif.notification_type === 'success' ? '#16a34a' : '#1a73e8' }}></i>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, color: '#1a1c1c' }}>{notif.title}</div>
+            <div style={{ fontSize: '.78rem', color: '#5b403d' }}>{notif.message}</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {notif.link && (
+              <Link to={notif.link} className="btn-notif-action" style={{ padding: '4px 12px', background: '#f3f4f6', color: '#374151', fontWeight: 700, fontSize: '.7rem', textDecoration: 'none', borderRadius: 4 }}>
+                {t('view_details') || 'Voir détails'}
+              </Link>
+            )}
+            <button 
+              onClick={async () => {
+                const access = getAccessToken();
+                await fetch(resolveBackendUrl(`/api/notifications/${notif.id}/mark_as_read/`), { 
+                  method: 'POST', 
+                  headers: { Authorization: `Bearer ${access}` } 
+                });
+                setGenericNotifications(prev => prev.filter(n => n.id !== notif.id));
+              }}
+              style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '.8rem' }}
+              title={t('mark_as_read') || 'Marquer comme lu'}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
       ))}
 
 
