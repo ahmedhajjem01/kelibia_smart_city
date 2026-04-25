@@ -152,10 +152,12 @@ class UserProfileView(APIView):
         return Response(serializer.data)
 
     def patch(self, request):
-        allowed = ['first_name', 'last_name', 'phone', 'address', 'city', 'governorate', 'place_of_birth']
+        allowed = ['first_name', 'last_name', 'phone', 'address', 'city', 'governorate', 'place_of_birth', 'preferred_language']
         data = {k: v for k, v in request.data.items() if k in allowed and v is not None}
         if not data:
             return Response({"error": "Aucun champ modifiable fourni."}, status=status.HTTP_400_BAD_REQUEST)
+        if 'preferred_language' in data and data['preferred_language'] not in ('fr', 'ar'):
+            return Response({"error": "Langue invalide. Valeurs: fr, ar"}, status=status.HTTP_400_BAD_REQUEST)
         for attr, value in data.items():
             setattr(request.user, attr, value)
         request.user.save(update_fields=list(data.keys()))
@@ -268,27 +270,22 @@ class UserVerificationView(APIView):
             target_user = User.objects.get(id=user_id)
             if action == 'verify':
                 from notifications.models import Notification
+                from notifications.helpers import get_notif
                 from django.core.mail import send_mail
                 from django.conf import settings
 
                 target_user.is_verified = True
-                # Effacer les images du CIN pour la confidentialité après vérification
                 target_user.cin_front_utf = None
                 target_user.cin_back_utf = None
                 target_user.cin_front_image = None
                 target_user.cin_back_image = None
                 target_user.save()
 
-                # Send In-app notification
-                title = "Compte Vérifié"
-                title_ar = "تأكيد الحساب"
-                message = "Votre compte a été vérifié avec succès par l'administration. Vous pouvez maintenant accéder à tous nos services."
-                message_ar = "تم تأكيد حسابك بنجاح من قبل الإدارة. يمكنك الآن الوصول إلى جميع خدماتنا."
-                
+                title, message = get_notif(target_user, 'account_verified')
                 Notification.objects.create(
                     recipient=target_user,
-                    title=f"{title} / {title_ar}",
-                    message=f"{message}\n\n{message_ar}",
+                    title=title,
+                    message=message,
                     notification_type='success',
                     link='/dashboard'
                 )
@@ -362,26 +359,21 @@ class UserVerificationView(APIView):
             elif action == 'activate_asd':
                 from django.utils import timezone
                 from notifications.models import Notification
+                from notifications.helpers import get_notif
                 from django.core.mail import send_mail
                 from django.conf import settings
 
-                # Activating ASD implies physical verification of CIN, so we also verify the account
                 target_user.is_verified = True
                 target_user.asd_active = True
                 duration_months = int(request.data.get('duration_months', 12))
                 target_user.asd_expiration = timezone.now() + timezone.timedelta(days=30 * duration_months)
                 target_user.save()
 
-                # Send In-app notification
-                title = "Abonnement ASD Activé"
-                title_ar = "تفعيل اشتراك الخدمات الرقمية"
-                message = f"Félicitations ! Votre abonnement aux Services Digitaux (ASD) a été activé pour {duration_months} mois. Vous pouvez désormais demander vos extraits et documents gratuitement."
-                message_ar = f"تهانينا! تم تفعيل اشتراكك في الخدمات الرقمية (ASD) لمدة {duration_months} شهرًا. يمكنك الآن طلب وثائقك مجانًا."
-                
+                title, message = get_notif(target_user, 'asd_activated', months=duration_months)
                 Notification.objects.create(
                     recipient=target_user,
-                    title=f"{title} / {title_ar}",
-                    message=f"{message}\n\n{message_ar}",
+                    title=title,
+                    message=message,
                     notification_type='success',
                     link='/dashboard'
                 )
@@ -519,27 +511,22 @@ class AgentCitizenVerificationView(APIView):
 
         if action == 'verify':
             from notifications.models import Notification
+            from notifications.helpers import get_notif
             from django.core.mail import send_mail
             from django.conf import settings
 
             target.is_verified = True
-            # Clear CIN images after verification (privacy)
             target.cin_front_utf   = None
             target.cin_back_utf    = None
             target.cin_front_image = None
             target.cin_back_image  = None
             target.save()
 
-            # Send In-app notification
-            title = "Compte Vérifié"
-            title_ar = "تأكيد الحساب"
-            message = "Votre compte a été vérifié avec succès par l'agent municipal. Vous pouvez maintenant accéder à tous nos services."
-            message_ar = "تم تأكيد حسابك بنجاح من قبل العون البلدي. يمكنك الآن الوصول إلى جميع خدماتنا."
-            
+            title, message = get_notif(target, 'account_verified')
             Notification.objects.create(
                 recipient=target,
-                title=f"{title} / {title_ar}",
-                message=f"{message}\n\n{message_ar}",
+                title=title,
+                message=message,
                 notification_type='success',
                 link='/dashboard'
             )

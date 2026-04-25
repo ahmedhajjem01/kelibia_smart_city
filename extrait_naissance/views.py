@@ -154,10 +154,13 @@ class DeclarationNaissanceDetailAPIView(APIView):
                 if hasattr(declaration, 'get_status_display'):
                     status_display = declaration.get_status_display()
                 
+                from notifications.helpers import get_notif
+                title_n, msg_n = get_notif(declaration.declarant, 'birth_updated',
+                                           obj_id=declaration.id, status_display=status_display)
                 Notification.objects.create(
                     recipient=declaration.declarant,
-                    title="Mise à jour: Déclaration de Naissance",
-                    message=f"Le statut de votre déclaration de naissance #{declaration.id} a été mis à jour: {status_display}.",
+                    title=title_n,
+                    message=msg_n,
                     notification_type='success' if declaration.status == 'validated' else 'info',
                     link='/mes-demandes'
                 )

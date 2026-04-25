@@ -65,6 +65,9 @@ class CustomUser(AbstractUser):
     asd_active = models.BooleanField(default=False, verbose_name="Abonnement ASD Actif")
     asd_expiration = models.DateTimeField(null=True, blank=True, verbose_name="Date d'expiration ASD")
 
+    # UI Language preference
+    preferred_language = models.CharField(max_length=5, default='fr', choices=[('fr', 'Français'), ('ar', 'العربية')], verbose_name="Langue préférée")
+
     @property
     def has_active_asd(self):
         from django.utils import timezone

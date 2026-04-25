@@ -322,11 +322,16 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                         if hasattr(o, 'get_status_display'):
                             status_display = o.get_status_display()
                         
-                        # In-app
+                        # In-app notification
+                        from notifications.helpers import get_notif
+                        title_n, msg_n = get_notif(citizen, 'request_updated',
+                                                   type_label=type_label,
+                                                   obj_id=o.id,
+                                                   status_display=status_display)
                         Notification.objects.create(
                             recipient=citizen,
-                            title=f"Mise à jour: {type_label}",
-                            message=f"Le statut de votre demande '{type_label} #{o.id}' a été mis à jour: {status_display}.",
+                            title=title_n,
+                            message=msg_n,
                             notification_type='success' if nst in ['resolved', 'validated', 'ready', 'approved', 'permis_delivre'] else 'info',
                             link='/mes-demandes' if t in ['residence', 'livret', 'naissance', 'mariage', 'deces', 'legalisation'] else '/dashboard'
                         )

@@ -17,10 +17,15 @@ def notify_citizen(instance, title_prefix, link='/dashboard'):
         if hasattr(instance, 'get_status_display'):
             status_display = instance.get_status_display()
         
+        from notifications.helpers import get_notif
+        title_notif, msg_notif = get_notif(instance.citizen, 'request_updated',
+                                           type_label=title_prefix,
+                                           obj_id=instance.id,
+                                           status_display=status_display)
         Notification.objects.create(
             recipient=instance.citizen,
-            title=f"Mise à jour: {title_prefix}",
-            message=f"Le statut de votre demande '{title_prefix} #{instance.id}' a été mis à jour: {status_display}.",
+            title=title_notif,
+            message=msg_notif,
             notification_type='success' if instance.status in ['permis_delivre', 'ready', 'approved', 'resolved', 'travaux_termines'] else 'info',
             link=link
         )

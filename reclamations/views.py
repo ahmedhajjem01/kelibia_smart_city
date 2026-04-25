@@ -97,10 +97,12 @@ class ReclamationViewSet(viewsets.ModelViewSet):
 
         # Notification for citizen
         try:
+            from notifications.helpers import get_notif
+            title, message = get_notif(self.request.user, 'signalement_created', title=instance.title)
             Notification.objects.create(
                 recipient=self.request.user,
-                title="Nouveau signalement enregistré",
-                message=f"Votre signalement '{instance.title}' a été enregistré avec succès.",
+                title=title,
+                message=message,
                 notification_type='info',
                 link='/mes-reclamations'
             )
@@ -236,10 +238,14 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             # --- Send Notifications ---
             try:
                 # 1. In-app notification (synchronous — fast DB write)
+                from notifications.helpers import get_notif
+                title, notif_msg = get_notif(rec.citizen, 'signalement_updated',
+                                             rec_title=rec.title,
+                                             status_display=rec.get_status_display())
                 Notification.objects.create(
                     recipient=rec.citizen,
-                    title=f"Mise à jour de votre signalement: {rec.title}",
-                    message=f"Le statut de votre signalement '{rec.title}' est passé à : {rec.get_status_display()}.",
+                    title=title,
+                    message=notif_msg,
                     notification_type='success' if new_status == 'resolved' else 'info',
                     link='/mes-reclamations'
                 )

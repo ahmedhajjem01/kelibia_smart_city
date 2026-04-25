@@ -47,10 +47,14 @@ class DemandeLivretFamilleViewSet(viewsets.ModelViewSet):
                 if hasattr(instance, 'get_status_display'):
                     status_display = instance.get_status_display()
                 
+                from notifications.helpers import get_notif
+                title_n, msg_n = get_notif(instance.citizen, 'livret_updated',
+                                           obj_id=instance.id,
+                                           status_display=status_display)
                 Notification.objects.create(
                     recipient=instance.citizen,
-                    title="Mise à jour: Livret de famille",
-                    message=f"Le statut de votre demande de livret de famille #{instance.id} a été mis à jour: {status_display}.",
+                    title=title_n,
+                    message=msg_n,
                     notification_type='success' if instance.status == 'ready' else 'info',
                     link='/mes-demandes'
                 )

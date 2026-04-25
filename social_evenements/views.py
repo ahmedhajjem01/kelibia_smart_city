@@ -61,10 +61,12 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
             if hasattr(demande, 'get_status_display'):
                 status_display = demande.get_status_display()
             
+            from notifications.helpers import get_notif
+            title_n, msg_n = get_notif(demande.citizen, 'event_updated', status_display=status_display)
             Notification.objects.create(
                 recipient=demande.citizen,
-                title="Mise à jour: Événement",
-                message=f"Le statut de votre demande d'événement '{demande.titre_evenement}' a été mis à jour: {status_display}.",
+                title=title_n,
+                message=msg_n,
                 notification_type='success' if demande.status == 'approved' else 'info',
                 link='/mes-evenements'
             )
