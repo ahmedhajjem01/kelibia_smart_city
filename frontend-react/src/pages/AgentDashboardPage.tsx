@@ -1245,8 +1245,6 @@ export default function AgentDashboardPage() {
 
   const [reClsPrio, setReClsPrio] = useState('')
 
-  const [reClsSaving, setReClsSaving] = useState(false)
-
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'services' | 'forum' | 'evenements' | 'construction' | 'stats' | 'demandes' | 'profile' | 'citizens' | 'actualites' | 'config'>('dashboard')
 
   const [agentCitizens, setAgentCitizens] = useState<any[]>([])
