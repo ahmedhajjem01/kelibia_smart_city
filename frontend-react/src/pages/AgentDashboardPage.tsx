@@ -949,92 +949,100 @@ const CSS = `
 
 @media(max-width:1023px){
 
+  /* ── Topbar / Navbar ── */
   .ag-topbar{display:none}
-
   .ag-navbar{height:54px;padding:0 10px}
-
   .ag-logo{width:34px;height:34px;font-size:.9rem}
-
   .ag-title .main{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
-
   .ag-title .sub{display:none}
-
   .ag-brand{gap:7px;min-width:0;flex:1;overflow:hidden}
-
   .ag-actions{gap:5px;flex-shrink:0}
-
   .ag-user-pill{padding:4px;border-radius:50%;gap:0;border:0;background:transparent}
-
-  .ag-user-pill .name-block{display:none}
-
+  .ag-user-pill .name-block,.ag-user-pill span{display:none}
   .ag-user-pill .av{width:30px;height:30px}
-
   .ag-logout{width:30px;height:30px;font-size:.85rem}
-
-  .ag-hero{padding:10px 14px}
-
-  .ag-hero .greeting{font-size:.85rem}
-
-  .ag-hero .sub{font-size:.72rem}
-
-  .ag-hero-right{display:none!important}
-
+  .ag-logout span{display:none}
   .ag-breadcrumb{display:none}
 
-  .ag-body{flex-direction:column}
-
+  /* ── Layout shell ── */
+  .ag-body{flex-direction:column;gap:12px;padding:10px}
   .ag-sidebar{display:none}
-  .ag-navbar{padding:0 12px}
+  .ag-main{padding:10px 12px;gap:14px;min-height:unset}
 
-  .ag-user-pill span,.ag-logout span{display:none}
+  /* ── Hero ── */
+  .ag-hero{padding:10px 14px}
+  .ag-hero .greeting{font-size:.85rem}
+  .ag-hero .sub{font-size:.72rem}
+  .ag-hero-right{display:none!important}
 
-  .ag-body{flex-direction:column;gap:12px;padding:12px}
+  /* ── Stats grid: 2-col on tablets/phones ── */
+  .ag-stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+  .ag-stat{padding:12px 10px!important}
+  .ag-stat .icon-box{width:30px!important;height:30px!important;font-size:.85rem!important}
+  .ag-stat .val{font-size:1.1rem!important}
+  .ag-stat .lbl{font-size:.58rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  .ag-sidebar{width:100%;height:auto;position:static;display:none}
-
-  .ag-stats-grid {
-
-    grid-template-columns: repeat(2, 1fr);
-
-  }
-
+  /* ── Cards ── */
   .ag-card{border-radius:10px}
 
-  .ag-filter-bar{padding:8px 10px; flex-direction: column !important; gap: 10px;}
+  /* ── Filter bar: stack vertically ── */
+  .ag-filter-bar{padding:8px 10px;flex-direction:column!important;gap:8px!important;align-items:stretch!important}
+  .ag-filter-bar > *{width:100%!important;max-width:none!important}
+  .ag-search-input{width:100%!important;max-width:none!important}
 
-  .ag-search-input{width:100%;max-width:none}
+  /* ── Tables: force horizontal scroll instead of overflow ── */
+  .ag-table-wrap,.table-responsive{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .ag-table{min-width:580px}
+  .ag-table thead th{padding:6px 8px;font-size:.63rem;white-space:nowrap}
+  .ag-table tbody td{padding:7px 8px;font-size:.76rem}
 
-  .ag-table thead th{padding:6px 8px;font-size:.62rem}
-
-  .ag-table tbody td{padding:7px 8px;font-size:.75rem}
-
+  /* ── Map ── */
   #ag-map{height:220px!important}
-
   .leaflet-control-layers,.leaflet-bottom.leaflet-left{display:none!important}
 
+  /* ── Pagination ── */
   .ag-pag-bar{flex-direction:column;gap:6px;align-items:center}
 
+  /* ── Toasts ── */
   .ag-toast-container{right:8px;left:8px;bottom:66px}
-
   .ag-toast{min-width:unset;width:100%}
 
+  /* ── Modals: full-width on mobile ── */
   .modal-dialog{margin:6px!important;max-width:calc(100vw - 12px)!important}
+  .modal-body{padding:12px!important}
+  .modal-header{padding:10px 12px!important}
+  .modal-content{border-radius:12px!important}
 
+  /* ── Bottom nav visible on mobile ── */
   .ag-mobile-nav{display:flex!important}
+  .agent-page{padding-bottom:62px}
 
-  .agent-page{padding-bottom:60px}
+}
+
+@media(max-width:600px){
+
+  .ag-navbar{height:50px;padding:0 8px}
+  .ag-logo{width:30px;height:30px;font-size:.82rem}
+
+  /* One column on very small phones */
+  .ag-stats-grid{grid-template-columns:1fr 1fr!important}
+
+  /* Form grids full-width */
+  .ag-form-grid{grid-template-columns:1fr!important}
+  .ag-form-row{flex-direction:column!important;gap:8px}
+
+  /* Buttons smaller */
+  .ag-btn{font-size:.75rem;padding:6px 10px}
+
+  /* Bottom nav labels */
+  .ag-mobile-nav .nav-label{font-size:.55rem}
+
+  /* Section headings */
+  .ag-section-title,.ag-card-title{font-size:.88rem!important}
 
 }
 
 
-
-@media(max-width:480px){
-
-  .ag-stat .lbl{font-size:.52rem}
-
-  .ag-navbar{height:50px}
-
-}
 
 
 

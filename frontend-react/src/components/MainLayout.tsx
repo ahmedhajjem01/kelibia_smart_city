@@ -304,13 +304,55 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </footer>
 
         <style>{`
+          /* ══ Global citizen-side mobile fixes ══ */
+
           @media (max-width: 768px) {
-            h1 { font-size: 1.5rem !important; }
-            .section-title { font-size: 1.25rem !important; }
-            .table-responsive { border: 0 !important; }
-            .card { border-radius: 12px !important; }
+            /* Typography */
+            h1 { font-size: 1.4rem !important; }
+            h2 { font-size: 1.2rem !important; }
+            .section-title { font-size: 1.1rem !important; }
+
+            /* Spacing */
             .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
             .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            .py-6 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+
+            /* Cards */
+            .card { border-radius: 12px !important; }
+
+            /* Tables: always scroll horizontally */
+            .table-responsive {
+              overflow-x: auto !important;
+              -webkit-overflow-scrolling: touch;
+              display: block;
+              width: 100%;
+            }
+            table { min-width: 520px; }
+
+            /* Forms: stack inputs */
+            form .grid { grid-template-columns: 1fr !important; }
+            input, select, textarea {
+              width: 100% !important;
+              font-size: 16px !important; /* prevent iOS zoom */
+            }
+
+            /* Breadcrumb: shorter */
+            .breadcrumb { font-size: .75rem; }
+
+            /* Buttons full-width on mobile */
+            .btn-full-mobile { width: 100% !important; }
+
+            /* Image uploads */
+            .upload-preview { max-width: 100% !important; }
+
+            /* Service cards grid: 1 column on very small, 2 on small tablets */
+            .services-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          }
+
+          @media (max-width: 480px) {
+            h1 { font-size: 1.2rem !important; }
+            .services-grid { grid-template-columns: 1fr !important; }
+            .card-body { padding: .75rem !important; }
           }
         `}</style>
       </div>
