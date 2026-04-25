@@ -48,6 +48,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
   };
 
+  // Save language preference to backend so notifications come in correct language
+  const saveLang = async (newLang: string) => {
+    setLang(newLang as any);
+    const access = getAccessToken();
+    if (!access) return;
+    try {
+      await fetch(resolveBackendUrl('/api/accounts/me/'), {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preferred_language: newLang })
+      });
+    } catch (e) {
+      console.error('Failed to save language preference', e);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000);
@@ -106,7 +122,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           {/* Language toggle */}
           <div style={{ display: 'flex', background: '#f1f1f1', borderRadius: 999, padding: 3, gap: 2 }}>
             <button
-              onClick={() => setLang('fr')}
+              onClick={() => saveLang('fr')}
               style={{
                 border: 'none', borderRadius: 999, padding: '3px 14px',
                 fontSize: '.7rem', fontWeight: 700, cursor: 'pointer',
@@ -116,7 +132,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               }}
             >FR</button>
             <button
-              onClick={() => setLang('ar')}
+              onClick={() => saveLang('ar')}
               style={{
                 border: 'none', borderRadius: 999, padding: '3px 14px',
                 fontSize: '.7rem', fontWeight: 700, cursor: 'pointer',
