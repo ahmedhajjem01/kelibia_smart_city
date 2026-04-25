@@ -27,29 +27,45 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const { t, lang, setLang } = useI18n();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+
+  const fetchNotifications = async () => {
+    const access = getAccessToken();
+    if (!access) return;
+    try {
+      const res = await fetch(resolveBackendUrl('/api/notifications/'), {
+        headers: { Authorization: `Bearer ${access}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data);
+        setUnreadCount(data.filter((n: any) => !n.is_read).length);
+      }
+    } catch (e) {
+      console.error("Failed to fetch notifications", e);
+    }
+  };
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      const access = getAccessToken();
-      if (!access) return;
-      try {
-        const res = await fetch(resolveBackendUrl('/api/notifications/'), {
-          headers: { Authorization: `Bearer ${access}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUnreadCount(data.filter((n: any) => !n.is_read).length);
-        }
-      } catch (e) {
-        console.error("Failed to fetch notifications", e);
-      }
-    };
-
     fetchNotifications();
-    // Refresh every minute
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const markAsRead = async (id: number) => {
+    const access = getAccessToken();
+    try {
+      await fetch(resolveBackendUrl(`/api/notifications/${id}/mark_as_read/`), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${access}` }
+      });
+      fetchNotifications();
+    } catch (e) {
+      console.error("Failed to mark as read", e);
+    }
+  };
 
   const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
 
@@ -116,10 +132,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             {user?.first_name || t('profile')}
           </Link>
           
-          {/* Notifications count */}
-          {!isAgentOrAdmin && (
-            <Link to="/dashboard" style={{ marginLeft: 16, color: unreadCount > 0 ? '#1a73e8' : '#6b7280', fontSize: '.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5, position: 'relative' }}>
-              <i className="fas fa-bell" style={{ fontSize: '1rem' }}></i>
+          {/* Notifications Dropdown */}
+          <div style={{ position: 'relative', marginLeft: 16 }}>
+            <button 
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              style={{ 
+                background: 'none', border: 'none', padding: 0,
+                color: unreadCount > 0 ? '#1a73e8' : '#6b7280', 
+                fontSize: '1rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', position: 'relative' 
+              }}
+            >
+              <i className="fas fa-bell"></i>
               {unreadCount > 0 && (
                 <span style={{ 
                   position: 'absolute', top: -5, right: -5, 
@@ -131,8 +155,86 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                   {unreadCount}
                 </span>
               )}
-            </Link>
-          )}
+            </button>
+
+            {isNotifOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsNotifOpen(false)}
+                />
+                <div 
+                  className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl z-50 border border-slate-100 overflow-hidden"
+                  style={{ top: '100%', right: lang === 'ar' ? 'auto' : 0, left: lang === 'ar' ? 0 : 'auto' }}
+                >
+                  <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <span className="font-bold text-slate-700 text-sm">{t('notifications') || 'Notifications'}</span>
+                    {unreadCount > 0 && (
+                      <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        {unreadCount} {t('unread') || 'non lues'}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-slate-400 text-xs">
+                        <i className="fas fa-bell-slash mb-2 block text-lg"></i>
+                        {t('no_notifications') || 'Aucune notification'}
+                      </div>
+                    ) : (
+                      notifications.slice(0, 10).map((n: any) => (
+                        <div 
+                          key={n.id} 
+                          className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.is_read ? 'bg-blue-50/30' : ''}`}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${n.notification_type === 'success' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                              <i className={`fas ${n.notification_type === 'success' ? 'fa-check' : 'fa-info'} text-[10px]`}></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold text-slate-800 mb-0.5 truncate">{n.title}</p>
+                              <p className="text-[10px] text-slate-500 leading-tight mb-1">{n.message}</p>
+                              <div className="flex justify-between items-center mt-1">
+                                <span className="text-[9px] text-slate-400">{new Date(n.created_at).toLocaleDateString()}</span>
+                                <div className="flex gap-2">
+                                  {!n.is_read && (
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
+                                      className="text-[9px] text-blue-600 font-bold hover:underline"
+                                    >
+                                      {t('mark_read') || 'Lu'}
+                                    </button>
+                                  )}
+                                  {n.link && (
+                                    <Link 
+                                      to={n.link} 
+                                      onClick={() => setIsNotifOpen(false)}
+                                      className="text-[9px] text-slate-600 font-bold hover:underline"
+                                    >
+                                      {t('view') || 'Voir'}
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <Link 
+                      to="/dashboard" 
+                      onClick={() => setIsNotifOpen(false)}
+                      className="block py-2 text-center text-[10px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 border-t border-slate-100"
+                    >
+                      {t('see_all') || 'Tout voir'}
+                    </Link>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
 
           </div>
         </div>

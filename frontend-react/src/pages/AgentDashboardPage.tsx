@@ -1193,7 +1193,10 @@ export default function AgentDashboardPage() {
   const [filterPriority, setFilterPriority] = useState('')
 
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([])
-
+  const [reClsSaving, setReClsSaving] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const [detailRec, setDetailRec] = useState<Reclamation | null>(null)
 
   const [detailStatus, setDetailStatus] = useState('')
@@ -1205,6 +1208,40 @@ export default function AgentDashboardPage() {
   const [showExplainModal, setShowExplainModal] = useState(false)
 
   const [reClsCat, setReClsCat] = useState('')
+
+  const fetchNotifications = async () => {
+    if (!access) return;
+    try {
+      const res = await fetch(resolveBackendUrl('/api/notifications/'), {
+        headers: { Authorization: `Bearer ${access}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data);
+        setUnreadCount(data.filter((n: any) => !n.is_read).length);
+      }
+    } catch (e) {
+      console.error("Failed to fetch notifications", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const markAsRead = async (id: number) => {
+    try {
+      await fetch(resolveBackendUrl(`/api/notifications/${id}/mark_as_read/`), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${access}` }
+      });
+      fetchNotifications();
+    } catch (e) {
+      console.error("Failed to mark as read", e);
+    }
+  };
 
   const [reClsPrio, setReClsPrio] = useState('')
 
@@ -2935,6 +2972,60 @@ export default function AgentDashboardPage() {
           <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
 
           <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
+
+          {/* Notifications Bell */}
+          <div style={{ position: 'relative', margin: '0 10px' }}>
+            <button 
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              style={{ 
+                background: 'none', border: 'none', 
+                color: unreadCount > 0 ? 'var(--primary)' : '#94a3b8', 
+                fontSize: '1.1rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center'
+              }}
+            >
+              <i className="fas fa-bell"></i>
+              {unreadCount > 0 && (
+                <span className="ag-mob-badge" style={{ position: 'absolute', top: -5, right: -8 }}>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {isNotifOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)} />
+                <div 
+                  className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl z-50 border border-slate-200 overflow-hidden"
+                  style={{ top: '100%', right: lang === 'ar' ? 'auto' : 0, left: lang === 'ar' ? 0 : 'auto', color: '#1e293b' }}
+                >
+                  <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <span className="font-bold text-slate-700 text-sm">{t('notifications') || 'Notifications'}</span>
+                  </div>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-slate-400 text-xs">
+                        {t('no_notifications') || 'Aucune notification'}
+                      </div>
+                    ) : (
+                      notifications.slice(0, 8).map((n: any) => (
+                        <div key={n.id} className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 ${!n.is_read ? 'bg-blue-50/30' : ''}`}>
+                          <p className="text-[11px] font-bold mb-0.5">{n.title}</p>
+                          <p className="text-[10px] text-slate-500 leading-tight mb-1">{n.message}</p>
+                          <div className="flex justify-between items-center mt-1">
+                            <span className="text-[9px] text-slate-400">{new Date(n.created_at).toLocaleDateString()}</span>
+                            {!n.is_read && (
+                              <button onClick={() => markAsRead(n.id)} className="text-[9px] text-primary font-bold">{t('mark_read') || 'Lu'}</button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
           <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
 
