@@ -267,6 +267,10 @@ class UserVerificationView(APIView):
         try:
             target_user = User.objects.get(id=user_id)
             if action == 'verify':
+                from notifications.models import Notification
+                from django.core.mail import send_mail
+                from django.conf import settings
+
                 target_user.is_verified = True
                 # Effacer les images du CIN pour la confidentialité après vérification
                 target_user.cin_front_utf = None
@@ -274,6 +278,38 @@ class UserVerificationView(APIView):
                 target_user.cin_front_image = None
                 target_user.cin_back_image = None
                 target_user.save()
+
+                # Send In-app notification
+                title = "Compte Vérifié"
+                title_ar = "تأكيد الحساب"
+                message = "Votre compte a été vérifié avec succès par l'administration. Vous pouvez maintenant accéder à tous nos services."
+                message_ar = "تم تأكيد حسابك بنجاح من قبل الإدارة. يمكنك الآن الوصول إلى جميع خدماتنا."
+                
+                Notification.objects.create(
+                    recipient=target_user,
+                    title=f"{title} / {title_ar}",
+                    message=f"{message}\n\n{message_ar}",
+                    notification_type='success',
+                    link='/dashboard'
+                )
+
+                # Send Email
+                try:
+                    subject = "Votre compte Kélibia Smart City a été vérifié"
+                    email_body = f"Bonjour {target_user.first_name},\n\n" \
+                                f"Nous avons le plaisir de vous informer que votre compte a été vérifié par nos services.\n" \
+                                f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
+                                f"Cordialement,\nL'administration de Kélibia Smart City"
+                    send_mail(
+                        subject,
+                        email_body,
+                        settings.EMAIL_HOST_USER,
+                        [target_user.email],
+                        fail_silently=True,
+                    )
+                except Exception as e:
+                    print(f"Failed to send verification email: {e}")
+
                 return Response({"message": "Compte citoyen vérifié avec succès. Les images du CIN ont été supprimées par mesure de confidentialité."})
             elif action == 'toggle_active':
                 target_user.is_active = not target_user.is_active
@@ -320,12 +356,50 @@ class UserVerificationView(APIView):
                 return Response({"message": f"Mot de passe réinitialisé.", "new_password": new_password})
             elif action == 'activate_asd':
                 from django.utils import timezone
+                from notifications.models import Notification
+                from django.core.mail import send_mail
+                from django.conf import settings
+
                 # Activating ASD implies physical verification of CIN, so we also verify the account
                 target_user.is_verified = True
                 target_user.asd_active = True
                 duration_months = int(request.data.get('duration_months', 12))
                 target_user.asd_expiration = timezone.now() + timezone.timedelta(days=30 * duration_months)
                 target_user.save()
+
+                # Send In-app notification
+                title = "Abonnement ASD Activé"
+                title_ar = "تفعيل اشتراك الخدمات الرقمية"
+                message = f"Félicitations ! Votre abonnement aux Services Digitaux (ASD) a été activé pour {duration_months} mois. Vous pouvez désormais demander vos extraits et documents gratuitement."
+                message_ar = f"تهانينا! تم تفعيل اشتراكك في الخدمات الرقمية (ASD) لمدة {duration_months} شهرًا. يمكنك الآن طلب وثائقك مجانًا."
+                
+                Notification.objects.create(
+                    recipient=target_user,
+                    title=f"{title} / {title_ar}",
+                    message=f"{message}\n\n{message_ar}",
+                    notification_type='success',
+                    link='/dashboard'
+                )
+
+                # Send Email
+                try:
+                    subject = "Activation de votre abonnement ASD - Kélibia Smart City"
+                    email_body = f"Bonjour {target_user.first_name},\n\n" \
+                                f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n" \
+                                f"Durée : {duration_months} mois\n" \
+                                f"Expiration : {target_user.asd_expiration.strftime('%d/%m/%Y')}\n\n" \
+                                f"Vous pouvez désormais accéder à tous les services administratifs en ligne sans frais supplémentaires.\n\n" \
+                                f"Cordialement,\nL'administration de Kélibia Smart City"
+                    send_mail(
+                        subject,
+                        email_body,
+                        settings.EMAIL_HOST_USER,
+                        [target_user.email],
+                        fail_silently=True,
+                    )
+                except Exception as e:
+                    print(f"Failed to send ASD activation email: {e}")
+
                 return Response({
                     'message': f'Abonnement ASD activé pour {duration_months} mois (et compte vérifié).',
                     'asd_expiration': target_user.asd_expiration,
@@ -434,6 +508,10 @@ class AgentCitizenVerificationView(APIView):
             return Response({"error": "Les agents ne peuvent gérer que les comptes citoyens."}, status=403)
 
         if action == 'verify':
+            from notifications.models import Notification
+            from django.core.mail import send_mail
+            from django.conf import settings
+
             target.is_verified = True
             # Clear CIN images after verification (privacy)
             target.cin_front_utf   = None
@@ -441,6 +519,38 @@ class AgentCitizenVerificationView(APIView):
             target.cin_front_image = None
             target.cin_back_image  = None
             target.save()
+
+            # Send In-app notification
+            title = "Compte Vérifié"
+            title_ar = "تأكيد الحساب"
+            message = "Votre compte a été vérifié avec succès par l'agent municipal. Vous pouvez maintenant accéder à tous nos services."
+            message_ar = "تم تأكيد حسابك بنجاح من قبل العون البلدي. يمكنك الآن الوصول إلى جميع خدماتنا."
+            
+            Notification.objects.create(
+                recipient=target,
+                title=f"{title} / {title_ar}",
+                message=f"{message}\n\n{message_ar}",
+                notification_type='success',
+                link='/dashboard'
+            )
+
+            # Send Email
+            try:
+                subject = "Votre compte Kélibia Smart City a été vérifié"
+                email_body = f"Bonjour {target.first_name},\n\n" \
+                            f"Votre compte a été vérifié par un agent municipal.\n" \
+                            f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
+                            f"Cordialement,\nL'administration de Kélibia Smart City"
+                send_mail(
+                    subject,
+                    email_body,
+                    settings.EMAIL_HOST_USER,
+                    [target.email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f"Failed to send verification email: {e}")
+
             return Response({"message": "Compte citoyen vérifié avec succès. Images CIN supprimées."})
 
         elif action == 'toggle_active':
