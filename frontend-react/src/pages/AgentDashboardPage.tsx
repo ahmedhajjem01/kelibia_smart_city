@@ -984,22 +984,23 @@ const CSS = `
   .ag-body{flex-direction:column}
 
   .ag-sidebar{display:none}
+  .ag-navbar{padding:0 12px}
 
-  .ag-main{padding:10px;gap:12px}
+  .ag-user-pill span,.ag-logout span{display:none}
 
-  .ag-stats-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin-bottom:0!important}
+  .ag-body{flex-direction:column;gap:12px;padding:12px}
 
-  .ag-stats-grid .ag-stat{padding:10px 8px!important;height:70px!important;min-height:70px!important}
+  .ag-sidebar{width:100%;height:auto;position:static;display:none}
 
-  .ag-stats-grid .ag-stat .icon-box{width:28px!important;height:28px!important;font-size:.8rem!important}
+  .ag-stats-grid {
 
-  .ag-stats-grid .ag-stat .val{font-size:1rem!important}
+    grid-template-columns: repeat(2, 1fr);
 
-  .ag-stats-grid .ag-stat .lbl{font-size:.55rem!important;overflow:hidden;text-overflow:ellipsis}
+  }
 
   .ag-card{border-radius:10px}
 
-  .ag-filter-bar{padding:8px 10px}
+  .ag-filter-bar{padding:8px 10px; flex-direction: column !important; gap: 10px;}
 
   .ag-search-input{width:100%;max-width:none}
 

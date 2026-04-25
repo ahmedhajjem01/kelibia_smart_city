@@ -11,7 +11,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
   const { t, lang } = useI18n();
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: '384px' }}>
+    <div className="relative w-full overflow-hidden h-[240px] md:h-[384px]">
       {/* Background */}
       <img src={fortImg} alt="Fort de Kélibia" className="w-full h-full object-cover" />
       <div
@@ -20,7 +20,7 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
       />
 
       {/* Content — bottom-left aligned like the mockup */}
-      <div className="absolute inset-0 flex flex-col justify-end px-12 pb-14">
+      <div className="absolute inset-0 flex flex-col justify-end px-6 md:px-12 pb-8 md:pb-14">
         <h1
           className="font-extrabold text-white uppercase tracking-tighter leading-none mb-6"
           style={{ 

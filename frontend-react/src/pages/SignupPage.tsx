@@ -130,7 +130,7 @@ export default function SignupPage() {
 
   align-items: center;
 
-  padding: 14px 32px;
+  padding: 14px 20px;
 
   background: rgba(255,255,255,.85);
 
@@ -140,6 +140,11 @@ export default function SignupPage() {
 
   box-shadow: 0 1px 0 rgba(0,0,0,.06);
 
+}
+
+@media (max-width: 768px) {
+  .sg-nav { padding: 10px 16px; }
+  .sg-nav-links { display: none; }
 }
 
 .sg-nav-brand {
@@ -244,6 +249,11 @@ export default function SignupPage() {
 
   align-items: flex-start;
 
+}
+
+@media (max-width: 992px) {
+  .sg-layout { flex-direction: column; gap: 32px; }
+  .sg-sidebar { width: 100%; position: static; }
 }
 
 
@@ -520,6 +530,11 @@ export default function SignupPage() {
 
 }
 
+@media (max-width: 600px) {
+  .sg-grid-2 { grid-template-columns: 1fr; gap: 12px; }
+  .sg-card { padding: 24px 20px; }
+}
+
 .sg-grid-full {
 
   grid-column: 1 / -1;
@@ -690,6 +705,10 @@ export default function SignupPage() {
 
   margin-top: 18px;
 
+}
+
+@media (max-width: 500px) {
+  .sg-cin-grid { grid-template-columns: 1fr; }
 }
 
 .sg-cin-slot {

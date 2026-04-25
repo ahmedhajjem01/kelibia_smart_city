@@ -26,6 +26,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const { t, lang, setLang } = useI18n();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -59,15 +60,33 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       style={{ fontFamily: 'Public Sans, sans-serif', backgroundColor: '#f9f9f9', minHeight: '100vh' }}
     >
       {/* Sidebar */}
-      <Sidebar onLogout={onLogout} user={user} />
+      <Sidebar onLogout={onLogout} user={user} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* Main area offset from fixed sidebar */}
       <div className="md:ml-64">
         {/* Top bar */}
         <div
-          className="bg-white border-b border-slate-100 flex justify-end items-center px-6"
+          className="bg-white border-b border-slate-100 flex justify-between items-center px-6"
           style={{ height: 44 }}
         >
+          {/* Mobile menu toggle */}
+          <button 
+            className="md:hidden text-slate-600"
+            onClick={() => setIsSidebarOpen(true)}
+            style={{ background: 'none', border: 'none', fontSize: '1.2rem' }}
+          >
+            <i className="fas fa-bars"></i>
+          </button>
+
+          <div className="flex items-center">
           {/* Language toggle */}
           <div style={{ display: 'flex', background: '#f1f1f1', borderRadius: 999, padding: 3, gap: 2 }}>
             <button
@@ -115,6 +134,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             </Link>
           )}
 
+          </div>
         </div>
 
         {/* Hero */}
@@ -146,12 +166,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
 
         {/* Page body: main + optional right sidebar */}
-        <div className="flex">
-          <div className="flex-1 min-w-0 px-6 py-6 md:px-8">
+        <div className="flex flex-col lg:flex-row">
+          <div className="flex-1 min-w-0 px-4 py-6 md:px-8">
             {children}
           </div>
           {rightSidebar && (
             <div
+              className="hidden lg:block"
               style={{ width: '320px', minWidth: '320px', padding: '24px 24px 24px 0', flexShrink: 0 }}
             >
               {rightSidebar}
@@ -160,9 +181,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-slate-100 py-6 px-8 text-center text-xs text-slate-400">
+        <footer className="bg-white border-t border-slate-100 py-6 px-4 md:px-8 text-center text-xs text-slate-400">
           {t('footer_text')}
         </footer>
+
+        <style>{`
+          @media (max-width: 768px) {
+            h1 { font-size: 1.5rem !important; }
+            .section-title { font-size: 1.25rem !important; }
+            .table-responsive { border: 0 !important; }
+            .card { border-radius: 12px !important; }
+            .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+            .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+          }
+        `}</style>
       </div>
     </div>
   );

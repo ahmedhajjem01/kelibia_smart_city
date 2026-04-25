@@ -6,9 +6,11 @@ import logo from '../assets/logo.png';
 interface SidebarProps {
   onLogout: () => void;
   user?: { first_name: string; last_name: string; email: string; is_verified: boolean; user_type?: string; is_staff?: boolean; is_superuser?: boolean } | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onLogout, user, isOpen, onClose }) => {
   const { t, lang } = useI18n();
 
   const scrollToMap = (e: React.MouseEvent) => {
@@ -32,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
 
   return (
     <aside
-      className="sidebar fixed left-0 top-0 h-full w-64 flex flex-col z-50"
+      className={`sidebar fixed left-0 top-0 h-full w-64 flex flex-col z-50 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       style={{
         background: 'linear-gradient(180deg, #045b7e 0%, #033f58 100%)',
         boxShadow: '4px 0 24px rgba(0,0,0,.35)',
@@ -110,6 +112,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user }) => {
             </NavLink>
           </>
         )}
+        
+        {/* Close button for mobile */}
+        <button 
+          className="md:hidden mt-4 mx-4 py-2 bg-white/10 rounded text-white text-xs font-bold"
+          onClick={onClose}
+        >
+          {t('close') || 'Fermer'}
+        </button>
       </nav>
 
       {/* ── Bottom: Profil + Déconnexion ── */}

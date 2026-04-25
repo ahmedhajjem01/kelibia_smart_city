@@ -125,6 +125,18 @@ const CSS = `
 
 .db-action-label { font-size:.65rem; font-weight:700; color:#1a1c1c; text-transform:uppercase; letter-spacing:.4px; line-height:1.3; }
 
+.db-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .db-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 
 
 /* Right sidebar */
@@ -710,7 +722,7 @@ export default function DashboardPage() {
 
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+        <div className="db-grid">
 
           {[
 
