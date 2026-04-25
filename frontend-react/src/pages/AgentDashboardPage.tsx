@@ -2945,7 +2945,41 @@ export default function AgentDashboardPage() {
 
   const inits = initials(fullName)
 
+  const handleExportGeoJSON = async () => {
+    try {
+      const res = await fetch(resolveBackendUrl('/api/reclamations/geojson/?has_coords=true'), {
+        headers: { Authorization: `Bearer ${access}` }
+      })
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `reclamations_kelibia_${new Date().toISOString().slice(0, 10)}.geojson`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      console.error('Export GeoJSON failed', e)
+    }
+  }
 
+  const handleExportCSV = () => {
+    const rows = [
+      ['id', 'titre', 'categorie', 'statut', 'priorite', 'citoyen', 'latitude', 'longitude', 'date'],
+      ...allRecs.map(r => [
+        r.id, r.title, r.category, r.status, r.priority,
+        r.citizen_name || '', r.latitude ?? '', r.longitude ?? '',
+        r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : ''
+      ])
+    ]
+    const csv = rows.map(row => row.map(String).map(v => `"${v.toString().replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `reclamations_kelibia_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
 
@@ -3308,11 +3342,29 @@ export default function AgentDashboardPage() {
 
                 <div className="ag-card" id="ag-map-card">
 
-                  <div className="ag-card-hdr-blue">
+                  <div className="ag-card-hdr-blue" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
                     <span><i className="fas fa-map-marked-alt me-2"></i>{t('map_title_realtime')}</span>
 
-                    <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} {t('signalements_short')}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} {t('signalements_short')}</span>
+                      <button
+                        onClick={handleExportGeoJSON}
+                        className="btn btn-sm"
+                        title="Exporter pour QGIS (GeoJSON)"
+                        style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)', fontSize: '0.72rem', padding: '2px 8px' }}
+                      >
+                        <i className="fas fa-download me-1"></i>GeoJSON
+                      </button>
+                      <button
+                        onClick={handleExportCSV}
+                        className="btn btn-sm"
+                        title="Exporter en CSV (Excel / tableur)"
+                        style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)', fontSize: '0.72rem', padding: '2px 8px' }}
+                      >
+                        <i className="fas fa-table me-1"></i>CSV
+                      </button>
+                    </div>
 
                   </div>
 
