@@ -295,21 +295,25 @@ class UserVerificationView(APIView):
 
                 # Send Email
                 if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-                    try:
-                        subject = "Votre compte Kélibia Smart City a été vérifié"
-                        email_body = f"Bonjour {target_user.first_name},\n\n" \
-                                    f"Nous avons le plaisir de vous informer que votre compte a été vérifié par nos services.\n" \
-                                    f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
-                                    f"Cordialement,\nL'administration de Kélibia Smart City"
-                        send_mail(
-                            subject,
-                            email_body,
-                            settings.EMAIL_HOST_USER,
-                            [target_user.email],
-                            fail_silently=True,
-                        )
-                    except Exception as e:
-                        print(f"Failed to send verification email: {e}")
+                    import threading
+                    def send_async_email():
+                        try:
+                            subject = "Votre compte Kélibia Smart City a été vérifié"
+                            email_body = f"Bonjour {target_user.first_name},\n\n" \
+                                        f"Nous avons le plaisir de vous informer que votre compte a été vérifié par nos services.\n" \
+                                        f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
+                                        f"Cordialement,\nL'administration de Kélibia Smart City"
+                            send_mail(
+                                subject,
+                                email_body,
+                                settings.EMAIL_HOST_USER,
+                                [target_user.email],
+                                fail_silently=True,
+                            )
+                        except Exception as e:
+                            print(f"Failed to send verification email: {e}")
+                    
+                    threading.Thread(target=send_async_email).start()
 
                 return Response({"message": "Compte citoyen vérifié avec succès. Les images du CIN ont été supprimées par mesure de confidentialité."})
             elif action == 'toggle_active':
@@ -384,23 +388,27 @@ class UserVerificationView(APIView):
 
                 # Send Email
                 if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-                    try:
-                        subject = "Activation de votre abonnement ASD - Kélibia Smart City"
-                        email_body = f"Bonjour {target_user.first_name},\n\n" \
-                                    f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n" \
-                                    f"Durée : {duration_months} mois\n" \
-                                    f"Expiration : {target_user.asd_expiration.strftime('%d/%m/%Y')}\n\n" \
-                                    f"Vous pouvez désormais accéder à tous les services administratifs en ligne sans frais supplémentaires.\n\n" \
-                                    f"Cordialement,\nL'administration de Kélibia Smart City"
-                        send_mail(
-                            subject,
-                            email_body,
-                            settings.EMAIL_HOST_USER,
-                            [target_user.email],
-                            fail_silently=True,
-                        )
-                    except Exception as e:
-                        print(f"Failed to send ASD activation email: {e}")
+                    import threading
+                    def send_async_asd_email():
+                        try:
+                            subject = "Activation de votre abonnement ASD - Kélibia Smart City"
+                            email_body = f"Bonjour {target_user.first_name},\n\n" \
+                                        f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n" \
+                                        f"Durée : {duration_months} mois\n" \
+                                        f"Expiration : {target_user.asd_expiration.strftime('%d/%m/%Y')}\n\n" \
+                                        f"Vous pouvez désormais accéder à tous les services administratifs en ligne sans frais supplémentaires.\n\n" \
+                                        f"Cordialement,\nL'administration de Kélibia Smart City"
+                            send_mail(
+                                subject,
+                                email_body,
+                                settings.EMAIL_HOST_USER,
+                                [target_user.email],
+                                fail_silently=True,
+                            )
+                        except Exception as e:
+                            print(f"Failed to send ASD activation email: {e}")
+                    
+                    threading.Thread(target=send_async_asd_email).start()
 
                 return Response({
                     'message': f'Abonnement ASD activé pour {duration_months} mois (et compte vérifié).',
@@ -538,21 +546,25 @@ class AgentCitizenVerificationView(APIView):
 
             # Send Email
             if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-                try:
-                    subject = "Votre compte Kélibia Smart City a été vérifié"
-                    email_body = f"Bonjour {target.first_name},\n\n" \
-                                f"Votre compte a été vérifié par un agent municipal.\n" \
-                                f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
-                                f"Cordialement,\nL'administration de Kélibia Smart City"
-                    send_mail(
-                        subject,
-                        email_body,
-                        settings.EMAIL_HOST_USER,
-                        [target.email],
-                        fail_silently=True,
-                    )
-                except Exception as e:
-                    print(f"Failed to send verification email: {e}")
+                import threading
+                def send_async_agent_verify_email():
+                    try:
+                        subject = "Votre compte Kélibia Smart City a été vérifié"
+                        email_body = f"Bonjour {target.first_name},\n\n" \
+                                    f"Votre compte a été vérifié par un agent municipal.\n" \
+                                    f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
+                                    f"Cordialement,\nL'administration de Kélibia Smart City"
+                        send_mail(
+                            subject,
+                            email_body,
+                            settings.EMAIL_HOST_USER,
+                            [target.email],
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        print(f"Failed to send verification email: {e}")
+                
+                threading.Thread(target=send_async_agent_verify_email).start()
 
             return Response({"message": "Compte citoyen vérifié avec succès. Images CIN supprimées."})
 
