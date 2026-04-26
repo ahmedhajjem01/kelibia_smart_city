@@ -134,8 +134,8 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-stat .lbl{font-size:0.72rem;color:#9ca3af;margin-top:4px}
 
 .ag-dashboard-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:32px}
-.ag-map-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.06);position:relative;min-height:450px;display:flex;flex-direction:column}
-.ag-map-header{padding:14px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.ag-map-card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.06);position:relative;min-height:450px;display:flex;flex-direction:column}
+.ag-map-header{padding:14px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:12px 12px 0 0;overflow:hidden}
 .ag-map-header h4{font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1a1c1c}
 .ag-map-legend{position:absolute;top:66px;left:12px;z-index:400;background:rgba(255,255,255,0.97);padding:12px 14px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #f0f0f0}
 .ag-map-legend h5{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1a1c1c;margin-bottom:8px}
@@ -144,7 +144,7 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-map-export-btns{display:flex;gap:6px}
 .ag-export-btn{padding:5px 11px;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid #e5e7eb;background:#f9f9f9;color:#6b7280;transition:all .15s}
 .ag-export-btn:hover{background:#ae131a;color:#fff;border-color:#ae131a}
-#ag-map{flex:1;min-height:400px;width:100%}
+#ag-map{flex:1;min-height:400px;width:100%;border-radius:0 0 12px 12px;overflow:hidden}
 
 .ag-right-col{display:flex;flex-direction:column;gap:20px}
 .ag-panel{background:#fff;padding:22px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #f0f0f0}
