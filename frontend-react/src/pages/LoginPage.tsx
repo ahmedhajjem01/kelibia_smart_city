@@ -47,7 +47,7 @@ export default function LoginPage() {
 .lp-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(10,51,102,.45) 0%, transparent 60%, rgba(10,51,102,.25) 100%);
+  background: linear-gradient(135deg, rgba(30,90,180,.38) 0%, transparent 60%, rgba(30,90,180,.2) 100%);
 }
 
 /* ── Container ── */
@@ -69,7 +69,7 @@ export default function LoginPage() {
 /* ── Hero side ── */
 .lp-hero {
   display: none;
-  background: rgba(10,51,102,.88);
+  background: rgba(30,90,180,.55);
   backdrop-filter: blur(10px);
   padding: 48px 44px;
   flex-direction: column;
