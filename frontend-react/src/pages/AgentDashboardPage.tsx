@@ -80,1006 +80,182 @@ function getRoleLabel(u: UserInfo | null, t: any) {
 
 const CSS = `
 
-/* ── New Design System ── */
-
-:root{
-
-  --primary:#F18221;
-
-  --primary-hover:#e0731a;
-
-  --secondary:#004786;
-
-  --tertiary:#0093af;
-
-  --sidebar-bg:#f8fafc;
-
-  --sidebar-border:#e2e8f0;
-
-  --sidebar-hover:#f1f5f9;
-
-  --sidebar-active-bg:#dbeafe;
-
-  --sidebar-active-text:#1e40af;
-
-  --body-bg:#f1f5f9;
-
-  --card-shadow:0 2px 12px rgba(0,0,0,.06);
-
-  --red-tn:#c62828;
-
-  --blue:#004786;
-
-}
-
-
-
-/* ── Page shell ── */
-
-.agent-page{
-
-  font-family:'Public Sans','Segoe UI',sans-serif;
-
-  background:var(--body-bg);
-
-  min-height:100vh;
-
-}
-
-
-
-/* ── Top info bar (hidden on mobile) ── */
-
-.ag-topbar{
-
-  background:var(--secondary);
-
-  color:rgba(255,255,255,.8);
-
-  font-size:.78rem;
-
-  padding:4px 24px;
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-}
-
-.ag-topbar a{color:rgba(255,255,255,.7);text-decoration:none;margin:0 6px}
-
-.ag-topbar a:hover{color:#fff}
-
-
-
-/* ── Glassmorphism navbar ── */
-
-.ag-navbar{
-
-  background:rgba(255,255,255,0.88);
-
-  backdrop-filter:blur(12px);
-
-  -webkit-backdrop-filter:blur(12px);
-
-  border-bottom:1px solid #e2e8f0;
-
-  padding:0 28px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  height:68px;
-
-  box-shadow:0 1px 6px rgba(0,0,0,.06);
-
-  position:sticky;
-
-  top:0;
-
-  z-index:100;
-
-}
-
-.ag-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-
-.ag-logo{
-
-  width:42px;height:42px;
-
-  background:var(--primary);
-
-  border-radius:50%;
-
-  display:flex;align-items:center;justify-content:center;
-
-  color:#fff;font-size:1.2rem;
-
-}
-
-.ag-title .main{
-
-  font-size:0.85rem;font-weight:800;
-
-  color:var(--primary);display:block;
-
-  font-family:'Public Sans',sans-serif;
-
-  letter-spacing:-0.3px;
-
-}
-
-.ag-title .sub{font-size:.65rem;color:#94a3b8;font-weight:500}
-
-.ag-actions{display:flex;align-items:center;gap:10px}
-
-.ag-lang-btn{
-
-  background:transparent;border:0;
-
-  padding:2px 6px;
-
-  cursor:pointer;
-
-  font-size:.75rem;font-weight:800;
-
-  text-transform:uppercase;letter-spacing:.1em;
-
-  color:#94a3b8;transition:color .2s;
-
-}
-
-.ag-lang-btn:hover,.ag-lang-btn.active{color:#0f172a}
-
-.ag-user-pill{
-
-  display:flex;align-items:center;gap:10px;
-
-  background:#f8fafc;
-
-  border:1px solid #e2e8f0;
-
-  border-radius:10px;
-
-  padding:6px 14px 6px 6px;
-
-}
-
-.ag-user-pill .av{
-
-  width:30px;height:30px;
-
-  background:var(--primary);
-
-  color:#fff;
-
-  border-radius:50%;
-
-  display:flex;align-items:center;justify-content:center;
-
-  font-size:.75rem;font-weight:700;
-
-}
-
-.ag-user-pill .name-block .main-name{font-size:.8rem;font-weight:700;color:#0f172a;display:block}
-
-.ag-user-pill .name-block .role{font-size:.65rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
-
-.ag-logout{
-  background:transparent;
-  color:#64748b;
-  border:0;
-  border-radius:8px;
-  min-width:36px;
-  height:36px;
-  padding:0 12px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  font-size:.85rem;
-  font-weight:600;
-  transition:background .2s,color .2s;
-}
-
-.ag-logout:hover{background:#f1f5f9;color:var(--red-tn)}
-
-
-
-/* ── Small user avatar (used in users table) ── */
-
-.ag-user-av-sm{
-
-  width:32px;height:32px;
-
-  background:var(--primary);
-
-  color:#fff;border-radius:50%;
-
-  display:flex;align-items:center;justify-content:center;
-
-  font-size:.78rem;font-weight:700;flex-shrink:0;
-
-}
-
-
-
-/* ── Hero / welcome strip ── */
-
-.ag-hero{
-
-  background:linear-gradient(135deg,#0d1b2e 0%,#1565c0 100%);
-
-  color:#fff;
-
-  padding:20px 28px;
-
-  display:flex;align-items:center;justify-content:space-between;
-
-  flex-wrap:wrap;gap:12px;
-
-}
-
-.ag-hero .greeting{font-size:1.1rem;font-weight:700;font-family:'Public Sans',sans-serif}
-
-.ag-hero .sub{font-size:.83rem;opacity:.8;margin-top:3px}
-
-.ag-hero .badge-role{
-
-  background:rgba(255,255,255,.15);
-
-  border:1px solid rgba(255,255,255,.3);
-
-  border-radius:20px;padding:4px 14px;font-size:.75rem;
-
-}
-
-
-
-/* ── Breadcrumb ── */
-
-.ag-breadcrumb{
-
-  background:#fff;
-
-  border-bottom:1px solid #e2e8f0;
-
-  padding:8px 28px;
-
-  font-size:.78rem;color:#64748b;
-
-}
-
-.ag-breadcrumb a{color:var(--primary);text-decoration:none}
-
-
-
-/* ── Layout body ── */
-
-.ag-body{display:flex;min-height:calc(100vh - 160px);align-items:flex-start}
-
-
-
-/* ── Sidebar ── */
-
-.ag-sidebar{
-
-  width:240px;min-width:240px;
-
-  background:var(--sidebar-bg);
-
-  border-right:1px solid var(--sidebar-border);
-
-  padding:16px 12px;
-
-  flex-shrink:0;
-
-  position:sticky;
-
-  top:68px;
-
-  height:calc(100vh - 68px);
-
-  overflow-y:auto;
-
-}
-
-.ag-sec-title{
-
-  font-size:.65rem;font-weight:700;
-
-  text-transform:uppercase;letter-spacing:1.2px;
-
-  color:#94a3b8;
-
-  padding:12px 8px 4px;
-
-}
-
-.ag-nav-item{
-
-  display:flex;align-items:center;gap:10px;
-
-  padding:10px 14px;
-
-  cursor:pointer;
-
-  border-radius:8px;
-
-  transition:all .15s;
-
-  font-size:.85rem;font-weight:500;
-
-  text-decoration:none;
-
-  color:#64748b;
-
-  margin-bottom:2px;
-
-}
-
-.ag-nav-item:hover{background:var(--sidebar-hover);color:#0f172a;transform:translateX(2px)}
-
-.ag-nav-item.active{
-
-  background:var(--sidebar-active-bg);
-
-  color:var(--sidebar-active-text);
-
-  font-weight:700;
-
-}
-
-.ag-nav-item i{width:18px;text-align:center;font-size:.88rem}
-
-.ag-divider{border-top:1px solid #e2e8f0;margin:10px 0}
-
-.ag-badge{
-
-  margin-left:auto;
-
-  background:var(--red-tn);color:#fff;
-
-  border-radius:10px;padding:1px 7px;
-
-  font-size:.65rem;font-weight:700;
-
-}
-
-
-
-/* ── Main content ── */
-
-.ag-main{
-
-  flex:1;
-
-  padding:24px 28px;
-
-  overflow-x:hidden;
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:20px;
-
-  min-height:800px;
-
-}
-
-
-
-/* ── Stats Cards ── */
-
-.ag-stats-grid{
-
-  display:grid;
-
-  grid-template-columns:repeat(6,1fr);
-
-  gap:14px;
-
-  margin-bottom:4px;
-
-}
-
-.ag-stat{
-
-  background:#fff;
-
-  border-radius:10px;
-
-  padding:16px;
-
-  box-shadow:var(--card-shadow);
-
-  display:flex;align-items:flex-start;
-
-  gap:0;
-
-  flex-direction:column;
-
-  border:1px solid #f1f5f9;
-
-  transition:transform .2s,box-shadow .2s;
-
-  position:relative;
-
-  overflow:hidden;
-
-}
-
-.ag-stat:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
-
-.ag-stat .stat-top{display:flex;justify-content:space-between;align-items:flex-start;width:100%;margin-bottom:12px}
-
-.ag-stat .icon-box{
-
-  width:40px;height:40px;
-
-  border-radius:8px;
-
-  display:flex;align-items:center;justify-content:center;
-
-  font-size:1.1rem;flex-shrink:0;
-
-}
-
-.ag-stat .chip{
-
-  font-size:.6rem;font-weight:800;
-
-  text-transform:uppercase;letter-spacing:.05em;
-
-  opacity:.7;
-
-}
-
-.ag-stat .val{font-size:1.8rem;font-weight:900;line-height:1;color:#0f172a;font-family:'Public Sans',sans-serif}
-
-.ag-stat .lbl{font-size:.7rem;color:#94a3b8;margin-top:4px;font-weight:500}
-
-
-
-/* ── Content cards ── */
-
-.ag-card{
-
-  background:#fff;border-radius:12px;
-
-  box-shadow:var(--card-shadow);
-
-  margin-bottom:0;
-
-  overflow:hidden;
-
-  border:1px solid #f1f5f9;
-
-}
-
-.ag-card-hdr-blue{
-
-  background:linear-gradient(90deg,#0d1b2e,#1565c0);
-
-  color:#fff;padding:12px 18px;
-
-  display:flex;align-items:center;justify-content:space-between;
-
-  font-size:.88rem;font-weight:600;
-
-}
-
-.ag-card-hdr-green{
-
-  background:linear-gradient(90deg,#064e3b,#059669);
-
-  color:#fff;padding:12px 18px;
-
-  display:flex;align-items:center;justify-content:space-between;
-
-  font-size:.88rem;font-weight:600;
-
-}
-
-.ag-card-hdr-orange{
-
-  background:linear-gradient(90deg,#7c2d12,#F18221);
-
-  color:#fff;padding:12px 18px;
-
-  display:flex;align-items:center;justify-content:space-between;
-
-  font-size:.88rem;font-weight:600;
-
-}
-
-.ag-card-body{padding:18px}
-
-
-
-/* ── Filter bar ── */
-
-.ag-filter-bar{
-
-  padding:10px 16px;
-
-  background:#f8fafc;
-
-  border-bottom:1px solid #e8e8e8;
-
-  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-
-}
-
-.ag-filter-select{
-
-  border:1px solid #e2e8f0;border-radius:8px;
-
-  padding:5px 10px;font-size:.78rem;color:#475569;
-
-  background:#fff;cursor:pointer;
-
-}
-
-.ag-filter-btn{
-
-  border:1px solid #e2e8f0;border-radius:8px;
-
-  padding:5px 12px;font-size:.78rem;color:#475569;
-
-  background:#fff;cursor:pointer;
-
-  transition:all .2s;
-
-  display:flex;align-items:center;gap:5px;
-
-}
-
-.ag-filter-btn:hover,.ag-filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-.ag-search-wrap{position:relative}
-
-.ag-search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.78rem}
-
-.ag-search-input{
-
-  border:1px solid #e2e8f0;border-radius:8px;
-
-  padding:5px 10px 5px 30px;font-size:.78rem;width:200px;background:#fff;
-
-}
-
-
-
-/* ── Table ── */
-
-.ag-table{width:100%;border-collapse:separate;border-spacing:0}
-
-.ag-table thead th{
-
-  background:#f8fafc;color:#64748b;
-
-  font-size:.68rem;font-weight:700;
-
-  padding:10px 14px;
-
-  text-transform:uppercase;letter-spacing:.05em;
-
-  border-bottom:1px solid #e2e8f0;
-
-  white-space:nowrap;
-
-}
-
-.ag-table tbody tr{transition:background .12s}
-
-.ag-table tbody tr:hover{background:#f8fafc}
-
-.ag-table tbody td{
-
-  padding:11px 14px;font-size:.82rem;color:#334155;
-
-  border-bottom:1px solid #f1f5f9;vertical-align:middle;
-
-}
-
-
-
-/* ── Badges ── */
-
-.cat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap}
-
-.cat-lighting{background:#fffbeb;color:#b45309}.cat-trash{background:#f0fdf4;color:#166534}
-
-.cat-roads{background:#f5f3ff;color:#5b21b6}.cat-noise{background:#fdf2f8;color:#9d174d}
-
-.cat-other{background:#f1f5f9;color:#475569}
-
-
-
-.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
-
-.status-pending{background:#fff7ed;color:#c2410c}.status-in_progress{background:#eff6ff;color:#1d4ed8}
-
-.status-resolved{background:#f0fdf4;color:#166534}.status-rejected{background:#fff1f2;color:#be123c}
-
-
-
-.priority-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.66rem;font-weight:700;white-space:nowrap}
-
-.priority-urgente{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
-
-.priority-normale{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-
-.priority-faible{background:#f5f3ff;color:#5b21b6;border:1px solid #ddd6fe}
-
-
-
-.service-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:600;background:#eff6ff;color:#1d4ed8;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
-
-
-
-.ag-status-select{border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;font-size:.73rem;cursor:pointer;background:#fff}
-
-
-
-.ag-action-btn{
-
-  background:none;border:1px solid #e2e8f0;border-radius:8px;
-
-  padding:5px 9px;font-size:.73rem;cursor:pointer;
-
-  color:#64748b;transition:all .15s;
-
-  display:inline-flex;align-items:center;gap:4px;
-
-}
-
-.ag-action-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-
-
-.ag-empty{text-align:center;padding:40px 20px;color:#94a3b8}
-
-.ag-empty i{font-size:2.5rem;margin-bottom:10px;opacity:.3}
-
-
-
-/* ── Profile card ── */
-
-.ag-profile-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:16px}
-
-.ag-profile-hdr{background:linear-gradient(135deg,#0d1b2e,#1565c0);padding:24px;text-align:center;color:#fff}
-
-.ag-profile-av{
-
-  width:64px;height:64px;
-
-  background:rgba(255,255,255,.2);
-
-  border:3px solid rgba(255,255,255,.5);
-
-  border-radius:50%;
-
-  display:flex;align-items:center;justify-content:center;
-
-  font-size:1.5rem;font-weight:700;
-
-  margin:0 auto 10px;color:#fff;
-
-}
-
-.ag-profile-name{font-size:.92rem;font-weight:700}
-
-.ag-profile-email{font-size:.72rem;opacity:.75;margin-top:2px}
-
-.ag-profile-body{padding:14px 16px}
-
-.ag-profile-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.78rem}
-
-.ag-profile-row:last-child{border-bottom:none}
-
-.ag-profile-row .lbl{color:#94a3b8}.ag-profile-row .val{color:#1e293b;font-weight:600}
-
-
-
-/* ── Mini progress bar ── */
-
-.mini-progress{height:5px;border-radius:3px;background:#e2e8f0;margin-top:4px;overflow:hidden}
-
-.mini-progress .bar{height:100%;border-radius:3px;transition:width .6s}
-
-
-
-/* ── Pagination ── */
-
-.ag-pag-bar{
-
-  padding:10px 16px;
-
-  display:flex;align-items:center;justify-content:space-between;
-
-  border-top:1px solid #f1f5f9;
-
-  font-size:.75rem;color:#94a3b8;
-
-  background:#fafafa;
-
-}
-
-.ag-page-btn{
-
-  background:#fff;border:1px solid #e2e8f0;border-radius:7px;
-
-  padding:4px 10px;font-size:.75rem;cursor:pointer;transition:all .2s;
-
-}
-
-.ag-page-btn:hover:not(:disabled){background:var(--primary);color:#fff;border-color:var(--primary)}
-
-.ag-page-btn:disabled{opacity:.4;cursor:not-allowed}
-
-.ag-page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-
-
-
-/* ── Toast notifications ── */
-
-.ag-toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-
-.ag-toast{
-
-  background:#fff;border-radius:12px;
-
-  padding:12px 16px;
-
-  box-shadow:0 8px 30px rgba(0,0,0,.12);
-
-  font-size:.82rem;
-
-  display:flex;align-items:center;gap:10px;
-
-  min-width:280px;
-
-  animation:ag-slide .3s ease;
-
-}
-
-.ag-toast.success{border-left:4px solid #22c55e}
-
-.ag-toast.error{border-left:4px solid var(--red-tn)}
-
-.ag-toast .ticon{font-size:1rem}
-
-.ag-toast.success .ticon{color:#22c55e}
-
-.ag-toast.error .ticon{color:var(--red-tn)}
-
-@keyframes ag-slide{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}
-
-
-
-/* ── Modals ── */
-
-.ag-modal-hdr{
-
-  background:linear-gradient(90deg,#0d1b2e,#1565c0);
-
-  color:#fff;padding:16px 20px;
-
-  display:flex;align-items:center;justify-content:space-between;
-
-}
-
-.ag-modal-hdr .title{font-size:.96rem;font-weight:700}
-
-.ag-close-btn{
-
-  background:rgba(255,255,255,.15);border:none;color:#fff;
-
-  width:28px;height:28px;border-radius:50%;cursor:pointer;
-
-  display:flex;align-items:center;justify-content:center;font-size:.9rem;
-
-}
-
-.ag-close-btn:hover{background:rgba(255,255,255,.3)}
-
-.det-label{font-size:.72rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-
-.det-value{font-size:.88rem;color:#1e293b;font-weight:500}
-
-.ag-footer{background:#0d1b2e;color:rgba(255,255,255,.5);text-align:center;font-size:.72rem;padding:14px}
-
-
-
-/* ── Duplicate card ── */
-
-.ag-dup-card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);margin-bottom:0;overflow:hidden;border-left:4px solid #7c3aed}
-
-
-
-/* ── ML confidence badges ── */
-
-.conf-badge{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:2px}
-
-.conf-high{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
-
-.conf-med{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
-
-.conf-low{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
-
-
-
-/* ── Reclassify box ── */
-
-.reclassify-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-top:12px}
-
-.reclassify-box .rc-title{font-size:.78rem;font-weight:700;color:#b45309;margin-bottom:8px}
-
-
-
-/* ── Skeleton loader ── */
-
-.skeleton-box{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:10px;width:100%}
-
-@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-.table-skeleton{height:400px;margin-bottom:20px}
-
-#ag-map-card{min-height:430px}
-
-#ag-recs-card{min-height:500px}
-
-
-
-/* ══════════════════════ MOBILE ══════════════════════ */
-
-@media(max-width:1023px){
-
-  .ag-topbar{display:none}
-
-  .ag-navbar{height:54px;padding:0 10px}
-
-  .ag-logo{width:34px;height:34px;font-size:.9rem}
-
-  .ag-title .main{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
-
-  .ag-title .sub{display:none}
-
-  .ag-brand{gap:7px;min-width:0;flex:1;overflow:hidden}
-
-  .ag-actions{gap:5px;flex-shrink:0}
-
-  .ag-user-pill{padding:4px;border-radius:50%;gap:0;border:0;background:transparent}
-
-  .ag-user-pill .name-block{display:none}
-
-  .ag-user-pill .av{width:30px;height:30px}
-
-  .ag-logout{width:30px;height:30px;font-size:.85rem}
-
-  .ag-hero{padding:10px 14px}
-
-  .ag-hero .greeting{font-size:.85rem}
-
-  .ag-hero .sub{font-size:.72rem}
-
-  .ag-hero-right{display:none!important}
-
-  .ag-breadcrumb{display:none}
-
-  .ag-body{flex-direction:column}
-
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&family=Work+Sans:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body,.agent-page{font-family:'Work Sans',sans-serif;background:#f9f9f9;color:#1a1c1c}
+h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
+
+.ag-sidebar{position:fixed;left:0;top:0;height:100vh;width:256px;background:#f3f3f3;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;padding:24px 16px;z-index:100;overflow-y:auto}
+.ag-sidebar-brand{display:flex;align-items:center;gap:12px;padding:0 8px;margin-bottom:32px}
+.ag-sidebar-brand img{width:40px;height:40px;object-fit:contain}
+.ag-brand-name{font-family:'Public Sans',sans-serif;font-size:1rem;font-weight:700;color:#ae131a;line-height:1.2}
+.ag-brand-sub{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:#9ca3af;font-weight:500}
+.ag-sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px}
+.ag-nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;color:#6b7280;text-decoration:none;border-radius:6px;font-size:0.875rem;font-weight:500;transition:all .15s;border-right:3px solid transparent;position:relative}
+.ag-nav-item:hover{color:#ae131a;background:rgba(174,19,26,0.06)}
+.ag-nav-item.active{color:#ae131a;font-weight:700;border-right-color:#ae131a;background:rgba(174,19,26,0.06)}
+.ag-nav-item i{width:18px;text-align:center;font-size:0.9rem}
+.ag-badge{margin-left:auto;background:#ae131a;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.65rem;font-weight:700}
+.ag-sec-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;color:#9ca3af;font-weight:700;padding:8px 12px 4px}
+.ag-divider{border-top:1px solid #e5e7eb;margin:8px 0}
+.ag-sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px;padding-top:16px;border-top:1px solid #e5e7eb}
+.ag-new-report-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#ae131a,#d2312f);color:#fff;padding:12px;border-radius:6px;font-weight:700;font-size:0.875rem;cursor:pointer;border:none;width:100%;box-shadow:0 4px 12px rgba(174,19,26,.25);transition:opacity .15s;margin-bottom:8px}
+.ag-new-report-btn:hover{opacity:0.9}
+
+.ag-topnav{position:fixed;top:0;right:0;left:256px;height:64px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:99;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.ag-topnav-search{position:relative;display:flex;align-items:center}
+.ag-topnav-search i{position:absolute;left:12px;color:#9ca3af;font-size:0.8rem}
+.ag-topnav-search input{padding:8px 16px 8px 36px;background:#f3f3f3;border:none;border-radius:9999px;font-size:0.85rem;width:260px;outline:none;font-family:'Work Sans',sans-serif}
+.ag-topnav-right{display:flex;align-items:center;gap:20px}
+.ag-lang-toggle{display:flex;gap:12px}
+.ag-lang-btn{background:none;border:none;font-size:0.7rem;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;color:#9ca3af;cursor:pointer;padding:0}
+.ag-lang-btn.active{color:#1a1c1c}
+.ag-lang-btn:hover{color:#ae131a}
+.ag-topnav-icons{display:flex;gap:16px;align-items:center}
+.ag-topnav-icon{color:#6b7280;cursor:pointer;font-size:1rem;transition:color .15s}
+.ag-topnav-icon:hover{color:#ae131a}
+.ag-topnav-user{display:flex;align-items:center;gap:12px;padding-left:20px;border-left:1px solid #e5e7eb}
+.ag-topnav-user-name{font-size:0.75rem;font-weight:700;color:#1a1c1c}
+.ag-topnav-user-role{font-size:0.62rem;color:#9ca3af}
+.ag-avatar{width:36px;height:36px;border-radius:9999px;background:linear-gradient(135deg,#ae131a,#d2312f);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;border:2px solid #e5e7eb;flex-shrink:0}
+
+.ag-main{margin-left:256px;padding-top:64px;min-height:100vh}
+.ag-main-inner{padding:32px}
+
+.ag-stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;margin-bottom:32px}
+.ag-stat{background:#fff;padding:20px;border-radius:8px;box-shadow:0 8px 24px -4px rgba(26,28,28,.06);transition:transform .2s}
+.ag-stat:hover{transform:translateY(-4px)}
+.ag-stat .stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.ag-stat .icon-box{padding:8px;border-radius:6px;display:flex}
+.ag-stat .icon-box i{font-size:1.1rem}
+.ag-stat .chip{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em}
+.ag-stat .val{font-size:1.875rem;font-weight:900;color:#1a1c1c;line-height:1}
+.ag-stat .lbl{font-size:0.72rem;color:#9ca3af;margin-top:4px}
+
+.ag-dashboard-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:32px}
+.ag-map-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.06);position:relative;min-height:450px;display:flex;flex-direction:column}
+.ag-map-header{padding:14px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.ag-map-header h4{font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1a1c1c}
+.ag-map-legend{position:absolute;top:66px;left:12px;z-index:400;background:rgba(255,255,255,0.97);padding:12px 14px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #f0f0f0}
+.ag-map-legend h5{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1a1c1c;margin-bottom:8px}
+.ag-legend-item{display:flex;align-items:center;gap:8px;font-size:0.73rem;color:#6b7280;margin-bottom:5px}
+.ag-legend-dot{width:10px;height:10px;border-radius:9999px;flex-shrink:0;border:2px solid rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(0,0,0,.1)}
+.ag-map-export-btns{display:flex;gap:6px}
+.ag-export-btn{padding:5px 11px;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid #e5e7eb;background:#f9f9f9;color:#6b7280;transition:all .15s}
+.ag-export-btn:hover{background:#ae131a;color:#fff;border-color:#ae131a}
+#ag-map{flex:1;min-height:400px;width:100%}
+
+.ag-right-col{display:flex;flex-direction:column;gap:20px}
+.ag-panel{background:#fff;padding:22px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #f0f0f0}
+.ag-panel h4{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#1a1c1c;margin-bottom:20px}
+.ag-donut-wrap{display:flex;align-items:center;justify-content:center;position:relative;padding:8px 0}
+.ag-donut-center{position:absolute;display:flex;flex-direction:column;align-items:center}
+.ag-donut-center .pct{font-size:1.5rem;font-weight:900;color:#1a1c1c}
+.ag-donut-center .lbl{font-size:0.6rem;color:#9ca3af;text-transform:uppercase}
+.ag-cat-list{display:flex;flex-direction:column;gap:14px}
+.ag-cat-item{display:flex;align-items:center;justify-content:space-between}
+.ag-cat-item-left{display:flex;align-items:center;gap:10px}
+.ag-cat-item-left i{color:#9ca3af;font-size:0.95rem;width:18px;text-align:center}
+.ag-cat-item-left span{font-size:0.875rem;color:#6b7280}
+.ag-cat-count{font-size:0.875rem;font-weight:700;color:#1a1c1c}
+
+.ag-table-card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #f0f0f0;overflow:hidden;margin-bottom:32px}
+.ag-table-hdr{padding:16px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.ag-table-hdr h3{font-size:1rem;font-weight:900;color:#1a1c1c}
+.ag-table-hdr h3 span{color:#ae131a;font-weight:400}
+.ag-table-hdr-btns{display:flex;gap:8px}
+.ag-table-hdr-btn{padding:6px 12px;font-size:0.68rem;font-weight:700;border:1px solid #e5e7eb;border-radius:4px;color:#6b7280;background:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em}
+.ag-table-hdr-btn:hover{background:#f9f9f9}
+
+.ag-filter-bar{padding:12px 24px;border-bottom:1px solid #f0f0f0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#fafafa}
+.ag-search-wrap{position:relative;display:flex;align-items:center}
+.ag-search-wrap i{position:absolute;left:10px;color:#9ca3af;font-size:0.8rem}
+.ag-search-input{padding:7px 12px 7px 30px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;font-size:0.82rem;outline:none;min-width:180px;font-family:'Work Sans',sans-serif}
+.ag-search-input:focus{border-color:#ae131a}
+.ag-filter-select{padding:7px 10px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;font-size:0.82rem;outline:none;color:#374151;font-family:'Work Sans',sans-serif}
+.ag-filter-select:focus{border-color:#ae131a}
+.ag-filter-btn{padding:7px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:0.82rem;cursor:pointer;background:#fff;color:#6b7280;font-family:'Work Sans',sans-serif}
+.ag-filter-btn.active{background:#ae131a;color:#fff;border-color:#ae131a}
+
+.ag-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.ag-table thead{background:#fafafa}
+.ag-table thead th{padding:12px 20px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:#9ca3af;font-weight:700;white-space:nowrap}
+.ag-table tbody tr{border-bottom:1px solid #f9f9f9;transition:background .1s}
+.ag-table tbody tr:hover{background:rgba(249,249,249,.8)}
+.ag-table tbody td{padding:12px 20px;vertical-align:middle}
+.ag-status-select{border:none;border-radius:6px;padding:5px 8px;font-size:0.75rem;font-weight:700;cursor:pointer;outline:none;font-family:'Work Sans',sans-serif}
+.ag-action-btn{width:30px;height:30px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#6b7280;transition:all .15s}
+.ag-action-btn:hover{background:#ae131a;color:#fff;border-color:#ae131a}
+.ag-pag-bar{padding:14px 24px;background:#fafafa;display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#9ca3af}
+.ag-page-btn{width:32px;height:32px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;cursor:pointer;font-size:0.8rem;color:#6b7280;display:flex;align-items:center;justify-content:center}
+.ag-page-btn:hover,.ag-page-btn.active{background:#ae131a;color:#fff;border-color:#ae131a}
+.ag-page-btn:disabled{opacity:0.4;cursor:not-allowed}
+.ag-empty{text-align:center;padding:48px;color:#9ca3af;font-size:0.9rem}
+.ag-empty i{font-size:2rem;display:block;margin-bottom:12px}
+
+.cat-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:0.68rem;font-weight:700;background:#f3f3f3;color:#374151}
+.cat-trash{background:#fef3c7;color:#92400e}
+.cat-lighting{background:#fffbeb;color:#b45309}
+.cat-roads{background:#f0fdf4;color:#166534}
+.cat-noise{background:#eff6ff;color:#1e40af}
+.cat-other{background:#f9f9f9;color:#6b7280}
+.priority-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:0.72rem;font-weight:700}
+.priority-urgente{background:#fee2e2;color:#991b1b}
+.priority-normale{background:#dbeafe;color:#1e40af}
+.priority-faible{background:#f3e8ff;color:#6b21a8}
+.status-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:0.72rem;font-weight:700}
+.conf-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:0.7rem;font-weight:600}
+.conf-high{background:#dcfce7;color:#166534}
+.conf-med{background:#fef9c3;color:#854d0e}
+.conf-low{background:#fee2e2;color:#991b1b}
+.service-badge{display:inline-block;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:0.78rem;color:#6b7280}
+
+.ag-dup-card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.06);margin-bottom:24px;overflow:hidden}
+.ag-card-hdr-blue{padding:14px 20px;background:linear-gradient(90deg,#1a237e,#283593);color:#fff;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:0.85rem}
+.ag-card-hdr-green{padding:14px 20px;background:linear-gradient(90deg,#1b5e20,#2e7d32);color:#fff;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:0.85rem}
+
+.ag-card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.06);margin-bottom:24px;overflow:hidden}
+.ag-card-body{padding:20px}
+
+.ag-footer{margin-left:256px;padding:16px 32px;text-align:center;font-size:0.75rem;color:#9ca3af;border-top:1px solid #f0f0f0;background:#fff}
+
+.ag-toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.ag-toast{display:flex;align-items:center;gap:10px;background:#1a1c1c;color:#fff;padding:12px 18px;border-radius:8px;font-size:0.83rem;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:slideIn .3s ease}
+.ag-toast.success{background:#166534}
+.ag-toast.error{background:#991b1b}
+.ticon{font-size:1rem}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.ag-modal-hdr{padding:16px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.ag-modal-hdr .title{font-weight:700;font-size:1rem}
+.ag-close-btn{background:none;border:1px solid #e5e7eb;border-radius:6px;width:32px;height:32px;cursor:pointer;color:#6b7280;font-size:0.9rem}
+.ag-close-btn:hover{background:#ae131a;color:#fff;border-color:#ae131a}
+.det-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;font-weight:700;margin-bottom:4px}
+.det-value{font-size:0.9rem;color:#1a1c1c}
+
+.skeleton-box{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+.table-skeleton{height:200px;width:100%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.mini-progress{height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden}
+.mini-progress .bar{height:100%;border-radius:2px}
+.leaflet-container{font-family:'Work Sans',sans-serif!important}
+
+.ag-mobile-nav{display:none}
+.ag-mob-btn{display:none}
+.ag-mob-badge{display:none}
+@media(max-width:768px){
   .ag-sidebar{display:none}
-
-  .ag-main{padding:10px;gap:12px}
-
-  .ag-stats-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin-bottom:0!important}
-
-  .ag-stats-grid .ag-stat{padding:10px 8px!important;height:70px!important;min-height:70px!important}
-
-  .ag-stats-grid .ag-stat .icon-box{width:28px!important;height:28px!important;font-size:.8rem!important}
-
-  .ag-stats-grid .ag-stat .val{font-size:1rem!important}
-
-  .ag-stats-grid .ag-stat .lbl{font-size:.55rem!important;overflow:hidden;text-overflow:ellipsis}
-
-  .ag-card{border-radius:10px}
-
-  .ag-filter-bar{padding:8px 10px}
-
-  .ag-search-input{width:100%;max-width:none}
-
-  .ag-table thead th{padding:6px 8px;font-size:.62rem}
-
-  .ag-table tbody td{padding:7px 8px;font-size:.75rem}
-
-  #ag-map{height:220px!important}
-
-  .leaflet-control-layers,.leaflet-bottom.leaflet-left{display:none!important}
-
-  .ag-pag-bar{flex-direction:column;gap:6px;align-items:center}
-
-  .ag-toast-container{right:8px;left:8px;bottom:66px}
-
-  .ag-toast{min-width:unset;width:100%}
-
-  .modal-dialog{margin:6px!important;max-width:calc(100vw - 12px)!important}
-
-  .ag-mobile-nav{display:flex!important}
-
-  .agent-page{padding-bottom:60px}
-
-}
-
-
-
-@media(max-width:480px){
-
-  .ag-stat .lbl{font-size:.52rem}
-
-  .ag-navbar{height:50px}
-
-}
-
-
-
-/* ── Mobile bottom nav ── */
-
-.ag-mobile-nav{
-
-  display:none;
-
-  position:fixed;bottom:0;left:0;right:0;
-
-  background:#fff;
-
-  border-top:1px solid #e2e8f0;
-
-  z-index:1000;height:58px;
-
-  align-items:stretch;
-
-  box-shadow:0 -2px 12px rgba(0,0,0,.08);
-
-}
-
-.ag-mob-btn{
-
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-
-  color:#94a3b8;cursor:pointer;border:none;background:none;
-
-  font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.2px;padding:5px 2px;
-
-  transition:all .15s;border-top:2px solid transparent;position:relative;
-
-  -webkit-tap-highlight-color:transparent;
-
-}
-
-.ag-mob-btn i{font-size:.9rem;line-height:1}
-
-.ag-mob-btn.active{color:var(--primary);border-top-color:var(--primary);background:rgba(241,130,33,.06)}
-
-.ag-mob-btn:active{opacity:.7}
-
-.ag-mob-badge{
-
-  position:absolute;top:3px;right:calc(50% - 16px);
-
-  background:var(--red-tn);color:#fff;border-radius:8px;padding:0 4px;
-
-  font-size:.52rem;font-weight:700;min-width:14px;text-align:center;line-height:14px;height:14px;
-
+  .ag-topnav{left:0}
+  .ag-main{margin-left:0}
+  .ag-footer{margin-left:0}
+  .ag-stats-grid{grid-template-columns:repeat(2,1fr)}
+  .ag-dashboard-grid{grid-template-columns:1fr}
+  .ag-mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;border-top:1px solid #e5e7eb;padding:8px 0;justify-content:space-around}
+  .ag-mob-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:#9ca3af;font-size:0.6rem;cursor:pointer;padding:4px 8px;position:relative}
+  .ag-mob-btn i{font-size:1.2rem}
+  .ag-mob-btn.active{color:#ae131a}
+  .ag-mob-badge{display:block;position:absolute;top:0;right:4px;background:#ae131a;color:#fff;border-radius:8px;padding:1px 5px;font-size:0.55rem;font-weight:700}
 }
 
 `
@@ -2904,494 +2080,407 @@ export default function AgentDashboardPage() {
 
     <div className="agent-page">
 
-      {/* Inject styles synchronously on first render — avoids flash before useEffect fires */}
-
       <style>{CSS}</style>
 
-      <div className="ag-topbar">
+      {/* ── SIDEBAR ── */}
+      <aside className="ag-sidebar">
 
-        <div><i className="fas fa-map-marker-alt me-1"></i> Commune de Kélibia — Gouvernorat de Nabeul</div>
-
-        <div><a href="#"><i className="fas fa-phone me-1"></i>+216 72 296 239</a><a href="#"><i className="fas fa-envelope me-1"></i>webmaster.commune-kelibia@topnet.tn</a></div>
-
-      </div>
-
-      <nav className="ag-navbar">
-
-        <a className="ag-brand" href="#">
-
-          <img src={logo} className="ag-logo" style={{ height: '36px', width: 'auto' }} alt="Logo" />
-
-          <div className="ag-title"><span className="main">{lang === 'ar' ? 'بلدية قليبية' : 'Smart City Portal'}</span><span className="sub">Administration — Tunisia Smart City</span></div>
-
-        </a>
-
-        <div className="ag-actions">
-
-          <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}><img src="https://flagcdn.com/w20/fr.png" width="16" alt="FR" /> FR</button>
-
-          <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}><img src="https://flagcdn.com/w20/tn.png" width="16" alt="AR" /> عربي</button>
-
-          <div className="ag-user-pill"><div className="av">{inits}</div><span>{fullName}</span></div>
-
-          <button className="ag-logout" onClick={() => { clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i><span className="logout-text ms-1"> {t('logout')}</span></button>
-
+        {/* Brand */}
+        <div className="ag-sidebar-brand">
+          <img src={logo} alt="Logo" />
+          <div>
+            <div className="ag-brand-name">Kelibia Smart City</div>
+            <div className="ag-brand-sub">Municipal Agent Portal</div>
+          </div>
         </div>
 
-      </nav>
-
-      <div className="ag-hero">
-
-        <div>
-
-          <div className="greeting"><i className="fas fa-shield-alt me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_space') : t('nav_agent_space')} — <strong>{user?.first_name || '...'}</strong></div>
-
-          <div className="sub">{user?.user_type === 'supervisor' || user?.is_superuser ? t('nav_supervisor_subtitle') : t('nav_agent_subtitle')}</div>
-
-        </div>
-
-        <div className="d-flex align-items-center gap-2 ag-hero-right">
-
-          <span className="badge-role"><i className="fas fa-id-badge me-1"></i>{getRoleLabel(user, t)}</span>
-
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Flag_of_Tunisia.svg/40px-Flag_of_Tunisia.svg.png" height="22" style={{ borderRadius: 3 }} alt="Tunisie" />
-
-        </div>
-
-      </div>
-
-      <div className="ag-breadcrumb">
-
-        <a href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard'); }}><i className="fas fa-home me-1"></i>{t('nav_home')}</a>
-
-        <span className="mx-2 text-muted">/</span>
-
-        <span>{t('nav_agent_space_title')}</span>
-
-        <span className="mx-2 text-muted">/</span>
-
-        <span>{t('nav_manage_signalements')}</span>
-
-      </div>
-
-      <div className="ag-body">
-
-        <div className="ag-sidebar">
-
-          <div className="ag-sec-title">{t('nav_navigation')}</div>
-
-          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); if (user?.user_type === 'supervisor' || user?.user_type === 'agent' || user?.is_staff || user?.is_superuser) { fetchDemandes(); fetchTopics(); } }}>
-
-            <i className="fas fa-user-circle"></i> {t('nav_profile')}
-
-          </a>
-
-
-
-          {/* ── Visible to ALL agents ── */}
-
-          <div className="ag-divider"></div>
-
-          <div className="ag-sec-title">{t('nav_agent_space')}</div>
+        {/* Nav */}
+        <nav className="ag-sidebar-nav">
 
           <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
-
-            <i className="fas fa-exclamation-circle"></i> {t('my_reclamations')}
-
+            <i className="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
             {pending > 0 && <span className="ag-badge">{pending}</span>}
-
           </a>
 
           <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
-
-            <i className="fas fa-calendar-alt"></i> {t('nav_events_mgmt')}
-
-            {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
-
-              <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
-
-            )}
-
+            <i className="fas fa-calendar-alt"></i>
+            <span>{t('nav_events_mgmt')}</span>
+            {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>}
           </a>
 
           <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
-
-            <i className="fas fa-hard-hat"></i> Permis de construire
-
-            {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && (
-
-              <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>
-
-            )}
-
+            <i className="fas fa-hard-hat"></i>
+            <span>Permis de construire</span>
+            {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
           </a>
 
           <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
-
-            <i className="fas fa-robot"></i> {t('nav_stats_ia')}
-
+            <i className="fas fa-robot"></i>
+            <span>{t('nav_stats_ia')}</span>
           </a>
 
+          <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); fetchDemandes(); fetchTopics(); }}>
+            <i className="fas fa-user-circle"></i>
+            <span>{t('nav_profile')}</span>
+          </a>
 
+          {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
+            <div className="ag-divider"></div>
+            <div className="ag-sec-title">{t('nav_admin_staff')}</div>
 
+            <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode) }}>
+              <i className="fas fa-users-cog"></i>
+              <span>{t('nav_managed_users')}</span>
+              {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
+            </a>
 
-          {/* ── Supervisor / Admin only ── */}
+            <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
+              <i className="fas fa-folder-open"></i>
+              <span>{t('nav_demandes_citoyens')}</span>
+              {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
+            </a>
 
-          {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
+            <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
+              <i className="fas fa-comments"></i>
+              <span>{t('nav_forum_moderation')}</span>
+            </a>
 
-            <>
+            <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
+              <i className="fas fa-newspaper"></i>
+              <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
+            </a>
 
-              <div className="ag-divider"></div>
-
-              <div className="ag-sec-title">{t('nav_admin_staff')}</div>
-
-              <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode) }}>
-
-                <i className="fas fa-users-cog"></i> {t('nav_managed_users')}
-
-                {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
-
+            {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+              <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
+                <i className="fas fa-cogs"></i>
+                <span>Configuration</span>
               </a>
+            )}
+          </>)}
 
-              {/*
+        </nav>
 
-              <a className={`ag-nav-item${activeTab === 'services' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('services') }}>
-
-                <i className="fas fa-file-invoice"></i> {t('nav_services_villes')}
-
-              </a>
-
-              */}
-
-              <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
-
-                <i className="fas fa-folder-open"></i> {t('nav_demandes_citoyens')}
-
-                {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
-
-              </a>
-
-              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
-
-                <i className="fas fa-comments"></i> {t('nav_forum_moderation')}
-
-              </a>
-
-              <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
-
-                <i className="fas fa-newspaper"></i> {lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}
-
-              </a>
-
-              {(user?.user_type === 'supervisor' || user?.is_superuser) && (
-                <>
-                  <div className="ag-divider"></div>
-                  <div className="ag-sec-title">Système</div>
-                  <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
-                    <i className="fas fa-cogs"></i> Configuration
-                  </a>
-                </>
-              )}
-
-            </>
-
-          )}
-
-
-
-          <div className="ag-divider"></div>
-
-          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}><i className="fas fa-sign-out-alt"></i> {t('logout')}</a>
-
+        {/* Bottom actions */}
+        <div className="ag-sidebar-bottom">
+          <button className="ag-new-report-btn" onClick={() => navigate('/reclamation-form')}>
+            <i className="fas fa-plus"></i>
+            <span>{lang === 'ar' ? 'تقرير جديد' : 'Nouveau Rapport'}</span>
+          </button>
+          <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
+            <i className="fas fa-sign-out-alt"></i>
+            <span>{t('logout')}</span>
+          </a>
         </div>
 
-        <div className="ag-main" id="ag-main-content">
+      </aside>
 
+      {/* ── TOP NAV ── */}
+      <header className="ag-topnav">
+
+        <div className="ag-topnav-search">
+          <i className="fas fa-search"></i>
+          <input type="text" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+
+        <div className="ag-topnav-right">
+          <div className="ag-lang-toggle">
+            <button className={`ag-lang-btn${lang === 'fr' ? ' active' : ''}`} onClick={() => setLang('fr')}>FR</button>
+            <button className={`ag-lang-btn${lang === 'ar' ? ' active' : ''}`} onClick={() => setLang('ar')}>AR</button>
+          </div>
+          <div className="ag-topnav-icons">
+            <i className="fas fa-bell ag-topnav-icon"></i>
+          </div>
+          <div className="ag-topnav-user">
+            <div>
+              <div className="ag-topnav-user-name">{fullName}</div>
+              <div className="ag-topnav-user-role">{getRoleLabel(user, t)}</div>
+            </div>
+            <div className="ag-avatar">{inits}</div>
+          </div>
+        </div>
+
+      </header>
+
+      {/* ── MAIN ── */}
+      <div className="ag-main">
+        <div className="ag-main-inner">
           <>
 
             {activeTab === 'dashboard' ? (
 
               <>
 
-                {/* Stats grid — CSS handles desktop (6-col) vs mobile (3-col) automatically */}
-
-                <div className="ag-stats-grid">
-
-                  {[
-
-                    { val: total, lbl: t('total_reclamations_short'), chipLabel: 'Total', color: '#2e7d32', bg: '#e8f5e9', icon: 'fa-list-check', onClick: undefined },
-
-                    { val: pending, lbl: t('total_pending'), chipLabel: 'En attente', color: '#e65100', bg: '#fff3e0', icon: 'fa-clock', onClick: undefined },
-
-                    { val: inprog, lbl: t('total_in_progress'), chipLabel: 'En cours', color: '#1565c0', bg: '#e3f2fd', icon: 'fa-tools', onClick: undefined },
-
-                    { val: resolved, lbl: t('total_resolved'), chipLabel: 'Résolus', color: '#1b5e20', bg: '#e8f5e9', icon: 'fa-check-circle', onClick: undefined },
-
-                    { val: rejected, lbl: t('total_rejected'), chipLabel: 'Rejetés', color: '#b71c1c', bg: '#ffebee', icon: 'fa-times-circle', onClick: undefined },
-
-                    {
-                      val: dupCount, lbl: t('total_duplicates'), chipLabel: 'Doublons', color: '#6a1b9a', bg: '#f3e5f5', icon: 'fa-copy',
-
-                      onClick: () => setShowDupPanel(p => !p)
-                    },
-
-                  ].map((s, i) => (
-
-                    <div key={i} className="ag-stat" style={{ cursor: s.onClick ? 'pointer' : 'default' }} onClick={s.onClick}>
-
-                      <div className="stat-top">
-
-                        <div className="icon-box" style={{ background: s.bg }}><i className={`fas ${s.icon}`} style={{ color: s.color }}></i></div>
-
-                        <span className="chip" style={{ color: s.color }}>{s.chipLabel}</span>
-
-                      </div>
-
-                      <div className="val">{loading ? '—' : s.val}</div>
-
-                      <div className="lbl">{s.lbl}{s.icon === 'fa-copy' && <i className="fas fa-eye ms-1" style={{ fontSize: '.65rem', color: '#aaa' }}></i>}</div>
-
-                    </div>
-
-                  ))}
-
+                {/* ── Dashboard Header ── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+                  <div>
+                    <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1c1c', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      Tableau de Bord <span style={{ color: '#ae131a' }}>/</span> <span style={{ fontWeight: 300 }}>لوحة القيادة</span>
+                    </h1>
+                    <p style={{ color: '#9ca3af', marginTop: 4, fontSize: '0.9rem' }}>{lang === 'ar' ? 'الإدارة الحضرية الذكية لقليبية' : 'Gestion urbaine intelligente de Kélibia'}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: '0.85rem', fontWeight: 500, color: '#6b7280' }}>
+                      {new Date().toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
                 </div>
 
+                {/* ── Stat Cards ── */}
+                <div className="ag-stats-grid">
+                  {([
+                    { val: total,    chip: 'Total',    lbl: 'Rapports totaux',        icon: 'fa-list-alt',   iconBg: '#f3f3f3', iconColor: '#6b7280', chipColor: '#6b7280' },
+                    { val: pending,  chip: 'Attente',  lbl: "En attente d'examen",    icon: 'fa-clock',      iconBg: '#fff7ed', iconColor: '#ea580c', chipColor: '#ea580c' },
+                    { val: inprog,   chip: 'Cours',    lbl: 'Interventions actives',  icon: 'fa-tools',      iconBg: '#eff6ff', iconColor: '#2563eb', chipColor: '#2563eb' },
+                    { val: resolved, chip: 'Résolu',   lbl: 'Problèmes réglés',       icon: 'fa-check-circle', iconBg: '#f0fdf4', iconColor: '#16a34a', chipColor: '#16a34a', accent: true },
+                    { val: dupCount, chip: 'Doublons', lbl: 'Signalements répétés',   icon: 'fa-copy',       iconBg: '#fef2f2', iconColor: '#dc2626', chipColor: '#dc2626', onClick: () => setShowDupPanel((p: boolean) => !p) },
+                  ] as Array<{ val: number; chip: string; lbl: string; icon: string; iconBg: string; iconColor: string; chipColor: string; accent?: boolean; onClick?: () => void }>).map((s, i) => (
+                    <div key={i} className="ag-stat" style={{ cursor: s.onClick ? 'pointer' : 'default', borderBottom: s.accent ? '2px solid #ae131a' : undefined }} onClick={s.onClick}>
+                      <div className="stat-top">
+                        <div className="icon-box" style={{ background: s.iconBg }}><i className={`fas ${s.icon}`} style={{ color: s.iconColor }}></i></div>
+                        <span className="chip" style={{ color: s.chipColor }}>{s.chip}</span>
+                      </div>
+                      <div className="val">{loading ? '—' : s.val}</div>
+                      <div className="lbl">{s.lbl}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── Duplicates Panel ── */}
                 {showDupPanel && (
-
                   <div className="ag-dup-card">
-
                     <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#4a148c,#6a1b9a)' }}>
-
                       <span><i className="fas fa-copy me-2"></i>{t('potential_duplicates')}</span>
-
-                      <button onClick={() => setShowDupPanel(false)} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-times me-1"></i> Fermer</button>
-
+                      <button onClick={() => setShowDupPanel(false)} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}>
+                        <i className="fas fa-times me-1"></i> Fermer
+                      </button>
                     </div>
-
                     <div style={{ padding: 16 }}>
-
                       {dupGroups.length === 0
-
-                        ? <div style={{ textAlign: 'center', padding: 30, color: '#888' }}><i className="fas fa-check-circle" style={{ color: '#2e7d32', fontSize: '2rem', display: 'block', marginBottom: 10 }}></i>{t('no_duplicates')}.</div>
-
-                        : dupGroups.map((grp, gi) => (
-
+                        ? <div style={{ textAlign: 'center', padding: 30, color: '#888' }}><i className="fas fa-check-circle" style={{ color: '#16a34a', fontSize: '2rem', display: 'block', marginBottom: 10 }}></i>{t('no_duplicates')}.</div>
+                        : dupGroups.map((grp: Reclamation[], gi: number) => (
                           <div key={gi} style={{ background: '#f9f0ff', border: '1px solid #e1bee7', borderRadius: 8, padding: '12px 16px', marginBottom: 10 }}>
-
                             <div style={{ fontSize: '.78rem', color: '#6a1b9a', fontWeight: 700, marginBottom: 8 }}><i className="fas fa-copy me-1"></i>{grp.length} {t('similar_reports')}</div>
-
                             {grp.map((r: Reclamation) => (
-
                               <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #ede7f6', fontSize: '.8rem' }}>
-
-                                <span><strong>#{r.id}</strong> — {r.title}</span><span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
-
+                                <span><strong>#{r.id}</strong> — {r.title}</span>
+                                <span style={{ color: '#888' }}>{STATUS[r.status]?.label || r.status}</span>
                               </div>
-
                             ))}
-
                           </div>
-
-                        ))}
-
+                        ))
+                      }
                     </div>
-
                   </div>
-
                 )}
 
-                <div className="ag-card" id="ag-map-card">
+                {/* ── Map + Right Column ── */}
+                <div className="ag-dashboard-grid">
 
-                  <div className="ag-card-hdr-blue" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  {/* Map */}
+                  <div className="ag-map-card">
+                    <div className="ag-map-header">
+                      <h4><i className="fas fa-map-marked-alt" style={{ marginRight: 8, color: '#ae131a' }}></i>{t('map_title_realtime')}</h4>
+                      <div className="ag-map-export-btns">
+                        <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginRight: 8 }}>{allRecs.length} {t('signalements_short')}</span>
+                        <button className="ag-export-btn" onClick={handleExportGeoJSON} title="Exporter pour QGIS">
+                          <i className="fas fa-download" style={{ marginRight: 4 }}></i>GeoJSON
+                        </button>
+                        <button className="ag-export-btn" onClick={handleExportCSV} title="Exporter en CSV">
+                          <i className="fas fa-table" style={{ marginRight: 4 }}></i>CSV
+                        </button>
+                      </div>
+                    </div>
+                    <div className="ag-map-legend">
+                      <h5>Répartition des incidents</h5>
+                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#f97316' }}></span><span>En attente ({pending})</span></div>
+                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#3b82f6' }}></span><span>En cours ({inprog})</span></div>
+                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#22c55e' }}></span><span>Résolu ({resolved})</span></div>
+                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#ef4444' }}></span><span>Rejeté ({rejected})</span></div>
+                    </div>
+                    <div id="ag-map" ref={mapRef}></div>
+                  </div>
 
-                    <span><i className="fas fa-map-marked-alt me-2"></i>{t('map_title_realtime')}</span>
+                  {/* Right column */}
+                  <div className="ag-right-col">
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '.75rem', opacity: .7 }}>{allRecs.length} {t('signalements_short')}</span>
-                      <button
-                        onClick={handleExportGeoJSON}
-                        className="btn btn-sm"
-                        title="Exporter pour QGIS (GeoJSON)"
-                        style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)', fontSize: '0.72rem', padding: '2px 8px' }}
-                      >
-                        <i className="fas fa-download me-1"></i>GeoJSON
-                      </button>
-                      <button
-                        onClick={handleExportCSV}
-                        className="btn btn-sm"
-                        title="Exporter en CSV (Excel / tableur)"
-                        style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)', fontSize: '0.72rem', padding: '2px 8px' }}
-                      >
-                        <i className="fas fa-table me-1"></i>CSV
-                      </button>
+                    {/* Donut — Taux de résolution */}
+                    <div className="ag-panel">
+                      <h4>Taux de Résolution</h4>
+                      {(() => {
+                        const rate = total > 0 ? resolved / total : 0;
+                        const circ = 351.86;
+                        const offset = circ * (1 - rate);
+                        const pct = Math.round(rate * 100);
+                        return (
+                          <>
+                            <div className="ag-donut-wrap">
+                              <svg width="128" height="128" style={{ transform: 'rotate(-90deg)' }}>
+                                <circle cx="64" cy="64" r="56" fill="transparent" stroke="#f3f3f3" strokeWidth="12" />
+                                <circle cx="64" cy="64" r="56" fill="transparent" stroke="#ae131a" strokeWidth="12"
+                                  strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" />
+                              </svg>
+                              <div className="ag-donut-center">
+                                <span className="pct">{pct}%</span>
+                                <span className="lbl">Mensuel</span>
+                              </div>
+                            </div>
+                            <div style={{ marginTop: 20 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af', marginBottom: 6 }}>
+                                <span>Moyenne mensuelle</span>
+                                <span style={{ fontWeight: 700, color: '#1a1c1c' }}>{pct}%</span>
+                              </div>
+                              <div style={{ height: 4, background: '#f3f3f3', borderRadius: 2, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', background: '#ae131a', width: `${pct}%`, borderRadius: 2 }}></div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Categories */}
+                    <div className="ag-panel">
+                      <h4>Catégories</h4>
+                      <div className="ag-cat-list">
+                        {([
+                          { key: 'trash',    icon: 'fa-trash',      label: lang === 'ar' ? 'النظافة' : 'Déchets / Propreté' },
+                          { key: 'lighting', icon: 'fa-lightbulb',  label: lang === 'ar' ? 'الإنارة' : 'Éclairage public' },
+                          { key: 'roads',    icon: 'fa-road',       label: lang === 'ar' ? 'الطرق' : 'Voirie / Routes' },
+                          { key: 'noise',    icon: 'fa-volume-up',  label: lang === 'ar' ? 'الضوضاء' : 'Nuisances sonores' },
+                          { key: 'other',    icon: 'fa-ellipsis-h', label: lang === 'ar' ? 'أخرى' : 'Autres' },
+                        ] as Array<{ key: string; icon: string; label: string }>).map(cat => (
+                          <div key={cat.key} className="ag-cat-item">
+                            <div className="ag-cat-item-left">
+                              <i className={`fas ${cat.icon}`}></i>
+                              <span>{cat.label}</span>
+                            </div>
+                            <span className="ag-cat-count">{catCounts[cat.key] || 0}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                   </div>
-
-                  <div id="ag-map" ref={mapRef} style={{ height: 380, width: '100%', borderRadius: '0 0 10px 10px' }}></div>
-
                 </div>
 
-                <div className="ag-card" id="ag-recs-card">
-
-                  <div className="ag-card-hdr-blue">
-
-                    <span><i className="fas fa-bullhorn me-2"></i>{t('nav_manage_signalements')}</span>
-
-                    <button onClick={fetchReclamations} style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 6, fontSize: '.78rem', padding: '4px 10px', cursor: 'pointer' }}><i className="fas fa-sync-alt me-1"></i> {t('refresh')}</button>
-
+                {/* ── Reclamations Table ── */}
+                <div className="ag-table-card">
+                  <div className="ag-table-hdr">
+                    <h3>Rapports Récents <span>/ بلاغات حديثة</span></h3>
+                    <div className="ag-table-hdr-btns">
+                      <button className="ag-table-hdr-btn" onClick={() => { setFilterStatus(''); setFilterCategory(''); setFilterPriority(''); setSearch(''); setUrgentOnly(false); }}>Filtrer</button>
+                      <button className="ag-table-hdr-btn" onClick={handleExportGeoJSON}>GeoJSON</button>
+                      <button className="ag-table-hdr-btn" onClick={handleExportCSV}>CSV</button>
+                      <button className="ag-table-hdr-btn" onClick={fetchReclamations}><i className="fas fa-sync-alt"></i></button>
+                    </div>
                   </div>
 
                   <div className="ag-filter-bar">
-
                     <div className="ag-search-wrap"><i className="fas fa-search"></i><input className="ag-search-input" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} /></div>
-
-                    <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="">{t('all_statuses')}</option><option value="pending">{t('status_pending')}</option><option value="in_progress">{t('status_in_progress')}</option><option value="resolved">{t('status_resolved')}</option><option value="rejected">{t('status_rejected')}</option></select>
-
-                    <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}><option value="">{t('all_categories')}</option><option value="lighting">{t('lighting')}</option><option value="trash">{t('trash')}</option><option value="roads">{t('roads')}</option><option value="noise">{t('noise')}</option><option value="other">{t('other')}</option></select>
-
-                    <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}><option value="">{t('all_priorities')}</option><option value="urgente">🔴 {t('urgent')}</option><option value="normale">🔵 {t('normal')}</option><option value="faible">🟣 {t('low')}</option></select>
-
-                    <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly(u => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}><i className="fas fa-fire"></i> {t('urgent_only')}</button>
-
-                    <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#888' }}>{filteredRecs.length} {t('results_count')}</span>
-
+                    <select className="ag-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                      <option value="">{t('all_statuses')}</option><option value="pending">{t('status_pending')}</option>
+                      <option value="in_progress">{t('status_in_progress')}</option><option value="resolved">{t('status_resolved')}</option>
+                      <option value="rejected">{t('status_rejected')}</option>
+                    </select>
+                    <select className="ag-filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+                      <option value="">{t('all_categories')}</option><option value="lighting">{t('lighting')}</option>
+                      <option value="trash">{t('trash')}</option><option value="roads">{t('roads')}</option>
+                      <option value="noise">{t('noise')}</option><option value="other">{t('other')}</option>
+                    </select>
+                    <select className="ag-filter-select" value={filterPriority} onChange={e => { setFilterPriority(e.target.value); setUrgentOnly(false) }}>
+                      <option value="">{t('all_priorities')}</option><option value="urgente">🔴 {t('urgent')}</option>
+                      <option value="normale">🔵 {t('normal')}</option><option value="faible">🟣 {t('low')}</option>
+                    </select>
+                    <button className={`ag-filter-btn${urgentOnly ? ' active' : ''}`} onClick={() => { setUrgentOnly((u: boolean) => !u); setFilterPriority(urgentOnly ? '' : 'urgente') }}>
+                      <i className="fas fa-fire" style={{ marginRight: 4 }}></i>{t('urgent_only')}
+                    </button>
+                    <span style={{ marginLeft: 'auto', fontSize: '.78rem', color: '#9ca3af' }}>{filteredRecs.length} {t('results_count')}</span>
                   </div>
 
-                  {loading ? <div className="p-4"><div className="skeleton-box table-skeleton"></div></div> : <></>}
-
-                  {!loading && recError && <div className="ag-empty"><i className="fas fa-exclamation-triangle d-block" style={{ color: '#e53935' }}></i><p>{t('reclamations_error')}</p><button onClick={fetchReclamations} style={{ background: '#1565c0', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem' }}><i className="fas fa-redo me-1"></i> {t('retry')}</button></div>}
-
-                  {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox d-block"></i><p>{t('no_reclamations_found')}</p></div>}
+                  {loading && <div style={{ padding: 24 }}><div className="skeleton-box table-skeleton"></div></div>}
+                  {!loading && recError && (
+                    <div className="ag-empty">
+                      <i className="fas fa-exclamation-triangle" style={{ color: '#dc2626' }}></i>
+                      <p>{t('reclamations_error')}</p>
+                      <button onClick={fetchReclamations} style={{ background: '#ae131a', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 16px', cursor: 'pointer', fontSize: '.83rem', marginTop: 8 }}>{t('retry')}</button>
+                    </div>
+                  )}
+                  {!loading && !recError && filteredRecs.length === 0 && <div className="ag-empty"><i className="fas fa-inbox"></i><p>{t('no_reclamations_found')}</p></div>}
 
                   {!loading && !recError && filteredRecs.length > 0 && (
-
                     <div style={{ overflowX: 'auto' }}>
-
                       <table className="ag-table">
-
-                        <thead><tr><th>{t('id_label')}</th><th>{t('title_label')}</th><th>{t('citizen_label')}</th><th>{t('category_label')}</th><th>{t('priority_label')}</th><th>{t('ai_confidence')}</th><th>{t('service_label')}</th><th>{t('status_label')}</th><th>{t('date_label')}</th><th>{t('actions_label')}</th></tr></thead>
-
+                        <thead>
+                          <tr>
+                            <th>ID</th><th>Titre</th><th>{t('citizen_label')}</th>
+                            <th>Catégorie</th><th>Priorité</th><th>{t('ai_confidence')}</th>
+                            <th>{t('service_label')}</th><th>Statut</th><th>Date</th>
+                            <th style={{ textAlign: 'right' }}>Actions</th>
+                          </tr>
+                        </thead>
                         <tbody>
-
-                          {pageRecs.map(r => {
-
-                            const cat = CAT[r.category] || CAT.other
-
-                            const prio = PRIORITY[r.priority] || PRIORITY.normale
-
-                            const svc = r.service_responsable || '—'
-
+                          {pageRecs.map((r: Reclamation) => {
+                            const cat = CAT[r.category] || CAT.other;
+                            const prio = PRIORITY[r.priority] || PRIORITY.normale;
+                            const svc = r.service_responsable || '—';
+                            const statusBg: Record<string, string> = { pending: '#fff7ed', in_progress: '#eff6ff', resolved: '#f0fdf4', rejected: '#fef2f2' };
+                            const statusClr: Record<string, string> = { pending: '#c2410c', in_progress: '#1d4ed8', resolved: '#15803d', rejected: '#dc2626' };
                             return (
-
                               <tr key={r.id}>
-
-                                <td style={{ color: '#aaa', fontSize: '.74rem' }}>#{r.id}</td>
-
+                                <td style={{ color: '#9ca3af', fontSize: '.74rem', fontFamily: 'monospace' }}>#{r.id}</td>
                                 <td>
-
-                                  <div style={{ fontWeight: 600, color: '#1a1a2e', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
-
-                                  <div style={{ fontSize: '.7rem', color: '#888', marginTop: 1 }}>
-
-                                    {r.agent_name ? (
-
-                                      <span className="text-primary fw-bold"><i className="fas fa-id-badge me-1"></i>Assigné à: {r.agent_name}</span>
-
-                                    ) : (
-
-                                      <span className="text-muted italic"><i className="fas fa-user-clock me-1"></i>Non assigné</span>
-
-                                    )}
-
+                                  <div style={{ fontWeight: 700, color: '#1a1c1c', maxWidth: 160, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                                  <div style={{ fontSize: '.7rem', color: '#9ca3af', marginTop: 2 }}>
+                                    {r.agent_name ? <span style={{ color: '#ae131a' }}><i className="fas fa-id-badge" style={{ marginRight: 4 }}></i>Assigné: {r.agent_name}</span> : <span>—</span>}
                                   </div>
-
                                 </td>
-
-                                <td style={{ fontSize: '.8rem', color: '#444' }}>{r.citizen_name || '—'}</td>
-
-                                <td><span className={`cat-badge ${cat.cls}`}>{cat.label}</span></td>
-
-                                <td><span className={`priority-badge ${prio.cls}`}>{prio.label}</span></td>
-
+                                <td style={{ fontSize: '.8rem', color: '#6b7280' }}>{r.citizen_name || '—'}</td>
+                                <td><span className={`cat-badge cat-${r.category}`}>{cat.label}</span></td>
+                                <td><span className={`priority-badge priority-${r.priority}`}>{prio.label}</span></td>
                                 <td>{(() => {
-
-                                  const cc = r.confidence?.category
-
-                                  const v = cc !== undefined ? cc : undefined
-
-                                  if (v === undefined) return <span className="conf-badge conf-med">🤖 —</span>
-
-                                  if (v >= 0.80) return <span className="conf-badge conf-high">🤖 {Math.round(v * 100)}%</span>
-
-                                  if (v >= 0.60) return <span className="conf-badge conf-med">⚠️ {Math.round(v * 100)}%</span>
-
-                                  return <span className="conf-badge conf-low">❌ {Math.round(v * 100)}%</span>
-
+                                  const cc = r.confidence?.category;
+                                  if (cc === undefined) return <span className="conf-badge conf-med">🤖 —</span>;
+                                  if (cc >= 0.80) return <span className="conf-badge conf-high">🤖 {Math.round(cc * 100)}%</span>;
+                                  if (cc >= 0.60) return <span className="conf-badge conf-med">⚠️ {Math.round(cc * 100)}%</span>;
+                                  return <span className="conf-badge conf-low">❌ {Math.round(cc * 100)}%</span>;
                                 })()}</td>
-
                                 <td><span className="service-badge" title={svc}>{svc}</span></td>
-
-                                <td><QSSelect rec={r} onUpdate={quickUpdateStatus} /></td>
-
-                                <td style={{ whiteSpace: 'nowrap', color: '#888', fontSize: '.78rem' }}>{formatDate(r.created_at)}</td>
-
                                 <td>
-
-                                  <div className="d-flex gap-1">
-
-                                    <button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button>
-
-                                    {(user?.is_superuser || user?.is_staff || user?.user_type === 'supervisor') && (
-
-                                      <button className="ag-action-btn text-danger" onClick={() => deleteReclamation(r.id)} title="Supprimer définitivement"><i className="fas fa-trash"></i></button>
-
-                                    )}
-
-                                  </div>
-
+                                  <QSSelect rec={r} onUpdate={quickUpdateStatus} />
                                 </td>
-
+                                <td style={{ whiteSpace: 'nowrap', color: '#9ca3af', fontSize: '.78rem' }}>{formatDate(r.created_at)}</td>
+                                <td style={{ textAlign: 'right' }}>
+                                  <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                                    <button className="ag-action-btn" onClick={() => { setDetailRec(r); setDetailStatus(r.status) }} title="Voir détail"><i className="fas fa-eye"></i></button>
+                                    {(user?.is_superuser || user?.is_staff || user?.user_type === 'supervisor') && (
+                                      <button className="ag-action-btn" style={{ color: '#dc2626' }} onClick={() => deleteReclamation(r.id)} title="Supprimer"><i className="fas fa-trash"></i></button>
+                                    )}
+                                  </div>
+                                </td>
                               </tr>
-
-                            )
-
+                            );
                           })}
-
                         </tbody>
-
                       </table>
 
                       {totalPages > 1 && (
-
                         <div className="ag-pag-bar">
-
-                          <span>Page {currentPage} / {totalPages} — {filteredRecs.length} {t('signalements_short')}</span>
-
-                          <div className="d-flex gap-2">
-
-                            <button className="ag-page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><i className="fas fa-chevron-left"></i></button>
-
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const p = Math.max(1, currentPage - 2) + i; return p > totalPages ? null : <button key={p} className={`ag-page-btn${p === currentPage ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button> })}
-
-                            <button className="ag-page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><i className="fas fa-chevron-right"></i></button>
-
+                          <span>Affichage de {pageRecs.length} sur {filteredRecs.length} rapports</span>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button className="ag-page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage((p: number) => p - 1)}><i className="fas fa-chevron-left"></i></button>
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => { const p = Math.max(1, currentPage - 2) + i; return p > totalPages ? null : <button key={p} className={`ag-page-btn${p === currentPage ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button>; })}
+                            <button className="ag-page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p: number) => p + 1)}><i className="fas fa-chevron-right"></i></button>
                           </div>
-
                         </div>
-
                       )}
-
                     </div>
-
                   )}
 
                 </div>
 
               </>
-
-            ) : activeTab === 'users' ? (
+) : activeTab === 'users' ? (
 
               <div className="ag-card animate__animated animate__fadeIn">
 
@@ -6968,241 +6057,7 @@ export default function AgentDashboardPage() {
   )
 }
 
-          </>
 
-        </div >
-
-  <div style={{ width: 240, minWidth: 240, padding: '24px 16px 24px 0', flexShrink: 0 }}>
-
-
-
-    <div className="ag-profile-card">
-
-      <div className="ag-profile-hdr"><div className="ag-profile-av">{inits}</div><div className="ag-profile-name">{fullName}</div><div className="ag-profile-email">{user?.email || '...'}</div></div>
-
-      <div className="ag-profile-body">
-
-        <div className="ag-profile-row"><span className="lbl">{t('role')}</span><span className="val" style={{ color: '#1565c0' }}>{getRoleLabel(user, t)}</span></div>
-
-        <div className="ag-profile-row"><span className="lbl">{t('city_label')}</span><span className="val">{user?.city || 'Kélibia'}</span></div>
-
-        <div className="ag-profile-row"><span className="lbl">{t('profile_dossiers_title')}</span><span className="val">{inprog}</span></div>
-
-      </div>
-
-    </div>
-
-    <div className="ag-card">
-
-      <div className="ag-card-hdr-green"><span><i className="fas fa-chart-pie me-2"></i>{t('progress_title')}</span></div>
-
-      <div className="ag-card-body">
-
-        {[
-
-          { lbl: t('status_pending'), val: pct(pending), color: '#e65100' },
-
-          { lbl: t('status_in_progress'), val: pct(inprog), color: '#1565c0' },
-
-          { lbl: t('forum_resolved'), val: pct(resolved), color: '#1b5e20' },
-
-        ].map(b => (
-
-          <div key={b.lbl} className="mb-3">
-
-            <div className="d-flex justify-content-between" style={{ fontSize: '.78rem', marginBottom: 3 }}><span style={{ color: b.color }}>{b.lbl}</span><span style={{ fontWeight: 600 }}>{b.val}%</span></div>
-
-            <div className="mini-progress"><div className="bar" style={{ background: b.color, width: `${b.val}%` }}></div></div>
-
-          </div>
-
-        ))}
-
-      </div>
-
-    </div>
-
-    <div className="ag-card">
-
-      <div className="ag-card-hdr-orange"><span><i className="fas fa-layer-group me-2"></i>{t('cat_title')}</span></div>
-
-      <div className="ag-card-body">
-
-        {Object.keys(catCounts).length === 0
-
-          ? <div style={{ color: '#aaa', fontSize: '.8rem', textAlign: 'center' }}>{t('loading_short')}</div>
-
-          : Object.entries(catCounts).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([k, v]) => {
-
-            const cat = CAT[k] || CAT.other
-
-            const p = total > 0 ? Math.round((v as number) / total * 100) : 0
-
-            return (
-
-              <div key={k} className="mb-2">
-
-                <div className="d-flex justify-content-between" style={{ fontSize: '.76rem', marginBottom: 2 }}><span>{cat.label}</span><span style={{ fontWeight: 600 }}>{v as number}</span></div>
-
-                <div className="mini-progress"><div className="bar" style={{ background: '#1565c0', width: `${p}%` }}></div></div>
-
-              </div>
-
-            )
-
-          })}
-
-      </div>
-
-    </div>
-
-  </div>
-
-      </div >
-
-  <div className="ag-footer">© 2025 <span>{t('commune_kelibia')}</span> — {t('agent_panel_footer')} &nbsp;|&nbsp; {t('all_rights_reserved')}</div>
-
-
-
-{/* ── MOBILE BOTTOM NAVIGATION BAR ── */ }
-
-<nav className="ag-mobile-nav">
-
-  <button className={`ag-mob-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-
-    <i className="fas fa-exclamation-circle"></i>
-
-    <span>Signalements</span>
-
-    {pending > 0 && <span className="ag-mob-badge">{pending}</span>}
-
-  </button>
-
-  <button className={`ag-mob-btn${activeTab === 'evenements' ? ' active' : ''}`} onClick={() => { setActiveTab('evenements'); fetchEvenements() }}>
-
-    <i className="fas fa-calendar-alt"></i>
-
-    <span>Événements</span>
-
-    {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && (
-
-      <span className="ag-mob-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>
-
-    )}
-
-  </button>
-
-  <button className={`ag-mob-btn${activeTab === 'citizens' ? ' active' : ''}`} onClick={() => { setActiveTab('citizens'); fetchAgentCitizens() }}>
-
-    <i className="fas fa-user-check"></i>
-
-    <span>Citoyens</span>
-
-    {agentCitizens.length > 0 && <span className="ag-mob-badge">{agentCitizens.length}</span>}
-
-  </button>
-
-  <button className={`ag-mob-btn${activeTab === 'construction' ? ' active' : ''}`} onClick={() => { setActiveTab('construction'); fetchConstructions() }}>
-
-    <i className="fas fa-hard-hat"></i>
-
-    <span>Permis</span>
-
-    {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && (
-
-      <span className="ag-mob-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>
-
-    )}
-
-  </button>
-
-  <button className={`ag-mob-btn${mobileMenuOpen ? ' active' : ''}`} onClick={() => setMobileMenuOpen(o => !o)}>
-
-    <i className={`fas fa-${mobileMenuOpen ? 'times' : 'bars'}`}></i>
-
-    <span>Menu</span>
-
-  </button>
-
-</nav>
-
-
-
-{/* ── MOBILE SLIDE-UP MENU DRAWER ── */ }
-
-{
-  mobileMenuOpen && (
-
-    <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
-
-      onClick={() => setMobileMenuOpen(false)}>
-
-      <div style={{ background: '#fff', borderRadius: '18px 18px 0 0', padding: '8px 0 70px', maxHeight: '70vh', overflowY: 'auto', boxShadow: '0 -4px 20px rgba(0,0,0,.12)' }}
-
-        onClick={e => e.stopPropagation()}>
-
-        {/* Handle */}
-
-        <div style={{ width: 40, height: 4, background: '#e2e8f0', borderRadius: 2, margin: '8px auto 16px' }}></div>
-
-        <div style={{ padding: '0 8px', fontSize: '.65rem', textTransform: 'uppercase', letterSpacing: 1.2, color: '#94a3b8', paddingLeft: 20, marginBottom: 4, fontWeight: 700 }}>Navigation</div>
-
-        {[
-
-          { tab: 'profile' as const, icon: 'fa-user-circle', label: t('nav_profile'), badge: 0 },
-
-          { tab: 'stats' as const, icon: 'fa-robot', label: t('nav_stats_ia'), badge: 0 },
-
-          ...(user?.user_type === 'supervisor' || user?.user_type === 'agent' || user?.is_staff || user?.is_superuser ? [
-
-            { tab: 'users' as const, icon: 'fa-users-cog', label: t('nav_managed_users'), badge: managedUsers.filter(u => !u.is_verified).length },
-
-            { tab: 'services' as const, icon: 'fa-file-invoice', label: t('nav_services_villes'), badge: 0 },
-
-            { tab: 'demandes' as const, icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length },
-
-            { tab: 'forum' as const, icon: 'fa-comments', label: t('nav_forum_moderation'), badge: 0 },
-
-          ] : []),
-
-        ].map(item => (
-
-          <a key={item.tab}
-
-            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', color: activeTab === item.tab ? '#1e40af' : '#64748b', background: activeTab === item.tab ? '#dbeafe' : 'none', cursor: 'pointer', borderLeft: `3px solid ${activeTab === item.tab ? '#1e40af' : 'transparent'}`, fontSize: '.88rem', textDecoration: 'none', fontWeight: activeTab === item.tab ? 700 : 500 }}
-
-            href="#"
-
-            onClick={e => { e.preventDefault(); setActiveTab(item.tab); setMobileMenuOpen(false); if (item.tab === 'users') fetchManagedUsers(usersMode); if (item.tab === 'demandes') fetchDemandes(); if (item.tab === 'forum') { fetchTopics(); fetchMlStats(); } if (item.tab === 'stats') { if (!mlStats && !mlLoading) fetchMlStats() } }}>
-
-            <i className={`fas ${item.icon}`} style={{ width: 18, textAlign: 'center' }}></i>
-
-            <span style={{ flex: 1 }}>{item.label}</span>
-
-            {item.badge > 0 && <span style={{ background: '#c62828', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: '.68rem', fontWeight: 700 }}>{item.badge}</span>}
-
-          </a>
-
-        ))}
-
-        <div style={{ borderTop: '1px solid #f1f5f9', margin: '10px 0' }}></div>
-
-        <a style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', color: '#c62828', cursor: 'pointer', fontSize: '.88rem', textDecoration: 'none' }}
-
-          href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
-
-          <i className="fas fa-sign-out-alt" style={{ width: 18, textAlign: 'center' }}></i>
-
-          <span>{t('logout')}</span>
-
-        </a>
-
-      </div>
-
-    </div>
-
-  )
-}
 
 <div className="ag-toast-container">
 
@@ -7434,8 +6289,6 @@ export default function AgentDashboardPage() {
   )
 }
 
-
-
 {/* ── CITIZEN VERIFICATION MODAL ── */ }
 
 {
@@ -7643,6 +6496,8 @@ export default function AgentDashboardPage() {
 
   )
 }
+
+
 
 {/* MODAL: RESET PASSWORD RESULT */ }
 
@@ -8540,7 +7395,13 @@ export default function AgentDashboardPage() {
   )
 }
 
-    </div >
+          </>
+
+        </div>
+
+      </div>
+
+    </div>
 
   )
 
