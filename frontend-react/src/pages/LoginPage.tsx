@@ -47,7 +47,7 @@ export default function LoginPage() {
 .lp-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(149,74,0,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%);
+  background: linear-gradient(135deg, rgba(10,51,102,.45) 0%, transparent 60%, rgba(10,51,102,.25) 100%);
 }
 
 /* ── Container ── */
@@ -69,7 +69,7 @@ export default function LoginPage() {
 /* ── Hero side ── */
 .lp-hero {
   display: none;
-  background: rgba(149,74,0,.82);
+  background: rgba(10,51,102,.88);
   backdrop-filter: blur(10px);
   padding: 48px 44px;
   flex-direction: column;
@@ -84,11 +84,11 @@ export default function LoginPage() {
 .lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
 .lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
 .lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
-.lp-hero-accent { color: #ffb785; white-space: nowrap; }
+.lp-hero-accent { color: #7ec8f7; white-space: nowrap; }
 .lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
 .lp-hero-badges { display: flex; align-items: center; gap: 28px; }
 .lp-hero-badge { display: flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 700; text-transform: uppercase; opacity: .9; }
-.lp-hero-badge i { color: #ffb785; }
+.lp-hero-badge i { color: #7ec8f7; }
 
 /* ── Form side ── */
 .lp-form-side {
