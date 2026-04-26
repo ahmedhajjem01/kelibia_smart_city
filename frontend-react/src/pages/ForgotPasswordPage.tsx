@@ -10,21 +10,21 @@ const CSS = `
 .lp-root { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; position: relative; overflow: hidden; font-family: "Public Sans", "Segoe UI", sans-serif; background: #0f1117; }
 .lp-bg { position: absolute; inset: 0; z-index: 0; }
 .lp-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
-.lp-bg-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(149,74,0,.45) 0%, transparent 60%, rgba(149,74,0,.25) 100%); }
+.lp-bg-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(30,90,180,.38) 0%, transparent 60%, rgba(30,90,180,.2) 100%); }
 .lp-container { position: relative; z-index: 10; width: 100%; max-width: 960px; display: grid; grid-template-columns: 1fr; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.35); }
 @media (min-width: 768px) { .lp-container { grid-template-columns: 7fr 5fr; } }
-.lp-hero { display: none; background: rgba(149,74,0,.82); backdrop-filter: blur(10px); padding: 48px 44px; flex-direction: column; justify-content: space-between; color: #fff; }
+.lp-hero { display: none; background: rgba(30,90,180,.55); backdrop-filter: blur(10px); padding: 48px 44px; flex-direction: column; justify-content: space-between; color: #fff; }
 @media (min-width: 768px) { .lp-hero { display: flex; } }
 .lp-hero-brand { display: flex; align-items: center; gap: 14px; }
 .lp-hero-logo { height: 56px; width: auto; }
 .lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
 .lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
 .lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
-.lp-hero-accent { color: #ffb785; white-space: nowrap; }
+.lp-hero-accent { color: #7ec8f7; white-space: nowrap; }
 .lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
 .lp-hero-badges { display: flex; align-items: center; gap: 28px; }
 .lp-hero-badge { display: flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 700; text-transform: uppercase; opacity: .9; }
-.lp-hero-badge i { color: #ffb785; }
+.lp-hero-badge i { color: #7ec8f7; }
 .lp-form-side { background: rgba(255,255,255,.94); backdrop-filter: blur(18px); padding: 40px 36px; display: flex; flex-direction: column; justify-content: center; }
 .lp-lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 28px; }
 .lp-lang-pill { background: #e7e7f1; border-radius: 999px; padding: 4px; display: flex; }
