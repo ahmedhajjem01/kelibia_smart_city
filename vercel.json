@@ -26,11 +26,12 @@
     { "src": "/dashboard/(.*)",             "dest": "core/wsgi.py" },
     { "src": "/livret-famille/(.*)",        "dest": "core/wsgi.py" },
     { "src": "/assets/(.*)",                "dest": "frontend-react/assets/$1" },
+    { "src": "/layers/(.*)",               "dest": "frontend-react/layers/$1" },
     { "src": "/favicon.svg",                "dest": "frontend-react/favicon.svg" }
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|admin/|static/|media/|extrait-naissance/|extrait-mariage/|extrait-deces/|attestation-residence/|signalement/|dashboard/|livret-famille/|assets/|favicon\\.svg).*)",
+      "source": "/((?!api/|admin/|static/|media/|extrait-naissance/|extrait-mariage/|extrait-deces/|attestation-residence/|signalement/|dashboard/|livret-famille/|assets/|layers/|favicon\\.svg).*)",
       "destination": "/frontend-react/index.html"
     }
   ]
