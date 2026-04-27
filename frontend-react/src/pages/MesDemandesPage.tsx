@@ -45,30 +45,40 @@ export default function MesDemandesPage() {
           setUser(userData)
         }
 
-        // Parallel fetching
+        // Helper for safe fetching
+        const safeFetch = async (url: string) => {
+          try {
+            const res = await fetch(resolveBackendUrl(url), { headers })
+            return res.ok ? res : null
+          } catch (e) {
+            console.error(`Failed to fetch ${url}:`, e)
+            return null
+          }
+        }
+
         const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement, resTransfert, resLegalisation] = await Promise.all([
-          fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-deces/api/declaration/'), { headers }),
-          fetch(resolveBackendUrl('/api/residence/demande/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-deces/api/inhumation/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-naissance/api/mes-extraits/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-mariage/extraits/'), { headers }),
-          fetch(resolveBackendUrl('/livret-famille/demandes/'), { headers }),
-          fetch(resolveBackendUrl('/api/construction/demandes/'), { headers }),
-          fetch(resolveBackendUrl('/api/construction/goudronnage/'), { headers }),
-          fetch(resolveBackendUrl('/api/construction/vocation/'), { headers }),
-          fetch(resolveBackendUrl('/api/construction/raccordement/'), { headers }),
-          fetch(resolveBackendUrl('/api/evenements/demande/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-deces/api/transfert-corps/'), { headers }),
-          fetch(resolveBackendUrl('/extrait-naissance/api/legalisation/'), { headers }),
+          safeFetch('/extrait-naissance/api/declaration/'),
+          safeFetch('/extrait-mariage/demandes/'),
+          safeFetch('/extrait-deces/api/declaration/'),
+          safeFetch('/api/residence/demande/'),
+          safeFetch('/extrait-deces/api/inhumation/'),
+          safeFetch('/extrait-naissance/api/mes-extraits/'),
+          safeFetch('/extrait-mariage/extraits/'),
+          safeFetch('/livret-famille/demandes/'),
+          safeFetch('/api/construction/demandes/'),
+          safeFetch('/api/construction/goudronnage/'),
+          safeFetch('/api/construction/vocation/'),
+          safeFetch('/api/construction/raccordement/'),
+          safeFetch('/api/evenements/demande/'),
+          safeFetch('/extrait-deces/api/transfert-corps/'),
+          safeFetch('/extrait-naissance/api/legalisation/'),
         ])
 
 
         const unified: UnifiedRequest[] = []
 
         // 1. Birth Declarations
-        if (resBirth.ok) {
+        if (resBirth && resBirth.ok) {
           const births = await resBirth.json()
           births.forEach((b: any) => {
             unified.push({
@@ -83,7 +93,7 @@ export default function MesDemandesPage() {
         }
 
         // 2. Birth Extraits (Signed)
-        if (resExtraits.ok) {
+        if (resExtraits && resExtraits.ok) {
           const extData = await resExtraits.json()
           const processExtrait = (e: any, labelKey: string) => {
             unified.push({
@@ -100,7 +110,7 @@ export default function MesDemandesPage() {
         }
 
         // 3. Marriage Declarations
-        if (resMarriage.ok) {
+        if (resMarriage && resMarriage.ok) {
           const marriages = await resMarriage.json()
           marriages.forEach((m: any) => {
             unified.push({
@@ -115,7 +125,7 @@ export default function MesDemandesPage() {
         }
 
         // 4. Marriage Extraits (Signed)
-        if (resExtraitsMariage.ok) {
+        if (resExtraitsMariage && resExtraitsMariage.ok) {
           const extM = await resExtraitsMariage.json()
           extM.forEach((m: any) => {
             unified.push({
@@ -130,7 +140,7 @@ export default function MesDemandesPage() {
         }
 
         // 5. Death
-        if (resDeath.ok) {
+        if (resDeath && resDeath.ok) {
           const deathData = await resDeath.json()
           const deaths = deathData.my_declarations || []
           deaths.forEach((d: any) => {
@@ -146,7 +156,7 @@ export default function MesDemandesPage() {
         }
 
         // 6. Residence
-        if (resResidence.ok) {
+        if (resResidence && resResidence.ok) {
           const residences = await resResidence.json()
           residences.forEach((r: any) => {
             unified.push({
@@ -163,7 +173,7 @@ export default function MesDemandesPage() {
 
 
         // 7. Inhumation
-        if (resInhumation.ok) {
+        if (resInhumation && resInhumation.ok) {
           const data = await resInhumation.json()
           const inhumations = data.my_requests || []
           inhumations.forEach((i: any) => {
@@ -179,7 +189,7 @@ export default function MesDemandesPage() {
         }
 
         // 7.5 Transfert Corps
-        if (resTransfert.ok) {
+        if (resTransfert && resTransfert.ok) {
           const transferts = await resTransfert.json()
           transferts.forEach((t_req: any) => {
             unified.push({
@@ -195,7 +205,7 @@ export default function MesDemandesPage() {
         }
 
         // 7.7 Légalisation
-        if (resLegalisation.ok) {
+        if (resLegalisation && resLegalisation.ok) {
           const legals = await resLegalisation.json()
           legals.forEach((l: any) => {
             unified.push({
@@ -211,7 +221,7 @@ export default function MesDemandesPage() {
         }
 
         // 8. Livret de Famille
-        if (resLivret.ok) {
+        if (resLivret && resLivret.ok) {
           const livrets = await resLivret.json()
           livrets.forEach((l: any) => {
             unified.push({
@@ -227,7 +237,7 @@ export default function MesDemandesPage() {
         }
 
         // 9. Permis de construire
-        if (resConstruction.ok) {
+        if (resConstruction && resConstruction.ok) {
           const constructions = await resConstruction.json()
           constructions.forEach((c: any) => {
             const typeLabel = c.type_travaux_display || c.type_travaux || ''
@@ -244,7 +254,7 @@ export default function MesDemandesPage() {
         }
 
         // 10. Goudronnage
-        if (resGoudronnage.ok) {
+        if (resGoudronnage && resGoudronnage.ok) {
           const goudronnages = await resGoudronnage.json()
           goudronnages.forEach((g: any) => {
             unified.push({
@@ -260,7 +270,7 @@ export default function MesDemandesPage() {
         }
 
         // 11. Certificat de vocation
-        if (resVocation.ok) {
+        if (resVocation && resVocation.ok) {
           const vocations = await resVocation.json()
           vocations.forEach((v: any) => {
             unified.push({
@@ -276,7 +286,7 @@ export default function MesDemandesPage() {
         }
 
         // 12. Raccordement
-        if (resRaccordement.ok) {
+        if (resRaccordement && resRaccordement.ok) {
           const raccordements = await resRaccordement.json()
           raccordements.forEach((r: any) => {
             unified.push({
@@ -292,7 +302,7 @@ export default function MesDemandesPage() {
         }
 
         // 13. Evenement
-        if (resEvenement.ok) {
+        if (resEvenement && resEvenement.ok) {
           const evenements = await resEvenement.json()
           evenements.forEach((e: any) => {
             unified.push({

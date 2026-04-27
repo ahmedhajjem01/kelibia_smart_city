@@ -180,6 +180,21 @@ export default function LoginPage() {
 .lp-footer p { font-size: .72rem; color: #9ca3af; margin: 4px 0; }
 .lp-signup-link { font-size: .78rem; color: #6b7280; }
 .lp-signup-link a { color: #954a00; font-weight: 600; text-decoration: none; }
+/* ── Modals ── */
+.lp-modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,17,23,.85); backdrop-filter: blur(8px);
+  z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.lp-modal {
+  background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 400px;
+  position: relative; box-shadow: 0 24px 60px rgba(0,0,0,.4);
+}
+.lp-modal h3 { font-size: 1.25rem; font-weight: 800; color: #191b22; margin-bottom: 8px; margin-top: 0; }
+.lp-modal p { font-size: .88rem; color: #6b7280; line-height: 1.5; margin: 0; }
+.lp-modal-close {
+  position: absolute; top: 16px; right: 16px; background: none; border: none;
+  font-size: 1.5rem; color: #9ca3af; cursor: pointer; line-height: 1;
+}
 `
 
   const [email, setEmail] = useState('')
@@ -188,6 +203,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  
+  const [showTunisieIdModal, setShowTunisieIdModal] = useState(false)
+  const [showQrModal, setShowQrModal] = useState(false)
+  const [tunisieIdCin, setTunisieIdCin] = useState('')
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail')
@@ -378,11 +397,11 @@ export default function LoginPage() {
             <div className="lp-divider-line"></div>
           </div>
           <div className="lp-alt-grid">
-            <button className="lp-alt-btn">
-              <i className="fas fa-id-card icon-blue"></i> {t('tunisia_id')}
+            <button type="button" className="lp-alt-btn" onClick={() => setShowTunisieIdModal(true)}>
+              <i className="fas fa-id-card icon-blue"></i> {t('tunisia_id') || 'Tunisie ID'}
             </button>
-            <button className="lp-alt-btn">
-              <i className="fas fa-qrcode icon-orange"></i> {t('scan_qr')}
+            <button type="button" className="lp-alt-btn" onClick={() => setShowQrModal(true)}>
+              <i className="fas fa-qrcode icon-orange"></i> {t('scan_qr') || 'Scan QR'}
             </button>
           </div>
 
@@ -400,6 +419,61 @@ export default function LoginPage() {
 
         </div>
       </div>
+
+      {/* Modals */}
+      {showTunisieIdModal && (
+        <div className="lp-modal-overlay">
+          <div className="lp-modal">
+            <button className="lp-modal-close" onClick={() => setShowTunisieIdModal(false)}>×</button>
+            <h3>Connexion via Tunisie ID</h3>
+            <p>Veuillez entrer votre numéro de CIN pour vous authentifier via e-Houwiya.</p>
+            <input 
+              type="text" 
+              className="lp-input" 
+              placeholder="Numéro de CIN" 
+              value={tunisieIdCin}
+              onChange={e => setTunisieIdCin(e.target.value)}
+              style={{ marginTop: '16px', marginBottom: '16px' }}
+            />
+            <button 
+              className="lp-btn"
+              onClick={() => {
+                alert('Authentification Tunisie ID réussie ! (Simulation pour soutenance)');
+                setShowTunisieIdModal(false);
+                navigate('/dashboard');
+              }}
+            >
+              Valider <i className="fas fa-check"></i>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showQrModal && (
+        <div className="lp-modal-overlay">
+          <div className="lp-modal" style={{ textAlign: 'center' }}>
+            <button className="lp-modal-close" onClick={() => setShowQrModal(false)}>×</button>
+            <h3>Connexion par Code QR</h3>
+            <p style={{ marginBottom: '16px' }}>Ouvrez l'application mobile de l'appareil connecté et scannez ce code.</p>
+            <img 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=kelibiasmartcity-login-mock`} 
+              alt="QR Code de connexion" 
+              style={{ borderRadius: '12px', border: '1px solid #eee', padding: '8px', display: 'inline-block' }}
+            />
+            <button 
+              className="lp-alt-btn"
+              style={{ width: '100%', marginTop: '24px' }}
+              onClick={() => {
+                alert('Scan QR réussi depuis l\'appareil mobile source ! (Simulation)');
+                setShowQrModal(false);
+                navigate('/dashboard');
+              }}
+            >
+              <i className="fas fa-mobile-alt icon-blue"></i> Simuler le scan mobile
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

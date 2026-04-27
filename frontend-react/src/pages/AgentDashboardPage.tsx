@@ -2709,10 +2709,8 @@ export default function AgentDashboardPage() {
 
                                   )}
 
-                                  {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
-
+                                  {user?.is_superuser && (
                                     <button className="btn btn-sm btn-outline-info" title={t('reset_pwd')}
-
                                       onClick={async (e) => {
 
                                         e.stopPropagation()

@@ -89,26 +89,34 @@ class ExtraitNaissance(models.Model):
 
     @property
     def get_qr_code(self):
-        import qrcode
-        import io
-        import base64
-        
-        # URL for verification
-        verify_url = f"http://127.0.0.1:8000/extrait-naissance/verify/{self.uuid}/"
-        
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(verify_url)
-        qr.make(fit=True)
+        try:
+            import qrcode
+            import io
+            import base64
+            from django.conf import settings
+            
+            # Use dynamic domain if possible
+            domain = getattr(settings, 'DOMAIN', '127.0.0.1:8000')
+            protocol = 'https' if not getattr(settings, 'DEBUG', True) else 'http'
+            verify_url = f"{protocol}://{domain}/extrait-naissance/verify/{self.uuid}/"
+            
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(verify_url)
+            qr.make(fit=True)
 
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffered = io.BytesIO()
-        img.save(buffered, format="PNG")
-        return base64.b64encode(buffered.getvalue()).decode()
+            img = qr.make_image(fill_color="black", back_color="white")
+            buffered = io.BytesIO()
+            img.save(buffered, format="PNG")
+            return base64.b64encode(buffered.getvalue()).decode()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"QR generation failed: {e}")
+            return "" # Safe fallback
 
 
 class DeclarationNaissance(models.Model):

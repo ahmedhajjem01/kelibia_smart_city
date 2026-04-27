@@ -85,8 +85,33 @@ class RegisterView(APIView):
             
             user.save()
             
+            # Send Verification Email
+            from django.core.mail import send_mail
+            from django.conf import settings
+            import threading
+            
+            if getattr(settings, 'EMAIL_HOST_USER', None):
+                def send_async_verification():
+                    try:
+                        subject = "Confirmez votre compte Kélibia Smart City"
+                        email_body = f"Bonjour {user.first_name},\n\n" \
+                                     f"Merci de vous être inscrit sur Kélibia Smart City.\n" \
+                                     f"Veuillez cliquer sur le lien suivant pour vérifier votre adresse e-mail et vous connecter :\n" \
+                                     f"http://localhost:5173/login?verified=true\n\n" \
+                                     f"Cordialement,\nL'équipe Kélibia Smart City"
+                        send_mail(
+                            subject,
+                            email_body,
+                            settings.EMAIL_HOST_USER,
+                            [user.email],
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        logger.error(f"Mail verification failed: {e}")
+                threading.Thread(target=send_async_verification).start()
+            
             return Response({
-                "message": "Utilisateur créé avec succès ! Veuillez vous connecter.",
+                "message": "Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
                 "username": user.username
             }, status=status.HTTP_201_CREATED)
 
