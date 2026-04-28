@@ -505,12 +505,23 @@ export default function DashboardPage() {
 
         <Link
           to="/profile"
-          style={{ display: 'block', width: '100%', marginTop: 18, padding: '10px', textAlign: 'center', background: '#e8e8e8', color: '#1a1c1c', fontWeight: 800, fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', transition: 'background .2s' }}
+          style={{ display: 'block', width: '100%', marginTop: 18, padding: '10px', textAlign: 'center', background: '#e8e8e8', color: '#1a1c1c', fontWeight: 800, fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '1px', textDecoration: 'none', transition: 'background .2s', borderRadius: '4px' }}
           onMouseEnter={e => (e.currentTarget.style.background = '#dadada')}
           onMouseLeave={e => (e.currentTarget.style.background = '#e8e8e8')}
         >
           {t('my_account_btn')}
         </Link>
+
+        <button
+          onClick={logout}
+          style={{ display: 'block', width: '100%', marginTop: 8, padding: '10px', textAlign: 'center', background: '#fef2f2', color: '#dc3545', border: '1px solid #fee2e2', fontWeight: 800, fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '1px', transition: 'background .2s', borderRadius: '4px', cursor: 'pointer' }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#fee2e2')}
+          onMouseLeave={e => (e.currentTarget.style.background = '#fef2f2')}
+        >
+          <i className={`fas fa-sign-out-alt ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
+          {t('logout')}
+        </button>
+
 
       </div>
 
