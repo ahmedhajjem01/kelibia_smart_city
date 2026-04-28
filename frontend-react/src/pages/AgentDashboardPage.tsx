@@ -5,7 +5,7 @@ import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_log.png'
+import smartCityLogo from '../assets/smart_city_logo.png'
 
 
 
@@ -89,7 +89,7 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-sidebar{position:fixed;left:0;top:0;height:100vh;width:256px;background:#f3f3f3;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;padding:24px 16px;z-index:100;overflow-y:auto}
 .ag-sidebar-brand{display:flex;align-items:center;gap:12px;padding:0 8px;margin-bottom:32px}
 .ag-sidebar-brand img{width:40px;height:40px;object-fit:contain}
-.ag-brand-name{font-family:'Public Sans',sans-serif;font-size:1rem;font-weight:700;color:#ae131a;line-height:1.2}
+.ag-brand-name{font-family:'Public Sans',sans-serif;font-size:1.4rem;font-weight:900;color:#ae131a;line-height:1.2}
 .ag-brand-sub{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:#9ca3af;font-weight:500}
 .ag-sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px}
 .ag-nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;color:#6b7280;text-decoration:none;border-radius:6px;font-size:0.875rem;font-weight:500;transition:all .15s;border-right:3px solid transparent;position:relative}
@@ -2087,10 +2087,9 @@ export default function AgentDashboardPage() {
 
         {/* Brand */}
         <div className="ag-sidebar-brand">
-          <img src={logo} alt="Logo" />
+          <img src={smartCityLogo} alt="Logo" style={{ width: 50, height: 50 }} />
           <div>
-            <div className="ag-brand-name">Kelibia Smart City</div>
-            <div className="ag-brand-sub">Municipal Agent Portal</div>
+            <div className="ag-brand-name">Smart City Portal</div>
           </div>
         </div>
 

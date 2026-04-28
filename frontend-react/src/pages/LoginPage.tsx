@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_log.png'
+import smartCityLogo from '../assets/smart_city_logo.png'
 
 type TokenResponse = {
   access: string
@@ -80,9 +80,9 @@ export default function LoginPage() {
   .lp-hero { display: flex; }
 }
 .lp-hero-brand { display: flex; align-items: center; gap: 14px; }
-.lp-hero-logo { height: 56px; width: auto; }
-.lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
-.lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+.lp-hero-logo { height: 72px; width: auto; }
+.lp-hero-brand-name { display: none; }
+.lp-hero-brand-sub { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
 .lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
 .lp-hero-accent { color: #7ec8f7; white-space: nowrap; }
 .lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
@@ -104,7 +104,7 @@ export default function LoginPage() {
 .lp-lang-opt { border: none; background: none; border-radius: 999px; padding: 5px 16px; font-size: .75rem; font-weight: 700; cursor: pointer; color: #6b7280; }
 .lp-lang-opt.active { background: #954a00; color: #fff; }
 .lp-mobile-logo { display: flex; justify-content: center; margin-bottom: 20px; }
-.lp-mobile-logo img { height: 44px; }
+.lp-mobile-logo img { height: 64px; }
 @media (min-width: 768px) { .lp-mobile-logo { display: none; } }
 .lp-greeting { margin-bottom: 28px; }
 .lp-greeting h2 { font-size: 1.55rem; font-weight: 800; color: #191b22; margin-bottom: 6px; }
@@ -283,11 +283,10 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src={tunisiaLogo}
+              src={smartCityLogo}
               alt="Logo"
             />
             <div>
-              <div className="lp-hero-brand-name">{t('republic_of_tunisia')}</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
@@ -325,7 +324,7 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={tunisiaLogo} alt="Logo" />
+            <img src={smartCityLogo} alt="Logo" />
           </div>
 
           {/* Greeting */}
