@@ -2341,13 +2341,6 @@ export default function AgentDashboardPage() {
                         </button>
                       </div>
                     </div>
-                    <div className="ag-map-legend">
-                      <h5>Répartition des incidents</h5>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#f97316' }}></span><span>En attente ({pending})</span></div>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#3b82f6' }}></span><span>En cours ({inprog})</span></div>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#22c55e' }}></span><span>Résolu ({resolved})</span></div>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#ef4444' }}></span><span>Rejeté ({rejected})</span></div>
-                    </div>
                     <div id="ag-map" ref={mapRef}></div>
                   </div>
 
