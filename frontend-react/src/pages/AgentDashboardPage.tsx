@@ -2299,10 +2299,10 @@ export default function AgentDashboardPage() {
 
                   {/* Map */}
                   <div className="ag-map-card">
-                    <div className="ag-map-header" style={{ flexWrap: 'wrap', gap: 8 }}>
-                      <h4><i className="fas fa-map-marked-alt" style={{ marginRight: 8, color: '#ae131a' }}></i>{t('map_title_realtime')}</h4>
-                      {/* Status filter toggles */}
-                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
+                    <div className="ag-map-header" style={{ flexWrap: 'nowrap', gap: 8, alignItems: 'center' }}>
+                      <h4 style={{ marginRight: 'auto' }}><i className="fas fa-map-marked-alt" style={{ marginRight: 8, color: '#ae131a' }}></i>{t('map_title_realtime')}</h4>
+                      {/* Status filter toggles + export buttons — all on one row */}
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
                         {([
                           { key: 'pending',     label: 'En attente',  color: '#e65100', bg: '#fff7ed' },
                           { key: 'in_progress', label: 'En cours',    color: '#1565c0', bg: '#eff6ff' },
@@ -2330,9 +2330,9 @@ export default function AgentDashboardPage() {
                             </button>
                           )
                         })}
-                      </div>
-                      <div className="ag-map-export-btns">
-                        <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginRight: 8 }}>{allRecs.length} {t('signalements_short')}</span>
+                        {/* Divider */}
+                        <span style={{ width: 1, height: 18, background: '#e5e7eb', display: 'inline-block', margin: '0 4px' }}></span>
+                        <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{allRecs.length} {t('signalements_short')}</span>
                         <button className="ag-export-btn" onClick={handleExportGeoJSON} title="Exporter pour QGIS">
                           <i className="fas fa-download" style={{ marginRight: 4 }}></i>GeoJSON
                         </button>
