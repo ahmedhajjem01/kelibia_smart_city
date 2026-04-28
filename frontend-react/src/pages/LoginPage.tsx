@@ -425,12 +425,12 @@ export default function LoginPage() {
         <div className="lp-modal-overlay">
           <div className="lp-modal">
             <button className="lp-modal-close" onClick={() => setShowTunisieIdModal(false)}>×</button>
-            <h3>Connexion via Tunisie ID</h3>
-            <p>Veuillez entrer votre numéro de CIN pour vous authentifier via e-Houwiya.</p>
+            <h3>{t('tunisia_id_modal_title')}</h3>
+            <p>{t('tunisia_id_modal_desc')}</p>
             <input 
               type="text" 
               className="lp-input" 
-              placeholder="Numéro de CIN" 
+              placeholder={t('cin_placeholder')}
               value={tunisieIdCin}
               onChange={e => setTunisieIdCin(e.target.value)}
               style={{ marginTop: '16px', marginBottom: '8px' }}
@@ -438,7 +438,7 @@ export default function LoginPage() {
             <input 
               type="password" 
               className="lp-input" 
-              placeholder="Mot de passe" 
+              placeholder={t('password_label')}
               value={tunisieIdPassword}
               onChange={e => setTunisieIdPassword(e.target.value)}
               style={{ marginBottom: '16px' }}
@@ -450,16 +450,13 @@ export default function LoginPage() {
                 setError(null)
                 setLoading(true)
                 try {
-                  // We try to login using CIN as the identifier. 
-                  // If the backend doesn't support 'cin' directly in /api/token/, 
-                  // we'll show an error. But per user instruction, this is the way.
                   const res = await fetch(resolveBackendUrl('/api/token/'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: tunisieIdCin, password: tunisieIdPassword }),
                   })
                   const data = await res.json()
-                  if (!res.ok) throw new Error(data.detail || 'Erreur de connexion')
+                  if (!res.ok) throw new Error(data.detail || t('error_msg'))
                   
                   storeTokens({ access: data.access, refresh: data.refresh })
                   setShowTunisieIdModal(false)
@@ -475,7 +472,7 @@ export default function LoginPage() {
                 }
               }}
             >
-              {loading ? 'Connexion...' : 'Se connecter'} <i className="fas fa-sign-in-alt"></i>
+              {loading ? (t('processing') || '...') : t('login_btn')} <i className="fas fa-sign-in-alt"></i>
             </button>
           </div>
         </div>
@@ -485,8 +482,8 @@ export default function LoginPage() {
         <div className="lp-modal-overlay">
           <div className="lp-modal" style={{ textAlign: 'center' }}>
             <button className="lp-modal-close" onClick={() => setShowQrModal(false)}>×</button>
-            <h3>Connexion par Code QR</h3>
-            <p style={{ marginBottom: '16px' }}>Ouvrez l'application mobile de l'appareil connecté et scannez ce code.</p>
+            <h3>{t('qr_modal_title')}</h3>
+            <p style={{ marginBottom: '16px' }}>{t('qr_modal_desc')}</p>
             <img 
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=kelibiasmartcity-login-mock`} 
               alt="QR Code de connexion" 
@@ -496,12 +493,12 @@ export default function LoginPage() {
               className="lp-alt-btn"
               style={{ width: '100%', marginTop: '24px' }}
               onClick={() => {
-                alert('Scan QR réussi depuis l\'appareil mobile source ! (Simulation)');
+                alert(t('qr_success_simulation') || 'Scan QR réussi !');
                 setShowQrModal(false);
                 navigate('/dashboard');
               }}
             >
-              <i className="fas fa-mobile-alt icon-blue"></i> Simuler le scan mobile
+              <i className="fas fa-mobile-alt icon-blue"></i> {t('qr_simulate_btn')}
             </button>
           </div>
         </div>
