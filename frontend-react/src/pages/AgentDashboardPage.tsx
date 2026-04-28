@@ -330,6 +330,8 @@ export default function AgentDashboardPage() {
 
   const [filterPriority, setFilterPriority] = useState('')
 
+  const [mapStatusFilter, setMapStatusFilter] = useState<string[]>(['pending', 'in_progress', 'resolved', 'rejected'])
+
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([])
 
   const [detailRec, setDetailRec] = useState<Reclamation | null>(null)
@@ -1821,7 +1823,9 @@ export default function AgentDashboardPage() {
 
     const BLT = 36.8467, BLG = 11.1047
 
-    allRecs.forEach(r => {
+    const mapRecs = allRecs.filter(r => mapStatusFilter.includes(r.status))
+
+    mapRecs.forEach(r => {
 
       const hc = r.latitude != null && r.longitude != null
 
@@ -1875,7 +1879,7 @@ export default function AgentDashboardPage() {
 
     })
 
-  }, [allRecs, activeTab])
+  }, [allRecs, activeTab, mapStatusFilter])
 
 
 
@@ -2295,8 +2299,38 @@ export default function AgentDashboardPage() {
 
                   {/* Map */}
                   <div className="ag-map-card">
-                    <div className="ag-map-header">
+                    <div className="ag-map-header" style={{ flexWrap: 'wrap', gap: 8 }}>
                       <h4><i className="fas fa-map-marked-alt" style={{ marginRight: 8, color: '#ae131a' }}></i>{t('map_title_realtime')}</h4>
+                      {/* Status filter toggles */}
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
+                        {([
+                          { key: 'pending',     label: 'En attente',  color: '#e65100', bg: '#fff7ed' },
+                          { key: 'in_progress', label: 'En cours',    color: '#1565c0', bg: '#eff6ff' },
+                          { key: 'resolved',    label: 'Résolu',      color: '#15803d', bg: '#f0fdf4' },
+                          { key: 'rejected',    label: 'Rejeté',      color: '#757575', bg: '#f5f5f5' },
+                        ] as { key: string; label: string; color: string; bg: string }[]).map(s => {
+                          const active = mapStatusFilter.includes(s.key)
+                          return (
+                            <button
+                              key={s.key}
+                              onClick={() => setMapStatusFilter(prev =>
+                                active ? prev.filter(x => x !== s.key) : [...prev, s.key]
+                              )}
+                              style={{
+                                padding: '3px 10px', borderRadius: 20, fontSize: '0.71rem',
+                                fontWeight: 700, border: `1.5px solid ${s.color}`,
+                                background: active ? s.bg : '#f3f4f6',
+                                color: active ? s.color : '#9ca3af',
+                                cursor: 'pointer', transition: 'all .15s',
+                                opacity: active ? 1 : 0.5,
+                              }}
+                            >
+                              <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: active ? s.color : '#ccc', marginRight: 5, verticalAlign: 'middle' }}></span>
+                              {s.label}
+                            </button>
+                          )
+                        })}
+                      </div>
                       <div className="ag-map-export-btns">
                         <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginRight: 8 }}>{allRecs.length} {t('signalements_short')}</span>
                         <button className="ag-export-btn" onClick={handleExportGeoJSON} title="Exporter pour QGIS">
