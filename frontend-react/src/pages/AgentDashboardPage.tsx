@@ -2197,7 +2197,7 @@ export default function AgentDashboardPage() {
             <i className="fas fa-bell ag-topnav-icon"></i>
             <button 
               className="btn btn-link text-danger p-0 ms-3" 
-              onClick={logout} 
+              onClick={() => { clearTokens(); navigate('/login') }}
               title={t('logout')}
               style={{ textDecoration: 'none' }}
             >
