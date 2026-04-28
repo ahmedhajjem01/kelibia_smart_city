@@ -25,6 +25,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        # Support CIN as identifier
+        username = attrs.get(self.username_field)
+        if username and '@' not in username:
+            user = User.objects.filter(cin=username).first()
+            if user:
+                attrs[self.username_field] = user.email
+
         data = super().validate(attrs)
         data['is_staff'] = self.user.is_staff
         data['is_superuser'] = self.user.is_superuser

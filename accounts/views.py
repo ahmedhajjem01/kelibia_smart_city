@@ -11,6 +11,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 from djoser.serializers import ActivationSerializer
 from .serializers import CustomUserSerializer, MyTokenObtainPairSerializer
 from datetime import date
@@ -93,11 +96,17 @@ class RegisterView(APIView):
             if getattr(settings, 'EMAIL_HOST_USER', None):
                 def send_async_verification():
                     try:
+                        uid = urlsafe_base64_encode(force_bytes(user.pk))
+                        token = default_token_generator.make_token(user)
+                        protocol = "https" if not settings.DEBUG else "http"
+                        domain = settings.DOMAIN
+                        activation_link = f"{protocol}://{domain}/activate?uid={uid}&token={token}"
+
                         subject = "Confirmez votre compte Kélibia Smart City"
                         email_body = f"Bonjour {user.first_name},\n\n" \
                                      f"Merci de vous être inscrit sur Kélibia Smart City.\n" \
-                                     f"Veuillez cliquer sur le lien suivant pour vérifier votre adresse e-mail et vous connecter :\n" \
-                                     f"http://localhost:5173/login?verified=true\n\n" \
+                                     f"Veuillez cliquer sur le lien suivant pour activer votre compte et accéder à votre profil :\n" \
+                                     f"{activation_link}\n\n" \
                                      f"Cordialement,\nL'équipe Kélibia Smart City"
                         send_mail(
                             subject,

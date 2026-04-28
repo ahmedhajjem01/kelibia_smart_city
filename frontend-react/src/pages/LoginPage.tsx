@@ -207,6 +207,7 @@ export default function LoginPage() {
   const [showTunisieIdModal, setShowTunisieIdModal] = useState(false)
   const [showQrModal, setShowQrModal] = useState(false)
   const [tunisieIdCin, setTunisieIdCin] = useState('')
+  const [tunisieIdPassword, setTunisieIdPassword] = useState('')
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail')
@@ -432,17 +433,49 @@ export default function LoginPage() {
               placeholder="Numéro de CIN" 
               value={tunisieIdCin}
               onChange={e => setTunisieIdCin(e.target.value)}
-              style={{ marginTop: '16px', marginBottom: '16px' }}
+              style={{ marginTop: '16px', marginBottom: '8px' }}
+            />
+            <input 
+              type="password" 
+              className="lp-input" 
+              placeholder="Mot de passe" 
+              value={tunisieIdPassword}
+              onChange={e => setTunisieIdPassword(e.target.value)}
+              style={{ marginBottom: '16px' }}
             />
             <button 
               className="lp-btn"
-              onClick={() => {
-                alert('Authentification Tunisie ID réussie ! (Simulation pour soutenance)');
-                setShowTunisieIdModal(false);
-                navigate('/dashboard');
+              disabled={loading}
+              onClick={async () => {
+                setError(null)
+                setLoading(true)
+                try {
+                  // We try to login using CIN as the identifier. 
+                  // If the backend doesn't support 'cin' directly in /api/token/, 
+                  // we'll show an error. But per user instruction, this is the way.
+                  const res = await fetch(resolveBackendUrl('/api/token/'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: tunisieIdCin, password: tunisieIdPassword }),
+                  })
+                  const data = await res.json()
+                  if (!res.ok) throw new Error(data.detail || 'Erreur de connexion')
+                  
+                  storeTokens({ access: data.access, refresh: data.refresh })
+                  setShowTunisieIdModal(false)
+                  if (data.is_staff || data.is_superuser || data.user_type === 'agent') {
+                    navigate('/agent-dashboard')
+                  } else {
+                    navigate('/dashboard')
+                  }
+                } catch (err: any) {
+                  alert(err.message)
+                } finally {
+                  setLoading(false)
+                }
               }}
             >
-              Valider <i className="fas fa-check"></i>
+              {loading ? 'Connexion...' : 'Se connecter'} <i className="fas fa-sign-in-alt"></i>
             </button>
           </div>
         </div>
