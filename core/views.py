@@ -181,9 +181,10 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
             else:
                 objs = model.objects.all()
             
-            # SI: Filter out unpaid requests - only show to admin after payment
-            if hasattr(model, 'is_paid'):
-                objs = objs.filter(is_paid=True)
+            # SI: We show all requests to the agent, even those unpaid, so they have a full overview.
+            # The frontend will display the payment status accordingly.
+            # if hasattr(model, 'is_paid'):
+            #     objs = objs.filter(is_paid=True)
                 
             objs = objs.order_by('-created_at')
             for o in objs:

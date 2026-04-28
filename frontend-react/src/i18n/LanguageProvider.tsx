@@ -7,6 +7,8 @@ const translations: Record<Lang, Record<string, string>> = {
   fr: {
     dashboard: 'Tableau de bord',
     logout: 'Déconnexion',
+    free_label: 'Gratuit',
+    configuration: 'Configuration',
     welcome_title: 'Bienvenu!',
     welcome_subtitle: 'Connectez-vous pour accéder à votre espace citoyen.',
     republic_of_tunisia: '',
@@ -45,7 +47,7 @@ const translations: Record<Lang, Record<string, string>> = {
     member_since: 'Membre depuis',
     update_success: 'Profil mis à jour avec succès !',
     update_error: 'Erreur lors de la sauvegarde.',
-    error_outside_kelibia: 'Veuillez sélectionner un emplacement à l'intérieur de Kélibia.',
+    error_outside_kelibia: "Veuillez sélectionner un emplacement à l'intérieur de Kélibia.",
     network_error: 'Erreur réseau. Veuillez réessayer.',
     loading_profile: 'Chargement du profil...',
     view_all: 'Voir tout',
@@ -928,6 +930,8 @@ const translations: Record<Lang, Record<string, string>> = {
   ar: {
     dashboard: 'لوحة القيادة',
     logout: 'تسجيل الخروج',
+    free_label: 'مجاني',
+    configuration: 'الإعدادات',
     welcome: 'مرحباً بك!',
     welcome_msg: 'لقد سجلت دخولك بنجاح في بوابة تونس مدينة ذكية.',
     admin_services: 'الخدمات الإدارية',

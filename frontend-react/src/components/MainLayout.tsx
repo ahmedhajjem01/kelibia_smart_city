@@ -9,7 +9,7 @@ import { resolveBackendUrl } from '../lib/backendUrl';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  user: { first_name: string; last_name: string; email: string; is_verified: boolean; user_type?: string; is_staff?: boolean; is_superuser?: boolean } | null;
+  user: { first_name: string; last_name: string; email: string; is_verified: boolean; user_type?: string; is_staff?: boolean; is_superuser?: boolean; has_active_asd?: boolean } | null;
   onLogout: () => void;
   breadcrumbs?: { label: string; link?: string }[];
   showHero?: boolean;
@@ -64,7 +64,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
   };
 
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+
+  const fetchConfig = async () => {
+    try {
+      const res = await fetch(resolveBackendUrl('/api/accounts/config/'));
+      if (res.ok) {
+        const data = await res.json();
+        setIsMaintenance(data.maintenance_mode);
+      }
+    } catch (e) {
+      console.error("Failed to fetch config", e);
+    } finally {
+      setLoadingConfig(false);
+    }
+  };
+
   useEffect(() => {
+    fetchConfig();
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
@@ -84,6 +102,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   };
 
   const isAgentOrAdmin = user && (user.user_type === 'agent' || user.user_type === 'supervisor' || user.is_staff || user.is_superuser);
+
+  if (isMaintenance && !isAgentOrAdmin && !loadingConfig) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-center">
+        <div className="max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+          <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="fas fa-tools fa-2x"></i>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">
+            {lang === 'ar' ? 'الموقع في حالة صيانة' : 'Site en Maintenance'}
+          </h1>
+          <p className="text-slate-500 mb-6">
+            {lang === 'ar' 
+              ? 'نحن نقوم حاليًا بإجراء تحسينات تقنية. يرجى العودة لاحقًا.' 
+              : 'Nous effectuons actuellement des mises à jour techniques pour améliorer votre expérience. Revenez bientôt !'}
+          </p>
+          <div className="text-sm text-slate-400">
+            Commune de Kélibia - Smart City
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -146,6 +187,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <Link to="/profile" style={{ marginLeft: 16, color: '#6b7280', fontSize: '.78rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
             <i className="fas fa-user-circle" style={{ fontSize: '1rem' }}></i>
             {user?.first_name || t('profile')}
+            {user?.has_active_asd && (
+              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[9px] font-bold ms-2">
+                ASD Actif
+              </span>
+            )}
           </Link>
           
           {/* Notifications Dropdown */}

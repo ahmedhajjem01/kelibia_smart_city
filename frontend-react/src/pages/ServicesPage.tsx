@@ -846,20 +846,18 @@ export default function ServicesPage() {
 
                     
 
-                    if (!user?.has_active_asd) {
+                    const isFree = modalState.title.toLowerCase().includes('naissance') || modalState.title.includes('ولادة') || 
+                                   modalState.title.toLowerCase().includes('décès') || modalState.title.includes('وفاة') ||
+                                   modalState.title.toLowerCase().includes('deces');
 
+                    if (!user?.has_active_asd && !isFree) {
                       if (window.confirm(t('pay_per_act_msg'))) {
-
                         const target = modalState.requestButton.target
-
                         const svcName = modalState.title
-
                         const url = `/paiement?amount=2.000&reason=${encodeURIComponent(svcName)}&target=${encodeURIComponent(target)}`
 
                         
-
                         // Close modal
-
                         const modalEl = document.getElementById('serviceModal')
 
                         if (modalEl) {

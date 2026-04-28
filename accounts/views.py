@@ -606,10 +606,12 @@ class ConfigView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     def get(self, request):
-        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
-            return Response({"error": "Accès refusé."}, status=403)
-        
         from .models import SiteConfiguration
         config, _ = SiteConfiguration.objects.get_or_create(id=1)
         return Response({

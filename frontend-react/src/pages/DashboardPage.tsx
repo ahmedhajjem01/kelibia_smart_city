@@ -59,6 +59,8 @@ type UserInfo = {
 
   is_superuser?: boolean
 
+  has_active_asd?: boolean
+
 }
 
 

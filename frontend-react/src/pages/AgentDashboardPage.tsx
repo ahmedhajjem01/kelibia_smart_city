@@ -401,6 +401,7 @@ export default function AgentDashboardPage() {
   const [loadingAgents, setLoadingAgents] = useState(false)
 
   const [articleImage, setArticleImage] = useState<File | null>(null)
+  const [extraImages, setExtraImages] = useState<FileList | null>(null)
 
 
 
@@ -629,6 +630,11 @@ export default function AgentDashboardPage() {
     fd.append('is_published', String(articleForm.is_published))
 
     if (articleImage) fd.append('image', articleImage)
+    if (extraImages) {
+      Array.from(extraImages).forEach(file => {
+        fd.append('extra_images', file)
+      })
+    }
 
 
 
@@ -651,6 +657,7 @@ export default function AgentDashboardPage() {
         setShowAddArticleModal(false)
 
         setArticleImage(null)
+        setExtraImages(null)
 
         fetchArticles()
 
@@ -2089,7 +2096,7 @@ export default function AgentDashboardPage() {
         <div className="ag-sidebar-brand">
           <img src={smartCityLogo} alt="Logo" style={{ width: 50, height: 50 }} />
           <div>
-            <div className="ag-brand-name">Smart City Portal</div>
+            <div className="ag-brand-name">{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Smart City Portal'}</div>
           </div>
         </div>
 
@@ -2098,7 +2105,7 @@ export default function AgentDashboardPage() {
 
           <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
             <i className="fas fa-chart-pie"></i>
-            <span>Dashboard</span>
+            <span>{t('dashboard')}</span>
             {pending > 0 && <span className="ag-badge">{pending}</span>}
           </a>
 
@@ -2110,7 +2117,7 @@ export default function AgentDashboardPage() {
 
           <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
             <i className="fas fa-hard-hat"></i>
-            <span>Permis de construire</span>
+            <span>{t('permis_construire')}</span>
             {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
           </a>
 
@@ -2153,7 +2160,7 @@ export default function AgentDashboardPage() {
             {(user?.user_type === 'supervisor' || user?.is_superuser) && (
               <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
                 <i className="fas fa-cogs"></i>
-                <span>Configuration</span>
+                <span>{t('configuration')}</span>
               </a>
             )}
           </>)}
@@ -2164,7 +2171,7 @@ export default function AgentDashboardPage() {
         <div className="ag-sidebar-bottom">
           <button className="ag-new-report-btn" onClick={() => navigate('/reclamation-form')}>
             <i className="fas fa-plus"></i>
-            <span>{lang === 'ar' ? 'تقرير جديد' : 'Nouveau Rapport'}</span>
+            <span>{t('new_signalement')}</span>
           </button>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
             <i className="fas fa-sign-out-alt"></i>
@@ -2177,9 +2184,8 @@ export default function AgentDashboardPage() {
       {/* ── TOP NAV ── */}
       <header className="ag-topnav">
 
-        <div className="ag-topnav-search">
-          <i className="fas fa-search"></i>
-          <input type="text" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="ag-topnav-search" style={{ visibility: 'hidden' }}>
+          {/* Removed by user request */}
         </div>
 
         <div className="ag-topnav-right">
@@ -2189,11 +2195,22 @@ export default function AgentDashboardPage() {
           </div>
           <div className="ag-topnav-icons">
             <i className="fas fa-bell ag-topnav-icon"></i>
+            <button 
+              className="btn btn-link text-danger p-0 ms-3" 
+              onClick={logout} 
+              title={t('logout')}
+              style={{ textDecoration: 'none' }}
+            >
+              <i className="fas fa-sign-out-alt fa-lg"></i>
+            </button>
           </div>
           <div className="ag-topnav-user">
             <div>
               <div className="ag-topnav-user-name">{fullName}</div>
               <div className="ag-topnav-user-role">{getRoleLabel(user, t)}</div>
+              <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: 2 }}>
+                <i className="fas fa-id-card me-1"></i>{user?.cin} <span className="mx-1">|</span> <i className="fas fa-phone me-1"></i>{user?.phone}
+              </div>
             </div>
             <div className="ag-avatar">{inits}</div>
           </div>
