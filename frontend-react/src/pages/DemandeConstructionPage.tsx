@@ -14,6 +14,11 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 const DefaultIcon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow, iconSize: [25, 41], iconAnchor: [12, 41] })
 L.Marker.prototype.options.icon = DefaultIcon
 const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
+const KELIBIA_BOUNDS = { minLat: 36.81, maxLat: 36.89, minLng: 11.05, maxLng: 11.15 }
+function isInsideKelibia(lat: number, lng: number) {
+  return lat >= KELIBIA_BOUNDS.minLat && lat <= KELIBIA_BOUNDS.maxLat &&
+         lng >= KELIBIA_BOUNDS.minLng && lng <= KELIBIA_BOUNDS.maxLng
+}
 
 const isHighRisk = (type: string, etages: number) => type === 'demolition' || etages > 3
 
@@ -64,7 +69,7 @@ type UserInfo = { first_name: string; last_name: string; email: string; is_verif
 
 export default function DemandeConstructionPage() {
   const navigate = useNavigate()
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
   
   const TYPE_TRAVAUX = [
     { value: 'construction_neuve', label: lang === 'ar' ? 'بناء جديد' : 'Construction neuve', emoji: '🏗️', risk: false },
@@ -160,7 +165,10 @@ export default function DemandeConstructionPage() {
       const access = getAccessToken()
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v) })
-      if (position) { fd.append('latitude', String(position[0])); fd.append('longitude', String(position[1])) }
+      if (position) { 
+        if (!isInsideKelibia(position[0], position[1])) throw new Error(t('error_outside_kelibia'))
+        fd.append('latitude', String(position[0])); fd.append('longitude', String(position[1])) 
+      }
       Object.entries(files).forEach(([k, f]) => {
         if (f) {
           const ext = f.name.split('.').pop() || 'bin'
@@ -376,6 +384,7 @@ export default function DemandeConstructionPage() {
                 <div className="col-md-6">
                   <label className="form-label fw-semibold small">{lang === 'ar' ? 'تاريخ البدء المخطط' : 'Date début prévue'} <span className="text-danger">*</span></label>
                   <input type="date" className="form-control rounded-3"
+                    min={new Date().toISOString().split('T')[0]}
                     value={form.date_debut_prevue} onChange={e => update('date_debut_prevue', e.target.value)} dir="ltr" />
                 </div>
                 <div className="col-md-6">
@@ -391,7 +400,14 @@ export default function DemandeConstructionPage() {
                 <div className="rounded-3 overflow-hidden border" style={{ height: 240 }} dir="ltr">
                   <MapContainer center={KELIBIA_CENTER} zoom={13} style={{ height: '100%', width: '100%' }}>
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
-                    <LocationMarker position={position} onMapClick={p => setPosition(p)} />
+                    <LocationMarker position={position} onMapClick={p => {
+                      if (!isInsideKelibia(p[0], p[1])) {
+                        setError(t('error_outside_kelibia'))
+                      } else {
+                        setError(null)
+                        setPosition(p)
+                      }
+                    }} />
                   </MapContainer>
                 </div>
                 {position && (
