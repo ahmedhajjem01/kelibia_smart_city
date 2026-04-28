@@ -725,9 +725,6 @@ export default function DashboardPage() {
         <div className="db-grid">
 
           {[
-
-            { to: '/nouvelle-reclamation', icon: 'fas fa-plus-circle',   labelKey: 'new_reclamation' },
-
             { to: '/mes-extraits',         icon: 'fas fa-file-contract', labelKey: 'extraits_hub_title' },
 
             { to: '/services',             icon: 'fas fa-receipt',       labelKey: 'admin_services' },
