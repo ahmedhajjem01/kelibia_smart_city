@@ -141,9 +141,6 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-map-legend h5{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1a1c1c;margin-bottom:8px}
 .ag-legend-item{display:flex;align-items:center;gap:8px;font-size:0.73rem;color:#6b7280;margin-bottom:5px}
 .ag-legend-dot{width:10px;height:10px;border-radius:9999px;flex-shrink:0;border:2px solid rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(0,0,0,.1)}
-.ag-map-export-btns{display:flex;gap:6px}
-.ag-export-btn{padding:5px 11px;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid #e5e7eb;background:#f9f9f9;color:#6b7280;transition:all .15s}
-.ag-export-btn:hover{background:#ae131a;color:#fff;border-color:#ae131a}
 #ag-map{flex:1;min-height:400px;width:100%;border-radius:0 0 12px 12px;overflow:hidden}
 
 .ag-right-col{display:flex;flex-direction:column;gap:20px}
@@ -2105,41 +2102,6 @@ export default function AgentDashboardPage() {
 
   const inits = initials(fullName)
 
-  const handleExportGeoJSON = async () => {
-    try {
-      const res = await fetch(resolveBackendUrl('/api/reclamations/geojson/?has_coords=true'), {
-        headers: { Authorization: `Bearer ${access}` }
-      })
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `reclamations_kelibia_${new Date().toISOString().slice(0, 10)}.geojson`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (e) {
-      console.error('Export GeoJSON failed', e)
-    }
-  }
-
-  const handleExportCSV = () => {
-    const rows = [
-      ['id', 'titre', 'categorie', 'statut', 'priorite', 'citoyen', 'latitude', 'longitude', 'date'],
-      ...allRecs.map(r => [
-        r.id, r.title, r.category, r.status, r.priority,
-        r.citizen_name || '', r.latitude ?? '', r.longitude ?? '',
-        r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : ''
-      ])
-    ]
-    const csv = rows.map(row => row.map(String).map(v => `"${v.toString().replace(/"/g, '""')}"`).join(',')).join('\n')
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `reclamations_kelibia_${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
 
   return (
 
@@ -2387,12 +2349,6 @@ export default function AgentDashboardPage() {
                         {/* Divider */}
                         <span style={{ width: 1, height: 18, background: '#e5e7eb', display: 'inline-block', margin: '0 4px' }}></span>
                         <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{allRecs.length} {t('signalements_short')}</span>
-                        <button className="ag-export-btn" onClick={handleExportGeoJSON} title="Exporter pour QGIS">
-                          <i className="fas fa-download" style={{ marginRight: 4 }}></i>GeoJSON
-                        </button>
-                        <button className="ag-export-btn" onClick={handleExportCSV} title="Exporter en CSV">
-                          <i className="fas fa-table" style={{ marginRight: 4 }}></i>CSV
-                        </button>
                       </div>
                     </div>
                     <div id="ag-map" ref={mapRef}></div>
@@ -2467,8 +2423,7 @@ export default function AgentDashboardPage() {
                     <h3>Rapports Récents <span>/ بلاغات حديثة</span></h3>
                     <div className="ag-table-hdr-btns">
                       <button className="ag-table-hdr-btn" onClick={() => { setFilterStatus(''); setFilterCategory(''); setFilterPriority(''); setSearch(''); setUrgentOnly(false); }}>Filtrer</button>
-                      <button className="ag-table-hdr-btn" onClick={handleExportGeoJSON}>GeoJSON</button>
-                      <button className="ag-table-hdr-btn" onClick={handleExportCSV}>CSV</button>
+
                       <button className="ag-table-hdr-btn" onClick={fetchReclamations}><i className="fas fa-sync-alt"></i></button>
                     </div>
                   </div>
