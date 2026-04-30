@@ -100,8 +100,6 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-sec-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;color:#9ca3af;font-weight:700;padding:8px 12px 4px}
 .ag-divider{border-top:1px solid #e5e7eb;margin:8px 0}
 .ag-sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px;padding-top:16px;border-top:1px solid #e5e7eb}
-.ag-new-report-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#ae131a,#d2312f);color:#fff;padding:12px;border-radius:6px;font-weight:700;font-size:0.875rem;cursor:pointer;border:none;width:100%;box-shadow:0 4px 12px rgba(174,19,26,.25);transition:opacity .15s;margin-bottom:8px}
-.ag-new-report-btn:hover{opacity:0.9}
 
 .ag-topnav{position:fixed;top:0;right:0;left:256px;height:64px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:99;box-shadow:0 1px 4px rgba(0,0,0,.04)}
 .ag-topnav-search{position:relative;display:flex;align-items:center}
@@ -2213,10 +2211,7 @@ export default function AgentDashboardPage() {
 
         {/* Bottom actions */}
         <div className="ag-sidebar-bottom">
-          <button className="ag-new-report-btn" onClick={() => navigate('/reclamation-form')}>
-            <i className="fas fa-plus"></i>
-            <span>{t('new_signalement')}</span>
-          </button>
+
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
             <i className="fas fa-sign-out-alt"></i>
             <span>{t('logout')}</span>
