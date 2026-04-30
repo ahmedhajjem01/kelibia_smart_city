@@ -1874,15 +1874,16 @@ export default function AgentDashboardPage() {
 
     const BLT = 36.8467, BLG = 11.1047
 
-    const mapRecs = allRecs.filter(r => mapStatusFilter.includes(r.status))
+    const mapRecs = allRecs.filter(r =>
+      mapStatusFilter.includes(r.status) &&
+      r.latitude != null && r.longitude != null
+    )
 
     mapRecs.forEach(r => {
 
-      const hc = r.latitude != null && r.longitude != null
+      const lat = r.latitude!
 
-      const lat = hc ? r.latitude! : (BLT + (Math.random() - 0.5) * 0.04)
-
-      const lng = hc ? r.longitude! : (BLG + (Math.random() - 0.5) * 0.06)
+      const lng = r.longitude!
 
       const cm: Record<string, string> = { pending: '#e65100', in_progress: '#1565c0', resolved: '#1b5e20', rejected: '#757575' }
 
@@ -1894,7 +1895,7 @@ export default function AgentDashboardPage() {
 
         className: '',
 
-        html: `<div style="background:${color};color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);${!hc ? 'opacity:0.65;' : ''}">${cat.label.split(' ')[0]}</div>`,
+        html: `<div style="background:${color};color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);">${cat.label.split(' ')[0]}</div>`,
 
         iconSize: [30, 30], iconAnchor: [15, 15],
 
@@ -1924,7 +1925,6 @@ export default function AgentDashboardPage() {
 
           <span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}33;">${prio.label}</span>
 
-          ${!hc ? '<span style="font-size:10px;color:#aaa;">(approx.)</span>' : ''}
 
         </div></div>`)
 
