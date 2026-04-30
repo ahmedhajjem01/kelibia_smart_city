@@ -310,21 +310,22 @@ export default function DashboardPage() {
   const [newsItems, setNewsItems] = useState<{ id: number; title: string; created_at: string }[]>([])
   const [genericNotifications, setGenericNotifications] = useState<any[]>([])
 
-  const [sigLayers, setSigLayers] = useState<{ routes: any; zonesVertes: any; industriel: any }>({
-    routes: null, zonesVertes: null, industriel: null,
+  const [sigLayers, setSigLayers] = useState<{ routes: any; espVerts: any; batiments: any; limite: any }>({
+    routes: null, espVerts: null, batiments: null, limite: null,
   })
 
-  // Charger les couches SIG GeoJSON statiques (citoyen : routes optionnel + zones vertes + industriel optionnel)
+  // Charger les couches SIG GeoJSON — citoyen (4 couches réelles WGS84)
   useEffect(() => {
     const load = async () => {
       try {
-        const [routesRes, zvRes, indRes] = await Promise.all([
-          fetch('/layers/routes.geojson'),
-          fetch('/layers/zones_vertes.geojson'),
-          fetch('/layers/industriel.geojson'),
+        const [rRes, evRes, bRes, lRes] = await Promise.all([
+          fetch('/layers/routes_lignes.geojson'),
+          fetch('/layers/espaces_verts_polygones.geojson'),
+          fetch('/layers/batiments_polygones.geojson'),
+          fetch('/layers/limite_kelibia.geojson'),
         ])
-        const [routes, zonesVertes, industriel] = await Promise.all([routesRes.json(), zvRes.json(), indRes.json()])
-        setSigLayers({ routes, zonesVertes, industriel })
+        const [routes, espVerts, batiments, limite] = await Promise.all([rRes.json(), evRes.json(), bRes.json(), lRes.json()])
+        setSigLayers({ routes, espVerts, batiments, limite })
       } catch {/* silencieux si fichiers absents */}
     }
     load()
@@ -834,42 +835,60 @@ export default function DashboardPage() {
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
                 </LayersControl.BaseLayer>
 
-                {/* Couches SIG — citoyen */}
+                {/* Couches SIG — citoyen (données réelles QGIS/WGS84) */}
+
+                {sigLayers.limite && (
+                  <LayersControl.Overlay checked name="🏛️ Limite communale">
+                    <GeoJSON
+                      data={sigLayers.limite}
+                      style={() => ({ color: '#1a237e', weight: 3, fill: false, dashArray: '8,4', opacity: 0.9 })}
+                      onEachFeature={(_feature, layer) => layer.bindPopup('<b>🏛️ Kelibia</b><br/>Limite de la commune')}
+                    />
+                  </LayersControl.Overlay>
+                )}
+
                 {sigLayers.routes && (
                   <LayersControl.Overlay name="🛣️ Routes">
                     <GeoJSON
                       data={sigLayers.routes}
                       style={(feature: any) => {
-                        const etat = feature?.properties?.etat
-                        const color = etat === 'bonne' ? '#2e7d32' : etat === 'dégradée' ? '#e65100' : etat === 'travaux' ? '#f9a825' : '#757575'
-                        return { color, weight: feature?.properties?.type === 'principale' ? 4 : 2, opacity: 0.8 }
+                        const type = feature?.properties?.route || ''
+                        const color = type === 'primary' ? '#c62828' : type === 'secondary' ? '#e65100' : type.startsWith('tertiary') ? '#f9a825' : '#546e7a'
+                        const weight = type === 'primary' ? 4 : type === 'secondary' ? 3 : type.startsWith('tertiary') ? 2.5 : 1.5
+                        return { color, weight, opacity: 0.85 }
                       }}
                       onEachFeature={(feature, layer) => {
-                        if (feature.properties) layer.bindPopup(`<b>🛣️ ${feature.properties.nom}</b><br/>État : ${feature.properties.etat}`)
-                      }}
-                    />
-                  </LayersControl.Overlay>
-                )}
-
-                {sigLayers.zonesVertes && (
-                  <LayersControl.Overlay checked name="🌳 Zones vertes">
-                    <GeoJSON
-                      data={sigLayers.zonesVertes}
-                      style={() => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.45 })}
-                      onEachFeature={(feature, layer) => {
-                        if (feature.properties) layer.bindPopup(`<b>🌳 ${feature.properties.nom}</b><br/>${feature.properties.equipements}`)
+                        const p = feature.properties || {}
+                        layer.bindPopup(`<b>🛣️ ${p.nom || '(sans nom)'}</b><br/>Type : ${p.route || '—'}`)
                       }}
                     />
                   </LayersControl.Overlay>
                 )}
 
-                {sigLayers.industriel && (
-                  <LayersControl.Overlay name="🏭 Zones industrielles">
+                {sigLayers.espVerts && (
+                  <LayersControl.Overlay checked name="🌳 Espaces verts">
                     <GeoJSON
-                      data={sigLayers.industriel}
-                      style={() => ({ color: '#5d4037', weight: 1.5, fillColor: '#ffccbc', fillOpacity: 0.4 })}
+                      data={sigLayers.espVerts}
+                      style={() => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.5 })}
                       onEachFeature={(feature, layer) => {
-                        if (feature.properties) layer.bindPopup(`<b>🏭 ${feature.properties.nom}</b><br/>${feature.properties.activite}`)
+                        const p = feature.properties || {}
+                        layer.bindPopup(`<b>🌳 ${p.nom || 'Espace vert'}</b><br/>Type : ${p.usage_sol || p.naturel || p.loisir || '—'}`)
+                      }}
+                    />
+                  </LayersControl.Overlay>
+                )}
+
+                {sigLayers.batiments && (
+                  <LayersControl.Overlay name="🏛️ Équipements publics">
+                    <GeoJSON
+                      data={{
+                        ...sigLayers.batiments,
+                        features: sigLayers.batiments.features.filter((f: any) => f.properties?.equip),
+                      }}
+                      style={() => ({ color: '#4e342e', weight: 1.5, fillColor: '#ffe0b2', fillOpacity: 0.7 })}
+                      onEachFeature={(feature, layer) => {
+                        const p = feature.properties || {}
+                        layer.bindPopup(`<b>🏛️ ${p.nom || 'Équipement public'}</b><br/>${p.equip || ''}`)
                       }}
                     />
                   </LayersControl.Overlay>
