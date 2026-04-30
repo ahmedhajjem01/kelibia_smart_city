@@ -10,6 +10,43 @@ from notifications.models import Notification
 logger = logging.getLogger(__name__)
 
 
+# ── Kelibia municipality boundary (loaded once from GeoJSON) ─────────────────
+import json, os
+
+def _load_kelibia_ring():
+    """Return the outer ring of the Kelibia municipal polygon [[lng, lat], ...]."""
+    geojson_path = os.path.join(
+        settings.BASE_DIR, 'frontend-react', 'public', 'layers', 'limite_kelibia.geojson'
+    )
+    try:
+        with open(geojson_path, encoding='utf-8') as f:
+            gj = json.load(f)
+        return gj['features'][0]['geometry']['coordinates'][0]
+    except Exception:
+        # Fallback bounding box if file not found
+        return [[11.05,36.81],[11.15,36.81],[11.15,36.89],[11.05,36.89],[11.05,36.81]]
+
+_KELIBIA_RING = _load_kelibia_ring()
+
+
+def _point_in_polygon(lat, lng, ring):
+    """Ray-casting algorithm. ring = [[lng, lat], ...]"""
+    inside = False
+    n = len(ring)
+    j = n - 1
+    for i in range(n):
+        xi, yi = ring[i][0], ring[i][1]
+        xj, yj = ring[j][0], ring[j][1]
+        if ((yi > lat) != (yj > lat)) and (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi):
+            inside = not inside
+        j = i
+    return inside
+
+
+def is_inside_kelibia(lat, lng):
+    return _point_in_polygon(lat, lng, _KELIBIA_RING)
+
+
 class ReclamationViewSet(viewsets.ModelViewSet):
     serializer_class = ReclamationSerializer
     queryset = Reclamation.objects.all()
@@ -110,6 +147,18 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             logger.warning(f"Failed to create creation notification: {e}")
 
     def create(self, request, *args, **kwargs):
+        # ── Boundary check — reject if coordinates are outside Kelibia ────────
+        try:
+            lat = float(request.data.get('latitude'))
+            lng = float(request.data.get('longitude'))
+            if not is_inside_kelibia(lat, lng):
+                return Response(
+                    {'detail': 'La localisation est en dehors des limites de la commune de Kelibia. Veuillez choisir un emplacement à l\'intérieur de la commune.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (TypeError, ValueError):
+            pass  # No coordinates provided — allowed (optional field)
+
         # We let super().create handle the standard flow (which calls perform_create)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

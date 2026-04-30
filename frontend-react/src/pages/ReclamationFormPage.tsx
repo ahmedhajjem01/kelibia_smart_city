@@ -40,16 +40,37 @@ L.Marker.prototype.options.icon = DefaultIcon
 
 const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 
-const KELIBIA_BOUNDS = {
-  minLat: 36.81,
-  maxLat: 36.89,
-  minLng: 11.05,
-  maxLng: 11.15
+// Ray-casting point-in-polygon — works with any GeoJSON Polygon ring
+function pointInPolygon(lat: number, lng: number, ring: number[][]): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1]
+    const xj = ring[j][0], yj = ring[j][1]
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+      (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)
+    if (intersect) inside = !inside
+  }
+  return inside
 }
 
-function isInsideKelibia(lat: number, lng: number) {
-  return lat >= KELIBIA_BOUNDS.minLat && lat <= KELIBIA_BOUNDS.maxLat &&
-         lng >= KELIBIA_BOUNDS.minLng && lng <= KELIBIA_BOUNDS.maxLng
+// Loaded once from the real QGIS/WGS84 shapefile
+let _kelibiaRing: number[][] | null = null
+async function loadKelibiaRing(): Promise<number[][]> {
+  if (_kelibiaRing) return _kelibiaRing
+  try {
+    const res = await fetch('/layers/limite_kelibia.geojson')
+    const gj = await res.json()
+    _kelibiaRing = gj.features[0].geometry.coordinates[0] as number[][]
+  } catch {
+    // fallback to bounding box ring if file not available
+    _kelibiaRing = [[11.05,36.81],[11.15,36.81],[11.15,36.89],[11.05,36.89],[11.05,36.81]]
+  }
+  return _kelibiaRing!
+}
+
+async function isInsideKelibia(lat: number, lng: number): Promise<boolean> {
+  const ring = await loadKelibiaRing()
+  return pointInPolygon(lat, lng, ring)
 }
 
 
@@ -194,14 +215,14 @@ export default function ReclamationFormPage() {
 
 
 
-  const handleMapClick = (pos: [number, number]) => { 
-    if (!isInsideKelibia(pos[0], pos[1])) {
+  const handleMapClick = async (pos: [number, number]) => {
+    if (!await isInsideKelibia(pos[0], pos[1])) {
       setError(t('error_outside_kelibia'))
       return
     }
     setError(null)
     setPosition(pos)
-    setGpsStatus('manual') 
+    setGpsStatus('manual')
   }
 
 
@@ -214,15 +235,15 @@ export default function ReclamationFormPage() {
 
     navigator.geolocation.getCurrentPosition(
 
-      (pos) => { 
-        if (!isInsideKelibia(pos.coords.latitude, pos.coords.longitude)) {
+      async (pos) => {
+        if (!await isInsideKelibia(pos.coords.latitude, pos.coords.longitude)) {
           setError(t('error_outside_kelibia'))
           setGpsStatus('none')
           return
         }
         setError(null)
         setPosition([pos.coords.latitude, pos.coords.longitude])
-        setGpsStatus('gps') 
+        setGpsStatus('gps')
       },
 
       (err) => {
@@ -285,7 +306,7 @@ export default function ReclamationFormPage() {
     }
 
     if (position) {
-      if (!isInsideKelibia(position[0], position[1])) {
+      if (!await isInsideKelibia(position[0], position[1])) {
         setError(t('error_outside_kelibia'))
         setLoading(false)
         return
