@@ -1668,7 +1668,7 @@ export default function AgentDashboardPage() {
 
     markersLayer.current = L.layerGroup().addTo(m)
 
-    // ── Couches SIG GeoJSON (Agent uniquement) ────────────────────────────
+    // ── Couches SIG GeoJSON — données réelles QGIS/WGS84 (Agent uniquement) ──
     const sigOverlays: Record<string, any> = {}
 
     const loadGeoJSON = (url: string, style: any, onEachFeature?: (f: any, layer: any) => void) => {
@@ -1680,72 +1680,124 @@ export default function AgentDashboardPage() {
       return layer
     }
 
-    // Routes — couleur selon état
-    const routesStyle = (feature: any) => {
-      const etat = feature?.properties?.etat
-      const color = etat === 'bonne' ? '#2e7d32' : etat === 'dégradée' ? '#e65100' : etat === 'travaux' ? '#f9a825' : '#757575'
-      const weight = feature?.properties?.type === 'principale' ? 4 : 2
-      return { color, weight, opacity: 0.85 }
-    }
-    const routesPopup = (feature: any, layer: any) => {
-      if (feature.properties) {
-        layer.bindPopup(
-          `<b>🛣️ ${feature.properties.nom}</b><br/>
-           État : <b style="color:${routesStyle(feature).color}">${feature.properties.etat}</b><br/>
-           Type : ${feature.properties.type}`
-        )
-      }
-    }
-    sigOverlays['🛣️ Routes'] = loadGeoJSON('/layers/routes.geojson', routesStyle, routesPopup)
+    // 1. Limite municipale — contour de la commune
+    sigOverlays['🏛️ Limite communale'] = loadGeoJSON(
+      '/layers/limite_kelibia.geojson',
+      () => ({ color: '#1a237e', weight: 3, fill: false, dashArray: '8,4', opacity: 0.9 }),
+      (feature, layer) => layer.bindPopup(`<b>🏛️ ${feature.properties?.name || 'Kelibia'}</b><br/>Limite de la commune`)
+    )
 
-    // Drainage — bleu
-    const drainageStyle = (feature: any) => {
-      const etat = feature?.properties?.etat
-      const color = etat === 'obstrué' ? '#b71c1c' : etat === 'risque' ? '#ff6f00' : '#0277bd'
-      const isZone = feature?.geometry?.type === 'Polygon'
-      return isZone
-        ? { color: '#ff6f00', weight: 1, fillColor: '#fff3e0', fillOpacity: 0.4 }
-        : { color, weight: 2, opacity: 0.8, dashArray: '5,4' }
+    // 2. Routes OSM — couleur selon type de voie
+    const routeColor = (type: string) => {
+      if (type === 'primary') return '#c62828'
+      if (type === 'secondary') return '#e65100'
+      if (type === 'tertiary' || type === 'tertiary_link') return '#f9a825'
+      if (type === 'residential' || type === 'unclassified') return '#546e7a'
+      if (type === 'service') return '#78909c'
+      return '#b0bec5'
     }
-    const drainagePopup = (feature: any, layer: any) => {
-      if (feature.properties) {
-        layer.bindPopup(
-          `<b>🚰 ${feature.properties.nom}</b><br/>
-           Type : ${feature.properties.type}<br/>
-           État : <b>${feature.properties.etat}</b>
-           ${feature.properties.diametre_mm ? `<br/>Ø ${feature.properties.diametre_mm} mm` : ''}`
-        )
+    const routeWeight = (type: string) => {
+      if (type === 'primary') return 4
+      if (type === 'secondary') return 3
+      if (type === 'tertiary' || type === 'tertiary_link') return 2.5
+      return 1.5
+    }
+    sigOverlays['🛣️ Routes'] = loadGeoJSON(
+      '/layers/routes_lignes.geojson',
+      (f: any) => ({ color: routeColor(f?.properties?.route || ''), weight: routeWeight(f?.properties?.route || ''), opacity: 0.85 }),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        layer.bindPopup(`<b>🛣️ ${p.nom || '(sans nom)'}</b><br/>Type : <b>${p.route || '—'}</b>`)
       }
-    }
-    sigOverlays['🚰 Drainage / Réseau eau'] = loadGeoJSON('/layers/drainage.geojson', drainageStyle, drainagePopup)
+    )
 
-    // Zones vertes — vert
-    const zonesVertesStyle = () => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.45 })
-    const zonesVertesPopup = (feature: any, layer: any) => {
-      if (feature.properties) {
-        layer.bindPopup(
-          `<b>🌳 ${feature.properties.nom}</b><br/>
-           Type : ${feature.properties.type}<br/>
-           Surface : ${feature.properties.superficie_m2?.toLocaleString()} m²<br/>
-           Équipements : ${feature.properties.equipements}`
-        )
+    // 3. Bâtiments — polygones + icône équipement public
+    sigOverlays['🏠 Bâtiments'] = loadGeoJSON(
+      '/layers/batiments_polygones.geojson',
+      () => ({ color: '#4e342e', weight: 1, fillColor: '#d7ccc8', fillOpacity: 0.6 }),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        const equip = p.equip ? `<br/>Équipement : <b>${p.equip}</b>` : ''
+        layer.bindPopup(`<b>🏠 ${p.nom || 'Bâtiment'}</b><br/>Type : ${p.bati || '—'}${equip}`)
       }
-    }
-    sigOverlays['🌳 Zones vertes'] = loadGeoJSON('/layers/zones_vertes.geojson', zonesVertesStyle, zonesVertesPopup)
+    )
 
-    // Zones industrielles — orange/gris
-    const industrielStyle = () => ({ color: '#5d4037', weight: 1.5, fillColor: '#ffccbc', fillOpacity: 0.5 })
-    const industrielPopup = (feature: any, layer: any) => {
-      if (feature.properties) {
-        layer.bindPopup(
-          `<b>🏭 ${feature.properties.nom}</b><br/>
-           Activité : ${feature.properties.activite}<br/>
-           Entreprises : ${feature.properties.nb_entreprises}<br/>
-           Impact : <span style="color:#b71c1c">${feature.properties.impact}</span>`
-        )
+    // 4. Agriculture — parcelles cultivées
+    sigOverlays['🌾 Agriculture'] = loadGeoJSON(
+      '/layers/agriculture_polygones.geojson',
+      () => ({ color: '#558b2f', weight: 1, fillColor: '#dcedc8', fillOpacity: 0.55 }),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        layer.bindPopup(`<b>🌾 ${p.nom || 'Parcelle'}</b><br/>Usage : <b>${p.usage_sol || '—'}</b>`)
       }
+    )
+
+    // 5. Espaces verts — parcs, jardins, pelouses
+    sigOverlays['🌳 Espaces verts'] = loadGeoJSON(
+      '/layers/espaces_verts_polygones.geojson',
+      () => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.5 }),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        layer.bindPopup(`<b>🌳 ${p.nom || 'Espace vert'}</b><br/>Type : ${p.usage_sol || p.naturel || p.loisir || '—'}`)
+      }
+    )
+
+    // 6. Zones urbaines — résidentiel, commercial, construction
+    const zoneUrbaineColor = (usage: string) => {
+      if (usage === 'residential') return '#ffe0b2'
+      if (usage === 'commercial') return '#e1bee7'
+      if (usage === 'construction') return '#fff9c4'
+      return '#f5f5f5'
     }
-    sigOverlays['🏭 Zones industrielles'] = loadGeoJSON('/layers/industriel.geojson', industrielStyle, industrielPopup)
+    sigOverlays['🏘️ Zones urbaines'] = loadGeoJSON(
+      '/layers/zones_urbaines_polygones.geojson',
+      (f: any) => ({ color: '#6d4c41', weight: 1.5, fillColor: zoneUrbaineColor(f?.properties?.usage_sol || ''), fillOpacity: 0.5 }),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        layer.bindPopup(`<b>🏘️ ${p.nom || 'Zone urbaine'}</b><br/>Usage : <b>${p.usage_sol || '—'}</b>`)
+      }
+    )
+
+    // 7. Forêts — zones boisées
+    sigOverlays['🌲 Forêts'] = loadGeoJSON(
+      '/layers/forets_polygones.geojson',
+      () => ({ color: '#1b5e20', weight: 1.5, fillColor: '#c8e6c9', fillOpacity: 0.6 }),
+      (feature, layer) => layer.bindPopup(`<b>🌲 Forêt / Zone boisée</b><br/>Type : ${feature.properties?.naturel || 'wood'}`)
+    )
+
+    // 8. Oueds (cours d'eau) — lignes bleues
+    sigOverlays['💧 Oueds (cours d\'eau)'] = loadGeoJSON(
+      '/layers/oueds_lignes.geojson',
+      () => ({ color: '#0277bd', weight: 2, opacity: 0.85, dashArray: '6,3' }),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        layer.bindPopup(`<b>💧 ${p.nom || 'Oued'}</b><br/>Type : ${p.oued || 'stream'}`)
+      }
+    )
+
+    // 9. Eaux (lacs/mares) — polygones bleus
+    sigOverlays['🌊 Plans d\'eau'] = loadGeoJSON(
+      '/layers/eau_polygones.geojson',
+      () => ({ color: '#01579b', weight: 1.5, fillColor: '#b3e5fc', fillOpacity: 0.65 }),
+      (feature, layer) => layer.bindPopup(`<b>🌊 Plan d'eau</b><br/>Type : ${feature.properties?.naturel || 'water'}`)
+    )
+
+    // 10. Points espaces verts
+    sigOverlays['📍 Points verts'] = loadGeoJSON(
+      '/layers/espaces_verts_points.geojson',
+      () => ({ color: '#2e7d32', weight: 2, fillColor: '#69f0ae', fillOpacity: 0.8, radius: 6 } as any),
+      (feature, layer) => layer.bindPopup(`<b>🌿 ${feature.properties?.nom || 'Espace vert'}</b>`)
+    )
+
+    // 11. Points bâtiments notables
+    sigOverlays['📌 Bâtiments notables'] = loadGeoJSON(
+      '/layers/batiments_points.geojson',
+      () => ({ color: '#4e342e', weight: 2, fillColor: '#ffab40', fillOpacity: 0.9, radius: 7 } as any),
+      (feature, layer) => {
+        const p = feature.properties || {}
+        layer.bindPopup(`<b>📌 ${p.nom || 'Bâtiment notable'}</b><br/>${p.equip || p.bati || ''}`)
+      }
+    )
 
     L.control.layers(
       { '🗺️ OpenStreetMap': osm, '🛰️ Satellite (Esri)': sat, '🏔️ Topographique': topo },
@@ -1765,15 +1817,17 @@ export default function AgentDashboardPage() {
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> Résolu</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejeté</div>
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Routes</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#2e7d32;display:inline-block;"></span> Bonne</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#e65100;display:inline-block;"></span> Dégradée</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="width:20px;height:3px;background:#f9a825;display:inline-block;"></span> Travaux</div>
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Couches SIG</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#a5d6a7;border:1px solid #2e7d32;display:inline-block;border-radius:2px;"></span> Zones vertes</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#ffccbc;border:1px solid #5d4037;display:inline-block;border-radius:2px;"></span> Industriel</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#0277bd;border-top:2px dashed #0277bd;display:inline-block;"></span> Drainage</div>
-        <div style="display:flex;align-items:center;gap:6px;"><span style="width:18px;height:8px;background:#fff3e0;border:1px solid #ff6f00;display:inline-block;border-radius:2px;"></span> Zone inondable</div>`
+        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Couches SIG (QGIS)</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;border-top:3px dashed #1a237e;display:inline-block;"></span> Limite communale</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#c62828;display:inline-block;"></span> Route principale</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#546e7a;display:inline-block;"></span> Route locale</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#d7ccc8;border:1px solid #4e342e;display:inline-block;border-radius:2px;"></span> Bâtiments</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#dcedc8;border:1px solid #558b2f;display:inline-block;border-radius:2px;"></span> Agriculture</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#a5d6a7;border:1px solid #2e7d32;display:inline-block;border-radius:2px;"></span> Espaces verts</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#ffe0b2;border:1px solid #6d4c41;display:inline-block;border-radius:2px;"></span> Zones urbaines</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#c8e6c9;border:1px solid #1b5e20;display:inline-block;border-radius:2px;"></span> Forêts</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;border-top:2px dashed #0277bd;display:inline-block;"></span> Oueds</div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:18px;height:8px;background:#b3e5fc;border:1px solid #01579b;display:inline-block;border-radius:2px;"></span> Plans d'eau</div>`
       return div
     }
     legend.addTo(m)
