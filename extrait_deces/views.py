@@ -45,14 +45,14 @@ class MesDecesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_cin = request.user.cin
+        user_cin = getattr(request.user, 'cin', None)
         if not user_cin:
-            return Response({"error": "CIN non défini."}, status=400)
+            return Response({"deces": [], "info": "CIN non défini."}, status=200)
             
         try:
             citoyen = Citoyen.objects.get(cin=user_cin)
         except Citoyen.DoesNotExist:
-            return Response({"error": "Citoyen introuvable."}, status=404)
+            return Response({"deces": [], "info": "Citoyen introuvable dans le registre civil."}, status=200)
             
         from extrait_mariage.models import ExtraitMariage
         mariages = ExtraitMariage.objects.filter(
@@ -90,12 +90,12 @@ class DeclarationDecesAPIView(APIView):
     def get(self, request):
         user_cin = getattr(request.user, 'cin', None)
         if not user_cin:
-            return Response({"eligible_relatives": [], "warning": "CIN non défini pour cet utilisateur."})
+            return Response({"eligible_relatives": [], "my_declarations": [], "warning": "CIN non défini pour cet utilisateur."}, status=200)
 
         try:
             citoyen = Citoyen.objects.get(cin=user_cin)
         except Citoyen.DoesNotExist:
-            return Response({"eligible_relatives": [], "warning": "Aucun dossier citoyen lié à ce compte."})
+            return Response({"eligible_relatives": [], "my_declarations": [], "warning": "Aucun dossier citoyen lié à ce compte."}, status=200)
 
         try:
             from extrait_mariage.models import ExtraitMariage

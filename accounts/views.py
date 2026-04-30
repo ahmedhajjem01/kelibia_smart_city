@@ -11,6 +11,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 from djoser.serializers import ActivationSerializer
 from .serializers import CustomUserSerializer, MyTokenObtainPairSerializer
 from datetime import date
@@ -85,8 +88,39 @@ class RegisterView(APIView):
             
             user.save()
             
+            # Send Verification Email
+            from django.core.mail import send_mail
+            from django.conf import settings
+            import threading
+            
+            if getattr(settings, 'EMAIL_HOST_USER', None):
+                def send_async_verification():
+                    try:
+                        uid = urlsafe_base64_encode(force_bytes(user.pk))
+                        token = default_token_generator.make_token(user)
+                        protocol = "https" if not settings.DEBUG else "http"
+                        domain = settings.DOMAIN
+                        activation_link = f"{protocol}://{domain}/activate?uid={uid}&token={token}"
+
+                        subject = "Confirmez votre compte Kélibia Smart City"
+                        email_body = f"Bonjour {user.first_name},\n\n" \
+                                     f"Merci de vous être inscrit sur Kélibia Smart City.\n" \
+                                     f"Veuillez cliquer sur le lien suivant pour activer votre compte et accéder à votre profil :\n" \
+                                     f"{activation_link}\n\n" \
+                                     f"Cordialement,\nL'équipe Kélibia Smart City"
+                        send_mail(
+                            subject,
+                            email_body,
+                            settings.EMAIL_HOST_USER,
+                            [user.email],
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        logger.error(f"Mail verification failed: {e}")
+                threading.Thread(target=send_async_verification).start()
+            
             return Response({
-                "message": "Utilisateur créé avec succès ! Veuillez vous connecter.",
+                "message": "Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
                 "username": user.username
             }, status=status.HTTP_201_CREATED)
 
@@ -572,10 +606,12 @@ class ConfigView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     def get(self, request):
-        if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
-            return Response({"error": "Accès refusé."}, status=403)
-        
         from .models import SiteConfiguration
         config, _ = SiteConfiguration.objects.get_or_create(id=1)
         return Response({

@@ -132,7 +132,7 @@ export default function MesResidencesPage() {
                       <td className="text-center">{getStatusBadge(d)}</td>
                       <td className="px-4 text-end">
                         {(!d.is_paid && !user?.has_active_asd) ? (
-                           <Link to={`/paiement-simulation?type=residence&id=${d.id}`} className="btn btn-sm btn-primary rounded-pill fw-bold">
+                           <Link to={`/paiement?amount=2.000&reason=Certificat+de+Résidence&requestId=${d.id}&requestType=residence&target=/mes-residences&file_fr=${encodeURIComponent(d.issued_document || '')}`} className="btn btn-sm btn-primary rounded-pill fw-bold">
                              <i className="fas fa-credit-card me-1"></i>
                              {t('pay_2dt') || 'Payer'}
                            </Link>

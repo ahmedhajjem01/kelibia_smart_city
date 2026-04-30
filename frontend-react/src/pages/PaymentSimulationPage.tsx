@@ -245,7 +245,7 @@ export default function PaymentSimulationPage() {
                       <div className="mb-4">
                         <i className="fas fa-check-circle fa-5x text-success"></i>
                       </div>
-                      <h3 className="fw-bold text-success mb-2">{lang === 'ar' ? 'تم الدفع بنجاح' : 'Paiement Réussi !'}</h3>
+                      <h3 className="fw-bold text-success mb-2">{t('payment_success') || 'Paiement Réussi !'}</h3>
                       <p className="text-muted mb-4">Votre transaction a été validée avec succès.</p>
                       
                       <div className="bg-light p-4 rounded-4 mb-4 text-start">
@@ -256,16 +256,24 @@ export default function PaymentSimulationPage() {
                       </div>
 
                       <div className="d-grid gap-2">
-                         {queryParams.get('file_fr') && queryParams.get('file_ar') && (
-                            <div className="d-flex gap-2 mb-2 no-print">
-                                <a href={queryParams.get('file_fr') || '#'} target="_blank" rel="noreferrer" className="btn btn-success flex-grow-1 rounded-pill fw-bold">
-                                    <i className="fas fa-file-pdf me-2"></i> Extrait (FR)
+                         <div className="d-flex flex-column gap-2 mb-2 no-print">
+                            {queryParams.get('file_fr') && (
+                                <a href={decodeURIComponent(queryParams.get('file_fr') || '')} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm">
+                                    <i className="fas fa-file-pdf me-2"></i> {t('open_doc_fr') || 'Ouvrir l\'extrait (FR)'}
                                 </a>
-                                <a href={queryParams.get('file_ar') || '#'} target="_blank" rel="noreferrer" className="btn btn-success flex-grow-1 rounded-pill fw-bold arabic-font">
-                                    <i className="fas fa-file-pdf me-2"></i> مضمون (Ar)
+                            )}
+                            {queryParams.get('file_ar') && (
+                                <a href={decodeURIComponent(queryParams.get('file_ar') || '')} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm arabic-font">
+                                    <i className="fas fa-file-pdf me-2"></i> {t('open_doc_ar') || 'فتح المضمون (عربية)'}
                                 </a>
-                            </div>
-                         )}
+                            )}
+                            {!queryParams.get('file_fr') && !queryParams.get('file_ar') && queryParams.get('file') && (
+                                <a href={decodeURIComponent(queryParams.get('file') || '')} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm">
+                                    <i className="fas fa-file-pdf me-2"></i> {t('open_document') || 'Ouvrir votre document'}
+                                </a>
+                            )}
+                         </div>
+
                          <button className="btn btn-dark btn-lg rounded-pill fw-bold no-print" onClick={() => window.print()}>
                             <i className="fas fa-receipt me-2"></i> {lang === 'ar' ? 'طباعة الوصل' : 'Télécharger le reçu'}
                          </button>

@@ -40,6 +40,18 @@ L.Marker.prototype.options.icon = DefaultIcon
 
 const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 
+const KELIBIA_BOUNDS = {
+  minLat: 36.81,
+  maxLat: 36.89,
+  minLng: 11.05,
+  maxLng: 11.15
+}
+
+function isInsideKelibia(lat: number, lng: number) {
+  return lat >= KELIBIA_BOUNDS.minLat && lat <= KELIBIA_BOUNDS.maxLat &&
+         lng >= KELIBIA_BOUNDS.minLng && lng <= KELIBIA_BOUNDS.maxLng
+}
+
 
 
 function LocationMarker({ position, onMapClick }: { position: [number, number] | null, onMapClick: (pos: [number, number]) => void }) {
@@ -182,7 +194,15 @@ export default function ReclamationFormPage() {
 
 
 
-  const handleMapClick = (pos: [number, number]) => { setPosition(pos); setGpsStatus('manual') }
+  const handleMapClick = (pos: [number, number]) => { 
+    if (!isInsideKelibia(pos[0], pos[1])) {
+      setError(t('error_outside_kelibia'))
+      return
+    }
+    setError(null)
+    setPosition(pos)
+    setGpsStatus('manual') 
+  }
 
 
 
@@ -194,7 +214,16 @@ export default function ReclamationFormPage() {
 
     navigator.geolocation.getCurrentPosition(
 
-      (pos) => { setPosition([pos.coords.latitude, pos.coords.longitude]); setGpsStatus('gps') },
+      (pos) => { 
+        if (!isInsideKelibia(pos.coords.latitude, pos.coords.longitude)) {
+          setError(t('error_outside_kelibia'))
+          setGpsStatus('none')
+          return
+        }
+        setError(null)
+        setPosition([pos.coords.latitude, pos.coords.longitude])
+        setGpsStatus('gps') 
+      },
 
       (err) => {
 
@@ -256,11 +285,13 @@ export default function ReclamationFormPage() {
     }
 
     if (position) {
-
+      if (!isInsideKelibia(position[0], position[1])) {
+        setError(t('error_outside_kelibia'))
+        setLoading(false)
+        return
+      }
       formData.append('latitude', position[0].toString())
-
       formData.append('longitude', position[1].toString())
-
     }
 
     try {

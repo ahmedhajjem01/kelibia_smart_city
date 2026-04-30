@@ -89,8 +89,8 @@ _is_neon = "neon.tech" in _db_url
 DATABASES = {
     "default": dj_database_url.config(
         default=_db_url,
-        conn_max_age=600,
-        ssl_require=_is_neon,
+        conn_max_age=0 if os.getenv("VERCEL") else 600,
+        ssl_require=True if "sslmode=require" in _db_url or _is_neon else False,
     )
 }
 

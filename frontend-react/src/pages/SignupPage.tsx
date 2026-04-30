@@ -8,7 +8,7 @@ import Webcam from 'react-webcam'
 import { useI18n } from '../i18n/LanguageProvider'
 
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_logo.png'
+import smartCityLogo from '../assets/smart_city_logo.png'
 
 
 
@@ -1165,6 +1165,7 @@ export default function SignupPage() {
 
   .sg-btn { justify-content: center; }
 
+  .sg-nav-portal-title { font-size: 1.4rem; font-weight: 800; color: #954a00; margin-left: 12px; text-transform: uppercase; }
 }
 
 `
@@ -1407,9 +1408,9 @@ export default function SignupPage() {
 
       }
 
-      setMessage(t('signup_success_verified'))
+      setMessage(data?.message || t('signup_success_verified') || "Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre e-mail.");
 
-      setTimeout(() => navigate('/login'), 300)
+      setTimeout(() => navigate('/login'), 5000)
 
     } catch (err) {
 
@@ -1450,19 +1451,13 @@ export default function SignupPage() {
       <nav className="sg-nav">
 
         <a className="sg-nav-brand" href="/">
-
           <img
-
             className="sg-nav-logo"
-
-            src={tunisiaLogo}
-
-            alt={t('republic_of_tunisia')}
-
+            src={smartCityLogo}
+            style={{ height: 60, width: 'auto' }}
+            alt="Logo"
           />
-
-          <span className="sg-nav-name">{t('republic_of_tunisia')}</span>
-
+          <span className="sg-nav-portal-title">{t('portal_title')}</span>
         </a>
 
         <div className="sg-nav-links">
@@ -1941,7 +1936,7 @@ export default function SignupPage() {
 
         <div>
 
-          <div className="sg-footer-brand">{t('republic_of_tunisia')}</div>
+          <div className="sg-footer-brand" style={{ fontSize: '1.2rem', fontWeight: 800 }}>{t('portal_title')}</div>
 
           <div className="sg-footer-copy">{t('footer_text')}</div>
 

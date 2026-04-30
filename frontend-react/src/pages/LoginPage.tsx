@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { storeTokens } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_log.png'
+import smartCityLogo from '../assets/smart_city_logo.png'
 
 type TokenResponse = {
   access: string
@@ -80,9 +80,9 @@ export default function LoginPage() {
   .lp-hero { display: flex; }
 }
 .lp-hero-brand { display: flex; align-items: center; gap: 14px; }
-.lp-hero-logo { height: 56px; width: auto; }
-.lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
-.lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+.lp-hero-logo { height: 72px; width: auto; }
+.lp-hero-brand-name { display: none; }
+.lp-hero-brand-sub { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
 .lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
 .lp-hero-accent { color: #7ec8f7; white-space: nowrap; }
 .lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
@@ -104,7 +104,7 @@ export default function LoginPage() {
 .lp-lang-opt { border: none; background: none; border-radius: 999px; padding: 5px 16px; font-size: .75rem; font-weight: 700; cursor: pointer; color: #6b7280; }
 .lp-lang-opt.active { background: #954a00; color: #fff; }
 .lp-mobile-logo { display: flex; justify-content: center; margin-bottom: 20px; }
-.lp-mobile-logo img { height: 44px; }
+.lp-mobile-logo img { height: 64px; }
 @media (min-width: 768px) { .lp-mobile-logo { display: none; } }
 .lp-greeting { margin-bottom: 28px; }
 .lp-greeting h2 { font-size: 1.55rem; font-weight: 800; color: #191b22; margin-bottom: 6px; }
@@ -180,6 +180,21 @@ export default function LoginPage() {
 .lp-footer p { font-size: .72rem; color: #9ca3af; margin: 4px 0; }
 .lp-signup-link { font-size: .78rem; color: #6b7280; }
 .lp-signup-link a { color: #954a00; font-weight: 600; text-decoration: none; }
+/* ── Modals ── */
+.lp-modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,17,23,.85); backdrop-filter: blur(8px);
+  z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.lp-modal {
+  background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 400px;
+  position: relative; box-shadow: 0 24px 60px rgba(0,0,0,.4);
+}
+.lp-modal h3 { font-size: 1.25rem; font-weight: 800; color: #191b22; margin-bottom: 8px; margin-top: 0; }
+.lp-modal p { font-size: .88rem; color: #6b7280; line-height: 1.5; margin: 0; }
+.lp-modal-close {
+  position: absolute; top: 16px; right: 16px; background: none; border: none;
+  font-size: 1.5rem; color: #9ca3af; cursor: pointer; line-height: 1;
+}
 `
 
   const [email, setEmail] = useState('')
@@ -188,6 +203,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  
+  const [showTunisieIdModal, setShowTunisieIdModal] = useState(false)
+  const [showQrModal, setShowQrModal] = useState(false)
+  const [tunisieIdCin, setTunisieIdCin] = useState('')
+  const [tunisieIdPassword, setTunisieIdPassword] = useState('')
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail')
@@ -264,11 +284,10 @@ export default function LoginPage() {
           <div className="lp-hero-brand">
             <img
               className="lp-hero-logo"
-              src={tunisiaLogo}
+              src={smartCityLogo}
               alt="Logo"
             />
             <div>
-              <div className="lp-hero-brand-name">{t('republic_of_tunisia')}</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
@@ -306,7 +325,7 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={tunisiaLogo} alt="Logo" />
+            <img src={smartCityLogo} alt="Logo" />
           </div>
 
           {/* Greeting */}
@@ -378,11 +397,11 @@ export default function LoginPage() {
             <div className="lp-divider-line"></div>
           </div>
           <div className="lp-alt-grid">
-            <button className="lp-alt-btn">
-              <i className="fas fa-id-card icon-blue"></i> {t('tunisia_id')}
+            <button type="button" className="lp-alt-btn" onClick={() => setShowTunisieIdModal(true)}>
+              <i className="fas fa-id-card icon-blue"></i> {t('tunisia_id') || 'Tunisie ID'}
             </button>
-            <button className="lp-alt-btn">
-              <i className="fas fa-qrcode icon-orange"></i> {t('scan_qr')}
+            <button type="button" className="lp-alt-btn" onClick={() => setShowQrModal(true)}>
+              <i className="fas fa-qrcode icon-orange"></i> {t('scan_qr') || 'Scan QR'}
             </button>
           </div>
 
@@ -400,6 +419,90 @@ export default function LoginPage() {
 
         </div>
       </div>
+
+      {/* Modals */}
+      {showTunisieIdModal && (
+        <div className="lp-modal-overlay">
+          <div className="lp-modal">
+            <button className="lp-modal-close" onClick={() => setShowTunisieIdModal(false)}>×</button>
+            <h3>{t('tunisia_id_modal_title')}</h3>
+            <p>{t('tunisia_id_modal_desc')}</p>
+            <input 
+              type="text" 
+              className="lp-input" 
+              placeholder={t('cin_placeholder')}
+              value={tunisieIdCin}
+              onChange={e => setTunisieIdCin(e.target.value)}
+              style={{ marginTop: '16px', marginBottom: '8px' }}
+            />
+            <input 
+              type="password" 
+              className="lp-input" 
+              placeholder={t('password_label')}
+              value={tunisieIdPassword}
+              onChange={e => setTunisieIdPassword(e.target.value)}
+              style={{ marginBottom: '16px' }}
+            />
+            <button 
+              className="lp-btn"
+              disabled={loading}
+              onClick={async () => {
+                setError(null)
+                setLoading(true)
+                try {
+                  const res = await fetch(resolveBackendUrl('/api/token/'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: tunisieIdCin, password: tunisieIdPassword }),
+                  })
+                  const data = await res.json()
+                  if (!res.ok) throw new Error(data.detail || t('error_msg'))
+                  
+                  storeTokens({ access: data.access, refresh: data.refresh })
+                  setShowTunisieIdModal(false)
+                  if (data.is_staff || data.is_superuser || data.user_type === 'agent') {
+                    navigate('/agent-dashboard')
+                  } else {
+                    navigate('/dashboard')
+                  }
+                } catch (err: any) {
+                  alert(err.message)
+                } finally {
+                  setLoading(false)
+                }
+              }}
+            >
+              {loading ? (t('processing') || '...') : t('login_btn')} <i className="fas fa-sign-in-alt"></i>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showQrModal && (
+        <div className="lp-modal-overlay">
+          <div className="lp-modal" style={{ textAlign: 'center' }}>
+            <button className="lp-modal-close" onClick={() => setShowQrModal(false)}>×</button>
+            <h3>{t('qr_modal_title')}</h3>
+            <p style={{ marginBottom: '16px' }}>{t('qr_modal_desc')}</p>
+            <img 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=kelibiasmartcity-login-mock`} 
+              alt="QR Code de connexion" 
+              style={{ borderRadius: '12px', border: '1px solid #eee', padding: '8px', display: 'inline-block' }}
+            />
+            <button 
+              className="lp-alt-btn"
+              style={{ width: '100%', marginTop: '24px' }}
+              onClick={() => {
+                alert(t('qr_success_simulation') || 'Scan QR réussi !');
+                setShowQrModal(false);
+                navigate('/dashboard');
+              }}
+            >
+              <i className="fas fa-mobile-alt icon-blue"></i> {t('qr_simulate_btn')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

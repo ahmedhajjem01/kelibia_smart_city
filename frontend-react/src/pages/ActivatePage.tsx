@@ -79,7 +79,7 @@ export default function ActivatePage() {
           storeTokens({ access: data.access, refresh: data.refresh, username: data.username })
         }
 
-        setTimeout(() => navigate('/dashboard'), 2000)
+        setTimeout(() => navigate('/profile'), 2000)
       } catch (e) {
         setLoading(false)
         setMessage({

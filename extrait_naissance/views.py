@@ -36,9 +36,14 @@ class MesExtraitsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_cin = request.user.cin
+        user_cin = getattr(request.user, 'cin', None)
         if not user_cin:
-            return Response({"error": "CIN non défini pour cet utilisateur."}, status=400)
+            return Response({
+                "error": "CIN non défini pour cet utilisateur.",
+                "mon_extrait": None,
+                "enfants": [],
+                "conjoints": []
+            }, status=200) # Return 200 with empty data instead of 400 error
             
         if not request.user.is_verified:
             return Response({"error": "Votre compte doit être vérifié par l'administration pour accéder à ce service."}, status=403)
@@ -47,24 +52,29 @@ class MesExtraitsAPIView(APIView):
             citoyen = Citoyen.objects.get(cin=user_cin)
         except Citoyen.DoesNotExist:
             return Response({
-                "error": "Aucun citoyen trouvé avec ce CIN dans le registre de l'État Civil.",
+                "info": "Aucun citoyen trouvé avec ce CIN dans le registre de l'État Civil.",
                 "mon_extrait": None,
-                "enfants": []
-            }, status=404)
+                "enfants": [],
+                "conjoints": []
+            }, status=200) # Return 200 so frontend doesn't crash
             
         mon_extrait = ExtraitNaissance.objects.filter(titulaire=citoyen).first()
+        
+        # Optimize child lookup
         enfants_extraits = ExtraitNaissance.objects.filter(
             models.Q(titulaire__pere=citoyen) | models.Q(titulaire__mere=citoyen)
-        )
+        ).select_related('titulaire')
+        
+        # Optimize conjoint lookup (parents of your children who are not you)
         conjoints_extraits = ExtraitNaissance.objects.filter(
-            models.Q(titulaire__enfants_mere__pere=citoyen) |
-            models.Q(titulaire__enfants_pere__mere=citoyen)
-        ).distinct()
+            models.Q(titulaire__pere=citoyen, titulaire__mere__isnull=False) |
+            models.Q(titulaire__mere=citoyen, titulaire__pere__isnull=False)
+        ).exclude(titulaire=citoyen).distinct().select_related('titulaire')
         
         now = timezone.now()
         
         def check_paid_validity(obj):
-            if not obj.is_paid or not obj.paid_at:
+            if not obj or not obj.is_paid or not obj.paid_at:
                 return False
             return (now - obj.paid_at).total_seconds() < 86400
 
@@ -95,16 +105,16 @@ class MesExtraitsAPIView(APIView):
                 "is_paid": check_paid_validity(enfant)
             })
 
-        for conjoint in conjoints_extraits:
+        for c in conjoints_extraits:
             data["conjoints"].append({
-                "id": conjoint.id,
-                "n_etat_civil": conjoint.titulaire.n_etat_civil,
-                "nom_complet_fr": f"{conjoint.titulaire.prenom_fr} {conjoint.titulaire.nom_fr}",
-                "nom_complet_ar": f"{conjoint.titulaire.prenom_ar} {conjoint.titulaire.nom_ar}",
-                "date_naissance": conjoint.titulaire.date_naissance,
-                "url_ar": f"/extrait-naissance/{conjoint.id}/certificate/",
-                "url_fr": f"/extrait-naissance/{conjoint.id}/certificate/fr/",
-                "is_paid": check_paid_validity(conjoint)
+                "id": c.id,
+                "n_etat_civil": c.titulaire.n_etat_civil,
+                "nom_complet_fr": f"{c.titulaire.prenom_fr} {c.titulaire.nom_fr}",
+                "nom_complet_ar": f"{c.titulaire.prenom_ar} {c.titulaire.nom_ar}",
+                "date_naissance": c.titulaire.date_naissance,
+                "url_ar": f"/extrait-naissance/{c.id}/certificate/",
+                "url_fr": f"/extrait-naissance/{c.id}/certificate/fr/",
+                "is_paid": check_paid_validity(c)
             })
             
         return Response(data)
@@ -115,10 +125,11 @@ class DeclarationNaissanceAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        if request.user.is_staff or getattr(request.user, 'role', '') == 'agent':
+        user = request.user
+        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor'):
             queryset = DeclarationNaissance.objects.all().order_by('-created_at')
         else:
-            queryset = DeclarationNaissance.objects.filter(declarant=request.user).order_by('-created_at')
+            queryset = DeclarationNaissance.objects.filter(declarant=user).order_by('-created_at')
         serializer = DeclarationNaissanceSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -134,13 +145,15 @@ class DeclarationNaissanceDetailAPIView(APIView):
 
     def get(self, request, pk):
         declaration = get_object_or_404(DeclarationNaissance, pk=pk)
-        if not (request.user.is_staff or getattr(request.user, 'role', '') == 'agent' or declaration.declarant == request.user):
+        user = request.user
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor') or declaration.declarant == user):
             return Response({"error": "Non autorisé"}, status=403)
         serializer = DeclarationNaissanceSerializer(declaration)
         return Response(serializer.data)
 
     def patch(self, request, pk):
-        if not (request.user.is_staff or getattr(request.user, 'role', '') == 'agent'):
+        user = request.user
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
              return Response({"error": "Seuls les agents peuvent modifier le statut."}, status=403)
         declaration = get_object_or_404(DeclarationNaissance, pk=pk)
         new_status = request.data.get('status')

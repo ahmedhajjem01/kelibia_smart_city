@@ -5,7 +5,7 @@ import { clearTokens, getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_log.png'
+import smartCityLogo from '../assets/smart_city_logo.png'
 
 
 
@@ -89,7 +89,7 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-sidebar{position:fixed;left:0;top:0;height:100vh;width:256px;background:#f3f3f3;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;padding:24px 16px;z-index:100;overflow-y:auto}
 .ag-sidebar-brand{display:flex;align-items:center;gap:12px;padding:0 8px;margin-bottom:32px}
 .ag-sidebar-brand img{width:40px;height:40px;object-fit:contain}
-.ag-brand-name{font-family:'Public Sans',sans-serif;font-size:1rem;font-weight:700;color:#ae131a;line-height:1.2}
+.ag-brand-name{font-family:'Public Sans',sans-serif;font-size:1.4rem;font-weight:900;color:#ae131a;line-height:1.2}
 .ag-brand-sub{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:#9ca3af;font-weight:500}
 .ag-sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px}
 .ag-nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;color:#6b7280;text-decoration:none;border-radius:6px;font-size:0.875rem;font-weight:500;transition:all .15s;border-right:3px solid transparent;position:relative}
@@ -330,6 +330,8 @@ export default function AgentDashboardPage() {
 
   const [filterPriority, setFilterPriority] = useState('')
 
+  const [mapStatusFilter, setMapStatusFilter] = useState<string[]>(['pending', 'in_progress', 'resolved', 'rejected'])
+
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([])
 
   const [detailRec, setDetailRec] = useState<Reclamation | null>(null)
@@ -401,6 +403,7 @@ export default function AgentDashboardPage() {
   const [loadingAgents, setLoadingAgents] = useState(false)
 
   const [articleImage, setArticleImage] = useState<File | null>(null)
+  const [extraImages, setExtraImages] = useState<FileList | null>(null)
 
 
 
@@ -629,6 +632,11 @@ export default function AgentDashboardPage() {
     fd.append('is_published', String(articleForm.is_published))
 
     if (articleImage) fd.append('image', articleImage)
+    if (extraImages) {
+      Array.from(extraImages).forEach(file => {
+        fd.append('extra_images', file)
+      })
+    }
 
 
 
@@ -651,6 +659,7 @@ export default function AgentDashboardPage() {
         setShowAddArticleModal(false)
 
         setArticleImage(null)
+        setExtraImages(null)
 
         fetchArticles()
 
@@ -1868,7 +1877,9 @@ export default function AgentDashboardPage() {
 
     const BLT = 36.8467, BLG = 11.1047
 
-    allRecs.forEach(r => {
+    const mapRecs = allRecs.filter(r => mapStatusFilter.includes(r.status))
+
+    mapRecs.forEach(r => {
 
       const hc = r.latitude != null && r.longitude != null
 
@@ -1922,7 +1933,7 @@ export default function AgentDashboardPage() {
 
     })
 
-  }, [allRecs, activeTab])
+  }, [allRecs, activeTab, mapStatusFilter])
 
 
 
@@ -2141,10 +2152,9 @@ export default function AgentDashboardPage() {
 
         {/* Brand */}
         <div className="ag-sidebar-brand">
-          <img src={logo} alt="Logo" />
+          <img src={smartCityLogo} alt="Logo" style={{ width: 50, height: 50 }} />
           <div>
-            <div className="ag-brand-name">Kelibia Smart City</div>
-            <div className="ag-brand-sub">Municipal Agent Portal</div>
+            <div className="ag-brand-name">{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Smart City Portal'}</div>
           </div>
         </div>
 
@@ -2153,7 +2163,7 @@ export default function AgentDashboardPage() {
 
           <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
             <i className="fas fa-chart-pie"></i>
-            <span>Dashboard</span>
+            <span>{t('dashboard')}</span>
             {pending > 0 && <span className="ag-badge">{pending}</span>}
           </a>
 
@@ -2165,7 +2175,7 @@ export default function AgentDashboardPage() {
 
           <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
             <i className="fas fa-hard-hat"></i>
-            <span>Permis de construire</span>
+            <span>{t('permis_construire')}</span>
             {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
           </a>
 
@@ -2208,7 +2218,7 @@ export default function AgentDashboardPage() {
             {(user?.user_type === 'supervisor' || user?.is_superuser) && (
               <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
                 <i className="fas fa-cogs"></i>
-                <span>Configuration</span>
+                <span>{t('configuration')}</span>
               </a>
             )}
           </>)}
@@ -2219,7 +2229,7 @@ export default function AgentDashboardPage() {
         <div className="ag-sidebar-bottom">
           <button className="ag-new-report-btn" onClick={() => navigate('/reclamation-form')}>
             <i className="fas fa-plus"></i>
-            <span>{lang === 'ar' ? 'تقرير جديد' : 'Nouveau Rapport'}</span>
+            <span>{t('new_signalement')}</span>
           </button>
           <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
             <i className="fas fa-sign-out-alt"></i>
@@ -2232,9 +2242,8 @@ export default function AgentDashboardPage() {
       {/* ── TOP NAV ── */}
       <header className="ag-topnav">
 
-        <div className="ag-topnav-search">
-          <i className="fas fa-search"></i>
-          <input type="text" placeholder={t('search_signalement')} value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="ag-topnav-search" style={{ visibility: 'hidden' }}>
+          {/* Removed by user request */}
         </div>
 
         <div className="ag-topnav-right">
@@ -2244,11 +2253,22 @@ export default function AgentDashboardPage() {
           </div>
           <div className="ag-topnav-icons">
             <i className="fas fa-bell ag-topnav-icon"></i>
+            <button 
+              className="btn btn-link text-danger p-0 ms-3" 
+              onClick={() => { clearTokens(); navigate('/login') }}
+              title={t('logout')}
+              style={{ textDecoration: 'none' }}
+            >
+              <i className="fas fa-sign-out-alt fa-lg"></i>
+            </button>
           </div>
           <div className="ag-topnav-user">
             <div>
               <div className="ag-topnav-user-name">{fullName}</div>
               <div className="ag-topnav-user-role">{getRoleLabel(user, t)}</div>
+              <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: 2 }}>
+                <i className="fas fa-id-card me-1"></i>{user?.cin} <span className="mx-1">|</span> <i className="fas fa-phone me-1"></i>{user?.phone}
+              </div>
             </div>
             <div className="ag-avatar">{inits}</div>
           </div>
@@ -2333,10 +2353,40 @@ export default function AgentDashboardPage() {
 
                   {/* Map */}
                   <div className="ag-map-card">
-                    <div className="ag-map-header">
-                      <h4><i className="fas fa-map-marked-alt" style={{ marginRight: 8, color: '#ae131a' }}></i>{t('map_title_realtime')}</h4>
-                      <div className="ag-map-export-btns">
-                        <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginRight: 8 }}>{allRecs.length} {t('signalements_short')}</span>
+                    <div className="ag-map-header" style={{ flexWrap: 'nowrap', gap: 8, alignItems: 'center' }}>
+                      <h4 style={{ marginRight: 'auto' }}><i className="fas fa-map-marked-alt" style={{ marginRight: 8, color: '#ae131a' }}></i>{t('map_title_realtime')}</h4>
+                      {/* Status filter toggles + export buttons — all on one row */}
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+                        {([
+                          { key: 'pending',     label: 'En attente',  color: '#e65100', bg: '#fff7ed' },
+                          { key: 'in_progress', label: 'En cours',    color: '#1565c0', bg: '#eff6ff' },
+                          { key: 'resolved',    label: 'Résolu',      color: '#15803d', bg: '#f0fdf4' },
+                          { key: 'rejected',    label: 'Rejeté',      color: '#757575', bg: '#f5f5f5' },
+                        ] as { key: string; label: string; color: string; bg: string }[]).map(s => {
+                          const active = mapStatusFilter.includes(s.key)
+                          return (
+                            <button
+                              key={s.key}
+                              onClick={() => setMapStatusFilter(prev =>
+                                active ? prev.filter(x => x !== s.key) : [...prev, s.key]
+                              )}
+                              style={{
+                                padding: '3px 10px', borderRadius: 20, fontSize: '0.71rem',
+                                fontWeight: 700, border: `1.5px solid ${s.color}`,
+                                background: active ? s.bg : '#f3f4f6',
+                                color: active ? s.color : '#9ca3af',
+                                cursor: 'pointer', transition: 'all .15s',
+                                opacity: active ? 1 : 0.5,
+                              }}
+                            >
+                              <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: active ? s.color : '#ccc', marginRight: 5, verticalAlign: 'middle' }}></span>
+                              {s.label}
+                            </button>
+                          )
+                        })}
+                        {/* Divider */}
+                        <span style={{ width: 1, height: 18, background: '#e5e7eb', display: 'inline-block', margin: '0 4px' }}></span>
+                        <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{allRecs.length} {t('signalements_short')}</span>
                         <button className="ag-export-btn" onClick={handleExportGeoJSON} title="Exporter pour QGIS">
                           <i className="fas fa-download" style={{ marginRight: 4 }}></i>GeoJSON
                         </button>
@@ -2344,13 +2394,6 @@ export default function AgentDashboardPage() {
                           <i className="fas fa-table" style={{ marginRight: 4 }}></i>CSV
                         </button>
                       </div>
-                    </div>
-                    <div className="ag-map-legend">
-                      <h5>Répartition des incidents</h5>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#f97316' }}></span><span>En attente ({pending})</span></div>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#3b82f6' }}></span><span>En cours ({inprog})</span></div>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#22c55e' }}></span><span>Résolu ({resolved})</span></div>
-                      <div className="ag-legend-item"><span className="ag-legend-dot" style={{ background: '#ef4444' }}></span><span>Rejeté ({rejected})</span></div>
                     </div>
                     <div id="ag-map" ref={mapRef}></div>
                   </div>
@@ -2763,10 +2806,8 @@ export default function AgentDashboardPage() {
 
                                   )}
 
-                                  {user?.is_superuser && (u.user_type === 'agent' || u.user_type === 'supervisor') && (
-
+                                  {user?.is_superuser && (
                                     <button className="btn btn-sm btn-outline-info" title={t('reset_pwd')}
-
                                       onClick={async (e) => {
 
                                         e.stopPropagation()

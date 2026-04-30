@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useI18n } from '../i18n/LanguageProvider'
 import logo from '../assets/logo.png'
-import tunisiaLogo from '../assets/tunisia_logo.png'
+import smartCityLogo from '../assets/smart_city_logo.png'
 
 const CSS = `
 /* ── Root ── */
@@ -16,9 +16,9 @@ const CSS = `
 .lp-hero { display: none; background: rgba(30,90,180,.55); backdrop-filter: blur(10px); padding: 48px 44px; flex-direction: column; justify-content: space-between; color: #fff; }
 @media (min-width: 768px) { .lp-hero { display: flex; } }
 .lp-hero-brand { display: flex; align-items: center; gap: 14px; }
-.lp-hero-logo { height: 56px; width: auto; }
-.lp-hero-brand-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
-.lp-hero-brand-sub { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+.lp-hero-logo { height: 72px; width: auto; }
+.lp-hero-brand-name { display: none; }
+.lp-hero-brand-sub { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
 .lp-hero-headline { font-size: 2.8rem; font-weight: 900; line-height: 1.1; }
 .lp-hero-accent { color: #7ec8f7; white-space: nowrap; }
 .lp-hero-desc { font-size: 1rem; opacity: .82; line-height: 1.65; margin-top: 18px; }
@@ -136,9 +136,8 @@ export default function ForgotPasswordPage() {
         {/* ── Hero side ── */}
         <div className="lp-hero">
           <div className="lp-hero-brand">
-            <img className="lp-hero-logo" src={tunisiaLogo} alt="Logo" />
+            <img className="lp-hero-logo" src={smartCityLogo} alt="Logo" />
             <div>
-              <div className="lp-hero-brand-name">{t('republic_of_tunisia')}</div>
               <div className="lp-hero-brand-sub">{t('portal_title')}</div>
             </div>
           </div>
@@ -176,7 +175,7 @@ export default function ForgotPasswordPage() {
 
           {/* Mobile logo */}
           <div className="lp-mobile-logo">
-            <img src={logo} alt="Logo" />
+            <img src={smartCityLogo} alt="Logo" />
           </div>
 
           <div className="lp-greeting">

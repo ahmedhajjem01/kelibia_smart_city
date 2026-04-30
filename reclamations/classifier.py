@@ -55,10 +55,11 @@ def _download_nltk_data():
         
     for pkg in ["stopwords", "punkt", "punkt_tab"]:
         try:
-            nltk.data.find(
-                "corpora/" + pkg if pkg == "stopwords" else "tokenizers/" + pkg
-            )
-        except LookupError:
+            # Check if package exists without heavy lookup
+            nltk.data.find("corpora/" + pkg if pkg == "stopwords" else "tokenizers/" + pkg)
+        except (LookupError, Exception):
+            # Only download if absolutely necessary
+            logger.info(f"Downloading NLTK package: {pkg}")
             nltk.download(pkg, download_dir=nltk_dir, quiet=True)
 
 
@@ -479,31 +480,48 @@ def detect_duplicate(title: str, description: str,
         geo_scores = np.zeros(len(existing))
 
         if has_gps:
-            with connection.cursor() as cursor:
-                # Calcul des distances en une seule requête spatiale
-                query = """
-                    SELECT id, ST_Distance(
-                        ST_MakePoint(longitude, latitude)::geography,
-                        ST_MakePoint(%s, %s)::geography
-                    ) as dist_m
-                    FROM reclamations_reclamation
-                    WHERE status != 'rejected'
-                """
-                if exclude_id:
-                    query += f" AND id != {exclude_id}"
+            from django.db import connection, OperationalError
+            try:
+                with connection.cursor() as cursor:
+                    # Calcul des distances en une seule requête spatiale
+                    query = """
+                        SELECT id, ST_Distance(
+                            ST_MakePoint(longitude, latitude)::geography,
+                            ST_MakePoint(%s, %s)::geography
+                        ) as dist_m
+                        FROM reclamations_reclamation
+                        WHERE status != 'rejected'
+                    """
+                    if exclude_id:
+                        query += f" AND id != {exclude_id}"
+                    
+                    cursor.execute(query, [longitude, latitude])
+                    dist_map = {row[0]: row[1] for row in cursor.fetchall()}
                 
-                cursor.execute(query, [longitude, latitude])
-                dist_map = {row[0]: row[1] for row in cursor.fetchall()}
-            
-            geo_list = []
-            for r in existing:
-                dist_m = dist_map.get(r['id'], 1000000)
-                if dist_m < 100:     score = 1.0
-                elif dist_m < 300:   score = 0.7
-                elif dist_m < 500:   score = 0.4
-                else:                score = 0.0
-                geo_list.append(score)
-            geo_scores = np.array(geo_list)
+                geo_list = []
+                for r in existing:
+                    dist_m = dist_map.get(r['id'], 1000000)
+                    if dist_m < 100:     score = 1.0
+                    elif dist_m < 300:   score = 0.7
+                    elif dist_m < 500:   score = 0.4
+                    else:                score = 0.0
+                    geo_list.append(score)
+                geo_scores = np.array(geo_list)
+            except (OperationalError, Exception) as e:
+                logger.warning(f"PostGIS duplicate detection failed, falling back to Haversine: {e}")
+                import math
+                def haversine_score(lat1, lon1, lat2, lon2):
+                    if None in (lat1, lon1, lat2, lon2): return 0.0
+                    R = 6371000
+                    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+                    dphi, dlambda = math.radians(lat2-lat1), math.radians(lon2-lon1)
+                    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
+                    dist_m = R * 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+                    if dist_m < 100: return 1.0
+                    if dist_m < 300: return 0.7
+                    if dist_m < 500: return 0.4
+                    return 0.0
+                geo_scores = np.array([haversine_score(latitude, longitude, r['latitude'], r['longitude']) for r in existing])
 
         # ── 4. Combined score ────────────────────────────────────────────────
         if has_gps:
