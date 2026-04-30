@@ -592,6 +592,29 @@ export default function AgentDashboardPage() {
 
   const markersLayer = useRef<any>(null)
 
+  const kelibiaRingRef = useRef<number[][] | null>(null)
+
+  // Load municipality polygon once
+  useEffect(() => {
+    fetch('/layers/limite_kelibia.geojson')
+      .then(r => r.json())
+      .then(gj => { kelibiaRingRef.current = gj.features[0].geometry.coordinates[0] })
+      .catch(() => {})
+  }, [])
+
+  function insideKelibia(lat: number, lng: number): boolean {
+    const ring = kelibiaRingRef.current
+    if (!ring) return true // allow if ring not loaded yet
+    let inside = false
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1]
+      const xj = ring[j][0], yj = ring[j][1]
+      if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi))
+        inside = !inside
+    }
+    return inside
+  }
+
   async function fetchArticles() {
 
     setLoadingArticles(true)
@@ -1876,7 +1899,8 @@ export default function AgentDashboardPage() {
 
     const mapRecs = allRecs.filter(r =>
       mapStatusFilter.includes(r.status) &&
-      r.latitude != null && r.longitude != null
+      r.latitude != null && r.longitude != null &&
+      insideKelibia(r.latitude!, r.longitude!)
     )
 
     mapRecs.forEach(r => {
