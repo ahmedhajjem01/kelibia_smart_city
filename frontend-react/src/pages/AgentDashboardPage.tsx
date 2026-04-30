@@ -2173,30 +2173,30 @@ export default function AgentDashboardPage() {
             <span>{t('nav_profile')}</span>
           </a>
 
-          {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
-            <div className="ag-divider"></div>
-            <div className="ag-sec-title">{t('nav_admin_staff')}</div>
+          <div className="ag-divider"></div>
+          <div className="ag-sec-title">{t('nav_admin_staff')}</div>
 
+          <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
+            <i className="fas fa-folder-open"></i>
+            <span>{t('nav_demandes_citoyens')}</span>
+            {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
+          </a>
+
+          <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
+            <i className="fas fa-comments"></i>
+            <span>{t('nav_forum_moderation')}</span>
+          </a>
+
+          <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
+            <i className="fas fa-newspaper"></i>
+            <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
+          </a>
+
+          {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
             <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode) }}>
               <i className="fas fa-users-cog"></i>
               <span>{t('nav_managed_users')}</span>
               {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
-            </a>
-
-            <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
-              <i className="fas fa-folder-open"></i>
-              <span>{t('nav_demandes_citoyens')}</span>
-              {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
-            </a>
-
-            <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
-              <i className="fas fa-comments"></i>
-              <span>{t('nav_forum_moderation')}</span>
-            </a>
-
-            <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
-              <i className="fas fa-newspaper"></i>
-              <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
             </a>
 
             {(user?.user_type === 'supervisor' || user?.is_superuser) && (
