@@ -397,7 +397,7 @@ export default function DemandeEvenementPrivePage() {
                         </div>
                         <div className="rounded-4 overflow-hidden shadow-sm" style={{ height: 280, border: '2px solid #dee2e6' }} dir="ltr">
                           <MapContainer center={position || KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                            <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
                             <LocationMarker position={position} onMapClick={p => { setPosition(p); setGpsStatus('manual') }} />
                           </MapContainer>
                         </div>

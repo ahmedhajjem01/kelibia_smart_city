@@ -76,7 +76,7 @@ const translations: Record<Lang, Record<string, string>> = {
     recover: 'Récupérer',
     your_access: 'Votre accès.',
     forgot_password_hero_desc: "Entrez l'adresse e-mail associée à votre compte, et nous vous enverrons un lien sécurisé pour réinitialiser votre mot de passe.",
-    send_link: 'Envoyer le رابط',
+    send_link: 'Envoyer le lien',
     back_to_login: 'Retour à la connexion',
     forgot_password_desc: 'Entrez votre e-mail pour réinitialiser.',
     become_citizen_num: 'Devenir Citoyen Numérique',
@@ -280,7 +280,7 @@ const translations: Record<Lang, Record<string, string>> = {
     scan_processing: "Vérification de l'authenticité...",
     scan_success:
       'Certificat authentifié : Document conforme aux normes hospitalières.',
-    scan_error_invalid: 'Document non reconnu. Veuillez télécharger l\'إعلام ولادة original.',
+    scan_error_invalid: 'Document non reconnu. Veuillez télécharger l\'avis de naissance original.',
     scan_error_blurry:
       'L\'image semble floue. Veuillez reprendre une photo plus nette.',
     unverified_title: 'Compte en attente de vérification',

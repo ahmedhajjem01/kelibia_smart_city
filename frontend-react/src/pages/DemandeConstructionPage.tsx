@@ -399,7 +399,7 @@ export default function DemandeConstructionPage() {
                 </label>
                 <div className="rounded-3 overflow-hidden border" style={{ height: 240 }} dir="ltr">
                   <MapContainer center={KELIBIA_CENTER} zoom={13} style={{ height: '100%', width: '100%' }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
+                    <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
                     <LocationMarker position={position} onMapClick={p => {
                       if (!isInsideKelibia(p[0], p[1])) {
                         setError(t('error_outside_kelibia'))

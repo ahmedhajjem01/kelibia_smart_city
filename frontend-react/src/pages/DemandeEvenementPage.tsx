@@ -434,7 +434,7 @@ export default function DemandeEvenementPage() {
                           <MapContainer center={position || KELIBIA_CENTER} zoom={14}
                             style={{ height: '100%', width: '100%' }}>
                             <TileLayer
-                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
                               attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>' />
                             <LocationMarker position={position} onMapClick={handleMapClick} />
                           </MapContainer>

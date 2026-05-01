@@ -197,7 +197,7 @@ export default function DemandeEnregistrementBienPage() {
                     </label>
                     <div className="rounded-4 overflow-hidden border" style={{ height: 350 }}>
                       <MapContainer center={[36.8481, 11.0939]} zoom={15} style={{ height: '100%', width: '100%' }}>
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
                         <MapClickHandler onLocationSelect={(lat, lng) => setPosition([lat, lng])} />
                         {position && <Marker position={position} icon={L.icon({
                           iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',

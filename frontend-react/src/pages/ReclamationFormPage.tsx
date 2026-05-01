@@ -555,7 +555,7 @@ export default function ReclamationFormPage() {
 
                         <LayersControl.BaseLayer checked name={t('map_standard') || 'Standard'}>
 
-                          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
 
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' />
 

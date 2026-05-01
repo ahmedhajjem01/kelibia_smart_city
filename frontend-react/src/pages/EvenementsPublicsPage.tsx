@@ -292,7 +292,7 @@ export default function EvenementsPublicsPage() {
           <div className="card-body p-0" style={{ height: 550 }}>
             <MapContainer center={KELIBIA_CENTER} zoom={13} style={{ height: '100%', width: '100%' }}>
               <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>' />
               {eventsWithGPS.map(ev => (
                 <Marker key={ev.id} position={[ev.latitude!, ev.longitude!]}>

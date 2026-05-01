@@ -828,7 +828,7 @@ export default function DashboardPage() {
               <LayersControl position="topright">
 
                 <LayersControl.BaseLayer checked name={t('map_osm')}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
                 </LayersControl.BaseLayer>
 
                 <LayersControl.BaseLayer name={t('map_satellite')}>
@@ -896,7 +896,7 @@ export default function DashboardPage() {
 
               </LayersControl>
 
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
 
               {reclamations.map((rec: any) =>
 
