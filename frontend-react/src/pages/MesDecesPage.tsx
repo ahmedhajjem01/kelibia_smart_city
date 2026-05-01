@@ -149,7 +149,7 @@ export default function MesDecesPage() {
                           ) : (
                               <>
                                 <a
-                                  href={resolveBackendUrl(d.url_fr)}
+                                  href={`${resolveBackendUrl(d.url_fr)}?token=${getAccessToken()}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="btn btn-dark flex-fill fw-bold"
@@ -157,7 +157,7 @@ export default function MesDecesPage() {
                                   <i className="fas fa-print me-1" /> {lang === 'ar' ? 'الفرنسية' : 'Version FR'}
                                 </a>
                                 <a
-                                  href={resolveBackendUrl(d.url_ar)}
+                                  href={`${resolveBackendUrl(d.url_ar)}?token=${getAccessToken()}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="btn btn-outline-dark flex-fill arabic-font fw-bold"

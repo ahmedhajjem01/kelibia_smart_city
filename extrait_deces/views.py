@@ -17,6 +17,9 @@ from .serializers import (
     DemandeInhumationSerializer, ExtraitDecesSerializer
 )
 
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
 def deces_certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitDeces, pk=pk)
     
@@ -27,6 +30,18 @@ def deces_certificate_view(request, pk, lang='ar'):
         if diff.total_seconds() < 86400: # 24 heures
             is_valid = True
             
+    token = request.GET.get('token')
+    if not is_valid and token:
+        try:
+            jwt_authenticator = JWTAuthentication()
+            validated_token = jwt_authenticator.get_validated_token(token)
+            user = jwt_authenticator.get_user(validated_token)
+            
+            if getattr(user, 'has_active_asd', False):
+                is_valid = True
+        except (InvalidToken, TokenError):
+            pass
+
     if not is_valid:
         return render(request, 'errors/unpaid.html', {'extrait': extrait})
 

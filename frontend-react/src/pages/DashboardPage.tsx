@@ -309,6 +309,7 @@ export default function DashboardPage() {
 
   const [newsItems, setNewsItems] = useState<{ id: number; title: string; created_at: string }[]>([])
   const [genericNotifications, setGenericNotifications] = useState<any[]>([])
+  const [mapStatusFilter, setMapStatusFilter] = useState<string[]>(['pending', 'in_progress', 'resolved', 'rejected'])
 
   const [sigLayers, setSigLayers] = useState<{ routes: any; espVerts: any; batiments: any; limite: any }>({
     routes: null, espVerts: null, batiments: null, limite: null,
@@ -787,25 +788,38 @@ export default function DashboardPage() {
 
             {[
 
-              { color: '#f57f17', label: lang === 'ar' ? 'بانتظار' : 'En attente' },
+              { color: '#f57f17', label: lang === 'ar' ? 'بانتظار' : 'En attente', key: 'pending' },
 
-              { color: '#1565c0', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours' },
+              { color: '#1565c0', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours', key: 'in_progress' },
 
-              { color: '#2e7d32', label: lang === 'ar' ? 'محلول' : 'Résolu' },
+              { color: '#2e7d32', label: lang === 'ar' ? 'محلول' : 'Résolu', key: 'resolved' },
 
-              { color: '#c62828', label: lang === 'ar' ? 'مرفوض' : 'Rejeté' },
+              { color: '#c62828', label: lang === 'ar' ? 'مرفوض' : 'Rejeté', key: 'rejected' },
 
-            ].map(i => (
+            ].map(i => {
+              const active = mapStatusFilter.includes(i.key);
+              return (
 
-              <div key={i.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '.72rem', color: '#5b403d' }}>
+              <button
+                key={i.key}
+                onClick={() => setMapStatusFilter(prev => 
+                  active ? prev.filter(x => x !== i.key) : [...prev, i.key]
+                )}
+                style={{ 
+                  display: 'flex', alignItems: 'center', gap: 5, fontSize: '.72rem', 
+                  color: active ? '#1a1c1c' : '#9ca3af',
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  opacity: active ? 1 : 0.5, transition: 'all 0.2s', padding: 0
+                }}
+              >
 
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: i.color, display: 'inline-block' }}></span>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: active ? i.color : '#ccc', display: 'inline-block' }}></span>
 
                 {i.label}
 
-              </div>
+              </button>
 
-            ))}
+            )})}
 
           </div>
 
@@ -898,7 +912,7 @@ export default function DashboardPage() {
 
               <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
 
-              {reclamations.map((rec: any) =>
+              {reclamations.filter((rec: any) => mapStatusFilter.includes(rec.status)).map((rec: any) =>
 
                 rec.latitude && rec.longitude && (
 

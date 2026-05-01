@@ -153,7 +153,7 @@ export default function MesMariagesPage() {
                           ) : (
                               <>
                                 <a
-                                  href={resolveBackendUrl(m.url_fr)}
+                                  href={`${resolveBackendUrl(m.url_fr)}?token=${getAccessToken()}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="btn btn-warning flex-fill fw-bold"
@@ -161,7 +161,7 @@ export default function MesMariagesPage() {
                                   <i className="fas fa-print me-1" /> {lang === 'ar' ? 'الفرنسية' : 'Version Française'}
                                 </a>
                                 <a
-                                  href={resolveBackendUrl(m.url_ar)}
+                                  href={`${resolveBackendUrl(m.url_ar)}?token=${getAccessToken()}`}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="btn btn-outline-warning flex-fill arabic-font fw-bold"

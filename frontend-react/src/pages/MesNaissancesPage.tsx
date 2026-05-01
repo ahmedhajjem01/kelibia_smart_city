@@ -106,7 +106,7 @@ export default function MesNaissancesPage() {
               ) : (
                 <>
                   <a
-                    href={resolveBackendUrl(extrait.url_fr)}
+                    href={`${resolveBackendUrl(extrait.url_fr)}?token=${getAccessToken()}`}
                     target="_blank"
                     rel="noreferrer"
                     className="btn btn-outline-primary flex-fill"
@@ -114,7 +114,7 @@ export default function MesNaissancesPage() {
                     <i className="fas fa-print me-1" /> {lang === 'ar' ? 'الفرنسية' : 'FR'}
                   </a>
                   <a
-                    href={resolveBackendUrl(extrait.url_ar)}
+                    href={`${resolveBackendUrl(extrait.url_ar)}?token=${getAccessToken()}`}
                     target="_blank"
                     rel="noreferrer"
                     className="btn btn-primary flex-fill arabic-font"

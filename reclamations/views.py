@@ -712,3 +712,5 @@ class ReclamationViewSet(viewsets.ModelViewSet):
 
         content = json.dumps(feature_collection, ensure_ascii=False)
         return HttpResponse(content, content_type='application/geo+json; charset=utf-8')
+
+

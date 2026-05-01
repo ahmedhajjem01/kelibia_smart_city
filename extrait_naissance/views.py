@@ -12,6 +12,9 @@ from notifications.models import Notification
 from django.core.mail import send_mail
 from django.conf import settings
 
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitNaissance, pk=pk)
     
@@ -22,6 +25,37 @@ def certificate_view(request, pk, lang='ar'):
         if diff.total_seconds() < 86400: # 24 heures
             is_valid = True
             
+    token = request.GET.get('token')
+    if not is_valid and token:
+        try:
+            jwt_authenticator = JWTAuthentication()
+            validated_token = jwt_authenticator.get_validated_token(token)
+            user = jwt_authenticator.get_user(validated_token)
+            
+            if getattr(user, 'has_active_asd', False):
+                # Verify ownership
+                citoyen = None
+                try:
+                    citoyen = Citoyen.objects.get(cin=user.cin)
+                except Citoyen.DoesNotExist:
+                    pass
+                
+                if citoyen:
+                    is_owner = False
+                    if extrait.titulaire == citoyen:
+                        is_owner = True
+                    elif extrait.titulaire.pere == citoyen or extrait.titulaire.mere == citoyen:
+                        is_owner = True
+                    else:
+                        if (extrait.titulaire.pere == citoyen and extrait.titulaire.mere is not None) or \
+                           (extrait.titulaire.mere == citoyen and extrait.titulaire.pere is not None):
+                            is_owner = True
+                    
+                    if is_owner:
+                        is_valid = True
+        except (InvalidToken, TokenError):
+            pass
+
     if not is_valid:
         return render(request, 'errors/unpaid.html', {'extrait': extrait})
         
