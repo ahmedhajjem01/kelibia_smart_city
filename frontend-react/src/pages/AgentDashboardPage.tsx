@@ -6,6 +6,10 @@ import { useI18n } from '../i18n/LanguageProvider'
 import PriorityExplanationModal from '../components/PriorityExplanationModal'
 import logo from '../assets/logo.png'
 import smartCityLogo from '../assets/smart_city_logo.png'
+import L from 'leaflet'
+import 'leaflet.markercluster'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 
 
@@ -1681,7 +1685,7 @@ export default function AgentDashboardPage() {
 
     if (activeTab !== 'dashboard' || !mapRef.current) return
 
-    const L = (window as any).L; if (!L) return
+    if (!L) return
 
 
 
@@ -1929,7 +1933,7 @@ export default function AgentDashboardPage() {
 
   useEffect(() => {
 
-    const L = (window as any).L; if (!L || !leafletMap.current || !markersLayer.current) return
+    if (!L || !leafletMap.current || !markersLayer.current) return
 
     markersLayer.current.clearLayers()
 
