@@ -412,7 +412,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/accounts/verify-citizens/?type=agent'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/verify-citizens/?type=agent'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) {
 
@@ -438,7 +438,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ agent_id: agentId })
 
@@ -631,7 +631,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/news/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/news/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setAllArticles(await res.json())
 
@@ -676,7 +676,7 @@ export default function AgentDashboardPage() {
 
         method,
 
-        headers: { Authorization: `Bearer ${access}` }, // Don't set Content-Type, fetch handles boundary
+        headers: { Authorization: `Bearer ${getAccessToken()}` }, // Don't set Content-Type, fetch handles boundary
 
         body: fd
 
@@ -711,7 +711,7 @@ export default function AgentDashboardPage() {
 
         method: 'DELETE',
 
-        headers: { Authorization: `Bearer ${access}` }
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
 
       })
 
@@ -733,7 +733,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/accounts/config/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/config/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setGlobalSettings(await res.json())
 
@@ -753,7 +753,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify(globalSettings)
 
@@ -789,7 +789,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (!res.ok) throw new Error()
 
@@ -839,7 +839,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/supervisor/services-summary/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/supervisor/services-summary/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setServicesSummary(await res.json())
 
@@ -855,7 +855,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/services/categories/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/services/categories/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) {
 
@@ -891,7 +891,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/reclamations/ml_stats/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/reclamations/ml_stats/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (!res.ok) { setMlError(`Erreur ${res.status} — Stats IA indisponibles.`); return }
 
@@ -909,7 +909,7 @@ export default function AgentDashboardPage() {
     try {
       const res = await fetch(resolveBackendUrl('/api/reclamations/explain_text/'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
         body: JSON.stringify({ title: '', description: explainText }),
       })
       const data = await res.json()
@@ -931,7 +931,7 @@ export default function AgentDashboardPage() {
 
         method: 'PATCH',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify(profileForm),
 
@@ -977,7 +977,7 @@ export default function AgentDashboardPage() {
 
         method: 'DELETE',
 
-        headers: { Authorization: `Bearer ${access}` }
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
 
       })
 
@@ -1007,7 +1007,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/supervisor/manage-orders/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/supervisor/manage-orders/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setAllDemandes(await res.json())
 
@@ -1029,7 +1029,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ type: order.type, order_id: order.id, status: newStatus })
 
@@ -1059,7 +1059,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/evenements/demande/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) {
 
@@ -1085,9 +1085,9 @@ export default function AgentDashboardPage() {
 
       const [listRes, statsRes] = await Promise.all([
 
-        fetch(resolveBackendUrl('/api/construction/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
+        fetch(resolveBackendUrl('/api/construction/demandes/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } }),
 
-        fetch(resolveBackendUrl('/api/construction/demandes/stats/'), { headers: { Authorization: `Bearer ${access}` } }),
+        fetch(resolveBackendUrl('/api/construction/demandes/stats/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } }),
 
       ])
 
@@ -1123,7 +1123,7 @@ export default function AgentDashboardPage() {
 
       const res = await fetch(`/api/construction/demandes/${id}/update-status/`, {
 
-        method: 'PATCH', headers: { Authorization: `Bearer ${access}` }, body: fd,
+        method: 'PATCH', headers: { Authorization: `Bearer ${getAccessToken()}` }, body: fd,
 
       })
 
@@ -1151,13 +1151,13 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/forum/topics/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/forum/topics/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setAllTopics(await res.json())
 
 
 
-      const sRes = await fetch(resolveBackendUrl('/api/forum/topics/stats/'), { headers: { Authorization: `Bearer ${access}` } })
+      const sRes = await fetch(resolveBackendUrl('/api/forum/topics/stats/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (sRes.ok) setForumStats(await sRes.json())
 
@@ -1183,7 +1183,7 @@ export default function AgentDashboardPage() {
 
         method: isDelete ? 'DELETE' : 'POST',
 
-        headers: { Authorization: `Bearer ${access}` }
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
 
       })
 
@@ -1211,7 +1211,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(`/api/forum/topics/${id}/`, { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(`/api/forum/topics/${id}/`, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setForumTopicSelected(await res.json())
 
@@ -1233,7 +1233,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ content: forumReplyText })
 
@@ -1269,7 +1269,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { Authorization: `Bearer ${access}` }
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
 
       })
 
@@ -1299,7 +1299,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { Authorization: `Bearer ${access}` }
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
 
       })
 
@@ -1343,7 +1343,7 @@ export default function AgentDashboardPage() {
 
         method: 'PATCH',
 
-        headers: { Authorization: `Bearer ${access}` },
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
 
         body: fd,
 
@@ -1379,7 +1379,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(`/api/accounts/verify-citizens/?mode=${mode}`, { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(`/api/accounts/verify-citizens/?mode=${mode}`, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) {
 
@@ -1409,7 +1409,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ user_id: userId, action })
 
@@ -1455,7 +1455,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ user_id: userId, action: 'activate_asd' })
 
@@ -1489,7 +1489,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/accounts/agent-citizens/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/accounts/agent-citizens/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setAgentCitizens(await res.json())
 
@@ -1509,7 +1509,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ user_id: citizenId, action }),
 
@@ -1555,7 +1555,7 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } })
+      const res = await fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (!res.ok) throw new Error()
 
@@ -1970,7 +1970,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ status: newStatus }),
 
@@ -2004,7 +2004,7 @@ export default function AgentDashboardPage() {
 
         method: 'DELETE',
 
-        headers: { Authorization: `Bearer ${access}` }
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
 
       })
 
@@ -2036,7 +2036,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify({ status: detailStatus }),
 
@@ -2074,7 +2074,7 @@ export default function AgentDashboardPage() {
 
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
         body: JSON.stringify(body),
 
@@ -2788,7 +2788,7 @@ export default function AgentDashboardPage() {
 
                                             method: 'POST',
 
-                                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+                                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
                                             body: JSON.stringify({ user_id: u.id, action: 'reset_password' })
 
@@ -7063,7 +7063,7 @@ export default function AgentDashboardPage() {
 
               method: 'POST',
 
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAccessToken()}` },
 
               body: JSON.stringify(data)
 
@@ -7373,7 +7373,7 @@ export default function AgentDashboardPage() {
 
               method,
 
-              headers: { Authorization: `Bearer ${access}` },
+              headers: { Authorization: `Bearer ${getAccessToken()}` },
 
               body: finalFd
 
