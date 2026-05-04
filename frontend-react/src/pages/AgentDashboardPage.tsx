@@ -1782,38 +1782,23 @@ export default function AgentDashboardPage() {
       }
     )
 
-    // 3. Bâtiments — polygones + icône équipement public
-    sigOverlays['🏠 Bâtiments'] = loadGeoJSON(
-      '/layers/batiments_polygones.geojson',
-      () => ({ color: '#4e342e', weight: 1, fillColor: '#d7ccc8', fillOpacity: 0.6 }),
-      (feature, layer) => {
-        const p = feature.properties || {}
-        const equip = p.equip ? `<br/>Équipement : <b>${p.equip}</b>` : ''
-        layer.bindPopup(`<b>🏠 ${p.nom || 'Bâtiment'}</b><br/>Type : ${p.bati || '—'}${equip}`)
-      }
-    )
+    // 3. Espaces verts (union : Agriculture + Espaces verts + Forêts)
+    const espacesVertsLayer = L.layerGroup()
+    const espacesVertsStyle = () => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.55 })
+    const loadIntoGroup = (url: string, popupFn: (p: any) => string) => {
+      const layer = L.geoJSON(null, {
+        style: espacesVertsStyle,
+        onEachFeature: (feature, layer) => layer.bindPopup(popupFn(feature.properties || {}))
+      })
+      fetch(url).then(r => r.json()).then(data => { layer.addData(data); espacesVertsLayer.addLayer(layer) }).catch(() => {})
+    }
+    loadIntoGroup('/layers/agriculture_polygones.geojson', p => `<b>🌾 ${p.nom || 'Parcelle agricole'}</b><br/>Usage : <b>${p.usage_sol || '—'}</b>`)
+    loadIntoGroup('/layers/espaces_verts_polygones.geojson', p => `<b>🌳 ${p.nom || 'Espace vert'}</b><br/>Type : ${p.usage_sol || p.naturel || p.loisir || '—'}`)
+    loadIntoGroup('/layers/forets_polygones.geojson', p => `<b>🌲 ${p.nom || 'Forêt / Zone boisée'}</b><br/>Type : ${p.naturel || 'wood'}`)
+    sigOverlays['🌿 Espaces verts'] = espacesVertsLayer
+    espacesVertsLayer.addTo(m)
 
-    // 4. Agriculture — parcelles cultivées
-    sigOverlays['🌾 Agriculture'] = loadGeoJSON(
-      '/layers/agriculture_polygones.geojson',
-      () => ({ color: '#558b2f', weight: 1, fillColor: '#dcedc8', fillOpacity: 0.55 }),
-      (feature, layer) => {
-        const p = feature.properties || {}
-        layer.bindPopup(`<b>🌾 ${p.nom || 'Parcelle'}</b><br/>Usage : <b>${p.usage_sol || '—'}</b>`)
-      }
-    )
-
-    // 5. Espaces verts — parcs, jardins, pelouses
-    sigOverlays['🌳 Espaces verts'] = loadGeoJSON(
-      '/layers/espaces_verts_polygones.geojson',
-      () => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.5 }),
-      (feature, layer) => {
-        const p = feature.properties || {}
-        layer.bindPopup(`<b>🌳 ${p.nom || 'Espace vert'}</b><br/>Type : ${p.usage_sol || p.naturel || p.loisir || '—'}`)
-      }
-    )
-
-    // 6. Zones urbaines — résidentiel, commercial, construction
+    // 4. Zones urbaines — résidentiel, commercial, construction
     const zoneUrbaineColor = (usage: string) => {
       if (usage === 'residential') return '#ffe0b2'
       if (usage === 'commercial') return '#e1bee7'
@@ -1829,44 +1814,13 @@ export default function AgentDashboardPage() {
       }
     )
 
-    // 7. Forêts — zones boisées
-    sigOverlays['🌲 Forêts'] = loadGeoJSON(
-      '/layers/forets_polygones.geojson',
-      () => ({ color: '#1b5e20', weight: 1.5, fillColor: '#c8e6c9', fillOpacity: 0.6 }),
-      (feature, layer) => layer.bindPopup(`<b>🌲 Forêt / Zone boisée</b><br/>Type : ${feature.properties?.naturel || 'wood'}`)
-    )
-
-    // 8. Oueds (cours d'eau) — lignes bleues
+    // 7. Oueds (cours d'eau) — lignes bleues
     sigOverlays['💧 Oueds (cours d\'eau)'] = loadGeoJSON(
       '/layers/oueds_lignes.geojson',
       () => ({ color: '#0277bd', weight: 2, opacity: 0.85, dashArray: '6,3' }),
       (feature, layer) => {
         const p = feature.properties || {}
         layer.bindPopup(`<b>💧 ${p.nom || 'Oued'}</b><br/>Type : ${p.oued || 'stream'}`)
-      }
-    )
-
-    // 9. Eaux (lacs/mares) — polygones bleus
-    sigOverlays['🌊 Plans d\'eau'] = loadGeoJSON(
-      '/layers/eau_polygones.geojson',
-      () => ({ color: '#01579b', weight: 1.5, fillColor: '#b3e5fc', fillOpacity: 0.65 }),
-      (feature, layer) => layer.bindPopup(`<b>🌊 Plan d'eau</b><br/>Type : ${feature.properties?.naturel || 'water'}`)
-    )
-
-    // 10. Points espaces verts
-    sigOverlays['📍 Points verts'] = loadGeoJSON(
-      '/layers/espaces_verts_points.geojson',
-      () => ({ color: '#2e7d32', weight: 2, fillColor: '#69f0ae', fillOpacity: 0.8, radius: 6 } as any),
-      (feature, layer) => layer.bindPopup(`<b>🌿 ${feature.properties?.nom || 'Espace vert'}</b>`)
-    )
-
-    // 11. Points bâtiments notables
-    sigOverlays['📌 Bâtiments notables'] = loadGeoJSON(
-      '/layers/batiments_points.geojson',
-      () => ({ color: '#4e342e', weight: 2, fillColor: '#ffab40', fillOpacity: 0.9, radius: 7 } as any),
-      (feature, layer) => {
-        const p = feature.properties || {}
-        layer.bindPopup(`<b>📌 ${p.nom || 'Bâtiment notable'}</b><br/>${p.equip || p.bati || ''}`)
       }
     )
 
@@ -1892,13 +1846,9 @@ export default function AgentDashboardPage() {
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;border-top:3px dashed #1a237e;display:inline-block;"></span> Limite communale</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#c62828;display:inline-block;"></span> Route principale</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#546e7a;display:inline-block;"></span> Route locale</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#d7ccc8;border:1px solid #4e342e;display:inline-block;border-radius:2px;"></span> Bâtiments</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#dcedc8;border:1px solid #558b2f;display:inline-block;border-radius:2px;"></span> Agriculture</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#a5d6a7;border:1px solid #2e7d32;display:inline-block;border-radius:2px;"></span> Espaces verts</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#ffe0b2;border:1px solid #6d4c41;display:inline-block;border-radius:2px;"></span> Zones urbaines</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#c8e6c9;border:1px solid #1b5e20;display:inline-block;border-radius:2px;"></span> Forêts</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;border-top:2px dashed #0277bd;display:inline-block;"></span> Oueds</div>
-        <div style="display:flex;align-items:center;gap:6px;"><span style="width:18px;height:8px;background:#b3e5fc;border:1px solid #01579b;display:inline-block;border-radius:2px;"></span> Plans d'eau</div>`
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:20px;height:3px;border-top:2px dashed #0277bd;display:inline-block;"></span> Oueds</div>`
       return div
     }
     legend.addTo(m)
