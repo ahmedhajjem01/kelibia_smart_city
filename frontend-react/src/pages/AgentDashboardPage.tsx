@@ -2132,7 +2132,7 @@ export default function AgentDashboardPage() {
         <div className="ag-sidebar-brand">
           <img src={smartCityLogo} alt="Logo" style={{ width: 50, height: 50 }} />
           <div>
-            <div className="ag-brand-name">{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Smart City Portal'}</div>
+            <div className="ag-brand-name">{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Portail Ville Intelligente'}</div>
           </div>
         </div>
 
@@ -2714,7 +2714,7 @@ export default function AgentDashboardPage() {
 
                                     <span className="badge bg-secondary" style={{ background: '#f5f5f5', color: '#888', fontSize: '10px' }}>
 
-                                      <i className="fas fa-id-card me-1"></i> ASD: Off
+                                      <i className="fas fa-id-card me-1"></i> ASD: Inactif
 
                                     </span>
 
@@ -5794,7 +5794,7 @@ export default function AgentDashboardPage() {
 
             <div className="mb-4">
 
-              <label className="det-label mb-2">Email Administrative Contact</label>
+              <label className="det-label mb-2">Email de Contact Administratif</label>
 
               <input className="form-control border-2" value={globalSettings.contact_email} onChange={e => setGlobalSettings({ ...globalSettings, contact_email: e.target.value })} />
 

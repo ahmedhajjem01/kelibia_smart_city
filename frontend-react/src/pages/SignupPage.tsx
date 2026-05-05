@@ -1944,11 +1944,11 @@ export default function SignupPage() {
 
         <div className="sg-footer-links">
 
-          <a href="#">Privacy Policy</a>
+          <a href="#">Politique de Confidentialité</a>
 
-          <a href="#">Terms of Service</a>
+          <a href="#">Conditions d'Utilisation</a>
 
-          <a href="#">Security Disclosure</a>
+          <a href="#">Signalement de Sécurité</a>
 
         </div>
 
@@ -1998,7 +1998,7 @@ export default function SignupPage() {
 
               <button type="button" className="sg-cam-mirror" onClick={() => setMirrored(m => !m)}>
 
-                <i className="fas fa-arrows-alt-h"></i> {mirrored ? `${t('mirror')} ON` : `${t('mirror')} OFF`}
+                <i className="fas fa-arrows-alt-h"></i> {mirrored ? `${t('mirror')} ACTIVÉ` : `${t('mirror')} DÉSACTIVÉ`}
 
               </button>
 
