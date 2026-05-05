@@ -301,7 +301,7 @@ export default function ReclamationFormPage() {
     if (image) {
       // Shorten filename to avoid backend 100 char limit
       const extension = image.name.split('.').pop() || 'jpg'
-      const newFile = new File([image], `signalement_${Date.now()}.${extension}`, { type: image.type })
+      const newFile = new File([image], `reclamation_${Date.now()}.${extension}`, { type: image.type })
       formData.append('image', newFile)
     }
 

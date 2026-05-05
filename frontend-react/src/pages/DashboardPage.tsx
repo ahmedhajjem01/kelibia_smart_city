@@ -179,7 +179,7 @@ const CSS = `
 
 }
 
-.db-signalement-btn {
+.db-reclamation-btn {
 
   width:100%; padding:16px; background:#E6F4F7; color:#0F4C5C;
 
@@ -193,7 +193,7 @@ const CSS = `
 
 }
 
-.db-signalement-btn:hover { background:#B5DDE5; color:#0F4C5C; }
+.db-reclamation-btn:hover { background:#B5DDE5; color:#0F4C5C; }
 
 .db-news-item { cursor:pointer; }
 
@@ -532,7 +532,7 @@ export default function DashboardPage() {
 
 
       {/* Big red CTA */}
-      <Link to="/nouvelle-reclamation" className="db-signalement-btn">
+      <Link to="/nouvelle-reclamation" className="db-reclamation-btn">
         <i className="fas fa-plus-circle"></i>
         {t('new_signalement_btn')}
       </Link>
@@ -952,7 +952,7 @@ export default function DashboardPage() {
 
 
 
-      {/* ── Mes signalements ── */}
+      {/* ── Mes réclamations ── */}
 
       <div style={{ background: '#fff', border: '1px solid #eeeeee', marginBottom: 28 }}>
 
@@ -986,7 +986,7 @@ export default function DashboardPage() {
 
             <p style={{ textAlign: 'center', color: '#9ca3af', padding: '24px 0', fontSize: '.85rem' }}>
 
-              {t('no_reclamations') || "Aucun signalement pour l'instant"}
+              {t('no_reclamations') || "Aucune réclamation pour l'instant"}
 
             </p>
 

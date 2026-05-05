@@ -2010,7 +2010,7 @@ export default function AgentDashboardPage() {
 
       if (res.ok) {
 
-        showToast('Signalement supprimé !')
+        showToast('Réclamation supprimée !')
 
         setAllRecs(prev => prev.filter(r => r.id !== id))
 
@@ -2282,7 +2282,7 @@ export default function AgentDashboardPage() {
                     { val: pending,  chip: 'Attente',  lbl: "En attente d'examen",    icon: 'fa-clock',      iconBg: '#fff7ed', iconColor: '#ea580c', chipColor: '#ea580c' },
                     { val: inprog,   chip: 'Cours',    lbl: 'Interventions actives',  icon: 'fa-tools',      iconBg: '#eff6ff', iconColor: '#2563eb', chipColor: '#2563eb' },
                     { val: resolved, chip: 'Résolu',   lbl: 'Problèmes réglés',       icon: 'fa-check-circle', iconBg: '#f0fdf4', iconColor: '#16a34a', chipColor: '#16a34a', accent: true },
-                    { val: dupCount, chip: 'Doublons', lbl: 'Signalements répétés',   icon: 'fa-copy',       iconBg: '#fef2f2', iconColor: '#dc2626', chipColor: '#dc2626', onClick: () => setShowDupPanel((p: boolean) => !p) },
+                    { val: dupCount, chip: 'Doublons', lbl: 'Réclamations répétées',   icon: 'fa-copy',       iconBg: '#fef2f2', iconColor: '#dc2626', chipColor: '#dc2626', onClick: () => setShowDupPanel((p: boolean) => !p) },
                   ] as Array<{ val: number; chip: string; lbl: string; icon: string; iconBg: string; iconColor: string; chipColor: string; accent?: boolean; onClick?: () => void }>).map((s, i) => (
                     <div key={i} className="ag-stat" style={{ cursor: s.onClick ? 'pointer' : 'default', borderBottom: s.accent ? '2px solid #ae131a' : undefined }} onClick={s.onClick}>
                       <div className="stat-top">
@@ -4819,7 +4819,7 @@ export default function AgentDashboardPage() {
               <i className="fas fa-flask"></i> LIME + SHAP — Démo en Direct
             </div>
             <p style={{ fontSize: '.76rem', color: '#888', marginBottom: 14, lineHeight: 1.6 }}>
-              Entrez une description de signalement pour voir comment l'IA explique sa décision de priorité mot par mot.
+              Entrez une description de réclamation pour voir comment l'IA explique sa décision de priorité mot par mot.
               <strong> LIME</strong> approxime l'influence locale de chaque mot. <strong>SHAP</strong> utilise les poids du modèle linéaire.
             </p>
             <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
@@ -6325,7 +6325,7 @@ export default function AgentDashboardPage() {
 
                 <div className="col-6"><div className="det-label">Citoyen</div><div className="det-value">{detailRec.citizen_name || '—'}</div></div>
 
-                <div className="col-6"><div className="det-label">Date de signalement</div><div className="det-value">{formatDate(detailRec.created_at)}</div></div>
+                <div className="col-6"><div className="det-label">Date de la réclamation</div><div className="det-value">{formatDate(detailRec.created_at)}</div></div>
 
               </div>
 
