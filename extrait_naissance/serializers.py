@@ -4,7 +4,7 @@ from .models import DeclarationNaissance, Citoyen, ExtraitNaissance, DemandeLega
 class DemandeExtraitNaissanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeExtraitNaissance
-        fields = ['id', 'prenom_fr', 'nom_fr', 'prenom_ar', 'nom_ar', 'cin_declarant', 'status', 'note_agent', 'created_at']
+        fields = ['id', 'prenom_fr', 'nom_fr', 'prenom_ar', 'nom_ar', 'date_naissance', 'status', 'note_agent', 'created_at']
         read_only_fields = ['citizen', 'status', 'note_agent', 'created_at']
 
 

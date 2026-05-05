@@ -188,7 +188,7 @@ class DemandeExtraitNaissance(models.Model):
     nom_fr        = models.CharField(max_length=100, verbose_name='Nom (FR)')
     prenom_ar     = models.CharField(max_length=100, blank=True, verbose_name='Prénom (AR)')
     nom_ar        = models.CharField(max_length=100, blank=True, verbose_name='Nom (AR)')
-    cin_declarant = models.CharField(max_length=8, verbose_name='CIN du demandeur')
+    date_naissance = models.DateField(verbose_name='Date de naissance')
     status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     note_agent    = models.TextField(blank=True, verbose_name="Note de l'agent")
     created_at    = models.DateTimeField(auto_now_add=True)

@@ -36,7 +36,7 @@ type DemandeExtrait = {
   nom_fr: string
   prenom_ar: string
   nom_ar: string
-  cin_declarant: string
+  date_naissance: string
   status: 'pending' | 'processed' | 'rejected'
   note_agent: string
   created_at: string
@@ -48,7 +48,7 @@ type MesExtraitsResponse = {
   enfants?: Extrait[]
 }
 
-const INIT_FORM = { prenom_fr: '', nom_fr: '', prenom_ar: '', nom_ar: '', cin_declarant: '' }
+const INIT_FORM = { prenom_fr: '', nom_fr: '', prenom_ar: '', nom_ar: '', date_naissance: '' }
 
 export default function MesNaissancesPage() {
   const { t, lang } = useI18n()
@@ -244,11 +244,10 @@ export default function MesNaissancesPage() {
                           onChange={e => setForm(f => ({ ...f, nom_ar: e.target.value }))} />
                       </div>
                       <div className="col-12">
-                        <label className="form-label small fw-semibold">{lang === 'ar' ? 'رقم بطاقة التعريف الوطنية' : 'CIN (8 chiffres)'} *</label>
-                        <input className="form-control" required maxLength={8} inputMode="numeric"
-                          value={form.cin_declarant}
-                          onInput={e => { const el = e.currentTarget; el.value = el.value.replace(/\D/g, '').slice(0, 8) }}
-                          onChange={e => setForm(f => ({ ...f, cin_declarant: e.target.value }))} />
+                        <label className="form-label small fw-semibold">{lang === 'ar' ? 'تاريخ الميلاد' : 'Date de naissance'} *</label>
+                        <input type="date" className="form-control" required
+                          value={form.date_naissance}
+                          onChange={e => setForm(f => ({ ...f, date_naissance: e.target.value }))} />
                       </div>
                     </div>
                     <div className="d-grid mt-4">
@@ -365,7 +364,8 @@ export default function MesNaissancesPage() {
                           </div>
                           <h5 className="fw-bold mb-1">{nomComplet}</h5>
                           <p className="text-muted mb-1" style={{ fontSize: '.85rem' }}>
-                            <i className="fas fa-id-card me-1" /> CIN : {dem.cin_declarant}
+                            <i className="fas fa-birthday-cake me-1" />
+                            {dem.date_naissance ? new Date(dem.date_naissance).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR') : '—'}
                           </p>
                           <hr className="my-2" />
                           <p className="mb-0" style={{ fontSize: '.75rem', color: '#6c757d' }}>
