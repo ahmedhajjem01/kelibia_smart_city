@@ -535,6 +535,7 @@ const translations: Record<Lang, Record<string, string>> = {
     cin_mere: 'CIN Mère',
     send_declaration: 'Envoyer la déclaration',
     back_to_dashboard: 'Retour au tableau de bord',
+    back_to_services: 'Retour aux services',
 
     err_eligible_members: 'Impossible de charger les membres éligibles.',
     date_deces_future: 'La date de décès ne peut pas être dans le futur.',
@@ -1461,6 +1462,7 @@ const translations: Record<Lang, Record<string, string>> = {
     cin_mere: 'ب.ت.و للأم',
     send_declaration: 'إرسال التصريح',
     back_to_dashboard: 'العودة إلى لوحة القيادة',
+    back_to_services: 'العودة إلى الخدمات',
 
     err_eligible_members: 'عذراً، لم نتمكن من تحميل قائمة أفراد العائلة.',
     date_deces_future: 'لا يمكن أن يكون تاريخ الوفاة في المستقبل.',

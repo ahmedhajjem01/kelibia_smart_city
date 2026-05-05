@@ -407,9 +407,9 @@ export default function DashboardPage() {
 
   const getMarkerIcon = (status: string) => {
 
-    const colors: Record<string, string> = { pending: '#f57f17', in_progress: '#1565c0', resolved: '#2e7d32', rejected: '#c62828' }
+    const colors: Record<string, string> = { pending: '#f57f17', in_progress: '#c61f2c', resolved: '#2e7d32', rejected: '#c62828' }
 
-    const color = colors[status] || '#1565c0'
+    const color = colors[status] || '#c61f2c'
 
     return L.divIcon({
 
@@ -429,7 +429,7 @@ export default function DashboardPage() {
 
     pending:     { bg: '#fef2f2', color: '#d4aa8d', label: t('status_pending') },
 
-    in_progress: { bg: '#eff6ff', color: '#1565c0', label: t('status_in_progress') },
+    in_progress: { bg: '#fde8ea', color: '#c61f2c', label: t('status_in_progress') },
 
     resolved:    { bg: '#f0fdf4', color: '#166534', label: t('status_resolved') },
 
@@ -669,7 +669,7 @@ export default function DashboardPage() {
 
           </div>
 
-          <Link to="/mes-mariages" style={{ padding: '6px 16px', background: '#1565c0', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', borderRadius: 999 }}>
+          <Link to="/mes-mariages" style={{ padding: '6px 16px', background: '#c61f2c', color: '#fff', fontWeight: 700, fontSize: '.78rem', textDecoration: 'none', borderRadius: 999 }}>
 
             {t('view_mariage_cert')}
 
@@ -790,7 +790,7 @@ export default function DashboardPage() {
 
               { color: '#f57f17', label: lang === 'ar' ? 'بانتظار' : 'En attente', key: 'pending' },
 
-              { color: '#1565c0', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours', key: 'in_progress' },
+              { color: '#c61f2c', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours', key: 'in_progress' },
 
               { color: '#2e7d32', label: lang === 'ar' ? 'محلول' : 'Résolu', key: 'resolved' },
 
