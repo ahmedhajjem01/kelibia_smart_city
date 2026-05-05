@@ -17,6 +17,18 @@ type Extrait = {
   is_paid: boolean
 }
 
+type Declaration = {
+  id: number
+  prenom_fr: string
+  prenom_ar: string
+  nom_fr: string
+  nom_ar: string
+  date_naissance: string
+  lieu_naissance_fr: string
+  lieu_naissance_ar: string
+  status: 'pending' | 'validated' | 'rejected'
+  created_at: string
+}
 
 type MesExtraitsResponse = {
   mon_extrait?: Extrait | null
@@ -31,6 +43,7 @@ export default function MesNaissancesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<MesExtraitsResponse | null>(null)
+  const [declarations, setDeclarations] = useState<Declaration[]>([])
   const [user, setUser] = useState<{ first_name: string; last_name: string; email: string; is_verified: boolean; has_active_asd: boolean } | null>(null)
 
   useEffect(() => {
@@ -65,6 +78,16 @@ export default function MesNaissancesPage() {
         }
         const json = (await res.json()) as MesExtraitsResponse
         setData(json)
+
+        // Also fetch pending/processed declarations submitted by the citizen
+        const declRes = await fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (declRes.ok) {
+          const declJson = await declRes.json()
+          const list: Declaration[] = Array.isArray(declJson) ? declJson : (declJson.results || [])
+          setDeclarations(list)
+        }
       } catch (e: any) {
         console.error(e)
         setError(e.message || "Erreur de connexion avec la base de données.")
@@ -170,6 +193,59 @@ export default function MesNaissancesPage() {
         <div className="alert alert-danger">{error}</div>
       ) : (
         <div className={lang === 'ar' ? 'font-arabic text-end' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+
+          {/* ── Declarations submitted by the citizen ── */}
+          {declarations.length > 0 && (
+            <>
+              <h4 className="mb-3 border-bottom pb-2">{t('my_birth_declarations') || 'Mes Déclarations de Naissance'}</h4>
+              <div className="row mb-5">
+                {declarations.map(decl => {
+                  const statusConfig: Record<string, { bg: string; color: string; label: string; icon: string }> = {
+                    pending:   { bg: '#fff3cd', color: '#856404', label: t('status_pending') || 'En attente',  icon: 'fas fa-clock' },
+                    validated: { bg: '#d1e7dd', color: '#0f5132', label: t('status_validated') || 'Validée',  icon: 'fas fa-check-circle' },
+                    rejected:  { bg: '#f8d7da', color: '#842029', label: t('status_rejected') || 'Rejetée',   icon: 'fas fa-times-circle' },
+                  }
+                  const sc = statusConfig[decl.status] || statusConfig['pending']
+                  const nomComplet = lang === 'ar'
+                    ? `${decl.prenom_ar} ${decl.nom_ar}`
+                    : `${decl.prenom_fr} ${decl.nom_fr}`
+                  const dateSubmitted = new Date(decl.created_at).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')
+                  const dateBirth = decl.date_naissance
+                    ? new Date(decl.date_naissance).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')
+                    : '—'
+                  return (
+                    <div className="col-md-6 col-lg-4 mb-4" key={decl.id}>
+                      <div className="card shadow-sm h-100 border-0" style={{ borderLeft: `4px solid ${sc.color}`, borderRadius: 12 }}>
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <span className="badge rounded-pill" style={{ background: sc.bg, color: sc.color, fontSize: '.75rem', padding: '5px 10px' }}>
+                              <i className={`${sc.icon} me-1`} /> {sc.label}
+                            </span>
+                            <small className="text-muted">#{decl.id}</small>
+                          </div>
+                          <h5 className="fw-bold mb-1">{nomComplet}</h5>
+                          <p className="text-muted mb-1" style={{ fontSize: '.85rem' }}>
+                            <i className="fas fa-birthday-cake me-1" />
+                            {dateBirth}
+                          </p>
+                          <p className="text-muted mb-0" style={{ fontSize: '.78rem' }}>
+                            <i className="fas fa-map-marker-alt me-1" />
+                            {lang === 'ar' ? decl.lieu_naissance_ar : decl.lieu_naissance_fr}
+                          </p>
+                          <hr className="my-2" />
+                          <p className="mb-0" style={{ fontSize: '.75rem', color: '#6c757d' }}>
+                            <i className="fas fa-calendar-plus me-1" />
+                            {t('submitted_on') || 'Soumis le'} {dateSubmitted}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+
           <h4 className="mb-3 border-bottom pb-2">{t('my_birth_extract') || 'Mon Extrait de Naissance'}</h4>
           <div className="row mb-5">
             {data?.mon_extrait ? (
