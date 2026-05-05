@@ -1713,7 +1713,8 @@ export default function AgentDashboardPage() {
 
 
 
-    const m = L.map(mapRef.current).setView([36.8467, 11.1047], 13)
+    const m = L.map(mapRef.current, { minZoom: 8, worldCopyJump: false, maxBoundsViscosity: 1.0 }).setView([36.8467, 11.1047], 13)
+    m.setMaxBounds([[27.0, -10.0], [40.0, 18.0]])
 
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap France', maxZoom: 19 }).addTo(m)
 
