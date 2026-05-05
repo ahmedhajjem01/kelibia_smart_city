@@ -83,7 +83,7 @@ export default function DemandeEvenementPublicPage() {
   type GpsStatus = 'none' | 'manual' | 'gps' | 'loading'
   const GPS_CONFIG: Record<GpsStatus, { color: string; bg: string; icon: string; text: string }> = {
     none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',       text: lang === 'ar' ? 'لا يوجد موقع' : 'Aucune localisation' },
-    manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',              text: lang === 'ar' ? 'موقع على الخريطة' : 'Position sur la carte' },
+    manual:  { color: '#c61f2c', bg: '#fde8ea', icon: 'fa-map-pin',              text: lang === 'ar' ? 'موقع على الخريطة' : 'Position sur la carte' },
     gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',       text: lang === 'ar' ? 'موقع تم تحديده' : 'Position GPS détectée' },
     loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: lang === 'ar' ? 'جاري التحميل...' : 'Récupération...' },
   }
@@ -210,7 +210,7 @@ export default function DemandeEvenementPublicPage() {
 
             {/* Header */}
             <div className="d-flex align-items-center gap-3 mb-4">
-              <div className="rounded-3 p-3 shadow-sm text-white" style={{ background: 'linear-gradient(135deg,#6f42c1,#0d6efd)', fontSize: '1.5rem' }}>
+              <div className="rounded-3 p-3 shadow-sm text-white" style={{ background: 'linear-gradient(135deg,#c61f2c,#ae131a)', fontSize: '1.5rem' }}>
                 <i className="fas fa-bullhorn"></i>
               </div>
               <div>
@@ -221,7 +221,7 @@ export default function DemandeEvenementPublicPage() {
                   {lang === 'ar' ? 'حفلات، مهرجانات، أحداث رياضية وثقافية...' : 'Concerts, festivals, événements sportifs et culturels...'}
                 </p>
               </div>
-              <span className="ms-auto badge rounded-pill px-3 py-2" style={{ background: '#f0e6ff', color: '#6f42c1', fontSize: '.8rem' }}>
+              <span className="ms-auto badge rounded-pill px-3 py-2" style={{ background: '#fde8ea', color: '#c61f2c', fontSize: '.8rem' }}>
                 <i className="fas fa-globe me-1"></i>
                 {lang === 'ar' ? 'عمومي' : 'Public'}
               </span>
@@ -231,7 +231,7 @@ export default function DemandeEvenementPublicPage() {
               <div className="card-body p-4 p-md-5 bg-white">
                 {success ? (
                   <div className="text-center py-5">
-                    <i className="fas fa-check-circle fa-5x mb-4" style={{ color: '#6f42c1' }}></i>
+                    <i className="fas fa-check-circle fa-5x mb-4" style={{ color: '#c61f2c' }}></i>
                     <h3 className="fw-bold mb-2">{lang === 'ar' ? 'تم إرسال الطلب!' : 'Demande envoyée !'}</h3>
                     <p className="text-muted">{lang === 'ar' ? 'طلبك قيد المعالجة من قبل البلدية.' : 'Votre demande est en cours de traitement par la municipalité.'}</p>
                     <p className="text-muted small">{lang === 'ar' ? 'جاري التوجيه...' : 'Redirection en cours...'}</p>
@@ -248,7 +248,7 @@ export default function DemandeEvenementPublicPage() {
                     <div className="mb-5">
                       <div className="d-flex align-items-center gap-2 mb-4 pb-2 border-bottom">
                         <span className="badge rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                          style={{ width: 32, height: 32, background: '#6f42c1', fontSize: '1rem' }}>1</span>
+                          style={{ width: 32, height: 32, background: '#c61f2c', fontSize: '1rem' }}>1</span>
                         <h5 className="fw-bold mb-0">
                           {lang === 'ar' ? 'معلومات الفعالية' : "Informations sur l'événement"}
                         </h5>
@@ -464,7 +464,7 @@ export default function DemandeEvenementPublicPage() {
                     <div className="d-grid gap-3">
                       <button type="submit" disabled={loading}
                         className="btn btn-lg rounded-pill py-3 fw-bold shadow-lg text-white"
-                        style={{ background: 'linear-gradient(135deg,#6f42c1,#0d6efd)', border: 'none' }}>
+                        style={{ background: 'linear-gradient(135deg,#c61f2c,#ae131a)', border: 'none' }}>
                         {loading
                           ? <><span className="spinner-border spinner-border-sm me-3"></span>{lang === 'ar' ? 'جاري الإرسال...' : 'Envoi en cours...'}</>
                           : <><i className={`fas fa-paper-plane ${lang === 'ar' ? 'ms-3' : 'me-3'}`}></i>{lang === 'ar' ? 'إرسال الطلب' : 'Soumettre la demande'}</>}

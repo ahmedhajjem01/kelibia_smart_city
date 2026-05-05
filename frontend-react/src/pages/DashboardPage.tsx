@@ -695,8 +695,8 @@ export default function DashboardPage() {
       ))}
 
       {genericNotifications.filter(n => !n.is_read).map((notif: any) => (
-        <div key={notif.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', marginBottom: 16, background: '#fff', borderLeft: '4px solid #1a73e8', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <i className={`fas ${notif.notification_type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}`} style={{ color: notif.notification_type === 'success' ? '#16a34a' : '#1a73e8' }}></i>
+        <div key={notif.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', marginBottom: 16, background: '#fff', borderLeft: '4px solid #c61f2c', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <i className={`fas ${notif.notification_type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}`} style={{ color: notif.notification_type === 'success' ? '#16a34a' : '#c61f2c' }}></i>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, color: '#1a1c1c' }}>{notif.title}</div>
             <div style={{ fontSize: '.78rem', color: '#5b403d' }}>{notif.message}</div>

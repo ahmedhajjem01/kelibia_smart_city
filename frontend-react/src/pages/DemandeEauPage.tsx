@@ -91,7 +91,7 @@ export default function DemandeEauPage() {
         <div className="col-lg-8">
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-header rounded-top-4 text-white py-3 px-4"
-              style={{ background: 'linear-gradient(135deg, #0d6efd, #0dcaf0)' }}>
+              style={{ background: 'linear-gradient(135deg, #c61f2c, #ae131a)' }}>
               <h4 className="mb-0 fw-bold">
                 <i className={`fas fa-tint ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>
                 {lang === 'ar' ? 'الماء، الكهرباء والصرف الصحي' : 'Demande — Eau, Lumière & Égouts'}

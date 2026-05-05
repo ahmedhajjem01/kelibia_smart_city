@@ -20,7 +20,7 @@ const KELIBIA_CENTER: [number, number] = [36.8474, 11.0991]
 type GpsStatus = 'none' | 'manual' | 'gps' | 'loading'
 const gpsStatusConfig: Record<GpsStatus, { color: string; bg: string; icon: string; text: string }> = {
   none:    { color: '#6c757d', bg: '#f8f9fa', icon: 'fa-map-marker-alt',      text: 'Aucune localisation sélectionnée' },
-  manual:  { color: '#0d6efd', bg: '#e7f1ff', icon: 'fa-map-pin',             text: 'Position choisie sur la carte' },
+  manual:  { color: '#c61f2c', bg: '#fde8ea', icon: 'fa-map-pin',             text: 'Position choisie sur la carte' },
   gps:     { color: '#198754', bg: '#d1e7dd', icon: 'fa-location-arrow',      text: 'Position GPS détectée' },
   loading: { color: '#fd7e14', bg: '#fff3cd', icon: 'fa-circle-notch fa-spin', text: 'Récupération de la position...' },
 }
@@ -246,7 +246,7 @@ export default function DemandeEvenementPage() {
           <div className="col-12 col-xl-10">
             {/* Header */}
             <div className="d-flex align-items-center gap-3 mb-4">
-              <div className="rounded-3 p-3 shadow-sm" style={{ background: 'linear-gradient(135deg,#6f42c1,#0d6efd)', color: '#fff', fontSize: '1.5rem' }}>
+              <div className="rounded-3 p-3 shadow-sm" style={{ background: 'linear-gradient(135deg,#c61f2c,#ae131a)', color: '#fff', fontSize: '1.5rem' }}>
                 <i className="fas fa-calendar-plus"></i>
               </div>
               <div>
@@ -259,7 +259,7 @@ export default function DemandeEvenementPage() {
               <div className="card-body p-4 p-md-5 bg-white">
                 {success ? (
                   <div className="text-center py-5">
-                    <div className="mb-4" style={{ color: '#6f42c1' }}><i className="fas fa-check-circle fa-5x"></i></div>
+                    <div className="mb-4" style={{ color: '#c61f2c' }}><i className="fas fa-check-circle fa-5x"></i></div>
                     <h3 className="fw-bold mb-2">Demande envoyée avec succès !</h3>
                     <p className="text-muted">طلبكم قيد المعالجة. تتم مراجعته من طرف البلدية.</p>
                     <p className="text-muted small">Redirection vers vos demandes...</p>
@@ -276,7 +276,7 @@ export default function DemandeEvenementPage() {
                     <div className="section-block mb-5">
                       <div className="d-flex align-items-center gap-2 mb-4 pb-2 border-bottom">
                         <span className="badge rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                          style={{ width: 32, height: 32, background: '#6f42c1', fontSize: '1rem' }}>1</span>
+                          style={{ width: 32, height: 32, background: '#c61f2c', fontSize: '1rem' }}>1</span>
                         <h5 className="fw-bold mb-0 text-dark">Informations sur l'événement</h5>
                         <span className="ms-2 text-muted small" style={{ direction: 'rtl' }}>معلومات التظاهرة</span>
                       </div>
@@ -520,7 +520,7 @@ export default function DemandeEvenementPage() {
                     <div className="d-grid gap-3 mt-2">
                       <button type="submit" className="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow-lg"
                         disabled={loading}
-                        style={{ background: 'linear-gradient(135deg,#6f42c1,#0d6efd)', border: 'none' }}>
+                        style={{ background: 'linear-gradient(135deg,#c61f2c,#ae131a)', border: 'none' }}>
                         {loading
                           ? <><span className="spinner-border spinner-border-sm me-3"></span>Envoi en cours...</>
                           : <><i className="fas fa-paper-plane me-3"></i>Soumettre la demande</>

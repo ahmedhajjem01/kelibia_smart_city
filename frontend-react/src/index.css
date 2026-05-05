@@ -37,6 +37,38 @@
   --arabic: 'Cairo', 'Tajawal', sans-serif;
 }
 
+/* ── Override Bootstrap primary → Tunisian Red (project theme) ── */
+:root {
+  --bs-primary: #c61f2c;
+  --bs-primary-rgb: 198, 31, 44;
+  --bs-primary-bg-subtle: #fde8ea;
+  --bs-primary-border-subtle: #f9b8be;
+  --bs-link-color: #c61f2c;
+  --bs-link-hover-color: #a31924;
+}
+.btn-primary {
+  --bs-btn-bg: #c61f2c;
+  --bs-btn-border-color: #c61f2c;
+  --bs-btn-hover-bg: #a31924;
+  --bs-btn-hover-border-color: #a31924;
+  --bs-btn-active-bg: #8e1520;
+  --bs-btn-active-border-color: #8e1520;
+  --bs-btn-disabled-bg: #c61f2c;
+  --bs-btn-disabled-border-color: #c61f2c;
+}
+.btn-outline-primary {
+  --bs-btn-color: #c61f2c;
+  --bs-btn-border-color: #c61f2c;
+  --bs-btn-hover-bg: #c61f2c;
+  --bs-btn-hover-border-color: #c61f2c;
+  --bs-btn-active-bg: #a31924;
+  --bs-btn-active-border-color: #a31924;
+}
+.bg-primary { background-color: #c61f2c !important; }
+.text-primary { color: #c61f2c !important; }
+.border-primary { border-color: #c61f2c !important; }
+.bg-primary.bg-opacity-10 { background-color: rgba(198,31,44,.10) !important; }
+
 * { box-sizing: border-box; }
 
 body {

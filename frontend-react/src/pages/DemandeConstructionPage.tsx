@@ -220,17 +220,17 @@ export default function DemandeConstructionPage() {
         .cst-step{display:flex;flex-direction:column;align-items:center}
         .cst-circ{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;transition:all .3s}
         .cst-circ.done{background:#198754;color:#fff}
-        .cst-circ.act{background:linear-gradient(135deg,#0d6efd,#6610f2);color:#fff;box-shadow:0 0 0 4px #cfe2ff}
+        .cst-circ.act{background:linear-gradient(135deg,#c61f2c,#ae131a);color:#fff;box-shadow:0 0 0 4px #fde8ea}
         .cst-circ.wait{background:#e9ecef;color:#6c757d}
         .cst-slbl{font-size:.68rem;margin-top:3px;font-weight:600;color:#6c757d;text-align:center;max-width:72px}
-        .cst-slbl.act{color:#0d6efd}
+        .cst-slbl.act{color:#c61f2c}
         .cst-conn{flex:1;height:3px;background:#e9ecef;margin:0 4px;position:relative;top:-12px;min-width:18px}
-        .cst-conn.on{background:linear-gradient(90deg,#198754,#0d6efd)}
-        .fc{background:#fff;border-radius:1.1rem;box-shadow:0 4px 22px rgba(13,110,253,.09);padding:1.8rem}
-        .sh{font-size:.95rem;font-weight:700;color:#0d6efd;border-bottom:2px solid #e7f1ff;padding-bottom:.4rem;margin-bottom:1.1rem}
+        .cst-conn.on{background:linear-gradient(90deg,#198754,#c61f2c)}
+        .fc{background:#fff;border-radius:1.1rem;box-shadow:0 4px 22px rgba(198,31,44,.09);padding:1.8rem}
+        .sh{font-size:.95rem;font-weight:700;color:#c61f2c;border-bottom:2px solid #fde8ea;padding-bottom:.4rem;margin-bottom:1.1rem}
         .tcard{padding:.75rem;border-radius:.7rem;border:2px solid #e9ecef;cursor:pointer;transition:all .2s;background:#f8f9fa;text-align:center;height:100%}
-        .tcard.sel{border-color:#0d6efd;background:#e7f1ff}
-        .tcard:hover{border-color:#86b7fe;background:#f0f5ff}
+        .tcard.sel{border-color:#c61f2c;background:#fde8ea}
+        .tcard:hover{border-color:#f9b8be;background:#fef5f5}
         .fok{display:flex;align-items:center;gap:.4rem;padding:.35rem .7rem;background:#d1e7dd;border-radius:.45rem;font-size:.8rem;color:#0a3622;font-weight:600;margin-top:.35rem}
         .rbanner{background:linear-gradient(135deg,#dc3545,#fd7e14);color:#fff;border-radius:.75rem;padding:.45rem .9rem;font-size:.83rem;font-weight:600;margin-bottom:.75rem}
       `}</style>
@@ -240,7 +240,7 @@ export default function DemandeConstructionPage() {
           <span className="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-2 d-inline-block">
             <i className={`fas fa-hard-hat ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'المنازل والبناء' : 'Maisons & Construction'}
           </span>
-          <h2 className="fw-bold mb-0" style={{ background: 'linear-gradient(135deg,#0d6efd,#6610f2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h2 className="fw-bold mb-0" style={{ background: 'linear-gradient(135deg,#c61f2c,#ae131a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {lang === 'ar' ? 'طلب رخصة بناء' : 'Demande de Permis de Construire'}
           </h2>
           <p className="text-muted small mb-0">رخصة البناء — Kelibia Municipality</p>

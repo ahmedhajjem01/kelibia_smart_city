@@ -165,7 +165,7 @@ export default function MesConstructionsPage() {
                       style={{ cursor: 'pointer' }}
                       onClick={() => setExpandedId(isExpanded ? null : d.id)}>
                       <div className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                        style={{ width: 48, height: 48, background: 'linear-gradient(135deg,#0d6efd,#6610f2)', fontSize: '1.4rem' }}>
+                        style={{ width: 48, height: 48, background: 'linear-gradient(135deg,#c61f2c,#ae131a)', fontSize: '1.4rem' }}>
                         {emoji}
                       </div>
                       <div className="flex-grow-1 min-w-0">

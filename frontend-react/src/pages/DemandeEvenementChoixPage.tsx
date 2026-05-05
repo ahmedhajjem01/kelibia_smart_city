@@ -30,7 +30,7 @@ export default function DemandeEvenementChoixPage() {
             {/* Header */}
             <div className="text-center mb-5">
               <div className="d-inline-flex rounded-4 p-4 mb-3 shadow-sm"
-                style={{ background: 'linear-gradient(135deg, #6f42c1, #0d6efd)', color: '#fff', fontSize: '2rem' }}>
+                style={{ background: 'linear-gradient(135deg, #c61f2c, #ae131a)', color: '#fff', fontSize: '2rem' }}>
                 <i className="fas fa-calendar-plus"></i>
               </div>
               <h2 className="fw-bold mb-2" style={{ color: '#1a1a2e' }}>
@@ -51,12 +51,12 @@ export default function DemandeEvenementChoixPage() {
                 <div
                   className="card border-0 rounded-4 shadow-sm h-100 text-center p-2"
                   style={{ cursor: 'pointer', transition: 'transform .2s, box-shadow .2s', overflow: 'hidden' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(111,66,193,.25)' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(198,31,44,.25)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '' }}
                   onClick={() => navigate('/demande-evenement-public')}
                 >
                   {/* Top color band */}
-                  <div className="py-4 px-3" style={{ background: 'linear-gradient(135deg, #6f42c1 0%, #0d6efd 100%)' }}>
+                  <div className="py-4 px-3" style={{ background: 'linear-gradient(135deg, #c61f2c 0%, #ae131a 100%)' }}>
                     <i className="fas fa-bullhorn fa-3x text-white mb-3 d-block"></i>
                     <h4 className="fw-bold text-white mb-1">
                       {lang === 'ar' ? 'فعالية عمومية' : 'Événement Public'}
@@ -84,7 +84,7 @@ export default function DemandeEvenementChoixPage() {
                         { icon: 'fa-hand-holding-heart', label: lang === 'ar' ? 'خيري' : 'Caritatif' },
                       ].map(t => (
                         <span key={t.label} className="badge rounded-pill px-3 py-2"
-                          style={{ background: '#f0e6ff', color: '#6f42c1', fontSize: '.75rem' }}>
+                          style={{ background: '#fde8ea', color: '#c61f2c', fontSize: '.75rem' }}>
                           <i className={`fas ${t.icon} me-1`}></i>{t.label}
                         </span>
                       ))}
@@ -92,7 +92,7 @@ export default function DemandeEvenementChoixPage() {
 
                     <button
                       className="btn rounded-pill px-5 py-2 fw-bold text-white w-100"
-                      style={{ background: 'linear-gradient(135deg, #6f42c1, #0d6efd)', border: 'none' }}
+                      style={{ background: 'linear-gradient(135deg, #c61f2c, #ae131a)', border: 'none' }}
                       onClick={() => navigate('/demande-evenement-public')}
                     >
                       <i className="fas fa-arrow-right me-2"></i>

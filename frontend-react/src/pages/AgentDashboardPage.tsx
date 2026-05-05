@@ -1836,7 +1836,7 @@ export default function AgentDashboardPage() {
       const div = L.DomUtil.create('div')
       div.style.cssText = 'background:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:12px;min-width:180px;'
       div.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;color:#1a3a5c;border-bottom:1px solid #eee;padding-bottom:4px;">📋 Légende</div>
+        <div style="font-weight:700;margin-bottom:6px;color:#ae131a;border-bottom:1px solid #eee;padding-bottom:4px;">📋 Légende</div>
         <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Signalements</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#e65100;display:inline-block;"></span> En attente</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
@@ -1925,7 +1925,7 @@ export default function AgentDashboardPage() {
 
       const prioColor = pc[r.priority] || '#1565c0'
 
-      mk.bindPopup(`<div style="min-width:210px;font-size:13px;"><strong style="color:#1a3a5c;">${r.title}</strong><br>
+      mk.bindPopup(`<div style="min-width:210px;font-size:13px;"><strong style="color:#ae131a;">${r.title}</strong><br>
 
         <span style="color:#888;font-size:11px;">${cat.label}</span><br>
 
@@ -3874,7 +3874,7 @@ export default function AgentDashboardPage() {
 
   <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
 
-    <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)' }}>
+    <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#ae131a,#c61f2c)' }}>
 
       <span><i className="fas fa-calendar-alt me-2"></i>{t('admin_events_title')}</span>
 
@@ -5422,7 +5422,7 @@ export default function AgentDashboardPage() {
 
     <div className="ag-card">
 
-      <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #1a3a5c, #1565c0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #ae131a, #c61f2c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
         <span><i className="fas fa-user-circle me-2"></i>{t('profile_personal_info')}</span>
 
@@ -5927,7 +5927,7 @@ export default function AgentDashboardPage() {
 
       <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 620, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
 
-        <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#1a3a5c,#6f42c1)', borderRadius: '16px 16px 0 0' }}>
+        <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#ae131a,#c61f2c)', borderRadius: '16px 16px 0 0' }}>
 
           <span className="title"><i className="fas fa-calendar-alt me-2"></i>{evDetail.titre_evenement}</span>
 
@@ -6295,7 +6295,7 @@ export default function AgentDashboardPage() {
 
                       style={{
 
-                        background: 'linear-gradient(135deg,#1565c0,#1a3a5c)',
+                        background: 'linear-gradient(135deg,#ae131a,#c61f2c)',
 
                         color: '#fff', border: 'none', borderRadius: '6px',
 
@@ -6681,7 +6681,7 @@ export default function AgentDashboardPage() {
 
       <div className="bg-white rounded-4 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '420px' }}>
 
-        <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(90deg,#1a3a5c,#0d6efd)', color: '#fff' }}>
+        <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(90deg,#ae131a,#c61f2c)', color: '#fff' }}>
 
           <h6 className="mb-0 fw-bold"><i className="fas fa-key me-2"></i>Mot de passe réinitialisé</h6>
 
@@ -6697,7 +6697,7 @@ export default function AgentDashboardPage() {
 
           <div className="d-flex align-items-center justify-content-center gap-2 mb-4">
 
-            <code className="px-4 py-2 rounded-3 fw-bold" style={{ background: '#f0f5ff', color: '#0d6efd', fontSize: '1.15rem', letterSpacing: 2, border: '2px dashed #0d6efd' }}>
+            <code className="px-4 py-2 rounded-3 fw-bold" style={{ background: '#fde8ea', color: '#c61f2c', fontSize: '1.15rem', letterSpacing: 2, border: '2px dashed #c61f2c' }}>
 
               {resetPwdResult.password}
 
