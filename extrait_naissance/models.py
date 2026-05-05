@@ -171,6 +171,38 @@ class DeclarationNaissance(models.Model):
         verbose_name = "Déclaration de Naissance"
         verbose_name_plural = "Déclarations de Naissance"
 
+class DemandeExtraitNaissance(models.Model):
+    STATUS_CHOICES = [
+        ('pending',   'En attente / قيد الانتظار'),
+        ('processed', 'Traité / تمت المعالجة'),
+        ('rejected',  'Rejeté / مرفوض'),
+    ]
+
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='demandes_extrait_naissance',
+        verbose_name='Demandeur'
+    )
+    prenom_fr     = models.CharField(max_length=100, verbose_name='Prénom (FR)')
+    nom_fr        = models.CharField(max_length=100, verbose_name='Nom (FR)')
+    prenom_ar     = models.CharField(max_length=100, blank=True, verbose_name='Prénom (AR)')
+    nom_ar        = models.CharField(max_length=100, blank=True, verbose_name='Nom (AR)')
+    cin_declarant = models.CharField(max_length=8, verbose_name='CIN du demandeur')
+    status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    note_agent    = models.TextField(blank=True, verbose_name="Note de l'agent")
+    created_at    = models.DateTimeField(auto_now_add=True)
+    updated_at    = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'Demande extrait: {self.prenom_fr} {self.nom_fr} ({self.citizen.email})'
+
+    class Meta:
+        verbose_name = "Demande d'extrait de naissance"
+        verbose_name_plural = "Demandes d'extrait de naissance"
+        ordering = ['-created_at']
+
+
 class DemandeLegalisation(models.Model):
     STATUS_CHOICES = [
         ('pending', 'En attente / قيد الانتظار'),

@@ -636,6 +636,11 @@ const translations: Record<Lang, Record<string, string>> = {
     no_child_birth_extract_found: "Aucun acte de naissance d'enfant n'est rattaché à votre CIN.",
     no_marriage_act_found: 'Aucun acte de mariage trouvé pour votre profil.',
     no_death_act_found: 'Aucun acte de décès trouvé pour votre famille.',
+    request_birth_extract: "Demander mon extrait de naissance",
+    my_extract_requests: "Mes demandes d'extrait",
+    submit_request: "Soumettre la demande",
+    request_sent_success: "Votre demande a été envoyée avec succès. Un agent vous contactera prochainement.",
+    note_agent_label: "Note de l'agent",
 
     all_statuses: 'Tous les statuts',
     all_categories: 'Toutes catégories',
@@ -1570,6 +1575,11 @@ const translations: Record<Lang, Record<string, string>> = {
     no_child_birth_extract_found: 'لم يتم العثور على أي مضمون ولادة لأطفالك مرتبط برقم بطاقة تعريفك.',
     no_marriage_act_found: 'لم يتم العثور على أي عقد زواج لملفك الشخصي.',
     no_death_act_found: 'لم يتم العثور على أي مضمون وفاة لعائلتك.',
+    request_birth_extract: "طلب مضمون الولادة الخاص بي",
+    my_extract_requests: "طلباتي لمضامين الولادة",
+    submit_request: "إرسال الطلب",
+    request_sent_success: "تم إرسال طلبك بنجاح. سيتصل بك أحد الموظفين قريباً.",
+    note_agent_label: "ملاحظة الموظف",
 
     add_collaborator: 'إضافة متعاون',
     new_municipal_service: 'خدمة بلدية جديدة',

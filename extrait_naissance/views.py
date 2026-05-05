@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import Citoyen, ExtraitNaissance, DeclarationNaissance, DemandeLegalisation
-from .serializers import DeclarationNaissanceSerializer, DemandeLegalisationSerializer
+from .models import Citoyen, ExtraitNaissance, DeclarationNaissance, DemandeLegalisation, DemandeExtraitNaissance
+from .serializers import DeclarationNaissanceSerializer, DemandeLegalisationSerializer, DemandeExtraitNaissanceSerializer
 
 from django.utils import timezone
 from notifications.models import Notification
@@ -249,3 +249,42 @@ class DemandeLegalisationAPIView(APIView):
             serializer.save(citizen=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DemandeExtraitNaissanceAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor'):
+            qs = DemandeExtraitNaissance.objects.all().order_by('-created_at')
+        else:
+            qs = DemandeExtraitNaissance.objects.filter(citizen=user).order_by('-created_at')
+        serializer = DemandeExtraitNaissanceSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = DemandeExtraitNaissanceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(citizen=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DemandeExtraitNaissanceDetailAPIView(APIView):
+    """Allows agents to update status + note_agent."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        user = request.user
+        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
+            return Response({'error': 'Non autorisé'}, status=403)
+        demande = get_object_or_404(DemandeExtraitNaissance, pk=pk)
+        new_status = request.data.get('status')
+        if new_status not in ('processed', 'rejected'):
+            return Response({'error': 'Statut invalide'}, status=400)
+        demande.status = new_status
+        if 'note_agent' in request.data:
+            demande.note_agent = request.data['note_agent']
+        demande.save()
+        return Response({'status': demande.status, 'note_agent': demande.note_agent})
