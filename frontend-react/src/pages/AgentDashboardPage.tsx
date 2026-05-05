@@ -2132,7 +2132,7 @@ export default function AgentDashboardPage() {
         <div className="ag-sidebar-brand">
           <img src={smartCityLogo} alt="Logo" style={{ width: 50, height: 50 }} />
           <div>
-            <div className="ag-brand-name">{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Portail Ville Intelligente'}</div>
+            <div className="ag-brand-name">{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Smart City Portal'}</div>
           </div>
         </div>
 

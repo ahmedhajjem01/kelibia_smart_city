@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user, isOpen, onClose }) =>
         <img src={smartCityLogo} alt="Logo" style={{ width: 64, height: 64, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }} />
         <div>
           <div style={{ color: '#fff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '.3px', lineHeight: 1.2, textTransform: 'uppercase' }}>
-            {lang === 'ar' ? 'بوابة المدينة الذكية' : 'Portail Ville Intelligente'}
+            Smart City Portal
           </div>
         </div>
       </div>
