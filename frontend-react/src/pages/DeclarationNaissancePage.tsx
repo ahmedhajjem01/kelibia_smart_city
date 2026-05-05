@@ -5,6 +5,7 @@ import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
+import DateTimePicker from '../components/DateTimePicker'
 
 const WebcamCapture = ({ onCapture, onCancel }: { onCapture: (blob: Blob) => void; onCancel: () => void }) => {
   const webcamRef = useRef<Webcam>(null)
@@ -279,12 +280,10 @@ export default function DeclarationNaissancePage() {
                         <label htmlFor="date_naissance" className="form-label">
                           {t('date_of_birth')}
                         </label>
-                        <input 
-                          type="datetime-local" 
-                          className="form-control" 
-                          id="date_naissance" 
-                          name="date_naissance" 
-                          required 
+                        <DateTimePicker
+                          id="date_naissance"
+                          name="date_naissance"
+                          required
                           max={new Date().toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
                           min={new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
                         />

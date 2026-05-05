@@ -5,6 +5,7 @@ import Webcam from 'react-webcam'
 import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 import MainLayout from '../components/MainLayout'
+import DateTimePicker from '../components/DateTimePicker'
 
 type EligibleRelative = {
   id: number
@@ -243,12 +244,10 @@ export default function DeclarationDecesPage() {
                       <label htmlFor="date_deces" className="form-label">
                         {t('date_of_death')}
                       </label>
-                      <input 
-                        type="datetime-local" 
-                        className="form-control" 
-                        id="date_deces" 
-                        name="date_deces" 
-                        required 
+                      <DateTimePicker
+                        id="date_deces"
+                        name="date_deces"
+                        required
                         max={new Date().toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
                         min={new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)}
                       />
