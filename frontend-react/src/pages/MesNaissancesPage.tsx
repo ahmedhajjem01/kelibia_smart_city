@@ -390,17 +390,48 @@ export default function MesNaissancesPage() {
           <div className="row mb-5">
             {data?.mon_extrait ? (
               card(data.mon_extrait)
-            ) : (
-              <div className="col-12">
-                <div className="alert alert-secondary d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
-                  <span className="flex-grow-1">{t('no_birth_extract_found')}</span>
-                  <button className="btn btn-primary btn-sm rounded-pill flex-shrink-0 fw-bold" onClick={() => setShowModal(true)}>
-                    <i className="fas fa-file-plus me-2" />
-                    {t('request_birth_extract') || 'Demander mon extrait'}
-                  </button>
+            ) : (() => {
+              // Find the most recent demande (array is ordered by -created_at)
+              const lastDemande = demandesExtrait[0]
+              const lastStatus = lastDemande?.status
+
+              if (lastStatus === 'pending') {
+                return (
+                  <div className="col-12">
+                    <div className="alert alert-warning border-0 d-flex align-items-center gap-3" style={{ borderRadius: 12 }}>
+                      <i className="fas fa-hourglass-half fa-lg text-warning flex-shrink-0" />
+                      <span className="flex-grow-1">{t('extract_request_pending') || 'Votre demande est en cours de traitement.'}</span>
+                    </div>
+                  </div>
+                )
+              }
+
+              if (lastStatus === 'processed') {
+                return (
+                  <div className="col-12">
+                    <div className="alert alert-success border-0 d-flex align-items-center gap-3" style={{ borderRadius: 12 }}>
+                      <i className="fas fa-check-circle fa-lg text-success flex-shrink-0" />
+                      <span className="flex-grow-1">{t('extract_request_processed') || 'Votre demande a été validée. Votre extrait sera bientôt disponible.'}</span>
+                    </div>
+                  </div>
+                )
+              }
+
+              // No demande yet, or last demande was rejected → show original message + button
+              return (
+                <div className="col-12">
+                  <div className="alert alert-secondary d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
+                    <span className="flex-grow-1">{t('no_birth_extract_found')}</span>
+                    <button className="btn btn-primary btn-sm rounded-pill flex-shrink-0 fw-bold" onClick={() => setShowModal(true)}>
+                      <i className="fas fa-file-plus me-2" />
+                      {lastStatus === 'rejected'
+                        ? (t('request_birth_extract_again') || 'Soumettre une nouvelle demande')
+                        : (t('request_birth_extract') || 'Demander mon extrait')}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
           </div>
 
           {/* ── Extraits de mes enfants ── */}
