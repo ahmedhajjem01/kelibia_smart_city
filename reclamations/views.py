@@ -289,48 +289,67 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                 rec.agent = user
             rec.save()
 
-            # ── Propagate status to all linked duplicates ──────────────────────
-            # Case A: rec is the original → update all its duplicates
-            Reclamation.objects.filter(duplicate_of=rec).update(status=new_status)
-            # Case B: rec is itself a duplicate → also update the original and
-            #         all sibling duplicates so every linked record stays in sync
+            # ── Collect all linked records that must also be updated ───────────
+            # Build a de-duplicated set of related reclamation PKs (excluding rec itself).
+            related_pks = set()
+
+            # Case A: rec is the original → gather all its duplicates
+            related_pks.update(
+                Reclamation.objects.filter(duplicate_of=rec).values_list('id', flat=True)
+            )
+            # Case B: rec is itself a duplicate → gather the original + all siblings
             if rec.duplicate_of_id:
-                Reclamation.objects.filter(pk=rec.duplicate_of_id).update(status=new_status)
-                Reclamation.objects.filter(duplicate_of_id=rec.duplicate_of_id).exclude(pk=rec.pk).update(status=new_status)
-            
-            # --- Send Notifications ---
-            try:
-                # 1. In-app notification (synchronous — fast DB write)
-                from notifications.helpers import get_notif
-                title, notif_msg = get_notif(rec.citizen, 'signalement_updated',
-                                             rec_title=rec.title,
-                                             status_display=rec.get_status_display())
-                Notification.objects.create(
-                    recipient=rec.citizen,
-                    title=title,
-                    message=notif_msg,
-                    notification_type='success' if new_status == 'resolved' else 'info',
-                    link='/mes-reclamations'
+                related_pks.add(rec.duplicate_of_id)
+                related_pks.update(
+                    Reclamation.objects.filter(duplicate_of_id=rec.duplicate_of_id)
+                    .exclude(pk=rec.pk)
+                    .values_list('id', flat=True)
                 )
 
-                # 2. Email notification — run in background thread to avoid timeout
-                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-                    import threading
-                    citizen_name = rec.citizen.first_name
-                    citizen_email = rec.citizen.email
-                    rec_title = rec.title
-                    status_display = rec.get_status_display()
-                    from_email = settings.DEFAULT_FROM_EMAIL
-                    def _send_status_email():
-                        try:
-                            subject = f"Mise à jour de votre signalement - Kelibia Smart City"
-                            msg = f"Bonjour {citizen_name},\n\nLe statut de votre signalement '{rec_title}' a été mis à jour.\nNouveau statut : {status_display}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City"
-                            send_mail(subject, msg, from_email, [citizen_email], fail_silently=True)
-                        except Exception as ex:
-                            logger.error(f"Background email send failed: {ex}")
-                    threading.Thread(target=_send_status_email).start()
-            except Exception as e:
-                logger.error(f"Error sending notifications: {e}")
+            # ── Helper: notify one citizen (in-app + email) ───────────────────
+            def _notify_citizen(target_rec):
+                try:
+                    from notifications.helpers import get_notif
+                    t, m = get_notif(target_rec.citizen, 'signalement_updated',
+                                     rec_title=target_rec.title,
+                                     status_display=target_rec.get_status_display())
+                    Notification.objects.create(
+                        recipient=target_rec.citizen,
+                        title=t,
+                        message=m,
+                        notification_type='success' if new_status == 'resolved' else 'info',
+                        link='/mes-reclamations'
+                    )
+                    if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                        import threading
+                        c_name  = target_rec.citizen.first_name
+                        c_email = target_rec.citizen.email
+                        r_title = target_rec.title
+                        s_disp  = target_rec.get_status_display()
+                        from_email = settings.DEFAULT_FROM_EMAIL
+                        def _send(cn=c_name, ce=c_email, rt=r_title, sd=s_disp):
+                            try:
+                                send_mail(
+                                    "Mise à jour de votre signalement - Kelibia Smart City",
+                                    f"Bonjour {cn},\n\nLe statut de votre signalement '{rt}' a été mis à jour.\nNouveau statut : {sd}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City",
+                                    from_email, [ce], fail_silently=True
+                                )
+                            except Exception as ex:
+                                logger.error(f"Background email send failed: {ex}")
+                        threading.Thread(target=_send).start()
+                except Exception as e:
+                    logger.error(f"Error notifying citizen for rec {target_rec.id}: {e}")
+
+            # ── Notify the citizen of the directly updated record ─────────────
+            _notify_citizen(rec)
+
+            # ── Update each related record in DB and notify its citizen ───────
+            if related_pks:
+                related_recs = Reclamation.objects.filter(pk__in=related_pks).select_related('citizen')
+                for r in related_recs:
+                    r.status = new_status
+                    r.save(update_fields=['status'])
+                    _notify_citizen(r)
 
             return Response({"status": "Statut mis a jour."})
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
