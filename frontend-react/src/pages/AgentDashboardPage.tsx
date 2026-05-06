@@ -4539,7 +4539,7 @@ export default function AgentDashboardPage() {
 
               <b>{t('stats_ia_recall')}</b> {t('ml_stats_recall_def')} &nbsp;|&nbsp;
 
-              <b>{t('stats_ia_f1')}</b> {t('ml_stats_f1_def')} &nbsp;|&nbsp; <b>{t('stats_ia_support')}</b> {t('ml_stats_support_def')}
+              <b>{t('stats_ia_f1')}</b> {t('ml_stats_f1_def')}
 
             </p>
 
@@ -4549,7 +4549,7 @@ export default function AgentDashboardPage() {
 
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
 
-                  <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('category_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_precision')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_recall')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_f1')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_support')}</th></tr></thead>
+                  <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('category_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_precision')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_recall')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_f1')}</th></tr></thead>
 
                   <tbody>
 
@@ -4569,8 +4569,6 @@ export default function AgentDashboardPage() {
 
                           <td style={{ padding: '8px 12px', color: '#444' }}><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1 * 100)}%</span></td>
 
-                          <td style={{ padding: '8px 12px', color: '#888' }}>{row.support}</td>
-
                         </tr>
 
                       )
@@ -4585,9 +4583,7 @@ export default function AgentDashboardPage() {
 
                       <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.category.report.length * 100)}%</td>
 
-                      <td style={{ padding: '8px 12px', color: '#1565c0' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.category.report.length * 100)}%</td>
-
-                      <td style={{ padding: '8px 12px', color: '#888' }}>{mlStats.n_samples}</td>
+                      <td style={{ padding: '8px 12px', color: '#c61f2c' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.category.report.length * 100)}%</td>
 
                     </tr>
 
@@ -4705,7 +4701,7 @@ export default function AgentDashboardPage() {
 
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.83rem' }}>
 
-                  <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('priority_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_precision')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_recall')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_f1')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_support')}</th></tr></thead>
+                  <thead><tr style={{ background: '#f5f5f5' }}><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('priority_label')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_precision')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_recall')}</th><th style={{ padding: '9px 12px', textAlign: 'left', fontWeight: 700, color: '#333', borderBottom: '2px solid #e0e0e0' }}>{t('stats_ia_f1')}</th></tr></thead>
 
                   <tbody>
 
@@ -4725,8 +4721,6 @@ export default function AgentDashboardPage() {
 
                           <td style={{ padding: '8px 12px', color: '#444' }}><span style={{ color: f1Color, fontWeight: 700 }}>{Math.round(row.f1 * 100)}%</span></td>
 
-                          <td style={{ padding: '8px 12px', color: '#888' }}>{row.support}</td>
-
                         </tr>
 
                       )
@@ -4741,9 +4735,7 @@ export default function AgentDashboardPage() {
 
                       <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.priority.report.length * 100)}%</td>
 
-                      <td style={{ padding: '8px 12px', color: '#1565c0' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.priority.report.length * 100)}%</td>
-
-                      <td style={{ padding: '8px 12px', color: '#888' }}>{mlStats.n_samples}</td>
+                      <td style={{ padding: '8px 12px', color: '#c61f2c' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.priority.report.length * 100)}%</td>
 
                     </tr>
 
