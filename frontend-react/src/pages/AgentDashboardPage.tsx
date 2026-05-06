@@ -3615,17 +3615,17 @@ export default function AgentDashboardPage() {
                 <div className="col-12"><div className="det-label">{lang === 'ar' ? 'الموقع' : 'Localisation'}</div><div className="det-value">{demandeDetail.latitude ? `${demandeDetail.latitude}, ${demandeDetail.longitude}` : '—'}</div></div>
               </>)}
 
-              {demandeDetail.type === 'mariage' && (<>
-                <div className="col-6"><div className="det-label">Époux</div><div className="det-value">{demandeDetail.epoux}</div></div>
-                <div className="col-6"><div className="det-label">Épouse</div><div className="det-value">{demandeDetail.epouse}</div></div>
-                <div className="col-6"><div className="det-label">Date mariage</div><div className="det-value">{demandeDetail.date_mariage}</div></div>
-                <div className="col-6"><div className="det-label">Régime</div><div className="det-value">{demandeDetail.regime}</div></div>
+              {(demandeDetail.type === 'mariage' || demandeDetail.type === 'mariage_extrait') && (<>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الزوج' : 'Époux'}</div><div className="det-value">{demandeDetail.epoux}</div></div>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'الزوجة' : 'Épouse'}</div><div className="det-value">{demandeDetail.epouse}</div></div>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'تاريخ الزواج' : 'Date mariage'}</div><div className="det-value">{demandeDetail.date_mariage}</div></div>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'نظام الأملاك' : 'Régime'}</div><div className="det-value">{demandeDetail.regime}</div></div>
               </>)}
 
-              {demandeDetail.type === 'deces' && (<>
-                <div className="col-6"><div className="det-label">Défunt</div><div className="det-value">{demandeDetail.nom_defunt}</div></div>
-                <div className="col-6"><div className="det-label">Date décès</div><div className="det-value">{demandeDetail.date_deces}</div></div>
-                <div className="col-6"><div className="det-label">Lieu décès</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
+              {(demandeDetail.type === 'deces' || demandeDetail.type === 'deces_extrait') && (<>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'المتوفى' : 'Défunt'}</div><div className="det-value">{demandeDetail.nom_defunt}</div></div>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'تاريخ الوفاة' : 'Date décès'}</div><div className="det-value">{demandeDetail.date_deces}</div></div>
+                <div className="col-6"><div className="det-label">{lang === 'ar' ? 'مكان الوفاة' : 'Lieu décès'}</div><div className="det-value">{demandeDetail.lieu_deces}</div></div>
               </>)}
 
               {demandeDetail.type === 'raccordement' && (<>
