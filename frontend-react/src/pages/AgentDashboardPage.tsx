@@ -3345,7 +3345,7 @@ export default function AgentDashboardPage() {
               else if (d.type === 'livret') summary = d.nom_chef ? `👤 ${d.nom_chef} ${d.prenom_chef}` : ''
 
               else if (d.type === 'naissance') summary = d.prenom_fr ? `👶 ${d.prenom_fr} ${d.nom_fr}` : ''
-              else if (d.type === 'mariage') summary = d.epoux ? `💍 ${d.epoux} & ${d.epouse}` : ''
+              else if (d.type === 'mariage' || d.type === 'mariage_extrait') summary = d.epoux ? `💍 ${d.epoux} & ${d.epouse}` : ''
               else if (d.type === 'deces') summary = d.nom_defunt ? `⚰️ ${d.nom_defunt} (${d.date_deces})` : ''
               else if (d.type === 'eau') summary = d.service_type_label ? `💧 ${String(d.service_type_label).slice(0, 35)}` : ''
               else if (d.type === 'impots') summary = d.service_type_label ? `💰 ${String(d.service_type_label).slice(0, 35)}` : ''

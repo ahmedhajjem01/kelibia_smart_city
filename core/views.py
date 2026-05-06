@@ -265,16 +265,16 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
                         "description": getattr(o, 'description', ''),
                         "commentaire_agent": getattr(o, 'commentaire_agent', ''),
                     }
-                elif key == 'mariage':
+                elif key == 'mariage' or key == 'mariage_extrait':
                     details = {
-                        "epoux": getattr(o, 'nom_epoux', ''),
-                        "epouse": getattr(o, 'nom_epouse', ''),
-                        "date_mariage": str(getattr(o, 'date_souhaitee', '')),
+                        "epoux": getattr(o, 'nom_epoux', o.epoux.nom_fr if hasattr(o, 'epoux') and o.epoux else ''),
+                        "epouse": getattr(o, 'nom_epouse', o.epouse.nom_fr if hasattr(o, 'epouse') and o.epouse else ''),
+                        "date_mariage": str(getattr(o, 'date_souhaitee', getattr(o, 'date_mariage', ''))),
                         "regime": getattr(o, 'regime_matrimonial', ''),
                     }
-                elif key == 'deces':
+                elif key == 'deces' or key == 'deces_extrait':
                     details = {
-                        "nom_defunt": f"{getattr(o, 'nom_fr', '')} {getattr(o, 'prenom_fr', '')}",
+                        "nom_defunt": f"{getattr(o, 'nom_fr', '')} {getattr(o, 'prenom_fr', '')}".strip() or (o.epoux.nom_fr if hasattr(o, 'epoux') and o.epoux else ''),
                         "date_deces": str(getattr(o, 'date_deces', '')),
                         "lieu_deces": getattr(o, 'lieu_deces_fr', ''),
                     }
