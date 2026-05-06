@@ -1979,11 +1979,10 @@ export default function AgentDashboardPage() {
 
       if (res.ok) {
 
-        setAllRecs(p => p.map(r => r.id === id ? { ...r, status: newStatus } : r));
-
         showToast(`Statut mis à jour → ${STATUS[newStatus]?.label || newStatus}`);
 
-        cb(true)
+        cb(true);
+        fetchReclamations()
 
       }
 
@@ -2043,7 +2042,7 @@ export default function AgentDashboardPage() {
 
       })
 
-      if (res.ok) { setAllRecs(p => p.map(r => r.id === detailRec.id ? { ...r, status: detailStatus } : r)); showToast('Statut enregistré !'); setDetailRec(null) }
+      if (res.ok) { showToast('Statut enregistré !'); setDetailRec(null); fetchReclamations() }
 
       else showToast('Erreur.', 'error')
 
@@ -3575,6 +3574,22 @@ export default function AgentDashboardPage() {
             <hr />
 
             {/* Status update */}
+            <div className="mb-3">
+              <label className="det-label mb-2">
+                <i className="fas fa-exchange-alt me-1"></i>{t('status_label')}
+              </label>
+              <select
+                className="form-select form-select-sm"
+                value={demandeNewStatus}
+                onChange={e => setDemandeNewStatus(e.target.value)}
+              >
+                <option value="pending">{t('status_pending')}</option>
+                <option value="in_progress">{t('status_in_progress')}</option>
+                <option value="approved">{t('status_approved')}</option>
+                <option value="resolved">{t('status_resolved')}</option>
+                <option value="rejected">{t('status_rejected')}</option>
+              </select>
+            </div>
 
 
 

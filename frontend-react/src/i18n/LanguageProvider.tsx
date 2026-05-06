@@ -267,6 +267,7 @@ const translations: Record<Lang, Record<string, string>> = {
       'Validez les déclarations soumises par les citoyens et vérifiez les pièces jointes.',
     status_pending: 'En attente',
     status_in_progress: 'En cours',
+    status_approved: 'Approuvé',
     status_resolved: 'Résolue',
     status_validated: 'Validée',
     status_rejected: 'Rejetée',
