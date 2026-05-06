@@ -4501,11 +4501,9 @@ export default function AgentDashboardPage() {
 
               {[
 
-                { label: t('stats_ia_precision_cat'), value: Math.round(mlStats.category.accuracy * 100) + '%', bg: '#e8f5e9', color: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', sub: `${mlStats.n_samples} ${t('stats_ia_samples')}` },
+                { label: t('stats_ia_precision_cat'), value: Math.round(mlStats.category.accuracy * 100) + '%', bg: '#e8f5e9', color: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
 
-                { label: t('stats_ia_precision_pri'), value: Math.round(mlStats.priority.accuracy * 100) + '%', bg: '#e3f2fd', color: mlStats.priority.accuracy >= 0.85 ? '#1565c0' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
-
-                { label: t('stats_ia_samples'), value: mlStats.n_samples, bg: '#f3e5f5', color: '#6a1b9a', sub: t('stats_ia_annotated') },
+                { label: t('stats_ia_precision_pri'), value: Math.round(mlStats.priority.accuracy * 100) + '%', bg: '#fde8ea', color: mlStats.priority.accuracy >= 0.85 ? '#c61f2c' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
 
               ].map((c, i) => (
 
@@ -4803,7 +4801,7 @@ export default function AgentDashboardPage() {
 
               <i className="fas fa-info-circle me-1"></i>
 
-              {t('stats_ia_model_trained')} · {mlStats.n_samples} {t('stats_ia_samples')}
+              {t('stats_ia_model_trained')}
 
             </div>
 
