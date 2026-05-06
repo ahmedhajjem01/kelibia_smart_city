@@ -1661,7 +1661,7 @@ export default function AgentDashboardPage() {
 
     const groups: Record<string, Reclamation[]> = {}
 
-    allRecs.forEach(r => {
+    allRecs.filter(r => r.status !== 'resolved' && r.status !== 'rejected').forEach(r => {
 
       const k = r.title.trim().toLowerCase().replace(/\s+/g, ' ').slice(0, 40)
 
