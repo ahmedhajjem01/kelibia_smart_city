@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from accounts.models import Citoyen
+from extrait_naissance.models import Citoyen
 from django.db.models import Q
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
