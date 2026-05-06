@@ -73,6 +73,7 @@ const translations: Record<Lang, Record<string, string>> = {
     open_doc_fr: 'Ouvrir l\'extrait (FR)',
     open_doc_ar: 'Ouvrir l\'extrait (AR)',
     open_document: 'Ouvrir votre document',
+    payment_success: 'Paiement Réussi !',
     recover: 'Récupérer',
     your_access: 'Votre accès.',
     forgot_password_hero_desc: "Entrez l'adresse e-mail associée à votre compte, et nous vous enverrons un lien sécurisé pour réinitialiser votre mot de passe.",
@@ -1884,6 +1885,7 @@ const translations: Record<Lang, Record<string, string>> = {
     activation_expired: 'فشل التفعيل. قد يكون الرابط منتهي الصلاحية أو مستخدمًا بالفعل.',
     activation_title: 'تفعيل حسابك',
     activation_subtitle: 'جاري التحقق من معلوماتك...',
+    payment_success: 'تم الدفع بنجاح !',
   },
 }
 

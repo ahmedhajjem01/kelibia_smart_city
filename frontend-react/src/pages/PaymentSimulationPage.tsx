@@ -6,7 +6,7 @@ import { useI18n } from '../i18n/LanguageProvider'
 import MainLayout from '../components/MainLayout'
 
 export default function PaymentSimulationPage() {
-  const { lang } = useI18n()
+  const { lang, t } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
   
