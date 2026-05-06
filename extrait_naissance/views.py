@@ -82,10 +82,17 @@ class MesExtraitsAPIView(APIView):
         ).select_related('titulaire')
         
         # Optimize conjoint lookup (parents of your children who are not you)
+        conjoint_ids = []
+        enfants = Citoyen.objects.filter(models.Q(pere=citoyen) | models.Q(mere=citoyen))
+        for enfant in enfants:
+            if enfant.pere_id and enfant.pere_id != citoyen.id:
+                conjoint_ids.append(enfant.pere_id)
+            if enfant.mere_id and enfant.mere_id != citoyen.id:
+                conjoint_ids.append(enfant.mere_id)
+                
         conjoints_extraits = ExtraitNaissance.objects.filter(
-            models.Q(titulaire__pere=citoyen, titulaire__mere__isnull=False) |
-            models.Q(titulaire__mere=citoyen, titulaire__pere__isnull=False)
-        ).exclude(titulaire=citoyen).distinct().select_related('titulaire')
+            titulaire_id__in=conjoint_ids
+        ).distinct().select_related('titulaire')
         
         now = timezone.now()
         
