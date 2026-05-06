@@ -243,6 +243,12 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
 .ag-mobile-nav{display:none}
 .ag-mob-btn{display:none}
 .ag-mob-badge{display:none}
+.ag-mob-hamburger{display:none}
+/* Mobile sidebar overlay */
+.ag-mob-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500}
+.ag-mob-sidebar-drawer{position:fixed;left:0;top:0;height:100vh;width:272px;background:#f3f3f3;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;padding:20px 14px;z-index:501;overflow-y:auto;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.ag-mob-sidebar-overlay.open{display:block}
+.ag-mob-sidebar-overlay.open .ag-mob-sidebar-drawer{transform:translateX(0)}
 @media(max-width:768px){
   .ag-sidebar{display:none}
   .ag-topnav{left:0}
@@ -255,6 +261,7 @@ h1,h2,h3,h4{font-family:'Public Sans',sans-serif}
   .ag-mob-btn i{font-size:1.2rem}
   .ag-mob-btn.active{color:#ae131a}
   .ag-mob-badge{display:block;position:absolute;top:0;right:4px;background:#ae131a;color:#fff;border-radius:8px;padding:1px 5px;font-size:0.55rem;font-weight:700}
+  .ag-mob-hamburger{display:flex;align-items:center;justify-content:center;background:none;border:none;color:#ae131a;font-size:1.3rem;cursor:pointer;padding:0 8px;margin-right:8px}
 }
 
 `
@@ -593,6 +600,10 @@ export default function AgentDashboardPage() {
 
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const [showLegend, setShowLegend] = useState(false)
+
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
 
 
@@ -1756,7 +1767,7 @@ export default function AgentDashboardPage() {
     sigOverlays['🏛️ Limite communale'] = loadGeoJSON(
       '/layers/limite_kelibia.geojson',
       () => ({ color: '#1a237e', weight: 3, fill: false, dashArray: '8,4', opacity: 0.9 }),
-      (feature, layer) => layer.bindPopup(`<b>🏛️ ${feature.properties?.name || 'Kelibia'}</b><br/>Limite de la commune`)
+      (feature, layer) => layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🏛️ ${feature.properties?.name || 'Kelibia'}</div><div style="padding:8px 12px;">Limite de la commune</div></div>`)
     )
 
     // 2. Routes OSM — couleur selon type de voie
@@ -1779,7 +1790,7 @@ export default function AgentDashboardPage() {
       (f: any) => ({ color: routeColor(f?.properties?.route || ''), weight: routeWeight(f?.properties?.route || ''), opacity: 0.85 }),
       (feature, layer) => {
         const p = feature.properties || {}
-        layer.bindPopup(`<b>🛣️ ${p.nom || '(sans nom)'}</b><br/>Type : <b>${p.route || '—'}</b>`)
+        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🛣️ ${p.nom || '(sans nom)'}</div><div style="padding:8px 12px;">Type : <b>${p.route || '—'}</b></div></div>`)
       }
     )
 
@@ -1793,9 +1804,9 @@ export default function AgentDashboardPage() {
       })
       fetch(url).then(r => r.json()).then(data => { layer.addData(data); espacesVertsLayer.addLayer(layer) }).catch(() => {})
     }
-    loadIntoGroup('/layers/agriculture_polygones.geojson', p => `<b>🌾 ${p.nom || 'Parcelle agricole'}</b><br/>Usage : <b>${p.usage_sol || '—'}</b>`)
-    loadIntoGroup('/layers/espaces_verts_polygones.geojson', p => `<b>🌳 ${p.nom || 'Espace vert'}</b><br/>Type : ${p.usage_sol || p.naturel || p.loisir || '—'}`)
-    loadIntoGroup('/layers/forets_polygones.geojson', p => `<b>🌲 ${p.nom || 'Forêt / Zone boisée'}</b><br/>Type : ${p.naturel || 'wood'}`)
+    loadIntoGroup('/layers/agriculture_polygones.geojson', p => `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🌾 ${p.nom || 'Parcelle agricole'}</div><div style="padding:8px 12px;">Usage : <b>${p.usage_sol || '—'}</b></div></div>`)
+    loadIntoGroup('/layers/espaces_verts_polygones.geojson', p => `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🌳 ${p.nom || 'Espace vert'}</div><div style="padding:8px 12px;">Type : ${p.usage_sol || p.naturel || p.loisir || '—'}</div></div>`)
+    loadIntoGroup('/layers/forets_polygones.geojson', p => `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🌲 ${p.nom || 'Forêt / Zone boisée'}</div><div style="padding:8px 12px;">Type : ${p.naturel || 'wood'}</div></div>`)
     sigOverlays['🌿 Espaces verts'] = espacesVertsLayer
     espacesVertsLayer.addTo(m)
 
@@ -1811,7 +1822,7 @@ export default function AgentDashboardPage() {
       (f: any) => ({ color: '#6d4c41', weight: 1.5, fillColor: zoneUrbaineColor(f?.properties?.usage_sol || ''), fillOpacity: 0.5 }),
       (feature, layer) => {
         const p = feature.properties || {}
-        layer.bindPopup(`<b>🏘️ ${p.nom || 'Zone urbaine'}</b><br/>Usage : <b>${p.usage_sol || '—'}</b>`)
+        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🏘️ ${p.nom || 'Zone urbaine'}</div><div style="padding:8px 12px;">Usage : <b>${p.usage_sol || '—'}</b></div></div>`)
       }
     )
 
@@ -1821,7 +1832,7 @@ export default function AgentDashboardPage() {
       () => ({ color: '#0277bd', weight: 2, opacity: 0.85, dashArray: '6,3' }),
       (feature, layer) => {
         const p = feature.properties || {}
-        layer.bindPopup(`<b>💧 ${p.nom || 'Oued'}</b><br/>Type : ${p.oued || 'stream'}`)
+        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">💧 ${p.nom || 'Oued'}</div><div style="padding:8px 12px;">Type : ${p.oued || 'stream'}</div></div>`)
       }
     )
 
@@ -1831,28 +1842,7 @@ export default function AgentDashboardPage() {
       { position: 'topright', collapsed: true }
     ).addTo(m)
 
-    // ── Légende ───────────────────────────────────────────────────────────
-    const legend = L.control({ position: 'bottomleft' })
-    legend.onAdd = function () {
-      const div = L.DomUtil.create('div')
-      div.style.cssText = 'background:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:12px;min-width:180px;'
-      div.innerHTML = `
-        <div style="font-weight:700;margin-bottom:6px;color:#ae131a;border-bottom:1px solid #eee;padding-bottom:4px;">📋 Légende</div>
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Signalements</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#e65100;display:inline-block;"></span> En attente</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1565c0;display:inline-block;"></span> En cours</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:12px;height:12px;border-radius:50%;background:#1b5e20;display:inline-block;"></span> Résolu</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#757575;display:inline-block;"></span> Rejeté</div>
-        <div style="font-weight:600;font-size:11px;color:#555;margin-bottom:4px;">Couches SIG (QGIS)</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;border-top:3px dashed #1a237e;display:inline-block;"></span> Limite communale</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#c62828;display:inline-block;"></span> Route principale</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:20px;height:3px;background:#546e7a;display:inline-block;"></span> Route locale</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#a5d6a7;border:1px solid #2e7d32;display:inline-block;border-radius:2px;"></span> Espaces verts</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="width:18px;height:8px;background:#ffe0b2;border:1px solid #6d4c41;display:inline-block;border-radius:2px;"></span> Zones urbaines</div>
-        <div style="display:flex;align-items:center;gap:6px;"><span style="width:20px;height:3px;border-top:2px dashed #0277bd;display:inline-block;"></span> Oueds</div>`
-      return div
-    }
-    legend.addTo(m)
+    // Legend is rendered as a React overlay (see JSX below), not as a Leaflet control
 
     leafletMap.current = m
 
@@ -1926,24 +1916,21 @@ export default function AgentDashboardPage() {
 
       const prioColor = pc[r.priority] || '#1565c0'
 
-      mk.bindPopup(`<div style="min-width:210px;font-size:13px;"><strong style="color:#ae131a;">${r.title}</strong><br>
-
-        <span style="color:#888;font-size:11px;">${cat.label}</span><br>
-
-        <span style="font-size:11px;">👤 ${r.citizen_name || '—'}</span><br>
-
-        <span style="font-size:11px;">📅 ${formatDate(r.created_at)}</span><br>
-
-        <span style="font-size:11px;">🏢 ${r.service_responsable || '—'}</span><br>
-
-        <div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap;">
-
-          <span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44;">${STATUS[r.status]?.label || r.status}</span>
-
-          <span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}33;">${prio.label}</span>
-
-
-        </div></div>`)
+      mk.bindPopup(`<div style="min-width:220px;font-size:13px;border-radius:8px;overflow:hidden;margin:-14px -20px -14px -20px;">
+        <div style="background:#0ea5e9;padding:10px 14px;margin-bottom:10px;">
+          <strong style="color:#fff;font-size:13px;display:block;">${r.title}</strong>
+          <span style="color:rgba(255,255,255,.85);font-size:11px;">${cat.label}</span>
+        </div>
+        <div style="padding:0 14px 12px 14px;">
+          <div style="font-size:11px;color:#555;margin-bottom:3px;">👤 ${r.citizen_name || '—'}</div>
+          <div style="font-size:11px;color:#555;margin-bottom:3px;">📅 ${formatDate(r.created_at)}</div>
+          <div style="font-size:11px;color:#555;margin-bottom:8px;">🏢 ${r.service_responsable || '—'}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44;">${STATUS[r.status]?.label || r.status}</span>
+            <span style="padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}33;">${prio.label}</span>
+          </div>
+        </div>
+      </div>`)
 
     })
 
@@ -2214,8 +2201,64 @@ export default function AgentDashboardPage() {
 
       </aside>
 
+      {/* ── MOBILE SIDEBAR OVERLAY ── */}
+      <div className={`ag-mob-sidebar-overlay${mobileSidebarOpen ? ' open' : ''}`} onClick={() => setMobileSidebarOpen(false)}>
+        <div className="ag-mob-sidebar-drawer" onClick={e => e.stopPropagation()}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <div className="ag-sidebar-brand" style={{ margin: 0, padding: 0 }}>
+              <img src={smartCityLogo} alt="Logo" style={{ width: 38, height: 38 }} />
+              <div className="ag-brand-name" style={{ fontSize: '0.85rem' }}>{lang === 'ar' ? 'بوابة المدينة الذكية' : 'Smart City Portal'}</div>
+            </div>
+            <button onClick={() => setMobileSidebarOpen(false)} style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '1.2rem', cursor: 'pointer', padding: 4 }}>
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+          {/* Nav items */}
+          <nav className="ag-sidebar-nav">
+            {[
+              { tab: 'dashboard', icon: 'fa-chart-pie', label: t('dashboard'), badge: pending > 0 ? pending : null, fetch: null },
+              { tab: 'evenements', icon: 'fa-calendar-alt', label: t('nav_events_mgmt'), badge: allEvenements.filter((ev: any) => ev.status === 'pending').length || null, fetch: fetchEvenements },
+              { tab: 'construction', icon: 'fa-hard-hat', label: t('permis_construire'), badge: allConstructions.filter((c: any) => c.status === 'pending').length || null, fetch: fetchConstructions },
+              { tab: 'stats', icon: 'fa-robot', label: t('nav_stats_ia'), badge: null, fetch: () => { if (!mlStats && !mlLoading) fetchMlStats() } },
+              { tab: 'profile', icon: 'fa-user-circle', label: t('nav_profile'), badge: null, fetch: () => { fetchDemandes(); fetchTopics() } },
+              { tab: 'demandes', icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length || null, fetch: fetchDemandes },
+              { tab: 'forum', icon: 'fa-comments', label: t('nav_forum_moderation'), badge: null, fetch: () => { fetchTopics(); fetchMlStats() } },
+              { tab: 'actualites', icon: 'fa-newspaper', label: lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités', badge: null, fetch: fetchArticles },
+            ].map(({ tab, icon, label, badge, fetch }) => (
+              <a key={tab} className={`ag-nav-item${activeTab === tab ? ' active' : ''}`} href="#"
+                onClick={e => { e.preventDefault(); setActiveTab(tab as any); fetch && fetch(); setMobileSidebarOpen(false) }}>
+                <i className={`fas ${icon}`}></i>
+                <span>{label}</span>
+                {badge ? <span className="ag-badge">{badge}</span> : null}
+              </a>
+            ))}
+            {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
+              <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#"
+                onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode); setMobileSidebarOpen(false) }}>
+                <i className="fas fa-users-cog"></i>
+                <span>{t('nav_managed_users')}</span>
+                {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
+              </a>
+            )}
+          </nav>
+          {/* Bottom logout */}
+          <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid #e5e7eb' }}>
+            <a className="ag-nav-item" href="#" onClick={e => { e.preventDefault(); clearTokens(); navigate('/login') }}>
+              <i className="fas fa-sign-out-alt"></i>
+              <span>{t('logout')}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ── TOP NAV ── */}
       <header className="ag-topnav">
+
+        {/* Hamburger — visible only on mobile */}
+        <button className="ag-mob-hamburger" onClick={() => setMobileSidebarOpen(true)} aria-label="Menu">
+          <i className="fas fa-bars"></i>
+        </button>
 
         <div className="ag-topnav-search" style={{ visibility: 'hidden' }}>
           {/* Removed by user request */}
@@ -2362,9 +2405,69 @@ export default function AgentDashboardPage() {
                         {/* Divider */}
                         <span style={{ width: 1, height: 18, background: '#e5e7eb', display: 'inline-block', margin: '0 4px' }}></span>
                         <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{allRecs.length} {t('signalements_short')}</span>
+                        <span style={{ width: 1, height: 18, background: '#e5e7eb', display: 'inline-block', margin: '0 4px' }}></span>
+                        {/* Legend toggle button */}
+                        <button
+                          onClick={() => setShowLegend(p => !p)}
+                          title="Afficher / masquer la légende"
+                          style={{
+                            padding: '3px 10px', borderRadius: 20, fontSize: '0.71rem',
+                            fontWeight: 700, border: '1.5px solid #6b7280',
+                            background: showLegend ? '#f3f4f6' : '#fff',
+                            color: showLegend ? '#374151' : '#6b7280',
+                            cursor: 'pointer', transition: 'all .15s',
+                          }}
+                        >
+                          <i className="fas fa-map-legend me-1" style={{ fontSize: '0.68rem' }}></i>
+                          <i className="fas fa-list me-1" style={{ fontSize: '0.68rem' }}></i>
+                          Légende
+                        </button>
                       </div>
                     </div>
-                    <div id="ag-map" ref={mapRef}></div>
+                    {/* Map container — position relative so legend overlay works */}
+                    <div style={{ position: 'relative' }}>
+                      <div id="ag-map" ref={mapRef}></div>
+                      {/* React legend overlay */}
+                      {showLegend && (
+                        <div style={{
+                          position: 'absolute', bottom: 12, left: 12, zIndex: 400,
+                          background: '#fff', padding: '10px 14px', borderRadius: 8,
+                          boxShadow: '0 2px 10px rgba(0,0,0,.15)', fontSize: 12, minWidth: 185,
+                          border: '1px solid #f0f0f0',
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <span style={{ fontWeight: 700, color: '#ae131a', borderBottom: '1px solid #eee', paddingBottom: 4, flex: 1 }}>📋 Légende</span>
+                            <button onClick={() => setShowLegend(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 14, padding: '0 0 0 8px', lineHeight: 1 }}>✕</button>
+                          </div>
+                          <div style={{ fontWeight: 600, fontSize: 11, color: '#555', marginBottom: 4 }}>Signalements</div>
+                          {[
+                            { color: '#e65100', label: 'En attente' },
+                            { color: '#1565c0', label: 'En cours' },
+                            { color: '#1b5e20', label: 'Résolu' },
+                            { color: '#757575', label: 'Rejeté' },
+                          ].map(({ color, label }) => (
+                            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                              <span style={{ width: 12, height: 12, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }}></span>
+                              <span>{label}</span>
+                            </div>
+                          ))}
+                          <div style={{ fontWeight: 600, fontSize: 11, color: '#555', margin: '8px 0 4px' }}>Couches SIG</div>
+                          {[
+                            { style: { width: 20, height: 3, borderTop: '3px dashed #1a237e', display: 'inline-block' }, label: 'Limite communale' },
+                            { style: { width: 20, height: 3, background: '#c62828', display: 'inline-block' }, label: 'Route principale' },
+                            { style: { width: 20, height: 3, background: '#546e7a', display: 'inline-block' }, label: 'Route locale' },
+                            { style: { width: 18, height: 8, background: '#a5d6a7', border: '1px solid #2e7d32', display: 'inline-block', borderRadius: 2 }, label: 'Espaces verts' },
+                            { style: { width: 18, height: 8, background: '#ffe0b2', border: '1px solid #6d4c41', display: 'inline-block', borderRadius: 2 }, label: 'Zones urbaines' },
+                            { style: { width: 20, height: 3, borderTop: '2px dashed #0277bd', display: 'inline-block' }, label: 'Oueds' },
+                          ].map(({ style, label }) => (
+                            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                              <span style={style as React.CSSProperties}></span>
+                              <span>{label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Right column */}
