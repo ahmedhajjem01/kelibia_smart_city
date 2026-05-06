@@ -58,7 +58,7 @@ let _kelibiaRing: number[][] | null = null
 async function loadKelibiaRing(): Promise<number[][]> {
   if (_kelibiaRing) return _kelibiaRing
   try {
-    const res = await fetch('/layers/limite_kelibia.geojson?v=2')
+    const res = await fetch('/layers/limite_kelibia_v2.geojson')
     const gj = await res.json()
     _kelibiaRing = gj.features[0].geometry.coordinates[0] as number[][]
   } catch {

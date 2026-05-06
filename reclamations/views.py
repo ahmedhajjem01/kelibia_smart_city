@@ -16,7 +16,7 @@ import json, os
 def _load_kelibia_ring():
     """Return the outer ring of the Kelibia municipal polygon [[lng, lat], ...]."""
     geojson_path = os.path.join(
-        settings.BASE_DIR, 'frontend-react', 'public', 'layers', 'limite_kelibia.geojson'
+        settings.BASE_DIR, 'frontend-react', 'public', 'layers', 'limite_kelibia_v2.geojson'
     )
     try:
         with open(geojson_path, encoding='utf-8') as f:

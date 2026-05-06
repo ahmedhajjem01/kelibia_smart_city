@@ -324,7 +324,7 @@ export default function DashboardPage() {
           fetch('/layers/routes_lignes.geojson'),
           fetch('/layers/espaces_verts_polygones.geojson'),
           fetch('/layers/batiments_polygones.geojson'),
-          fetch('/layers/limite_kelibia.geojson?v=2'),
+          fetch('/layers/limite_kelibia_v2.geojson'),
         ])
         const [routes, espVerts, batiments, limite] = await Promise.all([rRes.json(), evRes.json(), bRes.json(), lRes.json()])
         setSigLayers({ routes, espVerts, batiments, limite })
