@@ -114,6 +114,21 @@ def confirm_payment(request):
             obj.is_paid = True
             obj.paid_at = now
             obj.save()
+        elif req_type == 'commerce':
+            obj = DemandeCommerce.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.status = 'in_progress'
+            obj.save()
+        elif req_type == 'impots' or req_type == 'impot':
+            obj = DemandeImpot.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.status = 'in_progress'
+            obj.save()
+        elif req_type == 'eau':
+            obj = DemandeEau.objects.get(id=req_id, citizen=request.user)
+            obj.is_paid = True
+            obj.status = 'in_progress'
+            obj.save()
         else:
             return Response({"error": "Type de demande inconnu"}, status=400)
 
