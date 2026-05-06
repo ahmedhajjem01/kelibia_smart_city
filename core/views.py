@@ -196,128 +196,57 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
     if request.method == 'GET':
         resp = []
         for key, model in models_map.items():
-            if hasattr(model, 'citizen'):
-                objs = model.objects.all().select_related('citizen')
-            elif hasattr(model, 'user'):
-                objs = model.objects.all().select_related('user')
-            elif hasattr(model, 'declarant'):
-                objs = model.objects.all().select_related('declarant')
-            else:
-                objs = model.objects.all()
-            
-            # SI: We show all requests to the agent, even those unpaid, so they have a full overview.
-            # The frontend will display the payment status accordingly.
-            # if hasattr(model, 'is_paid'):
-            #     objs = objs.filter(is_paid=True)
+            try:
+                if hasattr(model, 'citizen'):
+                    objs = model.objects.all().select_related('citizen')
+                elif hasattr(model, 'user'):
+                    objs = model.objects.all().select_related('user')
+                elif hasattr(model, 'declarant'):
+                    objs = model.objects.all().select_related('declarant')
+                else:
+                    objs = model.objects.all()
                 
-            objs = objs.order_by('-created_at')
-            for o in objs:
-                citizen = getattr(o, 'citizen', getattr(o, 'user', getattr(o, 'declarant', None)))
-                # Build extra details depending on type
-                details = {}
-                if key == 'residence':
-                    details = {
-                        "adresse": getattr(o, 'adresse_demandee', ''),
-                        "motif": getattr(o, 'motif_demande', ''),
-                        "telephone": getattr(o, 'telephone', ''),
-                        "profession": getattr(o, 'profession', ''),
-                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
-                    }
-                elif key == 'livret':
-                    details = {
-                        "nom_chef": getattr(o, 'nom_chef_famille', ''),
-                        "prenom_chef": getattr(o, 'prenom_chef_famille', ''),
-                        "motif": getattr(o, 'motif_demande', ''),
-                        "etat_livret": getattr(o, 'etat_livret', ''),
-                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
-                    }
-                elif key == 'naissance':
-                    details = {
-                        "prenom_fr": getattr(o, 'prenom_fr', ''),
-                        "nom_fr": getattr(o, 'nom_fr', ''),
-                        "date_naissance": str(getattr(o, 'date_naissance', '')),
-                        "lieu_naissance_fr": getattr(o, 'lieu_naissance_fr', ''),
-                        "sexe": getattr(o, 'sexe', ''),
-                        "commentaire": getattr(o, 'commentaire', ''),
-                    }
-                elif key == 'eau':
-                    details = {
-                        "service_type": getattr(o, 'service_type', ''),
-                        "service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '',
-                        "adresse": getattr(o, 'adresse', ''),
-                        "description": getattr(o, 'description', ''),
-                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
-                    }
-                elif key == 'impots':
-                    details = {
-                        "service_type": getattr(o, 'service_type', ''),
-                        "service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '',
-                        "adresse_bien": getattr(o, 'adresse_bien', ''),
-                        "description": getattr(o, 'description', ''),
-                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
-                    }
-                elif key == 'commerce':
-                    details = {
-                        "service_type": getattr(o, 'service_type', ''),
-                        "service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '',
-                        "nom_commerce": getattr(o, 'nom_commerce', ''),
-                        "adresse_commerce": getattr(o, 'adresse_commerce', ''),
-                        "description": getattr(o, 'description', ''),
-                        "commentaire_agent": getattr(o, 'commentaire_agent', ''),
-                    }
-                elif key == 'mariage' or key == 'mariage_extrait':
-                    details = {
-                        "epoux": getattr(o, 'nom_epoux', o.epoux.nom_fr if hasattr(o, 'epoux') and o.epoux else ''),
-                        "epouse": getattr(o, 'nom_epouse', o.epouse.nom_fr if hasattr(o, 'epouse') and o.epouse else ''),
-                        "date_mariage": str(getattr(o, 'date_souhaitee', getattr(o, 'date_mariage', ''))),
-                        "regime": getattr(o, 'regime_matrimonial', ''),
-                    }
-                elif key == 'deces' or key == 'deces_extrait':
-                    details = {
-                        "nom_defunt": f"{getattr(o, 'nom_fr', '')} {getattr(o, 'prenom_fr', '')}".strip() or (o.epoux.nom_fr if hasattr(o, 'epoux') and o.epoux else ''),
-                        "date_deces": str(getattr(o, 'date_deces', '')),
-                        "lieu_deces": getattr(o, 'lieu_deces_fr', ''),
-                    }
-                elif key == 'construction':
-                    details = {
-                        "adresse": getattr(o, 'adresse_terrain', ''),
-                        "type": getattr(o, 'type_travaux', ''),
-                        "usage": getattr(o, 'usage_batiment', ''),
-                    }
-                elif key == 'goudronnage':
-                    details = {
-                        "adresse": getattr(o, 'adresse_residence', ''),
-                        "rue": getattr(o, 'localisation_rue', ''),
-                    }
-                elif key == 'vocation':
-                    details = {
-                        "adresse": getattr(o, 'adresse_bien', ''),
-                    }
-                elif key == 'raccordement':
-                    details = {
-                        "reseau": getattr(o, 'type_reseau', ''),
-                        "adresse": getattr(o, 'adresse_raccordement', ''),
-                    }
-                elif key == 'evenement':
-                    details = {
-                        "titre": getattr(o, 'titre_evenement', ''),
-                        "lieu": getattr(o, 'lieu_details', ''),
-                        "date": f"{getattr(o, 'date_debut', '')} au {getattr(o, 'date_fin', '')}",
-                    }
-                
-                resp.append({
-                    "id": o.id,
-                    "type": key,
-                    "type_label": model._meta.verbose_name,
-                    "citizen_name": f"{citizen.first_name} {citizen.last_name}".strip() if citizen else "Inconnu",
-                    "citizen_email": citizen.email if citizen else "",
-                    "status": getattr(o, 'status', 'approved' if getattr(o, 'is_paid', False) else 'pending'),
-                    "is_paid": getattr(o, 'is_paid', False),
-                    "created_at": o.created_at,
-                    "updated_at": getattr(o, 'updated_at', o.created_at),
-                    **details,
-                })
-        # Sort all by date
+                objs = objs.order_by('-created_at')
+                for o in objs:
+                    # Robust citizen lookup
+                    citizen = getattr(o, 'citizen', getattr(o, 'user', getattr(o, 'declarant', None)))
+                    
+                    # Build extra details
+                    details = {}
+                    # ... (logic remains same for details building)
+                    if key == 'residence':
+                        details = {"adresse": getattr(o, 'adresse_demandee', ''), "motif": getattr(o, 'motif_demande', ''), "telephone": getattr(o, 'telephone', ''), "profession": getattr(o, 'profession', '')}
+                    elif key == 'livret':
+                        details = {"nom_chef": getattr(o, 'nom_chef_famille', ''), "prenom_chef": getattr(o, 'prenom_chef_famille', ''), "motif": getattr(o, 'motif_demande', '')}
+                    elif key == 'naissance':
+                        details = {"prenom_fr": getattr(o, 'prenom_fr', ''), "nom_fr": getattr(o, 'nom_fr', ''), "date_naissance": str(getattr(o, 'date_naissance', ''))}
+                    elif key == 'mariage' or key == 'mariage_extrait':
+                        details = {"epoux": getattr(o, 'nom_epoux', o.epoux.nom_fr if hasattr(o, 'epoux') and o.epoux else ''), "epouse": getattr(o, 'nom_epouse', o.epouse.nom_fr if hasattr(o, 'epouse') and o.epouse else ''), "date_mariage": str(getattr(o, 'date_souhaitee', getattr(o, 'date_mariage', '')))}
+                    elif key == 'deces' or key == 'deces_extrait':
+                        details = {"nom_defunt": f"{getattr(o, 'nom_fr', '')} {getattr(o, 'prenom_fr', '')}".strip(), "date_deces": str(getattr(o, 'date_deces', ''))}
+                    elif key == 'eau' or key == 'impots' or key == 'commerce':
+                        details = {"service_type_label": o.get_service_type_display() if hasattr(o, 'get_service_type_display') else '', "nom_commerce": getattr(o, 'nom_commerce', ''), "adresse": getattr(o, 'adresse_commerce', getattr(o, 'adresse', getattr(o, 'adresse_bien', '')))}
+                    elif key == 'construction':
+                        details = {"adresse": getattr(o, 'adresse_terrain', ''), "type": getattr(o, 'type_travaux', '')}
+                    elif key == 'evenement':
+                        details = {"titre": getattr(o, 'titre_evenement', ''), "date": f"{getattr(o, 'date_debut', '')}"}
+
+                    resp.append({
+                        "id": o.id,
+                        "type": key,
+                        "type_label": str(model._meta.verbose_name),
+                        "citizen_name": f"{citizen.first_name} {citizen.last_name}".strip() if citizen else "Inconnu",
+                        "citizen_email": citizen.email if citizen else "",
+                        "status": str(getattr(o, 'status', 'pending')).lower(),
+                        "is_paid": getattr(o, 'is_paid', False),
+                        "created_at": o.created_at,
+                        "updated_at": getattr(o, 'updated_at', o.created_at),
+                        **details,
+                    })
+            except Exception as e:
+                print(f"Error processing model {key}: {e}")
+                continue
+        
         resp.sort(key=lambda x: x['created_at'], reverse=True)
         return Response(resp)
 

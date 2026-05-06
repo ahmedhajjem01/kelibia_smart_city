@@ -3136,21 +3136,27 @@ export default function AgentDashboardPage() {
         {!loadingDemandes && allDemandes.length > 0 && (() => {
 
           const typeCounts: Record<string, number> = {}
-
           const statusCounts: Record<string, number> = { pending: 0, in_progress: 0, approved: 0, rejected: 0 }
 
           const EXCLUDE_TYPES: string[] = []
           allDemandes.forEach((d: any) => {
-            if (EXCLUDE_TYPES.includes(d.type)) return
+            if (!d || EXCLUDE_TYPES.includes(d.type)) return
             typeCounts[d.type] = (typeCounts[d.type] || 0) + 1
 
-            let s = d.status || 'pending'
-            if (['validated', 'processed', 'ready', 'signed', 'completed', 'permis_delivre', 'delivre', 'traite', 'favorable'].includes(s)) s = 'approved'
-            if (['en_cours', 'en_cours_instruction', 'visite_programmee', 'devis_envoye'].includes(s)) s = 'in_progress'
-            if (['rejete', 'refusee', 'defavorable', 'rejet_definitif', 'rejected'].includes(s)) s = 'rejected'
+            let s = String(d.status || 'pending').toLowerCase()
+            
+            // Comprehensive mapping
+            if (['validated', 'processed', 'ready', 'signed', 'completed', 'permis_delivre', 'delivre', 'traite', 'favorable', 'approuvée', 'validé'].some(st => s.includes(st))) {
+              s = 'approved'
+            } else if (['en_cours', 'instruction', 'programmee', 'envoye', 'en cours'].some(st => s.includes(st))) {
+              s = 'in_progress'
+            } else if (['rejete', 'refusee', 'defavorable', 'rejet', 'rejected', 'rejetée', 'refusée'].some(st => s.includes(st))) {
+              s = 'rejected'
+            } else {
+              s = 'pending'
+            }
 
-            if (statusCounts[s] !== undefined) statusCounts[s]++
-            else statusCounts.pending++
+            statusCounts[s as keyof typeof statusCounts]++
           })
 
           return (
@@ -3285,16 +3291,23 @@ export default function AgentDashboardPage() {
 
     const EXCLUDE_TYPES: string[] = []
     const filtered = allDemandes.filter((d: any) => {
-      if (EXCLUDE_TYPES.includes(d.type)) return false
+      if (!d || EXCLUDE_TYPES.includes(d.type)) return false
 
       if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
 
-      if (demandeStatusFilter && d.status !== demandeStatusFilter) return false
+      if (demandeStatusFilter) {
+        let s = String(d.status || 'pending').toLowerCase()
+        let mapped = 'pending'
+        if (['validated', 'processed', 'ready', 'signed', 'completed', 'permis_delivre', 'delivre', 'traite', 'favorable', 'approuvée', 'validé'].some(st => s.includes(st))) mapped = 'approved'
+        else if (['en_cours', 'instruction', 'programmee', 'envoye', 'en cours'].some(st => s.includes(st))) mapped = 'in_progress'
+        else if (['rejete', 'refusee', 'defavorable', 'rejet', 'rejected', 'rejetée', 'refusée'].some(st => s.includes(st))) mapped = 'rejected'
+        
+        if (mapped !== demandeStatusFilter) return false
+      }
 
-      if (q && !d.citizen_name?.toLowerCase().includes(q) && !d.citizen_email?.toLowerCase().includes(q) && !d.type_label?.toLowerCase().includes(q)) return false
+      if (q && !d.citizen_name?.toLowerCase().includes(q) && !d.citizen_email?.toLowerCase().includes(q) && !String(d.type_label || '').toLowerCase().includes(q)) return false
 
       return true
-
     })
 
     if (filtered.length === 0) return (
