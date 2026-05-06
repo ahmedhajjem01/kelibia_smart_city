@@ -617,7 +617,7 @@ export default function AgentDashboardPage() {
 
   // Load municipality polygon once
   useEffect(() => {
-    fetch('/layers/limite_kelibia.geojson')
+    fetch('/layers/limite_kelibia.geojson?v=2')
       .then(r => r.json())
       .then(gj => { kelibiaRingRef.current = gj.features[0].geometry.coordinates[0] })
       .catch(() => {})
@@ -1765,7 +1765,7 @@ export default function AgentDashboardPage() {
 
     // 1. Limite municipale — contour de la commune
     sigOverlays['🏛️ Limite communale'] = loadGeoJSON(
-      '/layers/limite_kelibia.geojson',
+      '/layers/limite_kelibia.geojson?v=2',
       () => ({ color: '#1a237e', weight: 3, fill: false, dashArray: '8,4', opacity: 0.9 }),
       (feature, layer) => layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🏛️ ${feature.properties?.name || 'Kelibia'}</div><div style="padding:8px 12px;">Limite de la commune</div></div>`)
     )
