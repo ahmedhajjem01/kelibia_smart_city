@@ -307,39 +307,12 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                 )
 
             # ── Helper: notify one citizen (in-app + email) ───────────────────
-            # is_dup=True  → citizen receives a message explaining their report was
-            #                a duplicate of original_id, not just a generic status update
-            # is_dup=False → standard status-update message
-            def _notify_citizen(target_rec, is_dup=False, original_id=None):
+            def _notify_citizen(target_rec):
                 try:
                     from notifications.helpers import get_notif
-                    if is_dup and original_id:
-                        notif_key = 'signalement_doublon_updated'
-                        t, m = get_notif(target_rec.citizen, notif_key,
-                                         rec_title=target_rec.title,
-                                         status_display=target_rec.get_status_display(),
-                                         original_id=original_id)
-                        email_body = (
-                            f"Bonjour {target_rec.citizen.first_name},\n\n"
-                            f"Votre signalement « {target_rec.title} » a été clôturé car il correspond "
-                            f"à un problème déjà signalé (réf. #{original_id}).\n"
-                            f"Statut : {target_rec.get_status_display()}.\n\n"
-                            f"Vous pouvez suivre l'évolution sur l'application.\n\n"
-                            f"Cordialement,\nL'équipe Kelibia Smart City"
-                        )
-                    else:
-                        notif_key = 'signalement_updated'
-                        t, m = get_notif(target_rec.citizen, notif_key,
-                                         rec_title=target_rec.title,
-                                         status_display=target_rec.get_status_display())
-                        email_body = (
-                            f"Bonjour {target_rec.citizen.first_name},\n\n"
-                            f"Le statut de votre signalement « {target_rec.title} » a été mis à jour.\n"
-                            f"Nouveau statut : {target_rec.get_status_display()}.\n\n"
-                            f"Vous pouvez suivre l'évolution sur l'application.\n\n"
-                            f"Cordialement,\nL'équipe Kelibia Smart City"
-                        )
-
+                    t, m = get_notif(target_rec.citizen, 'signalement_updated',
+                                     rec_title=target_rec.title,
+                                     status_display=target_rec.get_status_display())
                     Notification.objects.create(
                         recipient=target_rec.citizen,
                         title=t,
@@ -347,16 +320,18 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                         notification_type='success' if new_status == 'resolved' else 'info',
                         link='/mes-reclamations'
                     )
-
                     if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
                         import threading
+                        c_name     = target_rec.citizen.first_name
                         c_email    = target_rec.citizen.email
+                        r_title    = target_rec.title
+                        s_disp     = target_rec.get_status_display()
                         from_email = settings.DEFAULT_FROM_EMAIL
-                        def _send(ce=c_email, body=email_body):
+                        def _send(cn=c_name, ce=c_email, rt=r_title, sd=s_disp):
                             try:
                                 send_mail(
                                     "Mise à jour de votre signalement - Kelibia Smart City",
-                                    body,
+                                    f"Bonjour {cn},\n\nLe statut de votre signalement « {rt} » a été mis à jour.\nNouveau statut : {sd}.\n\nVous pouvez suivre l'évolution sur l'application.\n\nCordialement,\nL'équipe Kelibia Smart City",
                                     from_email, [ce], fail_silently=True
                                 )
                             except Exception as ex:
@@ -366,29 +341,19 @@ class ReclamationViewSet(viewsets.ModelViewSet):
                     logger.error(f"Error notifying citizen for rec {target_rec.id}: {e}")
 
             # ── Notify the citizen of the directly updated record ─────────────
-            # The record the agent touched: could be the original OR a duplicate.
-            # In either case, use the standard message for it (agent treated it directly).
-            _notify_citizen(rec, is_dup=False)
+            _notify_citizen(rec)
 
             # ── Update each related record in DB and notify its citizen ───────
             if related_pks:
                 related_recs = (
                     Reclamation.objects
                     .filter(pk__in=related_pks)
-                    .select_related('citizen', 'duplicate_of')
+                    .select_related('citizen')
                 )
                 for r in related_recs:
                     r.status = new_status
                     r.save(update_fields=['status'])
-                    # Determine the "original" ID to mention in the notification:
-                    # if r is a duplicate, its duplicate_of is the original.
-                    # if r is the original (Case B — agent touched a sibling duplicate),
-                    # then rec.duplicate_of is the original.
-                    if r.is_duplicate and r.duplicate_of_id:
-                        orig_id = r.duplicate_of_id
-                    else:
-                        orig_id = rec.duplicate_of_id or rec.id
-                    _notify_citizen(r, is_dup=r.is_duplicate, original_id=orig_id)
+                    _notify_citizen(r)
 
             return Response({"status": "Statut mis a jour."})
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)

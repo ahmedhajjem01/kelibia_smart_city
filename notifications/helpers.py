@@ -44,16 +44,6 @@ TEXTS = {
             'message': "تم تحديث حالة بلاغك « {rec_title} » إلى: {status_display}.",
         },
     },
-    'signalement_doublon_updated': {
-        'fr': {
-            'title': 'Mise à jour: {rec_title}',
-            'message': "Votre signalement « {rec_title} » a été clôturé car il correspond à un problème déjà signalé (réf. #{original_id}). Statut : {status_display}.",
-        },
-        'ar': {
-            'title': 'تحديث: {rec_title}',
-            'message': "تم إغلاق بلاغك « {rec_title} » لأنه يتطابق مع بلاغ مسبق (مرجع #{original_id}). الحالة: {status_display}.",
-        },
-    },
     'request_updated': {
         'fr': {
             'title': 'Mise à jour: {type_label}',
