@@ -52,19 +52,28 @@ def confirm_payment(request):
             obj.status = 'in_progress'
             obj.save()
         elif req_type == 'birth_extract':
-            obj = ExtraitNaissance.objects.get(id=req_id, user=request.user)
+            from django.db.models import Q
+            obj = ExtraitNaissance.objects.filter(Q(id=req_id), Q(user=request.user) | Q(user__isnull=True)).first()
+            if not obj: raise Exception("Extrait introuvable")
             obj.is_paid = True
             obj.paid_at = now
+            if not obj.user: obj.user = request.user
             obj.save()
         elif req_type == 'marriage_extract':
-            obj = ExtraitMariage.objects.get(id=req_id, user=request.user)
+            from django.db.models import Q
+            obj = ExtraitMariage.objects.filter(Q(id=req_id), Q(user=request.user) | Q(user__isnull=True)).first()
+            if not obj: raise Exception("Extrait introuvable")
             obj.is_paid = True
             obj.paid_at = now
+            if not obj.user: obj.user = request.user
             obj.save()
         elif req_type == 'death_extract' or req_type == 'deces':
-            obj = ExtraitDeces.objects.get(id=req_id, user=request.user)
+            from django.db.models import Q
+            obj = ExtraitDeces.objects.filter(Q(id=req_id), Q(user=request.user) | Q(user__isnull=True)).first()
+            if not obj: raise Exception("Extrait introuvable")
             obj.is_paid = True
             obj.paid_at = now
+            if not obj.user: obj.user = request.user
             obj.save()
         elif req_type == 'marriage':
             obj = DemandeMariage.objects.get(id=req_id, citizen=request.user)

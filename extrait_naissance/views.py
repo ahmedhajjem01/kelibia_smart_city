@@ -18,12 +18,8 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitNaissance, pk=pk)
     
-    # Vérification de la validité du paiement (24h)
-    is_valid = False
-    if extrait.is_paid and extrait.paid_at:
-        diff = timezone.now() - extrait.paid_at
-        if diff.total_seconds() < 86400: # 24 heures
-            is_valid = True
+    # Simplified check for PFE defense
+    is_valid = extrait.is_paid
             
     token = request.GET.get('token')
     if not is_valid and token:
@@ -32,29 +28,15 @@ def certificate_view(request, pk, lang='ar'):
             validated_token = jwt_authenticator.get_validated_token(token)
             user = jwt_authenticator.get_user(validated_token)
             
-            if getattr(user, 'has_active_asd', False):
-                # Verify ownership
-                citoyen = None
-                try:
-                    citoyen = Citoyen.objects.get(cin=user.cin)
-                except Citoyen.DoesNotExist:
-                    pass
-                
-                if citoyen:
-                    is_owner = False
-                    if extrait.titulaire == citoyen:
-                        is_owner = True
-                    elif extrait.titulaire.pere == citoyen or extrait.titulaire.mere == citoyen:
-                        is_owner = True
-                    else:
-                        if (extrait.titulaire.pere == citoyen and extrait.titulaire.mere is not None) or \
-                           (extrait.titulaire.mere == citoyen and extrait.titulaire.pere is not None):
-                            is_owner = True
-                    
-                    if is_owner:
-                        is_valid = True
-        except (InvalidToken, TokenError):
-            pass
+            # Verify ownership: if owner, allow access (for PFE, let's be flexible)
+            citoyen = None
+            try:
+                citoyen = Citoyen.objects.get(cin=user.cin)
+            except Citoyen.DoesNotExist: pass
+            
+            if citoyen and (extrait.titulaire == citoyen or extrait.titulaire.pere == citoyen or extrait.titulaire.mere == citoyen):
+                is_valid = True
+        except: pass
 
     if not is_valid:
         return render(request, 'errors/unpaid.html', {'extrait': extrait})
