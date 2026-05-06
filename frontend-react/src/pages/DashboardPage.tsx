@@ -310,6 +310,7 @@ export default function DashboardPage() {
   const [newsItems, setNewsItems] = useState<{ id: number; title: string; created_at: string }[]>([])
   const [genericNotifications, setGenericNotifications] = useState<any[]>([])
   const [mapStatusFilter, setMapStatusFilter] = useState<string[]>(['pending', 'in_progress', 'resolved', 'rejected'])
+  const [dossiersCount, setDossiersCount] = useState(0)
 
   const [sigLayers, setSigLayers] = useState<{ routes: any; espVerts: any; batiments: any; limite: any }>({
     routes: null, espVerts: null, batiments: null, limite: null,
@@ -353,42 +354,29 @@ export default function DashboardPage() {
           if (data.user_type === 'agent' || data.is_staff || data.is_superuser) { navigate('/agent-dashboard'); return }
 
         }
+        const [rRes, mRes, bRes, resRes, cRes, lRes, nRes, newsRes, gnRes] = await Promise.all([
+          fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/residence/demande/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/construction/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/livret-famille/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/news/')),
+          fetch(resolveBackendUrl('/api/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
+        ])
 
-        const rRes = await fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } })
-
-        if (rRes.ok) setReclamations(await rRes.json())
-
-
-
-        const mRes = await fetch('/extrait-mariage/demandes/', { headers: { Authorization: `Bearer ${access}` } })
-
-        if (mRes.ok) { const d = await mRes.json(); setMarriageNotifications(d.filter((x: any) => x.status === 'signed')) }
-
-
-
-        const nRes = await fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
+        let totalDossiers = 0
+        if (rRes.ok) { const d = await rRes.json(); setReclamations(d); totalDossiers += d.length }
+        if (mRes.ok) { const d = await mRes.json(); setMarriageNotifications(d.filter((x: any) => x.status === 'signed')); totalDossiers += d.length }
+        if (bRes.ok) { const d = await bRes.json(); totalDossiers += d.length }
+        if (resRes.ok) { const d = await resRes.json(); totalDossiers += d.length }
+        if (cRes.ok) { const d = await cRes.json(); totalDossiers += d.length }
+        if (lRes.ok) { const d = await lRes.json(); setLivretNotifications(d.filter((x: any) => x.status === 'ready')); totalDossiers += d.length }
+        setDossiersCount(totalDossiers)
 
         if (nRes.ok) { const d = (await nRes.json()) as ForumNotif[]; setForumUnread(d.filter(n => !n.is_read).length) }
-
-
-
-        const newsRes = await fetch(resolveBackendUrl('/api/news/'))
-
-        if (newsRes.ok) {
-
-          const d = await newsRes.json()
-
-          setNewsItems((Array.isArray(d) ? d : (d.results || [])).slice(0, 3))
-
-        }
-
-
-
-        const lRes = await fetch('/livret-famille/demandes/', { headers: { Authorization: `Bearer ${access}` } })
-
-        if (lRes.ok) { const d = await lRes.json(); setLivretNotifications(d.filter((x: any) => x.status === 'ready')) }
-
-        const gnRes = await fetch(resolveBackendUrl('/api/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
+        if (newsRes.ok) { const d = await newsRes.json(); setNewsItems((Array.isArray(d) ? d : (d.results || [])).slice(0, 3)) }
         if (gnRes.ok) { setGenericNotifications(await gnRes.json()) }
 
       } catch (e) { console.error(e) }
@@ -503,7 +491,7 @@ export default function DashboardPage() {
         <div>
           <div className="db-stat-row" style={{ borderBottom: 'none' }}>
             <span style={{ color: '#5b403d' }}>{t('my_files_label')}</span>
-            <span className="db-stat-badge" style={{ [lang === 'ar' ? 'marginRight' : 'marginLeft']: 'auto' }}>{String(reclamations.length).padStart(2, '0')}</span>
+            <span className="db-stat-badge" style={{ [lang === 'ar' ? 'marginRight' : 'marginLeft']: 'auto' }}>{String(dossiersCount).padStart(2, '0')}</span>
           </div>
         </div>
 
