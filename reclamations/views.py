@@ -117,6 +117,10 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             except Exception:
                 duplicate_of = None
 
+        # If this is a duplicate, inherit the status of the original so the agent
+        # sees all duplicates with the same state and doesn't need to treat them separately.
+        inherited_status = duplicate_of.status if duplicate_of else 'pending'
+
         # Save the instance
         instance = serializer.save(
             citizen=self.request.user,
@@ -126,6 +130,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             is_duplicate=is_duplicate,
             duplicate_of=duplicate_of,
             similarity_score=dup_result.get('final_score', 0.0),
+            status=inherited_status,
         )
 
         # Attach results to the instance so create() can use them for response metadata
@@ -283,6 +288,15 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             if getattr(user, 'user_type', '') == 'agent' and rec.agent is None:
                 rec.agent = user
             rec.save()
+
+            # ── Propagate status to all linked duplicates ──────────────────────
+            # Case A: rec is the original → update all its duplicates
+            Reclamation.objects.filter(duplicate_of=rec).update(status=new_status)
+            # Case B: rec is itself a duplicate → also update the original and
+            #         all sibling duplicates so every linked record stays in sync
+            if rec.duplicate_of_id:
+                Reclamation.objects.filter(pk=rec.duplicate_of_id).update(status=new_status)
+                Reclamation.objects.filter(duplicate_of_id=rec.duplicate_of_id).exclude(pk=rec.pk).update(status=new_status)
             
             # --- Send Notifications ---
             try:

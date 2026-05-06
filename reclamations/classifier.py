@@ -84,28 +84,47 @@ def _get_stopwords():
 
 def _normalize(text: str) -> str:
     """
-    Full NLP preprocessing:
+    Full NLP preprocessing — bilingual (French + Arabic):
       1. Lowercase
-      2. Remove accents (Unicode NFD decomposition)
-      3. Keep only letters, digits, spaces  (strips Arabic / special chars)
+      2. Remove accents from Latin characters only (preserves Arabic Unicode)
+      3. Keep Latin letters, Arabic letters, digits, spaces
       4. Tokenize on whitespace
-      5. Remove stopwords and very short tokens
-      6. French Snowball stemming
+      5. Remove French stopwords and very short tokens
+      6. French Snowball stemming on Latin tokens only (Arabic tokens kept as-is)
     """
     from nltk.stem.snowball import FrenchStemmer
     _stemmer = FrenchStemmer()
     all_stop = _get_stopwords()
 
+    # Lowercase (does not affect Arabic)
     text = text.lower()
-    text = unicodedata.normalize("NFD", text)
-    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
-    text = re.sub(r"[^a-z0-9\s]", " ", text)
+
+    # Remove accents from Latin chars only — do NOT touch Arabic Unicode block
+    nfd = unicodedata.normalize("NFD", text)
+    text = "".join(
+        c for c in nfd
+        if unicodedata.category(c) != "Mn"              # strip combining marks
+        or "\u0600" <= c <= "\u06FF"                    # but keep Arabic diacritics range
+    )
+
+    # Keep: Latin letters (a-z), Arabic letters (\u0600-\u06FF), digits, spaces
+    text = re.sub(r"[^a-z0-9\u0600-\u06FF\s]", " ", text)
 
     tokens = text.split()
-    tokens = [t for t in tokens if t not in all_stop and len(t) > 1]
-    tokens = [_stemmer.stem(t) for t in tokens]
+    processed = []
+    for t in tokens:
+        if len(t) <= 1:
+            continue
+        # French stopword filter applies only to Latin tokens
+        if not re.search(r"[\u0600-\u06FF]", t) and t in all_stop:
+            continue
+        # Stem Latin tokens; keep Arabic tokens verbatim
+        if re.search(r"[\u0600-\u06FF]", t):
+            processed.append(t)
+        else:
+            processed.append(_stemmer.stem(t))
 
-    return " ".join(tokens)
+    return " ".join(processed)
 
 
 # ─── Model builder ────────────────────────────────────────────────────────────
@@ -113,6 +132,13 @@ def _build_pipeline() -> object:
     """
     TF-IDF (word unigrams + bigrams, sublinear TF) fed into a calibrated LinearSVC.
     CalibratedClassifierCV adds probability output to LinearSVC via isotonic regression.
+
+    Anti-overfitting measures (v3):
+      - min_df=2   : ignore tokens seen only once (hapax eliminata)
+      - max_features=4000 : cap vocabulary size to avoid memorising rare phrases
+      - max_df=0.90 : tighter cutoff for overly common terms
+      - C=0.3      : stronger L2 regularisation on LinearSVC (was 1.0)
+      - strip_accents=None : we handle accent removal ourselves to preserve Arabic
     """
     from sklearn.pipeline import Pipeline
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -122,13 +148,14 @@ def _build_pipeline() -> object:
     tfidf = TfidfVectorizer(
         analyzer="word",
         ngram_range=(1, 2),
-        min_df=1,
-        max_df=0.95,
+        min_df=2,           # drop hapax legomena
+        max_df=0.90,
+        max_features=4000,  # cap vocabulary — prevents memorising rare bigrams
         sublinear_tf=True,
-        strip_accents="unicode",
+        strip_accents=None, # we handle normalisation in _normalize() to preserve Arabic
     )
     svc = CalibratedClassifierCV(
-        LinearSVC(C=1.0, max_iter=2000, class_weight="balanced"),
+        LinearSVC(C=0.3, max_iter=3000, class_weight="balanced"),
         cv=3,
     )
     return Pipeline([("tfidf", tfidf), ("clf", svc)])
@@ -443,7 +470,9 @@ def detect_duplicate(title: str, description: str,
         from reclamations.models import Reclamation
 
         # ── 1. Fetch existing reclamations from DB ───────────────────────────
-        qs = Reclamation.objects.exclude(status='rejected')
+        # Exclude resolved AND rejected: a resolved problem can legitimately recur later.
+        # Only compare against active (pending / in_progress) reclamations.
+        qs = Reclamation.objects.exclude(status__in=['rejected', 'resolved'])
         if exclude_id:
             qs = qs.exclude(id=exclude_id)
 
@@ -490,7 +519,7 @@ def detect_duplicate(title: str, description: str,
                             ST_MakePoint(%s, %s)::geography
                         ) as dist_m
                         FROM reclamations_reclamation
-                        WHERE status != 'rejected'
+                        WHERE status NOT IN ('rejected', 'resolved')
                     """
                     if exclude_id:
                         query += f" AND id != {exclude_id}"
