@@ -3144,8 +3144,13 @@ export default function AgentDashboardPage() {
             if (EXCLUDE_TYPES.includes(d.type)) return
             typeCounts[d.type] = (typeCounts[d.type] || 0) + 1
 
-            if (statusCounts[d.status] !== undefined) statusCounts[d.status]++
+            let s = d.status || 'pending'
+            if (['validated', 'processed', 'ready', 'signed', 'completed', 'permis_delivre', 'delivre', 'traite', 'favorable'].includes(s)) s = 'approved'
+            if (['en_cours', 'en_cours_instruction', 'visite_programmee', 'devis_envoye'].includes(s)) s = 'in_progress'
+            if (['rejete', 'refusee', 'defavorable', 'rejet_definitif', 'rejected'].includes(s)) s = 'rejected'
 
+            if (statusCounts[s] !== undefined) statusCounts[s]++
+            else statusCounts.pending++
           })
 
           return (
@@ -3185,7 +3190,7 @@ export default function AgentDashboardPage() {
               <div className="d-flex flex-wrap gap-2">
 
                 {Object.entries(typeCounts).map(([type, count]) => {
-                  const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}` }
+                  const typeLabels: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, mariage_extrait: `📜 ${t('mariage_cert')} (Acte)`, deces_extrait: `📜 ${t('deces_cert')} (Acte)`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}`, raccordement: `🔌 ${lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}`, evenement: `🎉 ${lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}`, construction: `🏗️ ${lang === 'ar' ? 'رخصة بناء' : 'Construction'}` }
 
                   return <span key={type} style={{ background: '#e8eaf6', color: '#283593', border: '1px solid #c5cae9', borderRadius: 12, padding: '2px 10px', fontSize: '.75rem', fontWeight: 600 }}>{typeLabels[type] || type} ({count})</span>
 
@@ -3217,12 +3222,24 @@ export default function AgentDashboardPage() {
 
             <option value="">{t('demande_all_types')}</option>
 
+            <option value="residence">🏠 {t('residence_cert')}</option>
+            <option value="naissance">👶 {t('birth_cert')}</option>
+            <option value="mariage">💍 {t('mariage_cert')}</option>
+            <option value="deces">⚰️ {t('deces_cert')}</option>
+            <option value="mariage_extrait">📜 {t('mariage_cert')} (Acte)</option>
+            <option value="deces_extrait">📜 {t('deces_cert')} (Acte)</option>
             <option value="eau">💧 Eau, Lumière &amp; Égouts</option>
+            <option value="impots">💰 Argent &amp; Impôts</option>
+            <option value="commerce">🏪 Boutiques &amp; Commerces</option>
+            <option value="construction">🏗️ Construction</option>
             <option value="transfert">🚑 {lang === 'ar' ? 'رخصة نقل جثة' : 'Transfert de Corps'}</option>
             <option value="bien">🏢 {lang === 'ar' ? 'تسجيل عقار' : 'Bien Immobilier'}</option>
             <option value="mutation">🔄 {lang === 'ar' ? 'تحيين ملكية' : 'Mutation Propriété'}</option>
             <option value="raccordement">🔌 {lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}</option>
             <option value="evenement">🎉 {lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}</option>
+            <option value="vocation">🏗️ {lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}</option>
+            <option value="goudronnage">🛤️ {lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}</option>
+            <option value="legalisation">✒️ {lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}</option>
 
                 </select >
 
@@ -3264,7 +3281,7 @@ export default function AgentDashboardPage() {
               ) : (() => {
 
     const q = demandeSearchQ.toLowerCase()
-    const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}`, raccordement: `🔌 ${lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}`, evenement: `🎉 ${lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}`, construction: `🏗️ ${lang === 'ar' ? 'رخصة بناء' : 'Construction'}` }
+    const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, mariage_extrait: `📜 ${t('mariage_cert')} (Acte)`, deces_extrait: `📜 ${t('deces_cert')} (Acte)`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}`, raccordement: `🔌 ${lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}`, evenement: `🎉 ${lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}`, construction: `🏗️ ${lang === 'ar' ? 'رخصة بناء' : 'Construction'}` }
 
     const EXCLUDE_TYPES: string[] = []
     const filtered = allDemandes.filter((d: any) => {

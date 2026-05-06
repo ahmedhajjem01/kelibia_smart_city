@@ -150,7 +150,7 @@ def get_supervisor_services_summary(request):
     summary = {
         "attestation_residence": DemandeResidence.objects.filter(status='pending', is_paid=True).count(),
         "livret_famille": DemandeLivretFamille.objects.filter(status='pending', is_paid=True).count(),
-        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending', is_paid=True).count(),
+        "declaration_naissance": DeclarationNaissance.objects.filter(status='pending').count(),
     }
     
     summary["demande_mariage"] = DemandeMariage.objects.filter(status='pending', is_paid=True).count()
