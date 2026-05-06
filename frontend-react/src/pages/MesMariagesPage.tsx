@@ -66,14 +66,11 @@ export default function MesMariagesPage() {
 
     ;(async () => {
       try {
-        const [userRes, extraitsRes, demandesRes] = await Promise.all([
+        const [userRes, extraitsRes] = await Promise.all([
           fetch(resolveBackendUrl('/api/accounts/me/'), {
             headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(resolveBackendUrl('/extrait-mariage/extraits/'), {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(resolveBackendUrl('/extrait-mariage/demandes/'), {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ])
@@ -87,10 +84,6 @@ export default function MesMariagesPage() {
           setMariages(json)
         }
 
-        if (demandesRes.ok) {
-          const json = (await demandesRes.json()) as DemandeMariage[]
-          setDemandes(json)
-        }
       } catch (e: any) {
         console.error(e)
         setError(e.message || 'Erreur de connexion avec la base de données.')
@@ -151,87 +144,6 @@ export default function MesMariagesPage() {
       ) : (
         <div className={lang === 'ar' ? 'font-arabic text-end' : ''} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
-          {/* ── Mes demandes de mariage ── */}
-          <h4 className="mb-3 border-bottom pb-2">
-            <i className="fas fa-file-signature me-2" style={{ color: '#c61f2c' }} />
-            {lang === 'ar' ? 'طلبات الزواج' : 'Mes demandes de mariage'}
-          </h4>
-
-          {demandes.length > 0 ? (
-            <div className="row mb-5">
-              {demandes.map((d) => {
-                const cfg = getStatusCfg(d.status, lang)
-                return (
-                  <div className="col-md-6 col-lg-4 mb-4" key={d.id}>
-                    <div
-                      className="card h-100 shadow-sm"
-                      style={{ borderTop: `4px solid ${cfg.color}`, borderRadius: 12 }}
-                    >
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                          <i className="fas fa-rings-wedding fa-lg" style={{ color: cfg.color }} />
-                          <span
-                            className="badge rounded-pill fw-bold"
-                            style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}` }}
-                          >
-                            {cfg.label}
-                          </span>
-                        </div>
-
-                        <h6 className="fw-bold mb-1">
-                          {lang === 'ar'
-                            ? `${d.nom_epoux} ↔ ${d.nom_epouse}`
-                            : `${d.nom_epoux} ↔ ${d.nom_epouse}`}
-                        </h6>
-
-                        <p className="text-muted small mb-1">
-                          <i className="fas fa-calendar-alt me-1" />
-                          {lang === 'ar' ? 'التاريخ المطلوب:' : 'Date souhaitée :'}{' '}
-                          <strong>{d.date_souhaitee}</strong>
-                        </p>
-
-                        {d.lieu_mariage && (
-                          <p className="text-muted small mb-1">
-                            <i className="fas fa-map-marker-alt me-1" />
-                            {d.lieu_mariage}
-                          </p>
-                        )}
-
-                        <p className="text-muted small mb-2">
-                          <i className="fas fa-file-contract me-1" />
-                          {lang === 'ar' ? 'نوع العقد:' : 'Type :'}{' '}
-                          {d.type_contrat}
-                        </p>
-
-                        {d.commentaire_agent && (
-                          <div
-                            className="mt-2 p-2 rounded small"
-                            style={{ background: '#fafafa', border: '1px solid #e2e8f0' }}
-                          >
-                            <i className="fas fa-comment-dots me-1 text-muted" />
-                            <span className="text-muted fw-semibold">
-                              {lang === 'ar' ? 'ملاحظة العون:' : "Note de l'agent :"}
-                            </span>{' '}
-                            {d.commentaire_agent}
-                          </div>
-                        )}
-
-                        <p className="text-muted" style={{ fontSize: '0.7rem', marginTop: 8 }}>
-                          {lang === 'ar' ? 'تاريخ التقديم:' : 'Soumis le :'}{' '}
-                          {new Date(d.created_at).toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-FR')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="alert alert-secondary text-muted mb-5">
-              <i className="fas fa-info-circle me-2" />
-              {lang === 'ar' ? 'لا توجد طلبات زواج بعد.' : 'Aucune demande de mariage enregistrée.'}
-            </div>
-          )}
 
           {/* ── Actes de mariage signés ── */}
           <h4 className="mb-3 border-bottom pb-2">
