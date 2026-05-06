@@ -2264,7 +2264,7 @@ export default function AgentDashboardPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
                   <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1c1c', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                      Tableau de Bord <span style={{ color: '#ae131a' }}>/</span> <span style={{ fontWeight: 300 }}>لوحة القيادة</span>
+                      {lang === 'ar' ? 'لوحة القيادة' : 'Tableau de Bord'}
                     </h1>
                     <p style={{ color: '#9ca3af', marginTop: 4, fontSize: '0.9rem' }}>{lang === 'ar' ? 'الإدارة الحضرية الذكية لقليبية' : 'Gestion urbaine intelligente de Kélibia'}</p>
                   </div>
@@ -3036,8 +3036,9 @@ export default function AgentDashboardPage() {
 
           const statusCounts: Record<string, number> = { pending: 0, in_progress: 0, approved: 0, rejected: 0 }
 
+          const EXCLUDE_TYPES = ['livret', 'naissance', 'goudronnage', 'panneau_solaire', 'legalisation', 'commerce', 'impots', 'vocation', 'construction_neuve', 'mariage', 'residence', 'deces_extrait', 'deces', 'mariage_extrait']
           allDemandes.forEach((d: any) => {
-
+            if (EXCLUDE_TYPES.includes(d.type)) return
             typeCounts[d.type] = (typeCounts[d.type] || 0) + 1
 
             if (statusCounts[d.status] !== undefined) statusCounts[d.status]++
@@ -3052,7 +3053,7 @@ export default function AgentDashboardPage() {
 
                 {[
 
-                  { lbl: t('all_label'), val: allDemandes.length, color: '#006d94', bg: '#e1f3fb' },
+                  { lbl: t('all_label'), val: Object.values(statusCounts).reduce((a, b) => a + b, 0), color: '#006d94', bg: '#e1f3fb' },
 
                   { lbl: t('status_pending'), val: statusCounts.pending, color: '#e65100', bg: '#fff3e0' },
 
@@ -3113,24 +3114,12 @@ export default function AgentDashboardPage() {
 
             <option value="">{t('demande_all_types')}</option>
 
-            <option value="residence">🏠 {t('residence_cert')}</option>
-
-            <option value="livret">📘 {t('nav_managed_users')}</option>
-
-            <option value="naissance">👶 {t('birth_cert')}</option>
-
-            <option value="mariage">💍 {t('mariage_cert')}</option>
-
-            <option value="deces">⚰️ {t('deces_cert')}</option>
-                  <option value="eau">💧 Eau, Lumière &amp; Égouts</option>
-                  <option value="impots">💰 Argent &amp; Impôts</option>
-                  <option value="commerce">🏪 Boutiques &amp; Commerces</option>
-                  <option value="transfert">🚑 {lang === 'ar' ? 'رخصة نقل جثة' : 'Transfert de Corps'}</option>
-                  <option value="legalisation">✒️ {lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation Signature'}</option>
-                  <option value="goudronnage">🛤️ {lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage Street'}</option>
-                  <option value="bien">🏢 {lang === 'ar' ? 'تسجيل عقار' : 'Bien Immobilier'}</option>
-                  <option value="mutation">🔄 {lang === 'ar' ? 'تحيين ملكية' : 'Mutation Propriété'}</option>
-                  <option value="vocation">🏗️ {lang === 'ar' ? 'تغيير صبغة' : 'Vocation Change'}</option>
+            <option value="eau">💧 Eau, Lumière &amp; Égouts</option>
+            <option value="transfert">🚑 {lang === 'ar' ? 'رخصة نقل جثة' : 'Transfert de Corps'}</option>
+            <option value="bien">🏢 {lang === 'ar' ? 'تسجيل عقار' : 'Bien Immobilier'}</option>
+            <option value="mutation">🔄 {lang === 'ar' ? 'تحيين ملكية' : 'Mutation Propriété'}</option>
+            <option value="raccordement">🔌 {lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}</option>
+            <option value="evenement">🎉 {lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}</option>
 
                 </select >
 
@@ -3174,7 +3163,9 @@ export default function AgentDashboardPage() {
     const q = demandeSearchQ.toLowerCase()
     const typeLabelsMap: Record<string, string> = { residence: `🏠 ${t('residence_cert')}`, livret: `📘 ${t('nav_managed_users')}`, naissance: `👶 ${t('birth_cert')}`, mariage: `💍 ${t('mariage_cert')}`, deces: `⚰️ ${t('deces_cert')}`, eau: `💧 Eau, Lumière & Égouts`, impots: `💰 Argent & Impôts`, commerce: `🏪 Boutiques & Commerces`, transfert: `🚑 ${lang === 'ar' ? 'نقل جثة' : 'Transfert Corps'}`, legalisation: `✒️ ${lang === 'ar' ? 'تعريف بالإمضاء' : 'Légalisation'}`, goudronnage: `🛤️ ${lang === 'ar' ? 'تعبيد طريق' : 'Goudronnage'}`, bien: `🏢 ${lang === 'ar' ? 'تسجيل عقار' : 'Bien Immo'}`, mutation: `🔄 ${lang === 'ar' ? 'تحيين ملكية' : 'Mutation'}`, vocation: `🏗️ ${lang === 'ar' ? 'تغيير صبغة' : 'Vocation'}`, raccordement: `🔌 ${lang === 'ar' ? 'ربط بالشبكة' : 'Raccordement'}`, evenement: `🎉 ${lang === 'ar' ? 'ترخيص تظاهرة' : 'Événement'}`, construction: `🏗️ ${lang === 'ar' ? 'رخصة بناء' : 'Construction'}` }
 
+    const EXCLUDE_TYPES = ['livret', 'naissance', 'goudronnage', 'panneau_solaire', 'legalisation', 'commerce', 'impots', 'vocation', 'construction_neuve', 'mariage', 'residence', 'deces_extrait', 'deces', 'mariage_extrait']
     const filtered = allDemandes.filter((d: any) => {
+      if (EXCLUDE_TYPES.includes(d.type)) return false
 
       if (demandeTypeFilter && d.type !== demandeTypeFilter) return false
 

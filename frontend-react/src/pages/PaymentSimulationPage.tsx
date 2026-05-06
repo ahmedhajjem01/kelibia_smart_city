@@ -252,18 +252,21 @@ export default function PaymentSimulationPage() {
                         <div className="d-flex justify-content-between mb-2"><span>Statut</span><span className="badge bg-success">APPROUVÉ</span></div>
                         <div className="d-flex justify-content-between mb-2"><span>Montant</span><span className="fw-bold">{amount} DT</span></div>
                         <div className="d-flex justify-content-between mb-2"><span>Date</span><span>{new Date().toLocaleString()}</span></div>
-                        <div className="d-flex justify-content-between"><span>Autorisation</span><span className="font-monospace text-primary">#AUTH-9921-S</span></div>
+                        <div className="d-flex justify-content-between mb-2"><span>{t('status') || 'Statut'}</span><span className="badge bg-success">{t('approved') || 'APPROUVÉ'}</span></div>
+                        <div className="d-flex justify-content-between mb-2"><span>{t('amount') || 'Montant'}</span><span className="fw-bold">{amount} DT</span></div>
+                        <div className="d-flex justify-content-between mb-2"><span>{t('date') || 'Date'}</span><span>{new Date().toLocaleString()}</span></div>
+                        <div className="d-flex justify-content-between"><span>{t('authorization') || 'Autorisation'}</span><span className="font-monospace text-primary">#AUTH-9921-S</span></div>
                       </div>
 
                       <div className="d-grid gap-2">
                          <div className="d-flex flex-column gap-2 mb-2 no-print">
                             {queryParams.get('file_fr') && (
-                                <a href={decodeURIComponent(queryParams.get('file_fr') || '')} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm">
+                                <a href={`${decodeURIComponent(queryParams.get('file_fr') || '')}?token=${getAccessToken()}`} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm">
                                     <i className="fas fa-file-pdf me-2"></i> {t('open_doc_fr') || 'Ouvrir l\'extrait (FR)'}
                                 </a>
                             )}
                             {queryParams.get('file_ar') && (
-                                <a href={decodeURIComponent(queryParams.get('file_ar') || '')} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm arabic-font">
+                                <a href={`${decodeURIComponent(queryParams.get('file_ar') || '')}?token=${getAccessToken()}`} target="_blank" rel="noreferrer" className="btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm arabic-font">
                                     <i className="fas fa-file-pdf me-2"></i> {t('open_doc_ar') || 'فتح المضمون (عربية)'}
                                 </a>
                             )}
