@@ -880,21 +880,6 @@ export default function DashboardPage() {
                   </LayersControl.Overlay>
                 )}
 
-                {sigLayers.batiments && (
-                  <LayersControl.Overlay name="🏛️ Équipements publics">
-                    <GeoJSON
-                      data={{
-                        ...sigLayers.batiments,
-                        features: sigLayers.batiments.features.filter((f: any) => f.properties?.equip),
-                      }}
-                      style={() => ({ color: '#4e342e', weight: 1.5, fillColor: '#ffe0b2', fillOpacity: 0.7 })}
-                      onEachFeature={(feature, layer) => {
-                        const p = feature.properties || {}
-                        layer.bindPopup(`<b>🏛️ ${p.nom || 'Équipement public'}</b><br/>${p.equip || ''}`)
-                      }}
-                    />
-                  </LayersControl.Overlay>
-                )}
 
               </LayersControl>
 
