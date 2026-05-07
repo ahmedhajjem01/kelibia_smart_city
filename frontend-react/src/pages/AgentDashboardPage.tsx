@@ -1770,9 +1770,9 @@ export default function AgentDashboardPage() {
       (feature, layer) => layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🏛️ ${feature.properties?.name || 'Kelibia'}</div><div style="padding:8px 12px;">Limite de la commune</div></div>`)
     )
 
-    // 2. Routes OSM — couleur selon type de voie
+    // 2. Routes OSM — couleur selon type de voie (propriété OSM: highway)
     const routeColor = (type: string) => {
-      if (type === 'primary') return '#c62828'
+      if (type === 'primary' || type === 'secondary_link') return '#c62828'
       if (type === 'secondary') return '#e65100'
       if (type === 'tertiary' || type === 'tertiary_link') return '#f9a825'
       if (type === 'residential' || type === 'unclassified') return '#546e7a'
@@ -1780,17 +1780,18 @@ export default function AgentDashboardPage() {
       return '#b0bec5'
     }
     const routeWeight = (type: string) => {
-      if (type === 'primary') return 4
+      if (type === 'primary' || type === 'secondary_link') return 4
       if (type === 'secondary') return 3
       if (type === 'tertiary' || type === 'tertiary_link') return 2.5
       return 1.5
     }
     sigOverlays['🛣️ Routes'] = loadGeoJSON(
       '/layers/routes_lignes.geojson',
-      (f: any) => ({ color: routeColor(f?.properties?.route || ''), weight: routeWeight(f?.properties?.route || ''), opacity: 0.85 }),
+      (f: any) => ({ color: routeColor(f?.properties?.highway || ''), weight: routeWeight(f?.properties?.highway || ''), opacity: 0.85 }),
       (feature, layer) => {
         const p = feature.properties || {}
-        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🛣️ ${p.nom || '(sans nom)'}</div><div style="padding:8px 12px;">Type : <b>${p.route || '—'}</b></div></div>`)
+        const nom = p['name:fr'] || p.name || p.ref || '(sans nom)'
+        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🛣️ ${nom}</div><div style="padding:8px 12px;">Type : <b>${p.highway || '—'}</b></div></div>`)
       }
     )
 

@@ -320,14 +320,27 @@ export default function DashboardPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [rRes, evRes, bRes, lRes] = await Promise.all([
+        const [rRes, evRes, foretRes, agriRes, bRes, lRes] = await Promise.all([
           fetch('/layers/routes_lignes.geojson'),
           fetch('/layers/espaces_verts_polygones.geojson'),
+          fetch('/layers/forets_polygones.geojson'),
+          fetch('/layers/agriculture_polygones.geojson'),
           fetch('/layers/batiments_polygones.geojson'),
           fetch('/layers/limite_kelibia_v2.geojson'),
         ])
-        const [routes, espVerts, batiments, limite] = await Promise.all([rRes.json(), evRes.json(), bRes.json(), lRes.json()])
-        setSigLayers({ routes, espVerts, batiments, limite })
+        const [routes, espVerts, forets, agri, batiments, limite] = await Promise.all([
+          rRes.json(), evRes.json(), foretRes.json(), agriRes.json(), bRes.json(), lRes.json()
+        ])
+        // Merge all green zone sources into one FeatureCollection
+        const espVertsMerged = {
+          type: 'FeatureCollection',
+          features: [
+            ...espVerts.features,
+            ...forets.features,
+            ...agri.features,
+          ],
+        }
+        setSigLayers({ routes, espVerts: espVertsMerged, batiments, limite })
       } catch {/* silencieux si fichiers absents */}
     }
     load()
@@ -854,14 +867,22 @@ export default function DashboardPage() {
                     <GeoJSON
                       data={sigLayers.routes}
                       style={(feature: any) => {
-                        const type = feature?.properties?.route || ''
-                        const color = type === 'primary' ? '#c62828' : type === 'secondary' ? '#e65100' : type.startsWith('tertiary') ? '#f9a825' : '#546e7a'
-                        const weight = type === 'primary' ? 4 : type === 'secondary' ? 3 : type.startsWith('tertiary') ? 2.5 : 1.5
+                        const type = feature?.properties?.highway || ''
+                        const color = type === 'primary' || type === 'secondary_link' ? '#c62828'
+                                    : type === 'secondary' ? '#e65100'
+                                    : type.startsWith('tertiary') ? '#f9a825'
+                                    : (type === 'residential' || type === 'unclassified') ? '#546e7a'
+                                    : '#b0bec5'
+                        const weight = type === 'primary' || type === 'secondary_link' ? 4
+                                     : type === 'secondary' ? 3
+                                     : type.startsWith('tertiary') ? 2.5
+                                     : 1.5
                         return { color, weight, opacity: 0.85 }
                       }}
                       onEachFeature={(feature, layer) => {
                         const p = feature.properties || {}
-                        layer.bindPopup(`<b>🛣️ ${p.nom || '(sans nom)'}</b><br/>Type : ${p.route || '—'}`)
+                        const nom = p['name:fr'] || p.name || p.ref || '(sans nom)'
+                        layer.bindPopup(`<b>🛣️ ${nom}</b><br/>Type : ${p.highway || '—'}`)
                       }}
                     />
                   </LayersControl.Overlay>
@@ -874,7 +895,9 @@ export default function DashboardPage() {
                       style={() => ({ color: '#2e7d32', weight: 1.5, fillColor: '#a5d6a7', fillOpacity: 0.5 })}
                       onEachFeature={(feature, layer) => {
                         const p = feature.properties || {}
-                        layer.bindPopup(`<b>🌳 ${p.nom || 'Espace vert'}</b><br/>Type : ${p.usage_sol || p.naturel || p.loisir || '—'}`)
+                        const nom = p.nom || p['name:fr'] || p.name || 'Espace vert'
+                        const type = p.type || p.usage_sol || p.naturel || p.loisir || p.landuse || p.leisure || '—'
+                        layer.bindPopup(`<b>🌳 ${nom}</b><br/>Type : ${type}`)
                       }}
                     />
                   </LayersControl.Overlay>
