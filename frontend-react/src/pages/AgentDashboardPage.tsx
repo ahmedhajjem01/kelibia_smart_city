@@ -4014,7 +4014,7 @@ export default function AgentDashboardPage() {
 
   <div className="ag-card animate__animated animate__fadeIn" style={{ overflow: 'visible' }}>
 
-    <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#ae131a,#c61f2c)' }}>
+    <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(90deg,#0ea5e9,#38bdf8)' }}>
 
       <span><i className="fas fa-calendar-alt me-2"></i>{t('admin_events_title')}</span>
 
@@ -4642,7 +4642,7 @@ export default function AgentDashboardPage() {
 
                 { label: t('stats_ia_precision_cat'), value: Math.round(mlStats.category.accuracy * 100) + '%', bg: '#e8f5e9', color: mlStats.category.accuracy >= 0.85 ? '#2e7d32' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
 
-                { label: t('stats_ia_precision_pri'), value: Math.round(mlStats.priority.accuracy * 100) + '%', bg: '#fde8ea', color: mlStats.priority.accuracy >= 0.85 ? '#c61f2c' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
+                { label: t('stats_ia_precision_pri'), value: Math.round(mlStats.priority.accuracy * 100) + '%', bg: '#e0f2fe', color: mlStats.priority.accuracy >= 0.85 ? '#0369a1' : '#f57f17', sub: 'TF-IDF + LinearSVC' },
 
               ].map((c, i) => (
 
@@ -4720,7 +4720,7 @@ export default function AgentDashboardPage() {
 
                       <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.category.report.length * 100)}%</td>
 
-                      <td style={{ padding: '8px 12px', color: '#c61f2c' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.category.report.length * 100)}%</td>
+                      <td style={{ padding: '8px 12px', color: '#0369a1' }}>{Math.round(mlStats.category.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.category.report.length * 100)}%</td>
 
                     </tr>
 
@@ -4872,7 +4872,7 @@ export default function AgentDashboardPage() {
 
                       <td style={{ padding: '8px 12px' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.recall, 0) / mlStats.priority.report.length * 100)}%</td>
 
-                      <td style={{ padding: '8px 12px', color: '#c61f2c' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.priority.report.length * 100)}%</td>
+                      <td style={{ padding: '8px 12px', color: '#0369a1' }}>{Math.round(mlStats.priority.report.reduce((s: number, r: any) => s + r.f1, 0) / mlStats.priority.report.length * 100)}%</td>
 
                     </tr>
 
@@ -5552,7 +5552,7 @@ export default function AgentDashboardPage() {
 
     <div className="ag-card">
 
-      <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #ae131a, #c61f2c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="ag-card-hdr-blue" style={{ background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
         <span><i className="fas fa-user-circle me-2"></i>{t('profile_personal_info')}</span>
 
@@ -6057,7 +6057,7 @@ export default function AgentDashboardPage() {
 
       <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 620, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
 
-        <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#ae131a,#c61f2c)', borderRadius: '16px 16px 0 0' }}>
+        <div className="ag-modal-hdr" style={{ background: 'linear-gradient(90deg,#0ea5e9,#38bdf8)', borderRadius: '16px 16px 0 0' }}>
 
           <span className="title"><i className="fas fa-calendar-alt me-2"></i>{evDetail.titre_evenement}</span>
 
@@ -6425,7 +6425,7 @@ export default function AgentDashboardPage() {
 
                       style={{
 
-                        background: 'linear-gradient(135deg,#ae131a,#c61f2c)',
+                        background: 'linear-gradient(135deg,#0ea5e9,#38bdf8)',
 
                         color: '#fff', border: 'none', borderRadius: '6px',
 
@@ -6811,7 +6811,7 @@ export default function AgentDashboardPage() {
 
       <div className="bg-white rounded-4 shadow-lg overflow-hidden" style={{ width: '100%', maxWidth: '420px' }}>
 
-        <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(90deg,#ae131a,#c61f2c)', color: '#fff' }}>
+        <div className="p-3 d-flex justify-content-between align-items-center" style={{ background: 'linear-gradient(90deg,#0ea5e9,#38bdf8)', color: '#fff' }}>
 
           <h6 className="mb-0 fw-bold"><i className="fas fa-key me-2"></i>Mot de passe réinitialisé</h6>
 
@@ -6827,7 +6827,7 @@ export default function AgentDashboardPage() {
 
           <div className="d-flex align-items-center justify-content-center gap-2 mb-4">
 
-            <code className="px-4 py-2 rounded-3 fw-bold" style={{ background: '#fde8ea', color: '#c61f2c', fontSize: '1.15rem', letterSpacing: 2, border: '2px dashed #c61f2c' }}>
+            <code className="px-4 py-2 rounded-3 fw-bold" style={{ background: '#e0f2fe', color: '#0369a1', fontSize: '1.15rem', letterSpacing: 2, border: '2px dashed #0ea5e9' }}>
 
               {resetPwdResult.password}
 

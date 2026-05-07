@@ -1,7 +1,7 @@
 import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getAccessToken } from '../lib/authStorage'
@@ -42,6 +42,8 @@ export default function DemandeRaccordementPage() {
   const [planSituation, setPlanSituation] = useState<File | null>(null)
 
   const [position, setPosition] = useState<[number, number] | null>(null)
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -211,6 +213,7 @@ export default function DemandeRaccordementPage() {
             <div className="rounded-3 overflow-hidden border mb-2" style={{ height: 350 }}>
               <MapContainer center={[36.8481, 11.0939]} zoom={15} style={{ height: '100%', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
+                {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
                 <MapClickHandler onLocationSelect={(lat, lng) => setPosition([lat, lng])} />
                 {position && <Marker position={position} />}
               </MapContainer>

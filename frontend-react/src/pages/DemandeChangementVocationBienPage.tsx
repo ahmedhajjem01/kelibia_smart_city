@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getAccessToken } from '../lib/authStorage'
@@ -43,6 +43,8 @@ export default function DemandeChangementVocationBienPage() {
   })
 
   const [position, setPosition] = useState<[number, number] | null>(null)
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
   const [files, setFiles] = useState<{ [key: string]: File | null }>({
     titre_propriete: null,
     plan_amenagement: null, // Plan d'aménagement ou descriptif
@@ -175,6 +177,7 @@ export default function DemandeChangementVocationBienPage() {
                     <div className="rounded-4 overflow-hidden border shadow-sm" style={{ height: 320 }}>
                         <MapContainer center={[36.8481, 11.0939]} zoom={15} style={{ height: '100%', width: '100%' }}>
                             <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
+                            {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
                             <MapClickHandler onLocationSelect={(lat, lng) => setPosition([lat, lng])} />
                             {position && <Marker position={position} icon={L.icon({
                                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',

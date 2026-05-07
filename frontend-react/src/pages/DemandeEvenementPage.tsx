@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Webcam from 'react-webcam'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -80,6 +80,8 @@ export default function DemandeEvenementPage() {
   const [cameraActive, setCameraActive] = useState<string | null>(null)
   const [position, setPosition] = useState<[number, number] | null>(null)
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>('none')
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
 
   const [form, setForm] = useState({
     titre_evenement: '',
@@ -436,6 +438,7 @@ export default function DemandeEvenementPage() {
                             <TileLayer
                               url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
                               attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>' />
+                            {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
                             <LocationMarker position={position} onMapClick={handleMapClick} />
                           </MapContainer>
                         </div>

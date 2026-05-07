@@ -2,7 +2,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import { getAccessToken } from '../lib/authStorage'
 import MainLayout from '../components/MainLayout'
@@ -111,6 +111,8 @@ export default function DemandeConstructionPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [position, setPosition] = useState<[number, number] | null>(null)
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
   const [cameraActive, setCameraActive] = useState<string | null>(null)
   const [user, setUser] = useState<UserInfo | null>(null)
 
@@ -400,6 +402,7 @@ export default function DemandeConstructionPage() {
                 <div className="rounded-3 overflow-hidden border" style={{ height: 240 }} dir="ltr">
                   <MapContainer center={KELIBIA_CENTER} zoom={13} style={{ height: '100%', width: '100%' }}>
                     <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
+                    {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
                     <LocationMarker position={position} onMapClick={p => {
                       if (!isInsideKelibia(p[0], p[1])) {
                         setError(t('error_outside_kelibia'))

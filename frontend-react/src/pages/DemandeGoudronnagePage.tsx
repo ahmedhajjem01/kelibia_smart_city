@@ -2,7 +2,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Webcam from 'react-webcam'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { getAccessToken } from '../lib/authStorage'
@@ -80,6 +80,8 @@ export default function DemandeGoudronnagePage() {
   })
   const [cinCopie, setCinCopie] = useState<File | null>(null)
   const [position, setPosition] = useState<[number, number] | null>(null)
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
   const [cameraActive, setCameraActive] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -286,6 +288,7 @@ export default function DemandeGoudronnagePage() {
                 style={{ height: '100%', width: '100%' }}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
+                {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
                 <MapClickHandler onLocationSelect={(lat, lng) => setPosition([lat, lng])} />
                 {position && <Marker position={position} />}
               </MapContainer>

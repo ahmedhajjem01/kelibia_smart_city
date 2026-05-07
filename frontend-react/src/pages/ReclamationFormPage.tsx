@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
-import { MapContainer, TileLayer, Marker, useMapEvents, LayersControl, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, LayersControl, useMap, GeoJSON } from 'react-leaflet'
 
 import L from 'leaflet'
 
@@ -196,6 +196,12 @@ export default function ReclamationFormPage() {
   const [position, setPosition] = useState<[number, number] | null>(null)
 
   const [gpsStatus, setGpsStatus] = useState<'none' | 'manual' | 'gps' | 'loading'>('none')
+
+  const [limiteData, setLimiteData] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {})
+  }, [])
 
 
 
@@ -570,6 +576,10 @@ export default function ReclamationFormPage() {
                         </LayersControl.BaseLayer>
 
                       </LayersControl>
+
+                      {limiteData && (
+                        <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />
+                      )}
 
                       <LocationMarker position={position} onMapClick={handleMapClick} />
 

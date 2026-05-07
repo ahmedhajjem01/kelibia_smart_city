@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import { getAccessToken } from '../lib/authStorage'
 import { resolveBackendUrl } from '../lib/backendUrl'
@@ -90,6 +90,8 @@ export default function EvenementsPublicsPage() {
   const [events, setEvents] = useState<PublicEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'list' | 'map'>('list')
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
 
   // Filters
   const [filterType, setFilterType] = useState('')
@@ -294,6 +296,7 @@ export default function EvenementsPublicsPage() {
               <TileLayer
                 url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>' />
+              {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
               {eventsWithGPS.map(ev => (
                 <Marker key={ev.id} position={[ev.latitude!, ev.longitude!]}>
                   <Popup>

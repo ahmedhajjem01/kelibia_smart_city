@@ -2,7 +2,7 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Webcam from 'react-webcam'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, GeoJSON } from 'react-leaflet'
 import L from 'leaflet'
 import { getAccessToken } from '../lib/authStorage'
 import { useI18n } from '../i18n/LanguageProvider'
@@ -58,6 +58,8 @@ export default function DemandeEvenementPublicPage() {
   const [cameraActive, setCameraActive] = useState<string | null>(null)
   const [position, setPosition] = useState<[number, number] | null>(null)
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>('none')
+  const [limiteData, setLimiteData] = useState<any>(null)
+  useEffect(() => { fetch('/layers/limite_kelibia.geojson').then(r => r.json()).then(setLimiteData).catch(() => {}) }, [])
 
   const PUBLIC_TYPE_OPTIONS = [
     { value: 'concert',    label: lang === 'ar' ? '🎵 حفلة موسيقية' : '🎵 Concert' },
@@ -384,6 +386,7 @@ export default function DemandeEvenementPublicPage() {
                         <div className="rounded-4 overflow-hidden shadow-sm" style={{ height: 300, border: '2px solid #dee2e6' }} dir="ltr">
                           <MapContainer center={position || KELIBIA_CENTER} zoom={14} style={{ height: '100%', width: '100%' }}>
                             <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" />
+                            {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
                             <LocationMarker position={position} onMapClick={p => { setPosition(p); setGpsStatus('manual') }} />
                           </MapContainer>
                         </div>
