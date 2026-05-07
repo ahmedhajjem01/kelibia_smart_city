@@ -2456,6 +2456,8 @@ export default function AgentDashboardPage() {
                           {[
                             { style: { width: 20, height: 3, borderTop: '3px dashed #1a237e', display: 'inline-block' }, label: 'Limite communale' },
                             { style: { width: 20, height: 3, background: '#c62828', display: 'inline-block' }, label: 'Route principale' },
+                            { style: { width: 20, height: 3, background: '#e65100', display: 'inline-block' }, label: 'Route secondaire' },
+                            { style: { width: 20, height: 3, background: '#f9a825', display: 'inline-block' }, label: 'Route tertiaire' },
                             { style: { width: 20, height: 3, background: '#546e7a', display: 'inline-block' }, label: 'Route locale' },
                             { style: { width: 18, height: 8, background: '#a5d6a7', border: '1px solid #2e7d32', display: 'inline-block', borderRadius: 2 }, label: 'Espaces verts' },
                             { style: { width: 18, height: 8, background: '#ffe0b2', border: '1px solid #6d4c41', display: 'inline-block', borderRadius: 2 }, label: 'Zones urbaines' },
