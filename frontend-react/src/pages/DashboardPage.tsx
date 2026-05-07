@@ -858,13 +858,11 @@ export default function DashboardPage() {
                       style={(feature: any) => {
                         const type = feature?.properties?.highway || ''
                         const color = type === 'primary' || type === 'secondary_link' ? '#c62828'
-                                    : type === 'secondary' ? '#e65100'
-                                    : type.startsWith('tertiary') ? '#f9a825'
+                                    : (type === 'secondary' || type.startsWith('tertiary')) ? '#e65100'
                                     : (type === 'residential' || type === 'unclassified') ? '#546e7a'
                                     : '#b0bec5'
                         const weight = type === 'primary' || type === 'secondary_link' ? 4
-                                     : type === 'secondary' ? 3
-                                     : type.startsWith('tertiary') ? 2.5
+                                     : (type === 'secondary' || type.startsWith('tertiary')) ? 3
                                      : 1.5
                         return { color, weight, opacity: 0.85 }
                       }}

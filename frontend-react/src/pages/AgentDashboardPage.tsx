@@ -1773,16 +1773,14 @@ export default function AgentDashboardPage() {
     // 2. Routes OSM — couleur selon type de voie (propriété OSM: highway)
     const routeColor = (type: string) => {
       if (type === 'primary' || type === 'secondary_link') return '#c62828'
-      if (type === 'secondary') return '#e65100'
-      if (type === 'tertiary' || type === 'tertiary_link') return '#f9a825'
+      if (type === 'secondary' || type === 'tertiary' || type === 'tertiary_link') return '#e65100'
       if (type === 'residential' || type === 'unclassified') return '#546e7a'
       if (type === 'service') return '#78909c'
       return '#b0bec5'
     }
     const routeWeight = (type: string) => {
       if (type === 'primary' || type === 'secondary_link') return 4
-      if (type === 'secondary') return 3
-      if (type === 'tertiary' || type === 'tertiary_link') return 2.5
+      if (type === 'secondary' || type === 'tertiary' || type === 'tertiary_link') return 3
       return 1.5
     }
     sigOverlays['🛣️ Routes'] = loadGeoJSON(
@@ -2459,8 +2457,7 @@ export default function AgentDashboardPage() {
                           {[
                             { style: { width: 20, height: 3, borderTop: '3px dashed #1a237e', display: 'inline-block' }, label: 'Limite communale' },
                             { style: { width: 20, height: 3, background: '#c62828', display: 'inline-block' }, label: 'Route principale' },
-                            { style: { width: 20, height: 3, background: '#e65100', display: 'inline-block' }, label: 'Route secondaire' },
-                            { style: { width: 20, height: 3, background: '#f9a825', display: 'inline-block' }, label: 'Route tertiaire' },
+                            { style: { width: 20, height: 3, background: '#e65100', display: 'inline-block' }, label: 'Route secondaire / tertiaire' },
                             { style: { width: 20, height: 3, background: '#546e7a', display: 'inline-block' }, label: 'Route locale' },
                             { style: { width: 18, height: 8, background: '#a5d6a7', border: '1px solid #2e7d32', display: 'inline-block', borderRadius: 2 }, label: 'Espaces verts' },
                             { style: { width: 18, height: 8, background: '#ffe0b2', border: '1px solid #6d4c41', display: 'inline-block', borderRadius: 2 }, label: 'Zones urbaines' },
