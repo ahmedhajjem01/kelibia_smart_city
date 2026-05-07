@@ -320,27 +320,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [rRes, evRes, foretRes, agriRes, bRes, lRes] = await Promise.all([
+        const [rRes, evRes, bRes, lRes] = await Promise.all([
           fetch('/layers/routes_lignes.geojson'),
-          fetch('/layers/espaces_verts_polygones.geojson'),
-          fetch('/layers/forets_polygones.geojson'),
-          fetch('/layers/agriculture_polygones.geojson'),
+          fetch('/layers/zones_vertes_complet.geojson'),
           fetch('/layers/batiments_polygones.geojson'),
           fetch('/layers/limite_kelibia_v2.geojson'),
         ])
-        const [routes, espVerts, forets, agri, batiments, limite] = await Promise.all([
-          rRes.json(), evRes.json(), foretRes.json(), agriRes.json(), bRes.json(), lRes.json()
+        const [routes, espVerts, batiments, limite] = await Promise.all([
+          rRes.json(), evRes.json(), bRes.json(), lRes.json()
         ])
-        // Merge all green zone sources into one FeatureCollection
-        const espVertsMerged = {
-          type: 'FeatureCollection',
-          features: [
-            ...espVerts.features,
-            ...forets.features,
-            ...agri.features,
-          ],
-        }
-        setSigLayers({ routes, espVerts: espVertsMerged, batiments, limite })
+        setSigLayers({ routes, espVerts, batiments, limite })
       } catch {/* silencieux si fichiers absents */}
     }
     load()

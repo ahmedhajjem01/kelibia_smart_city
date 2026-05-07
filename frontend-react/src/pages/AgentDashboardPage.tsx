@@ -1805,9 +1805,12 @@ export default function AgentDashboardPage() {
       })
       fetch(url).then(r => r.json()).then(data => { layer.addData(data); espacesVertsLayer.addLayer(layer) }).catch(() => {})
     }
-    loadIntoGroup('/layers/agriculture_polygones.geojson', p => `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🌾 ${p.nom || 'Parcelle agricole'}</div><div style="padding:8px 12px;">Usage : <b>${p.usage_sol || '—'}</b></div></div>`)
-    loadIntoGroup('/layers/espaces_verts_polygones.geojson', p => `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🌳 ${p.nom || 'Espace vert'}</div><div style="padding:8px 12px;">Type : ${p.usage_sol || p.naturel || p.loisir || '—'}</div></div>`)
-    loadIntoGroup('/layers/forets_polygones.geojson', p => `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">🌲 ${p.nom || 'Forêt / Zone boisée'}</div><div style="padding:8px 12px;">Type : ${p.naturel || 'wood'}</div></div>`)
+    loadIntoGroup('/layers/zones_vertes_complet.geojson', p => {
+      const icon = p.icon || '🌿'
+      const nom = p.nom || p['name:fr'] || p.name || 'Espace vert'
+      const type = p.type || p.landuse || p.natural || p.leisure || '—'
+      return `<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">${icon} ${nom}</div><div style="padding:8px 12px;">Type : <b>${type}</b></div></div>`
+    })
     sigOverlays['🌿 Espaces verts'] = espacesVertsLayer
     espacesVertsLayer.addTo(m)
 
