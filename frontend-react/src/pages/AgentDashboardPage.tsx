@@ -1834,7 +1834,7 @@ export default function AgentDashboardPage() {
       () => ({ color: '#0277bd', weight: 2, opacity: 0.85, dashArray: '6,3' }),
       (feature, layer) => {
         const p = feature.properties || {}
-        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">💧 ${p.nom || 'Oued'}</div><div style="padding:8px 12px;">Type : ${p.oued || 'stream'}</div></div>`)
+        layer.bindPopup(`<div style="font-size:12px;margin:-14px -20px -14px -20px;border-radius:8px;overflow:hidden;"><div style="background:#0ea5e9;color:#fff;padding:8px 12px;font-weight:700;">💧 ${p.nom || 'Cours d\'eau'}</div><div style="padding:8px 12px;">Type : ${p.type || p.waterway || 'stream'}</div></div>`)
       }
     )
 
