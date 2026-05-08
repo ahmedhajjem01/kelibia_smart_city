@@ -19,6 +19,12 @@ class UserCreateSerializer(DjoserUserCreateSerializer):
         )
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    # Safe accessor: returns None if the column doesn't exist yet (pre-migration)
+    assigned_service = serializers.SerializerMethodField()
+
+    def get_assigned_service(self, obj):
+        return getattr(obj, 'assigned_service', None)
+
     class Meta:
         model = User
         fields = (
@@ -42,5 +48,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['is_staff'] = self.user.is_staff
         data['is_superuser'] = self.user.is_superuser
         data['user_type'] = self.user.user_type
-        data['assigned_service'] = self.user.assigned_service
+        # getattr guards against the column not yet existing in DB (pre-migration)
+        data['assigned_service'] = getattr(self.user, 'assigned_service', None)
         return data
