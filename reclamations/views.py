@@ -60,8 +60,22 @@ class ReclamationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent':
+        user_type = getattr(user, 'user_type', '')
+
+        # Supervisors see ALL reclamations (read-only monitoring)
+        if user.is_superuser or user_type == 'supervisor':
             return Reclamation.objects.all()
+
+        # Agents see ONLY reclamations for their assigned service/category
+        if user_type == 'agent' or user.is_staff:
+            assigned = getattr(user, 'assigned_service', None)
+            if assigned:
+                # Map agent service key to reclamation category key (they share the same values)
+                return Reclamation.objects.filter(category=assigned)
+            # Agent with no service assigned — return nothing (misconfigured account)
+            return Reclamation.objects.none()
+
+        # Citizens see only their own reclamations
         return Reclamation.objects.filter(citizen=user)
 
     def perform_create(self, serializer):
@@ -82,11 +96,16 @@ class ReclamationViewSet(viewsets.ModelViewSet):
 
         # ML Classification — safe fallback if models are missing or crash
         SERVICE_MAP_FALLBACK = {
-            'lighting': 'Service Eclairage Public',
-            'trash':    'Service Hygiene & Proprete',
-            'roads':    'Service Voirie & Infrastructure',
-            'noise':    'Service Ordre & Tranquillite',
-            'other':    'Service Technique General',
+            'lighting':     'Service Eclairage Public',
+            'trash':        'Service Hygiene & Proprete',
+            'roads':        'Service Voirie & Infrastructure',
+            'noise':        'Service Ordre & Tranquillite',
+            'water':        'Service Eau & Assainissement',
+            'construction': 'Service Urbanisme & Construction',
+            'social':       'Service Affaires Sociales',
+            'commerce':     'Service Commerces & Marches',
+            'taxes':        'Service Finances & Impots',
+            'other':        'Service Technique General',
         }
         ml_result = {
             'category':            category_hint if category_hint in SERVICE_MAP_FALLBACK else 'other',
@@ -222,7 +241,7 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             "confidence":          result.get('confidence', {}),
         })
 
-    # ── reclassify (manual override by agent) ────────────────────────────────
+    # ── reclassify (manual override by agent only) ───────────────────────────
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def reclassify(self, request, pk=None):
         """
@@ -230,19 +249,31 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         Body: { "category": "roads", "priority": "urgente" }   (both optional)
 
         Allows an agent to manually override the ML classification.
-        Also recomputes service_responsable from the new category.
+        Supervisors cannot reclassify — they are monitoring only.
         """
         rec  = self.get_object()
         user = request.user
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent'):
-            return Response({"detail": "Non autorise."}, status=status.HTTP_403_FORBIDDEN)
+        user_type = getattr(user, 'user_type', '')
+
+        if user_type == 'supervisor' or user.is_superuser:
+            return Response(
+                {"detail": "Les superviseurs ne peuvent pas modifier la classification. Rôle: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not (user.is_staff or user_type == 'agent'):
+            return Response({"detail": "Non autorisé. Réservé aux agents municipaux."}, status=status.HTTP_403_FORBIDDEN)
 
         SERVICE_MAP = {
-            'lighting': 'Service Eclairage Public',
-            'trash':    'Service Hygiene & Proprete',
-            'roads':    'Service Voirie & Infrastructure',
-            'noise':    'Service Ordre & Tranquillite',
-            'other':    'Service Technique General',
+            'lighting':     'Service Eclairage Public',
+            'trash':        'Service Hygiene & Proprete',
+            'roads':        'Service Voirie & Infrastructure',
+            'noise':        'Service Ordre & Tranquillite',
+            'water':        'Service Eau & Assainissement',
+            'construction': 'Service Urbanisme & Construction',
+            'social':       'Service Affaires Sociales',
+            'commerce':     'Service Commerces & Marches',
+            'taxes':        'Service Finances & Impots',
+            'other':        'Service Technique General',
         }
         valid_cats   = [c[0] for c in Reclamation.CATEGORY_CHOICES]
         valid_prios  = [p[0] for p in Reclamation.PRIORITY_CHOICES]
@@ -275,13 +306,21 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             "updated_fields":      changed,
         })
 
-    # ── update_status ─────────────────────────────────────────────────────────
+    # ── update_status (agents only; supervisors are read-only) ───────────────
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def update_status(self, request, pk=None):
         rec  = self.get_object()
         user = request.user
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent'):
-            return Response({"detail": "Non autorise."}, status=status.HTTP_403_FORBIDDEN)
+        user_type = getattr(user, 'user_type', '')
+
+        # Supervisors have no operational role — read-only
+        if user_type == 'supervisor' or user.is_superuser:
+            return Response(
+                {"detail": "Les superviseurs ne peuvent pas modifier le statut des réclamations. Rôle: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not (user.is_staff or user_type == 'agent'):
+            return Response({"detail": "Non autorisé. Réservé aux agents municipaux."}, status=status.HTTP_403_FORBIDDEN)
         new_status = request.data.get('status')
         if new_status in dict(Reclamation.STATUS_CHOICES):
             rec.status = new_status
@@ -358,31 +397,47 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             return Response({"status": "Statut mis a jour."})
         return Response({"detail": "Statut invalide."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ── assign_agent (Supervisor only) ───────────────────────────────────────
+    # ── correct_category (Supervisor only — category verification) ───────────
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def assign_agent(self, request, pk=None):
+    def correct_category(self, request, pk=None):
         """
-        POST /api/reclamations/{id}/assign_agent/
-        Body: { "agent_id": 123 }
+        POST /api/reclamations/{id}/correct_category/
+        Body: { "category": "roads" }
+
+        Supervisor-only action to fix a mis-classified reclamation category.
+        This routes the reclamation to the correct agent's service queue.
+        Supervisors observe and correct routing — they do NOT process or resolve.
         """
         rec  = self.get_object()
         user = request.user
-        # Only supervisors or staff can assign agents
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'supervisor'):
-            return Response({"detail": "Seuls les superviseurs peuvent affecter des agents."}, status=status.HTTP_403_FORBIDDEN)
-        
-        agent_id = request.data.get('agent_id')
-        if not agent_id:
-            return Response({"detail": "ID de l'agent requis."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        from accounts.models import CustomUser
-        try:
-            agent = CustomUser.objects.get(pk=agent_id, user_type='agent')
-            rec.agent = agent
-            rec.save()
-            return Response({"status": f"Agent {agent.first_name} {agent.last_name} affecté avec succès."})
-        except CustomUser.DoesNotExist:
-            return Response({"detail": "Agent introuvable ou n'est pas un agent municipal."}, status=status.HTTP_404_NOT_FOUND)
+        user_type = getattr(user, 'user_type', '')
+
+        if user_type not in ('supervisor',) and not (user.is_staff or user.is_superuser):
+            return Response(
+                {"detail": "Seuls les superviseurs peuvent corriger la catégorie d'une réclamation."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        new_category = request.data.get('category')
+        valid_cats = [c[0] for c in Reclamation.CATEGORY_CHOICES]
+        if not new_category or new_category not in valid_cats:
+            return Response(
+                {"detail": f"Catégorie invalide. Valeurs acceptées: {valid_cats}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        old_category = rec.category
+        rec.category = new_category
+        rec.service_responsable = Reclamation.SERVICE_MAP.get(new_category, 'Service Technique Général')
+        rec.agent = None  # Reset agent — the new responsible agent will pick it up
+        rec.save(update_fields=['category', 'service_responsable', 'agent'])
+
+        return Response({
+            "status": "Catégorie corrigée avec succès.",
+            "old_category": old_category,
+            "new_category": new_category,
+            "new_service_responsable": rec.service_responsable,
+        })
 
     # ── ml_stats ──────────────────────────────────────────────────────────────
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
@@ -672,8 +727,12 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         from .serializers import ReclamationGeoJSONSerializer
 
         user = request.user
-        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') == 'agent':
+        user_type = getattr(user, 'user_type', '')
+        if user.is_superuser or user_type == 'supervisor':
             qs = Reclamation.objects.all()
+        elif user_type == 'agent' or user.is_staff:
+            assigned = getattr(user, 'assigned_service', None)
+            qs = Reclamation.objects.filter(category=assigned) if assigned else Reclamation.objects.none()
         else:
             qs = Reclamation.objects.filter(citizen=user)
 

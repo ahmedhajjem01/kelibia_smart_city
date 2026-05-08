@@ -7,21 +7,28 @@ from .serializers import DemandeEvenementSerializer, DemandeEvenementPublicSeria
 from notifications.models import Notification
 from django.core.mail import send_mail
 from django.conf import settings
+from core.permissions import is_supervisor, is_agent, is_agent_for_service
 
 
 class DemandeEvenementViewSet(viewsets.ModelViewSet):
     """
     CRUD for event authorization requests.
     - Citizens: see only their own requests.
-    - Agents/supervisors: see all requests.
+    - Agent (social): sees and processes all requests.
+    - Supervisor: read-only; sees all (monitoring).
     """
     serializer_class = DemandeEvenementSerializer
     permission_classes = [permissions.IsAuthenticated]
+    REQUIRED_SERVICE = 'social'
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor'):
+        if is_supervisor(user):
             return DemandeEvenement.objects.select_related('citizen', 'conflict_with').all()
+        if is_agent(user):
+            if is_agent_for_service(user, self.REQUIRED_SERVICE):
+                return DemandeEvenement.objects.select_related('citizen', 'conflict_with').all()
+            return DemandeEvenement.objects.none()
         return DemandeEvenement.objects.select_related('conflict_with').filter(citizen=user)
 
     def perform_create(self, serializer):
@@ -29,7 +36,18 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='update-status')
     def update_status(self, request, pk=None):
-        """Agent: update status, comment, upload signed autorisation, mark paid."""
+        """Social agent: update status, comment, upload signed autorisation, mark paid."""
+        user = request.user
+        if is_supervisor(user):
+            return Response(
+                {"error": "Les superviseurs ne peuvent pas modifier le statut. Role: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not is_agent_for_service(user, self.REQUIRED_SERVICE):
+            return Response(
+                {"error": "Acces refuse. Vous n'etes pas responsable du service Affaires Sociales."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         demande = self.get_object()
         new_status = request.data.get('status')
         commentaire = request.data.get('commentaire_agent', '')
@@ -92,10 +110,10 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='conflicts', permission_classes=[permissions.IsAuthenticated])
     def list_conflicts(self, request):
-        """Agent: list all requests that have a conflict detected."""
+        """Social agent / supervisor: list all requests that have a conflict detected."""
         user = request.user
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
-            return Response({'error': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        if not (is_supervisor(user) or is_agent_for_service(user, self.REQUIRED_SERVICE)):
+            return Response({'error': 'Non autorise.'}, status=status.HTTP_403_FORBIDDEN)
         qs = DemandeEvenement.objects.filter(has_conflict=True).select_related('conflict_with')
         return Response(self.get_serializer(qs, many=True).data)
 

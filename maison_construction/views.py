@@ -4,12 +4,15 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import DemandeConstruction, DemandeGoudronnage, DemandeCertificatVocation, DemandeRaccordement
 from .serializers import (
-    DemandeConstructionSerializer, DemandeGoudronnageSerializer, 
+    DemandeConstructionSerializer, DemandeGoudronnageSerializer,
     DemandeCertificatVocationSerializer, DemandeRaccordementSerializer
 )
 from notifications.models import Notification
 from django.core.mail import send_mail
 from django.conf import settings
+from core.permissions import is_supervisor, is_agent, is_agent_for_service
+
+REQUIRED_SERVICE = 'construction'
 
 def notify_citizen(instance, title_prefix, link='/dashboard'):
     try:
@@ -47,28 +50,24 @@ def notify_citizen(instance, title_prefix, link='/dashboard'):
         print(f"Failed to send notification for {title_prefix}: {e}")
 
 
-class IsAgentOrAdmin(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and (
-            request.user.user_type in ('agent', 'supervisor') or
-            request.user.is_staff or
-            request.user.is_superuser
-        )
-
-
 class DemandeConstructionViewSet(viewsets.ModelViewSet):
+    """
+    - citizen: owns requests only
+    - agent (construction): full access + can update status
+    - supervisor: read-only monitoring
+    """
     serializer_class = DemandeConstructionSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-
-    def get_permissions(self):
-        if self.action in ['update_status', 'stats', 'high_risk']:
-            return [IsAgentOrAdmin()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+        if is_supervisor(user):
             return DemandeConstruction.objects.all().select_related('citizen')
+        if is_agent(user):
+            if is_agent_for_service(user, REQUIRED_SERVICE):
+                return DemandeConstruction.objects.all().select_related('citizen')
+            return DemandeConstruction.objects.none()
         return DemandeConstruction.objects.filter(citizen=user).select_related('citizen')
 
     def perform_create(self, serializer):
@@ -76,6 +75,17 @@ class DemandeConstructionViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='update-status')
     def update_status(self, request, pk=None):
+        user = request.user
+        if is_supervisor(user):
+            return Response(
+                {"error": "Les superviseurs ne peuvent pas modifier le statut. Role: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not is_agent_for_service(user, REQUIRED_SERVICE):
+            return Response(
+                {"error": "Acces refuse. Vous n'etes pas responsable du service Urbanisme & Construction."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         demande = self.get_object()
         new_status = request.data.get('status')
         if new_status and new_status in dict(DemandeConstruction.STATUS_CHOICES):
@@ -94,6 +104,9 @@ class DemandeConstructionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
+        user = request.user
+        if not (is_supervisor(user) or is_agent_for_service(user, REQUIRED_SERVICE)):
+            return Response({"error": "Acces refuse."}, status=status.HTTP_403_FORBIDDEN)
         qs = DemandeConstruction.objects.all()
         return Response({
             'total': qs.count(),
@@ -106,6 +119,9 @@ class DemandeConstructionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='high-risk')
     def high_risk(self, request):
+        user = request.user
+        if not (is_supervisor(user) or is_agent_for_service(user, REQUIRED_SERVICE)):
+            return Response({"error": "Acces refuse."}, status=status.HTTP_403_FORBIDDEN)
         qs = DemandeConstruction.objects.filter(is_high_risk=True).select_related('citizen')
         return Response(DemandeConstructionSerializer(qs, many=True).data)
 
@@ -113,16 +129,16 @@ class DemandeConstructionViewSet(viewsets.ModelViewSet):
 class DemandeGoudronnageViewSet(viewsets.ModelViewSet):
     serializer_class = DemandeGoudronnageSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-
-    def get_permissions(self):
-        if self.action == 'update_status':
-            return [IsAgentOrAdmin()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+        if is_supervisor(user):
             return DemandeGoudronnage.objects.all().select_related('citizen')
+        if is_agent(user):
+            if is_agent_for_service(user, REQUIRED_SERVICE):
+                return DemandeGoudronnage.objects.all().select_related('citizen')
+            return DemandeGoudronnage.objects.none()
         return DemandeGoudronnage.objects.filter(citizen=user).select_related('citizen')
 
     def perform_create(self, serializer):
@@ -130,6 +146,17 @@ class DemandeGoudronnageViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='update-status')
     def update_status(self, request, pk=None):
+        user = request.user
+        if is_supervisor(user):
+            return Response(
+                {"error": "Les superviseurs ne peuvent pas modifier le statut. Role: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not is_agent_for_service(user, REQUIRED_SERVICE):
+            return Response(
+                {"error": "Acces refuse. Vous n'etes pas responsable du service Construction."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         demande = self.get_object()
         new_status = request.data.get('status')
         if new_status and new_status in dict(DemandeGoudronnage.STATUS_CHOICES):
@@ -144,16 +171,16 @@ class DemandeGoudronnageViewSet(viewsets.ModelViewSet):
 class DemandeCertificatVocationViewSet(viewsets.ModelViewSet):
     serializer_class = DemandeCertificatVocationSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-
-    def get_permissions(self):
-        if self.action == 'update_status':
-            return [IsAgentOrAdmin()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+        if is_supervisor(user):
             return DemandeCertificatVocation.objects.all().select_related('citizen')
+        if is_agent(user):
+            if is_agent_for_service(user, REQUIRED_SERVICE):
+                return DemandeCertificatVocation.objects.all().select_related('citizen')
+            return DemandeCertificatVocation.objects.none()
         return DemandeCertificatVocation.objects.filter(citizen=user).select_related('citizen')
 
     def perform_create(self, serializer):
@@ -161,6 +188,17 @@ class DemandeCertificatVocationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='update-status')
     def update_status(self, request, pk=None):
+        user = request.user
+        if is_supervisor(user):
+            return Response(
+                {"error": "Les superviseurs ne peuvent pas modifier le statut. Role: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not is_agent_for_service(user, REQUIRED_SERVICE):
+            return Response(
+                {"error": "Acces refuse. Vous n'etes pas responsable du service Construction."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         demande = self.get_object()
         new_status = request.data.get('status')
         if new_status and new_status in dict(DemandeCertificatVocation.STATUS_CHOICES):
@@ -177,16 +215,16 @@ class DemandeCertificatVocationViewSet(viewsets.ModelViewSet):
 class DemandeRaccordementViewSet(viewsets.ModelViewSet):
     serializer_class = DemandeRaccordementSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-
-    def get_permissions(self):
-        if self.action == 'update_status':
-            return [IsAgentOrAdmin()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.user_type in ('agent', 'supervisor') or user.is_staff or user.is_superuser:
+        if is_supervisor(user):
             return DemandeRaccordement.objects.all().select_related('citizen')
+        if is_agent(user):
+            if is_agent_for_service(user, REQUIRED_SERVICE):
+                return DemandeRaccordement.objects.all().select_related('citizen')
+            return DemandeRaccordement.objects.none()
         return DemandeRaccordement.objects.filter(citizen=user).select_related('citizen')
 
     def perform_create(self, serializer):
@@ -194,6 +232,17 @@ class DemandeRaccordementViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='update-status')
     def update_status(self, request, pk=None):
+        user = request.user
+        if is_supervisor(user):
+            return Response(
+                {"error": "Les superviseurs ne peuvent pas modifier le statut. Role: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not is_agent_for_service(user, REQUIRED_SERVICE):
+            return Response(
+                {"error": "Acces refuse. Vous n'etes pas responsable du service Construction."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         demande = self.get_object()
         new_status = request.data.get('status')
         if new_status and new_status in dict(DemandeRaccordement.STATUS_CHOICES):

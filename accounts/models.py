@@ -35,6 +35,25 @@ class CustomUser(AbstractUser):
         ('supervisor', 'Superviseur'),
     ]
 
+    # Services an agent can be assigned to.
+    # 'forum_moderator' and 'news_editor' are special non-reclamation services.
+    AGENT_SERVICE_CHOICES = [
+        ('lighting',         'Éclairage Public'),
+        ('trash',            'Déchets / Hygiène'),
+        ('roads',            'Voirie / Routes'),
+        ('noise',            'Nuisances Sonores'),
+        ('water',            'Eau & Assainissement'),
+        ('construction',     'Urbanisme & Construction'),
+        ('social',           'Affaires Sociales & Événements'),
+        ('commerce',         'Commerces & Marchés'),
+        ('taxes',            'Finances & Impôts'),
+        ('civil_registry',   'État Civil'),
+        ('residence',        'Attestations de Résidence'),
+        ('forum_moderator',  'Modération du Forum'),
+        ('news_editor',      'Rédaction des Actualités'),
+        ('general',          'Service Technique Général'),
+    ]
+
     email = models.EmailField(unique=True, blank=False, verbose_name="Adresse Email")
     cin = models.CharField(max_length=8, unique=True, verbose_name="Numéro CIN")
     phone = models.CharField(max_length=8, unique=True, verbose_name="Numéro de Téléphone")
@@ -67,6 +86,16 @@ class CustomUser(AbstractUser):
 
     # UI Language preference
     preferred_language = models.CharField(max_length=5, default='fr', choices=[('fr', 'Français'), ('ar', 'العربية')], verbose_name="Langue préférée")
+
+    # For agents: the municipal service/category they are responsible for.
+    # Null for citizens and supervisors.
+    assigned_service = models.CharField(
+        max_length=50,
+        choices=AGENT_SERVICE_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name="Service assigné (agents uniquement)"
+    )
 
     @property
     def has_active_asd(self):

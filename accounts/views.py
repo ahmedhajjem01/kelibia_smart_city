@@ -248,23 +248,36 @@ class SavedCardView(APIView):
 
 class UserVerificationView(APIView):
     """
-    Supervisor view for listing and approving unverified citizens,
-    and managing all users (listing, activating, deactivating).
+    Supervisor-only view for system monitoring and agent/supervisor management.
+
+    IMPORTANT — role boundaries enforced here:
+    • Supervisor can NO LONGER verify/decline citizen accounts — that belongs to agents.
+    • Supervisor CAN: list all users, manage agents (create via AdminUserCreateView,
+      toggle_active, demote, reset_password), and activate ASD subscriptions.
+    • Agents use AgentCitizenVerificationView to verify citizens.
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ('supervisor', 'agent')):
-            return Response({"error": "Accès refusé."}, status=403)
-        
-        # Get mode: 'unverified', 'agents', or 'all'
-        mode = request.query_params.get('mode', 'unverified')
+    def _is_supervisor(self, user):
+        return (
+            getattr(user, 'user_type', '') == 'supervisor'
+            or user.is_staff
+            or user.is_superuser
+        )
 
-        if mode == 'unverified':
-            users = User.objects.filter(is_verified=False, user_type='citizen').order_by('-date_joined')
+    def get(self, request):
+        if not self._is_supervisor(request.user):
+            return Response({"error": "Accès refusé. Réservé aux superviseurs."}, status=403)
+
+        # mode: 'agents' | 'all' | 'citizens'
+        # NOTE: 'unverified' is intentionally NOT served here — agents handle it.
+        mode = request.query_params.get('mode', 'agents')
+
+        if mode == 'citizens':
+            users = User.objects.filter(user_type='citizen').order_by('-date_joined')
         elif mode == 'agents':
             users = User.objects.filter(user_type__in=['agent', 'supervisor']).order_by('-date_joined')
-        else:
+        else:  # 'all'
             users = User.objects.all().order_by('-date_joined')
 
         data = [{
@@ -278,76 +291,38 @@ class UserVerificationView(APIView):
             "is_verified": u.is_verified,
             "is_active": u.is_active,
             "user_type": u.user_type,
+            "assigned_service": u.assigned_service,
             "date_of_birth": u.date_of_birth,
             "place_of_birth": u.place_of_birth,
             "is_married": u.is_married,
             "spouse_cin": u.spouse_cin,
             "spouse_first_name": u.spouse_first_name,
             "spouse_last_name": u.spouse_last_name,
-            "cin_front": u.cin_front_utf if u.cin_front_utf else (u.cin_front_image if u.cin_front_image else None),
-            "cin_back": u.cin_back_utf if u.cin_back_utf else (u.cin_back_image if u.cin_back_image else None),
             "asd_active": u.asd_active,
             "asd_expiration": u.asd_expiration,
             "has_active_asd": u.has_active_asd,
         } for u in users]
-        
+
         return Response(data)
 
     def post(self, request):
-        if not (request.user.is_staff or getattr(request.user, 'user_type', '') in ('supervisor', 'agent')):
-            return Response({"error": "Accès refusé."}, status=403)
+        if not self._is_supervisor(request.user):
+            return Response({"error": "Accès refusé. Réservé aux superviseurs."}, status=403)
 
         user_id = request.data.get('user_id')
-        action = request.data.get('action') # 'verify' or 'toggle_active'
-        
+        action = request.data.get('action')
+
+        # Supervisors CANNOT verify citizens — that's agents' job.
+        if action == 'verify':
+            return Response(
+                {"error": "La vérification des citoyens est réservée aux agents municipaux."},
+                status=403
+            )
+
         try:
             target_user = User.objects.get(id=user_id)
-            if action == 'verify':
-                from notifications.models import Notification
-                from notifications.helpers import get_notif
-                from django.core.mail import send_mail
-                from django.conf import settings
 
-                target_user.is_verified = True
-                target_user.cin_front_utf = None
-                target_user.cin_back_utf = None
-                target_user.cin_front_image = None
-                target_user.cin_back_image = None
-                target_user.save()
-
-                title, message = get_notif(target_user, 'account_verified')
-                Notification.objects.create(
-                    recipient=target_user,
-                    title=title,
-                    message=message,
-                    notification_type='success',
-                    link='/dashboard'
-                )
-
-                # Send Email
-                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-                    import threading
-                    def send_async_email():
-                        try:
-                            subject = "Votre compte Kélibia Smart City a été vérifié"
-                            email_body = f"Bonjour {target_user.first_name},\n\n" \
-                                        f"Nous avons le plaisir de vous informer que votre compte a été vérifié par nos services.\n" \
-                                        f"Vous pouvez désormais utiliser l'intégralité des services de la plateforme.\n\n" \
-                                        f"Cordialement,\nL'administration de Kélibia Smart City"
-                            send_mail(
-                                subject,
-                                email_body,
-                                settings.EMAIL_HOST_USER,
-                                [target_user.email],
-                                fail_silently=True,
-                            )
-                        except Exception as e:
-                            print(f"Failed to send verification email: {e}")
-                    
-                    threading.Thread(target=send_async_email).start()
-
-                return Response({"message": "Compte citoyen vérifié avec succès. Les images du CIN ont été supprimées par mesure de confidentialité."})
-            elif action == 'toggle_active':
+            if action == 'toggle_active':
                 target_user.is_active = not target_user.is_active
                 target_user.save()
                 return Response({
@@ -357,19 +332,13 @@ class UserVerificationView(APIView):
             elif action == 'delete':
                 target_user.delete()
                 return Response({"message": "Utilisateur supprimé avec succès."})
-            elif action == 'promote_to_agent':
-                if getattr(request.user, 'user_type', '') != 'supervisor' and not request.user.is_superuser:
-                    return Response({"error": "Seul un superviseur peut promouvoir un citoyen en agent."}, status=403)
-                target_user.user_type = 'agent'
-                target_user.is_staff = True
-                target_user.save()
-                return Response({"message": "L'utilisateur a été promu au rang d'Agent."})
             elif action == 'promote_to_supervisor':
                 if getattr(request.user, 'user_type', '') != 'supervisor' and not request.user.is_superuser:
                     return Response({"error": "Seul un superviseur peut promouvoir un utilisateur en superviseur."}, status=403)
                 target_user.user_type = 'supervisor'
                 target_user.is_staff = True
                 target_user.is_superuser = True
+                target_user.assigned_service = None
                 target_user.save()
                 return Response({"message": "L'utilisateur a été promu au rang de Superviseur."})
             elif action == 'demote_to_citizen':
@@ -379,8 +348,21 @@ class UserVerificationView(APIView):
                 target_user.is_staff = False
                 target_user.is_superuser = False
                 target_user.is_verified = False
+                target_user.assigned_service = None
                 target_user.save()
                 return Response({"message": "L'agent a été rétrogradé au rang de Citoyen."})
+            elif action == 'update_agent_service':
+                # Supervisor can re-assign an agent's service
+                if target_user.user_type != 'agent':
+                    return Response({"error": "Ce champ ne s'applique qu'aux agents."}, status=400)
+                from .models import CustomUser
+                valid_services = [s[0] for s in CustomUser.AGENT_SERVICE_CHOICES]
+                new_service = request.data.get('assigned_service')
+                if new_service not in valid_services:
+                    return Response({"error": f"Service invalide. Valeurs: {valid_services}"}, status=400)
+                target_user.assigned_service = new_service
+                target_user.save(update_fields=['assigned_service'])
+                return Response({"message": f"Service de l'agent mis à jour: {new_service}"})
             elif action == 'reset_password':
                 if not request.user.is_superuser:
                     return Response({"error": "Seul un superutilisateur peut réinitialiser les mots de passe."}, status=403)
@@ -389,7 +371,7 @@ class UserVerificationView(APIView):
                 new_password = ''.join(secrets.choice(alphabet) for _ in range(12))
                 target_user.set_password(new_password)
                 target_user.save()
-                return Response({"message": f"Mot de passe réinitialisé.", "new_password": new_password})
+                return Response({"message": "Mot de passe réinitialisé.", "new_password": new_password})
             elif action == 'activate_asd':
                 from django.utils import timezone
                 from notifications.models import Notification
@@ -412,28 +394,25 @@ class UserVerificationView(APIView):
                     link='/dashboard'
                 )
 
-                # Send Email
                 if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
                     import threading
                     def send_async_asd_email():
                         try:
                             subject = "Activation de votre abonnement ASD - Kélibia Smart City"
-                            email_body = f"Bonjour {target_user.first_name},\n\n" \
-                                        f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n" \
-                                        f"Durée : {duration_months} mois\n" \
-                                        f"Expiration : {target_user.asd_expiration.strftime('%d/%m/%Y')}\n\n" \
-                                        f"Vous pouvez désormais accéder à tous les services administratifs en ligne sans frais supplémentaires.\n\n" \
-                                        f"Cordialement,\nL'administration de Kélibia Smart City"
+                            email_body = (
+                                f"Bonjour {target_user.first_name},\n\n"
+                                f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n"
+                                f"Durée : {duration_months} mois\n"
+                                f"Expiration : {target_user.asd_expiration.strftime('%d/%m/%Y')}\n\n"
+                                f"Cordialement,\nL'administration de Kélibia Smart City"
+                            )
                             send_mail(
-                                subject,
-                                email_body,
-                                settings.EMAIL_HOST_USER,
-                                [target_user.email],
+                                subject, email_body,
+                                settings.EMAIL_HOST_USER, [target_user.email],
                                 fail_silently=True,
                             )
                         except Exception as e:
                             print(f"Failed to send ASD activation email: {e}")
-                    
                     threading.Thread(target=send_async_asd_email).start()
 
                 return Response({
@@ -448,15 +427,47 @@ class UserVerificationView(APIView):
 
 class AdminUserCreateView(APIView):
     """
-    Supervisor endpoint to create agents or other supervisors directly.
+    Supervisor-only endpoint to create agent or supervisor accounts.
+
+    Rules:
+    • Only supervisors can call this endpoint.
+    • When creating an agent, `assigned_service` is REQUIRED.
+    • Supervisors have no assigned_service (they monitor everything).
+    • Citizens must self-register — this endpoint does not create citizens.
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         if not (request.user.is_staff or getattr(request.user, 'user_type', '') == 'supervisor'):
-            return Response({"error": "Accès refusé."}, status=403)
-        
+            return Response({"error": "Accès refusé. Réservé aux superviseurs."}, status=403)
+
         data = request.data
+        user_type = data.get('user_type', 'agent')
+
+        if user_type == 'citizen':
+            return Response(
+                {"error": "Les comptes citoyens doivent être créés via l'inscription publique."},
+                status=400
+            )
+
+        # Validate assigned_service for agents
+        from .models import CustomUser
+        valid_services = [s[0] for s in CustomUser.AGENT_SERVICE_CHOICES]
+        assigned_service = data.get('assigned_service')
+
+        if user_type == 'agent':
+            if not assigned_service:
+                return Response(
+                    {"error": "Le champ 'assigned_service' est obligatoire lors de la création d'un agent.",
+                     "valid_services": valid_services},
+                    status=400
+                )
+            if assigned_service not in valid_services:
+                return Response(
+                    {"error": f"Service invalide. Valeurs acceptées: {valid_services}"},
+                    status=400
+                )
+
         try:
             user = User.objects.create_user(
                 username=data['username'],
@@ -466,16 +477,21 @@ class AdminUserCreateView(APIView):
                 last_name=data.get('last_name', ''),
                 cin=data.get('cin', f"SYS{User.objects.count()}"),
                 phone=data.get('phone', f"0000{User.objects.count()}"),
-                user_type=data.get('user_type', 'agent'),
+                user_type=user_type,
+                assigned_service=assigned_service if user_type == 'agent' else None,
                 is_staff=True,
                 is_verified=True,
                 is_active=True
             )
-            if user.user_type == 'supervisor':
+            if user_type == 'supervisor':
                 user.is_superuser = True
                 user.save()
-            
-            return Response({"message": f"Nouvel utilisateur '{user.username}' créé avec succès."}, status=201)
+
+            return Response({
+                "message": f"Nouvel utilisateur '{user.username}' créé avec succès.",
+                "user_type": user_type,
+                "assigned_service": user.assigned_service,
+            }, status=201)
         except Exception as e:
             return Response({"error": f"Erreur lors de la création: {str(e)}"}, status=400)
 

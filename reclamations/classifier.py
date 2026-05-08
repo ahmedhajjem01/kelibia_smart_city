@@ -35,11 +35,16 @@ _priority_model = None
 
 # ─── Service map ─────────────────────────────────────────────────────────────
 SERVICE_MAP = {
-    "lighting": "Service Eclairage Public",
-    "trash":    "Service Hygiene & Proprete",
-    "roads":    "Service Voirie & Infrastructure",
-    "noise":    "Service Ordre & Tranquillite",
-    "other":    "Service Technique General",
+    "lighting":     "Service Eclairage Public",
+    "trash":        "Service Hygiene & Proprete",
+    "roads":        "Service Voirie & Infrastructure",
+    "noise":        "Service Ordre & Tranquillite",
+    "water":        "Service Eau & Assainissement",
+    "construction": "Service Urbanisme & Construction",
+    "social":       "Service Affaires Sociales",
+    "commerce":     "Service Commerces & Marches",
+    "taxes":        "Service Finances & Impots",
+    "other":        "Service Technique General",
 }
 
 

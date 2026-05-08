@@ -10,11 +10,16 @@ class Reclamation(models.Model):
     ]
 
     CATEGORY_CHOICES = [
-        ('lighting', 'Éclairage Public'),
-        ('trash', 'Déchets / Hygiène'),
-        ('roads', 'Voirie / Routes'),
-        ('noise', 'Nuisances Sonores'),
-        ('other', 'Autre'),
+        ('lighting',     'Éclairage Public'),
+        ('trash',        'Déchets / Hygiène'),
+        ('roads',        'Voirie / Routes'),
+        ('noise',        'Nuisances Sonores'),
+        ('water',        'Eau & Assainissement'),
+        ('construction', 'Urbanisme & Construction'),
+        ('social',       'Affaires Sociales'),
+        ('commerce',     'Commerces & Marchés'),
+        ('taxes',        'Finances & Impôts'),
+        ('other',        'Autre'),
     ]
 
     PRIORITY_CHOICES = [
@@ -23,13 +28,18 @@ class Reclamation(models.Model):
         ('urgente',  'Urgente'),
     ]
 
-    # Mapping catégorie → service responsable
+    # Mapping catégorie → service responsable (label affiché dans l'UI)
     SERVICE_MAP = {
-        'lighting': 'Service Éclairage Public',
-        'trash':    'Service Hygiène & Propreté',
-        'roads':    'Service Voirie & Infrastructure',
-        'noise':    'Service Ordre & Tranquillité',
-        'other':    'Service Technique Général',
+        'lighting':     'Service Éclairage Public',
+        'trash':        'Service Hygiène & Propreté',
+        'roads':        'Service Voirie & Infrastructure',
+        'noise':        'Service Ordre & Tranquillité',
+        'water':        'Service Eau & Assainissement',
+        'construction': 'Service Urbanisme & Construction',
+        'social':       'Service Affaires Sociales',
+        'commerce':     'Service Commerces & Marchés',
+        'taxes':        'Service Finances & Impôts',
+        'other':        'Service Technique Général',
     }
 
     citizen = models.ForeignKey(

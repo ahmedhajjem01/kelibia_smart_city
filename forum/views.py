@@ -56,8 +56,13 @@ class TopicViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        if not (request.user.is_staff or request.user.user_type == 'agent'):
-            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        from core.permissions import is_supervisor, is_agent_for_service
+        user = request.user
+        # Supervisors cannot delete forum content
+        if is_supervisor(user) and not user.is_staff:
+            return Response({'detail': 'Les superviseurs ne peuvent pas supprimer de sujets. Role: observateur.'}, status=status.HTTP_403_FORBIDDEN)
+        if not (user.is_staff or is_agent_for_service(user, 'forum_moderator')):
+            return Response({'detail': 'Interdit. Reservé au moderateur du forum.'}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
 
     # POST /api/forum/topics/{id}/reply/
@@ -113,9 +118,14 @@ class ReplyViewSet(viewsets.GenericViewSet):
 
     # DELETE /api/forum/replies/{id}/
     def destroy(self, request, pk=None):
+        from core.permissions import is_supervisor, is_agent_for_service
+        user = request.user
         reply = self.get_object()
-        if not (request.user.is_staff or request.user.user_type == 'agent' or reply.author == request.user):
-            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        # Author can delete their own; forum_moderator agent can delete any; supervisors cannot
+        if is_supervisor(user) and not user.is_staff:
+            return Response({'detail': 'Les superviseurs ne peuvent pas supprimer de replies. Role: observateur.'}, status=status.HTTP_403_FORBIDDEN)
+        if not (user.is_staff or is_agent_for_service(user, 'forum_moderator') or reply.author == user):
+            return Response({'detail': 'Interdit.'}, status=status.HTTP_403_FORBIDDEN)
         reply.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

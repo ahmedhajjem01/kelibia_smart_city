@@ -21,7 +21,13 @@ class UserCreateSerializer(DjoserUserCreateSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'first_name_ar', 'last_name_ar', 'cin', 'phone', 'address', 'governorate', 'city', 'date_of_birth', 'place_of_birth', 'user_type', 'is_verified', 'is_staff', 'is_superuser', 'has_active_asd', 'asd_expiration', 'preferred_language')
+        fields = (
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'first_name_ar', 'last_name_ar', 'cin', 'phone', 'address',
+            'governorate', 'city', 'date_of_birth', 'place_of_birth',
+            'user_type', 'assigned_service', 'is_verified', 'is_staff',
+            'is_superuser', 'has_active_asd', 'asd_expiration', 'preferred_language',
+        )
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -36,4 +42,5 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['is_staff'] = self.user.is_staff
         data['is_superuser'] = self.user.is_superuser
         data['user_type'] = self.user.user_type
+        data['assigned_service'] = self.user.assigned_service
         return data
