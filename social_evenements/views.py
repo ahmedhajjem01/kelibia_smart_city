@@ -10,23 +10,28 @@ from django.conf import settings
 from core.permissions import is_supervisor, is_agent, is_agent_for_service
 
 
+def _is_social_agent(user):
+    """Social & Événements is handled by the news_editor agent (who also manages social affairs)."""
+    from core.permissions import is_agent_for_service
+    return is_agent_for_service(user, 'social') or is_agent_for_service(user, 'news_editor')
+
+
 class DemandeEvenementViewSet(viewsets.ModelViewSet):
     """
     CRUD for event authorization requests.
     - Citizens: see only their own requests.
-    - Agent (social): sees and processes all requests.
+    - Agent (social or news_editor): sees and processes all requests.
     - Supervisor: read-only; sees all (monitoring).
     """
     serializer_class = DemandeEvenementSerializer
     permission_classes = [permissions.IsAuthenticated]
-    REQUIRED_SERVICE = 'social'
 
     def get_queryset(self):
         user = self.request.user
         if is_supervisor(user):
             return DemandeEvenement.objects.select_related('citizen', 'conflict_with').all()
         if is_agent(user):
-            if is_agent_for_service(user, self.REQUIRED_SERVICE):
+            if _is_social_agent(user):
                 return DemandeEvenement.objects.select_related('citizen', 'conflict_with').all()
             return DemandeEvenement.objects.none()
         return DemandeEvenement.objects.select_related('conflict_with').filter(citizen=user)
@@ -43,9 +48,9 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
                 {"error": "Les superviseurs ne peuvent pas modifier le statut. Role: observateur uniquement."},
                 status=status.HTTP_403_FORBIDDEN
             )
-        if not is_agent_for_service(user, self.REQUIRED_SERVICE):
+        if not _is_social_agent(user):
             return Response(
-                {"error": "Acces refuse. Vous n'etes pas responsable du service Affaires Sociales."},
+                {"error": "Acces refuse. Vous n'etes pas responsable du service Affaires Sociales & Evenements."},
                 status=status.HTTP_403_FORBIDDEN
             )
         demande = self.get_object()
@@ -112,7 +117,7 @@ class DemandeEvenementViewSet(viewsets.ModelViewSet):
     def list_conflicts(self, request):
         """Social agent / supervisor: list all requests that have a conflict detected."""
         user = request.user
-        if not (is_supervisor(user) or is_agent_for_service(user, self.REQUIRED_SERVICE)):
+        if not (is_supervisor(user) or _is_social_agent(user)):
             return Response({'error': 'Non autorise.'}, status=status.HTTP_403_FORBIDDEN)
         qs = DemandeEvenement.objects.filter(has_conflict=True).select_related('conflict_with')
         return Response(self.get_serializer(qs, many=True).data)
