@@ -6,6 +6,9 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from .models import DemandeMariage, ExtraitMariage
 from .serializers import DemandeMariageSerializer, ExtraitMariageSerializer
+from core.permissions import is_supervisor, is_agent, is_agent_for_service
+
+CIVIL_SERVICE = 'civil_registry'
 
 def certificate_view(request, pk, lang='ar'):
     extrait = get_object_or_404(ExtraitMariage, pk=pk)
@@ -42,13 +45,19 @@ class ExtraitMariageViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # L'acte est visible si l'utilisateur est soit l'époux, soit l'épouse (via CIN)
-        # Ou si l'acte est explicitement lié à son compte
+        if is_supervisor(user):
+            return ExtraitMariage.objects.all()
+        if is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                return ExtraitMariage.objects.all()
+            return ExtraitMariage.objects.none()
+        # Citizens see their own or spouse's marriage certificates
         return ExtraitMariage.objects.filter(
-            Q(user=user) | 
-            Q(epoux__cin=user.cin) | 
-            Q(epouse__cin=user.cin)
+            Q(user=user) |
+            Q(epoux__cin=getattr(user, 'cin', '')) |
+            Q(epouse__cin=getattr(user, 'cin', ''))
         ).distinct()
+
 
 class DemandeMariageViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -56,12 +65,36 @@ class DemandeMariageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # La demande est visible par le demandeur initial OU par l'un des deux époux via CIN
+        if is_supervisor(user):
+            return DemandeMariage.objects.all()
+        if is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                return DemandeMariage.objects.filter(is_paid=True)
+            return DemandeMariage.objects.none()
+        # Citizens see their own or spouse's requests
         return DemandeMariage.objects.filter(
-            Q(citizen=user) | 
-            Q(cin_epoux=user.cin) | 
-            Q(cin_epouse=user.cin)
+            Q(citizen=user) |
+            Q(cin_epoux=getattr(user, 'cin', '')) |
+            Q(cin_epouse=getattr(user, 'cin', ''))
         ).distinct()
 
     def perform_create(self, serializer):
         serializer.save(citizen=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        if is_supervisor(user):
+            return Response(
+                {"error": "Les superviseurs ne peuvent pas modifier les demandes. Rôle: observateur uniquement."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not is_agent_for_service(user, CIVIL_SERVICE):
+            return Response(
+                {"error": "Accès refusé. Vous n'êtes pas responsable du service État Civil."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)

@@ -6,6 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Citoyen, ExtraitNaissance, DeclarationNaissance, DemandeLegalisation, DemandeExtraitNaissance
 from .serializers import DeclarationNaissanceSerializer, DemandeLegalisationSerializer, DemandeExtraitNaissanceSerializer
+from core.permissions import is_supervisor, is_agent, is_agent_for_service
+
+CIVIL_SERVICE = 'civil_registry'
 
 from django.utils import timezone
 from notifications.models import Notification
@@ -149,8 +152,13 @@ class DeclarationNaissanceAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor'):
+        if is_supervisor(user):
             queryset = DeclarationNaissance.objects.all().order_by('-created_at')
+        elif is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                queryset = DeclarationNaissance.objects.all().order_by('-created_at')
+            else:
+                queryset = DeclarationNaissance.objects.none()
         else:
             queryset = DeclarationNaissance.objects.filter(declarant=user).order_by('-created_at')
         serializer = DeclarationNaissanceSerializer(queryset, many=True)
@@ -169,15 +177,17 @@ class DeclarationNaissanceDetailAPIView(APIView):
     def get(self, request, pk):
         declaration = get_object_or_404(DeclarationNaissance, pk=pk)
         user = request.user
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor') or declaration.declarant == user):
+        if not (is_supervisor(user) or is_agent_for_service(user, CIVIL_SERVICE) or declaration.declarant == user):
             return Response({"error": "Non autorisé"}, status=403)
         serializer = DeclarationNaissanceSerializer(declaration)
         return Response(serializer.data)
 
     def patch(self, request, pk):
         user = request.user
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
-             return Response({"error": "Seuls les agents peuvent modifier le statut."}, status=403)
+        if is_supervisor(user):
+            return Response({"error": "Les superviseurs ne peuvent pas modifier les demandes. Rôle: observateur uniquement."}, status=403)
+        if not is_agent_for_service(user, CIVIL_SERVICE):
+            return Response({"error": "Accès refusé. Vous n'êtes pas responsable du service État Civil."}, status=403)
         declaration = get_object_or_404(DeclarationNaissance, pk=pk)
         new_status = request.data.get('status')
         if new_status in ['validated', 'rejected']:
@@ -245,8 +255,13 @@ class DemandeExtraitNaissanceAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor'):
+        if is_supervisor(user):
             qs = DemandeExtraitNaissance.objects.all().order_by('-created_at')
+        elif is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                qs = DemandeExtraitNaissance.objects.all().order_by('-created_at')
+            else:
+                qs = DemandeExtraitNaissance.objects.none()
         else:
             qs = DemandeExtraitNaissance.objects.filter(citizen=user).order_by('-created_at')
         serializer = DemandeExtraitNaissanceSerializer(qs, many=True)
@@ -266,8 +281,10 @@ class DemandeExtraitNaissanceDetailAPIView(APIView):
 
     def patch(self, request, pk):
         user = request.user
-        if not (user.is_staff or user.is_superuser or getattr(user, 'user_type', '') in ('agent', 'supervisor')):
-            return Response({'error': 'Non autorisé'}, status=403)
+        if is_supervisor(user):
+            return Response({'error': 'Les superviseurs ne peuvent pas modifier les demandes. Rôle: observateur uniquement.'}, status=403)
+        if not is_agent_for_service(user, CIVIL_SERVICE):
+            return Response({'error': "Accès refusé. Vous n'êtes pas responsable du service État Civil."}, status=403)
         demande = get_object_or_404(DemandeExtraitNaissance, pk=pk)
         new_status = request.data.get('status')
         if new_status not in ('processed', 'rejected'):

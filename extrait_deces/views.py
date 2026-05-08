@@ -6,10 +6,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import ExtraitDeces, DeclarationDeces, DemandeInhumation, DemandeTransfertCorps
 from .serializers import (
-    DeclarationDecesSerializer, CitoyenSimpleSerializer, 
+    DeclarationDecesSerializer, CitoyenSimpleSerializer,
     DemandeInhumationSerializer, DemandeTransfertCorpsSerializer
 )
 from extrait_naissance.models import Citoyen
+from core.permissions import is_supervisor, is_agent, is_agent_for_service
+
+CIVIL_SERVICE = 'civil_registry'
 
 from django.utils import timezone
 from .serializers import (
@@ -103,6 +106,19 @@ class DeclarationDecesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
+
+        # Agents (civil_registry) and supervisors get a flat list of all declarations
+        if is_supervisor(user):
+            qs = DeclarationDeces.objects.all().order_by('-created_at')
+            return Response({"all_declarations": DeclarationDecesSerializer(qs, many=True).data})
+        if is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                qs = DeclarationDeces.objects.all().order_by('-created_at')
+                return Response({"all_declarations": DeclarationDecesSerializer(qs, many=True).data})
+            return Response({"all_declarations": []})
+
+        # Citizen flow — eligible relatives + own declarations
         user_cin = getattr(request.user, 'cin', None)
         if not user_cin:
             return Response({"eligible_relatives": [], "my_declarations": [], "warning": "CIN non défini pour cet utilisateur."}, status=200)
@@ -168,25 +184,52 @@ class DeclarationDecesAPIView(APIView):
             return Response({"error": f"Erreur serveur: {str(exc)}"}, status=500)
 
     def post(self, request):
+        if is_supervisor(request.user) or is_agent(request.user):
+            return Response({"error": "Seuls les citoyens peuvent soumettre une déclaration de décès."}, status=status.HTTP_403_FORBIDDEN)
         serializer = DeclarationDecesSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(declarant=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, pk=None):
+        """Agent-only: update status of a declaration (validate/reject)."""
+        if is_supervisor(request.user):
+            return Response({"error": "Les superviseurs ne peuvent pas modifier les demandes. Rôle: observateur uniquement."}, status=403)
+        if not is_agent_for_service(request.user, CIVIL_SERVICE):
+            return Response({"error": "Accès refusé. Vous n'êtes pas responsable du service État Civil."}, status=403)
+        declaration = get_object_or_404(DeclarationDeces, pk=pk)
+        new_status = request.data.get('status')
+        if new_status not in ('validated', 'rejected'):
+            return Response({"error": "Statut invalide. Valeurs: validated, rejected"}, status=400)
+        declaration.status = new_status
+        declaration.save()
+        return Response({"status": declaration.status})
+
+
 class DemandeInhumationAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Lister les déclarations de décès validées de l'utilisateur qui n'ont pas encore de demande d'inhumation
+        user = request.user
+        if is_supervisor(user):
+            return Response({
+                "all_requests": DemandeInhumationSerializer(DemandeInhumation.objects.all().order_by('-created_at'), many=True).data
+            })
+        if is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                return Response({
+                    "all_requests": DemandeInhumationSerializer(DemandeInhumation.objects.all().order_by('-created_at'), many=True).data
+                })
+            return Response({"all_requests": []})
+
+        # Citizen: show validated declarations without burial request + their own requests
         available_declarations = DeclarationDeces.objects.filter(
-            declarant=request.user, 
+            declarant=request.user,
             status='validated',
             demande_inhumation__isnull=True
         )
-        
         my_requests = DemandeInhumation.objects.filter(citizen=request.user)
-        
         return Response({
             "available_declarations": DeclarationDecesSerializer(available_declarations, many=True).data,
             "my_requests": DemandeInhumationSerializer(my_requests, many=True).data
@@ -216,8 +259,17 @@ class DemandeTransfertCorpsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        my_requests = DemandeTransfertCorps.objects.filter(citizen=request.user).order_by('-created_at')
-        serializer = DemandeTransfertCorpsSerializer(my_requests, many=True)
+        user = request.user
+        if is_supervisor(user):
+            qs = DemandeTransfertCorps.objects.all().order_by('-created_at')
+        elif is_agent(user):
+            if is_agent_for_service(user, CIVIL_SERVICE):
+                qs = DemandeTransfertCorps.objects.all().order_by('-created_at')
+            else:
+                qs = DemandeTransfertCorps.objects.none()
+        else:
+            qs = DemandeTransfertCorps.objects.filter(citizen=request.user).order_by('-created_at')
+        serializer = DemandeTransfertCorpsSerializer(qs, many=True)
         return Response(serializer.data)
 
     def post(self, request):

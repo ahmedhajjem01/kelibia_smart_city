@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from .models import DemandeLivretFamille
 from .serializers import DemandeLivretFamilleSerializer, DemandeLivretFamilleAgentSerializer
+from core.permissions import is_supervisor, is_agent, is_agent_for_service
 
 from django.db.models import Q
 from notifications.models import Notification
@@ -10,23 +11,29 @@ from django.conf import settings
 
 class DemandeLivretFamilleViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    REQUIRED_SERVICE = 'civil_registry'
+
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or getattr(user, 'user_type', None) == 'agent':
-            # NEW: Only paid requests reach the agent queue
-            return DemandeLivretFamille.objects.filter(is_paid=True).order_by('-created_at')
 
-        
-        # Le livret de famille doit être visible au citoyen qui l'a demandé, 
-        # mais aussi aux conjoints s'ils ont un compte connecté via leur CIN.
+        if is_supervisor(user):
+            return DemandeLivretFamille.objects.all().order_by('-created_at')
+
+        if is_agent(user):
+            if is_agent_for_service(user, self.REQUIRED_SERVICE):
+                return DemandeLivretFamille.objects.filter(is_paid=True).order_by('-created_at')
+            return DemandeLivretFamille.objects.none()
+
+        # Citizens see their own + spouse's requests
         return DemandeLivretFamille.objects.filter(
-            Q(citizen=user) | 
-            Q(cin_epoux=getattr(user, 'cin', '')) | 
+            Q(citizen=user) |
+            Q(cin_epoux=getattr(user, 'cin', '')) |
             Q(cin_epouse=getattr(user, 'cin', ''))
         ).order_by('-created_at')
+
     def get_serializer_class(self):
         user = self.request.user
-        if user.is_staff or getattr(user, 'user_type', None) == 'agent':
+        if is_supervisor(user) or is_agent(user):
             return DemandeLivretFamilleAgentSerializer
         return DemandeLivretFamilleSerializer
     def perform_create(self, serializer):
@@ -34,7 +41,9 @@ class DemandeLivretFamilleViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = request.user
-        if user.is_staff or getattr(user, 'user_type', None) == 'agent':
+        if is_supervisor(user):
+            return Response({'detail': 'Les superviseurs ne peuvent pas modifier les demandes. Rôle: observateur uniquement.'}, status=status.HTTP_403_FORBIDDEN)
+        if is_agent_for_service(user, self.REQUIRED_SERVICE):
             partial = kwargs.pop('partial', False)
             serializer = self.get_serializer(instance, data=request.data, partial=partial)
             serializer.is_valid(raise_exception=True)
@@ -77,4 +86,4 @@ class DemandeLivretFamilleViewSet(viewsets.ModelViewSet):
                 print(f"Failed to send notification for livret: {e}")
 
             return Response(serializer.data)
-        return Response({'detail': 'Non autorisé.'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'detail': 'Accès refusé. Vous n\'êtes pas responsable du service État Civil.'}, status=status.HTTP_403_FORBIDDEN)
