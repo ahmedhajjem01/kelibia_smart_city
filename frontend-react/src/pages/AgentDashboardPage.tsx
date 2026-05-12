@@ -2224,10 +2224,19 @@ export default function AgentDashboardPage() {
           </a>
 
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
-            <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode) }}>
+            <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { 
+              e.preventDefault(); 
+              setActiveTab('users'); 
+              if (user?.user_type === 'supervisor' || user?.is_superuser) {
+                setUsersMode('agents');
+                fetchManagedUsers('agents');
+              } else {
+                fetchManagedUsers(usersMode);
+              }
+            }}>
               <i className="fas fa-users-cog"></i>
-              <span>{t('nav_managed_users')}</span>
-              {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
+              <span>{user?.user_type === 'supervisor' || user?.is_superuser ? (lang === 'ar' ? 'إدارة الوكلاء' : 'Gestion des Agents') : t('nav_managed_users')}</span>
+              {managedUsers.filter(u => !u.is_verified).length > 0 && !(user?.user_type === 'supervisor' || user?.is_superuser) && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
             </a>
 
             <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens(); }}>
@@ -2725,17 +2734,19 @@ export default function AgentDashboardPage() {
 
                 <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#004d40,#00695c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
 
-                  <span className="fw-bold"><i className="fas fa-users-cog me-2"></i>{t('user_management')}</span>
+                  <span className="fw-bold"><i className="fas fa-users-cog me-2"></i>{user?.user_type === 'supervisor' || user?.is_superuser ? (lang === 'ar' ? 'إدارة الوكلاء' : 'Gestion des Agents') : t('user_management')}</span>
 
                   <div className="btn-group btn-group-sm bg-white bg-opacity-10 p-1 rounded">
 
-                    <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('pending_verification')}</button>
-
-                    {(user?.user_type === 'supervisor' || user?.is_superuser) && (
-                      <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? 'btn-warning' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+                    {!(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                      <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('pending_verification')}</button>
                     )}
 
-                    <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('all_label')}</button>
+                    <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? (user?.user_type === 'supervisor' || user?.is_superuser ? 'btn-light' : 'btn-warning') : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+
+                    {!(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                      <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('all_label')}</button>
+                    )}
 
                   </div>
 
@@ -2819,8 +2830,9 @@ export default function AgentDashboardPage() {
                           {managedUsers.filter(u => {
                             const q = userSearch.toLowerCase()
                             const matches = !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.cin?.toLowerCase().includes(q)
-                            const isSupervisor = user?.user_type === 'supervisor' || user?.is_superuser
-                            if (!isSupervisor && u.user_type !== 'citizen') return false
+                            const isSup = user?.user_type === 'supervisor' || user?.is_superuser
+                            if (isSup) return matches && u.user_type === 'agent'
+                            if (u.user_type !== 'citizen') return false
                             return matches
                           }).map(u => (
 
