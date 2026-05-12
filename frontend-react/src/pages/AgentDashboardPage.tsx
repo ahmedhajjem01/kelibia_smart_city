@@ -2213,15 +2213,19 @@ export default function AgentDashboardPage() {
             {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
           </a>
 
-          <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
-            <i className="fas fa-comments"></i>
-            <span>{t('nav_forum_moderation')}</span>
-          </a>
+          {user?.user_type === 'agent' && (
+            <>
+              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
+                <i className="fas fa-comments"></i>
+                <span>{t('nav_forum_moderation')}</span>
+              </a>
 
-          <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
-            <i className="fas fa-newspaper"></i>
-            <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
-          </a>
+              <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
+                <i className="fas fa-newspaper"></i>
+                <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
+              </a>
+            </>
+          )}
 
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
             <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { 
@@ -2287,8 +2291,10 @@ export default function AgentDashboardPage() {
               { tab: 'stats', icon: 'fa-robot', label: t('nav_stats_ia'), badge: null, fetch: () => { if (!mlStats && !mlLoading) fetchMlStats() } },
               { tab: 'profile', icon: 'fa-user-circle', label: t('nav_profile'), badge: null, fetch: () => { fetchDemandes(); fetchTopics() } },
               { tab: 'demandes', icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length || null, fetch: fetchDemandes },
-              { tab: 'forum', icon: 'fa-comments', label: t('nav_forum_moderation'), badge: null, fetch: () => { fetchTopics(); fetchMlStats() } },
-              { tab: 'actualites', icon: 'fa-newspaper', label: lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités', badge: null, fetch: fetchArticles },
+              ...(user?.user_type === 'agent' ? [
+                { tab: 'forum', icon: 'fa-comments', label: t('nav_forum_moderation'), badge: null, fetch: () => { fetchTopics(); fetchMlStats() } },
+                { tab: 'actualites', icon: 'fa-newspaper', label: lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités', badge: null, fetch: fetchArticles },
+              ] : []),
             ].map(({ tab, icon, label, badge, fetch }) => (
               <a key={tab} className={`ag-nav-item${activeTab === tab ? ' active' : ''}`} href="#"
                 onClick={e => { e.preventDefault(); setActiveTab(tab as any); fetch && fetch(); setMobileSidebarOpen(false) }}>
