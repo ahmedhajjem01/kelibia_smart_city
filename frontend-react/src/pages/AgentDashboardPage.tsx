@@ -5325,35 +5325,39 @@ export default function AgentDashboardPage() {
 
                     <div className="d-flex gap-2">
 
-                      {!c.is_verified && (
-                        <button
+                      {!(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                        <>
+                          {!c.is_verified && (
+                            <button
 
-                          className="btn btn-sm btn-success"
+                              className="btn btn-sm btn-success"
 
-                          title="Vérifier ce compte"
+                              title="Vérifier ce compte"
 
-                          onClick={e => { e.stopPropagation(); if (window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
+                              onClick={e => { e.stopPropagation(); if (window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
 
-                        >
+                            >
 
-                          <i className="fas fa-check me-1"></i> Vérifier
+                              <i className="fas fa-check me-1"></i> Vérifier
 
-                        </button>
+                            </button>
+                          )}
+
+                          <button
+
+                            className={`btn btn-sm ${c.is_active ? 'btn-outline-danger' : 'btn-danger'}`}
+
+                            title={c.is_active ? 'Bloquer' : 'Débloquer'}
+
+                            onClick={e => { e.stopPropagation(); handleAgentCitizenAction(c.id, 'toggle_active') }}
+
+                          >
+
+                            <i className={`fas ${c.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
+
+                          </button>
+                        </>
                       )}
-
-                      <button
-
-                        className={`btn btn-sm ${c.is_active ? 'btn-outline-danger' : 'btn-danger'}`}
-
-                        title={c.is_active ? 'Bloquer' : 'Débloquer'}
-
-                        onClick={e => { e.stopPropagation(); handleAgentCitizenAction(c.id, 'toggle_active') }}
-
-                      >
-
-                        <i className={`fas ${c.is_active ? 'fa-user-slash' : 'fa-user-check'}`}></i>
-
-                      </button>
 
                       {(c.cin_front || c.cin_back) && (
 
@@ -5587,11 +5591,13 @@ export default function AgentDashboardPage() {
 
             <div className="modal-footer border-top bg-light">
 
-              <button className="btn btn-success px-4" onClick={() => { if (window.confirm(`Vérifier le compte de "${selectedCitizen.full_name}" ?`)) { handleAgentCitizenAction(selectedCitizen.id, 'verify'); } }}>
+              {!(user?.user_type === 'supervisor' || user?.is_superuser) && !selectedCitizen.is_verified && (
+                <button className="btn btn-success px-4" onClick={() => { if (window.confirm(`Vérifier le compte de "${selectedCitizen.full_name}" ?`)) { handleAgentCitizenAction(selectedCitizen.id, 'verify'); } }}>
 
-                <i className="fas fa-check-circle me-2"></i>Confirmer la vérification
+                  <i className="fas fa-check-circle me-2"></i>Confirmer la vérification
 
-              </button>
+                </button>
+              )}
 
               <button className="btn btn-outline-secondary" onClick={() => setSelectedCitizen(null)}>Fermer</button>
 
