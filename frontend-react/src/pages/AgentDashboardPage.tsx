@@ -2182,17 +2182,21 @@ export default function AgentDashboardPage() {
             {pending > 0 && <span className="ag-badge">{pending}</span>}
           </a>
 
-          <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
-            <i className="fas fa-calendar-alt"></i>
-            <span>{t('nav_events_mgmt')}</span>
-            {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>}
-          </a>
+          {user?.user_type === 'agent' && (
+            <>
+              <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
+                <i className="fas fa-calendar-alt"></i>
+                <span>{t('nav_events_mgmt')}</span>
+                {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>}
+              </a>
 
-          <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
-            <i className="fas fa-hard-hat"></i>
-            <span>{t('permis_construire')}</span>
-            {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
-          </a>
+              <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
+                <i className="fas fa-hard-hat"></i>
+                <span>{t('permis_construire')}</span>
+                {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
+              </a>
+            </>
+          )}
 
           <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
             <i className="fas fa-robot"></i>
@@ -2288,8 +2292,10 @@ export default function AgentDashboardPage() {
           <nav className="ag-sidebar-nav">
             {[
               { tab: 'dashboard', icon: 'fa-chart-pie', label: t('dashboard'), badge: pending > 0 ? pending : null, fetch: null },
-              { tab: 'evenements', icon: 'fa-calendar-alt', label: t('nav_events_mgmt'), badge: allEvenements.filter((ev: any) => ev.status === 'pending').length || null, fetch: fetchEvenements },
-              { tab: 'construction', icon: 'fa-hard-hat', label: t('permis_construire'), badge: allConstructions.filter((c: any) => c.status === 'pending').length || null, fetch: fetchConstructions },
+              ...(user?.user_type === 'agent' ? [
+                { tab: 'evenements', icon: 'fa-calendar-alt', label: t('nav_events_mgmt'), badge: allEvenements.filter((ev: any) => ev.status === 'pending').length || null, fetch: fetchEvenements },
+                { tab: 'construction', icon: 'fa-hard-hat', label: t('permis_construire'), badge: allConstructions.filter((c: any) => c.status === 'pending').length || null, fetch: fetchConstructions },
+              ] : []),
               { tab: 'stats', icon: 'fa-robot', label: t('nav_stats_ia'), badge: null, fetch: () => { if (!mlStats && !mlLoading) fetchMlStats() } },
               { tab: 'profile', icon: 'fa-user-circle', label: t('nav_profile'), badge: null, fetch: () => { fetchDemandes(); fetchTopics() } },
               ...(user?.user_type === 'agent' ? [
