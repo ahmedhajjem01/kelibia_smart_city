@@ -23,7 +23,7 @@ class Article(models.Model):
 
 class ArticleImage(models.Model):
     article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='articles/extra/')
+    image = models.TextField(verbose_name="Image supplémentaire (URL ou Base64)")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
