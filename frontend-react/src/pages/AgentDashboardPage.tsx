@@ -1823,51 +1823,51 @@ export default function AgentDashboardPage() {
       }
     )
 
+    // Use collapsed:false so Leaflet wires all internal input listeners (layer toggling works)
     const layersCtrl = L.control.layers(
       { '🗺️ OpenStreetMap': osm, '🛰️ Satellite (Esri)': sat, '🏔️ Topographique': topo },
       { '📍 Signalements': markersLayer.current, ...sigOverlays },
-      { position: 'topright', collapsed: true }
+      { position: 'topright', collapsed: false }
     ).addTo(m)
 
-    // Click-to-open / click-outside-to-close for the layers control
-    // Strategy: replace container node with a clone to strip Leaflet's internal
-    // mouseenter/mouseleave expand handlers, then attach our own click logic.
+    // Click-to-open / click-outside-to-close for the layers control.
+    // collapsed:false keeps all Leaflet input listeners intact (layers still toggle).
+    // We inject CSS to hide the toggle button initially and suppress hover-expand,
+    // then manually show/hide the panel via the 'leaflet-control-layers-expanded' class.
     setTimeout(() => {
       const ctrlEl = layersCtrl.getContainer()
-      if (!ctrlEl || !ctrlEl.parentNode) return
+      if (!ctrlEl) return
 
-      // Clone strips all JS event listeners attached via addEventListener
-      const clone = ctrlEl.cloneNode(true) as HTMLElement
-      ctrlEl.parentNode.replaceChild(clone, ctrlEl)
+      // Inject scoped CSS: hide Leaflet's own toggle link, kill hover-expand
+      const style = document.createElement('style')
+      style.textContent = `
+        .leaflet-control-layers-collapsed-custom .leaflet-control-layers-list { display: none !important; }
+        .leaflet-control-layers-collapsed-custom .leaflet-control-layers-toggle { display: block !important; }
+        .leaflet-control-layers:not(.leaflet-control-layers-collapsed-custom) .leaflet-control-layers-toggle { display: none !important; }
+      `
+      document.head.appendChild(style)
 
-      const toggle = clone.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
-      const form   = clone.querySelector('.leaflet-control-layers-list') as HTMLElement | null
-      if (!toggle || !form) return
-
-      // Ensure it starts collapsed
-      form.style.display = 'none'
-      toggle.style.display = 'block'
-      clone.classList.remove('leaflet-control-layers-expanded')
+      // Start collapsed
+      ctrlEl.classList.add('leaflet-control-layers-collapsed-custom')
 
       let open = false
 
       const openPanel = () => {
-        form.style.display = 'block'
-        toggle.style.display = 'none'
-        clone.classList.add('leaflet-control-layers-expanded')
+        ctrlEl.classList.remove('leaflet-control-layers-collapsed-custom')
         open = true
       }
       const closePanel = () => {
-        form.style.display = 'none'
-        toggle.style.display = 'block'
-        clone.classList.remove('leaflet-control-layers-expanded')
+        ctrlEl.classList.add('leaflet-control-layers-collapsed-custom')
         open = false
       }
 
-      toggle.addEventListener('click', (e) => { e.stopPropagation(); openPanel() })
-      // Clicks inside the panel stay inside — do not close
-      clone.addEventListener('click', (e) => { e.stopPropagation() })
-      // Click anywhere outside closes the panel
+      const toggle = ctrlEl.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
+      if (toggle) {
+        toggle.addEventListener('click', (e) => { e.stopPropagation(); openPanel() })
+      }
+      // Clicks anywhere inside the control (including checkboxes) stay contained
+      ctrlEl.addEventListener('click', (e) => { e.stopPropagation() })
+      // Click outside closes panel
       document.addEventListener('click', () => { if (open) closePanel() })
     }, 0)
 
