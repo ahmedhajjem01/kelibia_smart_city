@@ -72,8 +72,8 @@ class ReclamationViewSet(viewsets.ModelViewSet):
             if assigned:
                 # Map agent service key to reclamation category key (they share the same values)
                 return Reclamation.objects.filter(category=assigned)
-            # Agent with no service assigned — return nothing (misconfigured account)
-            return Reclamation.objects.none()
+            # Agent with no service assigned — return all for general oversight (useful for testing/PFE)
+            return Reclamation.objects.all()
 
         # Citizens see only their own reclamations
         return Reclamation.objects.filter(citizen=user)
