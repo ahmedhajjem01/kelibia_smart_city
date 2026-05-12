@@ -2207,11 +2207,13 @@ export default function AgentDashboardPage() {
           <div className="ag-divider"></div>
           <div className="ag-sec-title">{t('nav_admin_staff')}</div>
 
-          <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
-            <i className="fas fa-folder-open"></i>
-            <span>{t('nav_demandes_citoyens')}</span>
-            {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
-          </a>
+          {user?.user_type === 'agent' && (
+            <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
+              <i className="fas fa-folder-open"></i>
+              <span>{t('nav_demandes_citoyens')}</span>
+              {allDemandes.filter(d => d.status === 'pending').length > 0 && <span className="ag-badge">{allDemandes.filter(d => d.status === 'pending').length}</span>}
+            </a>
+          )}
 
           {user?.user_type === 'agent' && (
             <>
@@ -2290,8 +2292,8 @@ export default function AgentDashboardPage() {
               { tab: 'construction', icon: 'fa-hard-hat', label: t('permis_construire'), badge: allConstructions.filter((c: any) => c.status === 'pending').length || null, fetch: fetchConstructions },
               { tab: 'stats', icon: 'fa-robot', label: t('nav_stats_ia'), badge: null, fetch: () => { if (!mlStats && !mlLoading) fetchMlStats() } },
               { tab: 'profile', icon: 'fa-user-circle', label: t('nav_profile'), badge: null, fetch: () => { fetchDemandes(); fetchTopics() } },
-              { tab: 'demandes', icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length || null, fetch: fetchDemandes },
               ...(user?.user_type === 'agent' ? [
+                { tab: 'demandes', icon: 'fa-folder-open', label: t('nav_demandes_citoyens'), badge: allDemandes.filter(d => d.status === 'pending').length || null, fetch: fetchDemandes },
                 { tab: 'forum', icon: 'fa-comments', label: t('nav_forum_moderation'), badge: null, fetch: () => { fetchTopics(); fetchMlStats() } },
                 { tab: 'actualites', icon: 'fa-newspaper', label: lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités', badge: null, fetch: fetchArticles },
               ] : []),
