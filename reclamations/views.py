@@ -255,13 +255,8 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         user = request.user
         user_type = getattr(user, 'user_type', '')
 
-        if user_type == 'supervisor' or user.is_superuser:
-            return Response(
-                {"detail": "Les superviseurs ne peuvent pas modifier la classification. Rôle: observateur uniquement."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        if not (user.is_staff or user_type == 'agent'):
-            return Response({"detail": "Non autorisé. Réservé aux agents municipaux."}, status=status.HTTP_403_FORBIDDEN)
+        if not (user.is_staff or user_type in ('agent', 'supervisor') or user.is_superuser):
+            return Response({"detail": "Non autorisé. Réservé aux agents municipaux et superviseurs."}, status=status.HTTP_403_FORBIDDEN)
 
         SERVICE_MAP = {
             'lighting':     'Service Eclairage Public',
@@ -313,14 +308,8 @@ class ReclamationViewSet(viewsets.ModelViewSet):
         user = request.user
         user_type = getattr(user, 'user_type', '')
 
-        # Supervisors have no operational role — read-only
-        if user_type == 'supervisor' or user.is_superuser:
-            return Response(
-                {"detail": "Les superviseurs ne peuvent pas modifier le statut des réclamations. Rôle: observateur uniquement."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        if not (user.is_staff or user_type == 'agent'):
-            return Response({"detail": "Non autorisé. Réservé aux agents municipaux."}, status=status.HTTP_403_FORBIDDEN)
+        if not (user.is_staff or user_type in ('agent', 'supervisor') or user.is_superuser):
+            return Response({"detail": "Non autorisé. Réservé aux agents municipaux et superviseurs."}, status=status.HTTP_403_FORBIDDEN)
         new_status = request.data.get('status')
         if new_status in dict(Reclamation.STATUS_CHOICES):
             rec.status = new_status

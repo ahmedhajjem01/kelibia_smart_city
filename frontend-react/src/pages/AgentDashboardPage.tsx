@@ -1501,7 +1501,12 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const res = await fetch(resolveBackendUrl('/api/accounts/agent-citizens/'), { headers: { Authorization: `Bearer ${getAccessToken()}` } })
+      const isSup = user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff;
+      const url = isSup 
+        ? resolveBackendUrl('/api/accounts/verify-citizens/?mode=citizens')
+        : resolveBackendUrl('/api/accounts/agent-citizens/');
+
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
       if (res.ok) setAgentCitizens(await res.json())
 
@@ -2223,6 +2228,11 @@ export default function AgentDashboardPage() {
               <i className="fas fa-users-cog"></i>
               <span>{t('nav_managed_users')}</span>
               {managedUsers.filter(u => !u.is_verified).length > 0 && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
+            </a>
+
+            <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens(); }}>
+              <i className="fas fa-user-friends"></i>
+              <span>{lang === 'ar' ? 'قائمة المواطنين' : 'Liste des Citoyens'}</span>
             </a>
 
             {(user?.user_type === 'supervisor' || user?.is_superuser) && (
@@ -5139,13 +5149,13 @@ export default function AgentDashboardPage() {
 
   <div className="ag-card animate__animated animate__fadeIn">
 
-    <div className="ag-card-hdr-green" style={{ background: 'linear-gradient(90deg,#1b5e20,#388e3c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
+    <div className="ag-card-hdr-green" style={{ background: user?.user_type === 'supervisor' || user?.is_superuser ? 'linear-gradient(90deg,#0d47a1,#1565c0)' : 'linear-gradient(90deg,#1b5e20,#388e3c)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, minHeight: '50px', padding: '8px 16px' }}>
 
-      <span className="fw-bold"><i className="fas fa-user-check me-2"></i>Vérification des Comptes Citoyens</span>
+      <span className="fw-bold"><i className={`fas ${user?.user_type === 'supervisor' || user?.is_superuser ? 'fa-user-friends' : 'fa-user-check'} me-2`}></i>{user?.user_type === 'supervisor' || user?.is_superuser ? (lang === 'ar' ? 'قاعدة بيانات المواطنين' : 'Base de données des Citoyens') : 'Vérification des Comptes Citoyens'}</span>
 
       <div className="d-flex align-items-center gap-2">
 
-        <span className="badge bg-warning text-dark" style={{ fontSize: '11px' }}>{agentCitizens.length} en attente</span>
+        <span className="badge bg-white bg-opacity-25" style={{ fontSize: '11px' }}>{agentCitizens.length} {user?.user_type === 'supervisor' || user?.is_superuser ? 'Citoyens' : 'en attente'}</span>
 
         <button className="btn btn-sm btn-light" onClick={fetchAgentCitizens}><i className="fas fa-sync-alt"></i></button>
 
@@ -5203,11 +5213,11 @@ export default function AgentDashboardPage() {
 
         <div className="text-center p-5 text-muted">
 
-          <i className="fas fa-check-circle fa-3x mb-3" style={{ color: '#2e7d32', opacity: .4 }}></i>
+          <i className={`fas ${user?.user_type === 'supervisor' || user?.is_superuser ? 'fa-users-slash' : 'fa-check-circle'} fa-3x mb-3`} style={{ color: user?.user_type === 'supervisor' || user?.is_superuser ? '#9ca3af' : '#2e7d32', opacity: .4 }}></i>
 
-          <p className="fw-bold">Aucun compte en attente de vérification.</p>
+          <p className="fw-bold">{user?.user_type === 'supervisor' || user?.is_superuser ? 'Aucun citoyen trouvé.' : 'Aucun compte en attente de vérification.'}</p>
 
-          <p className="small">Tous les citoyens inscrits ont été vérifiés.</p>
+          <p className="small">{user?.user_type === 'supervisor' || user?.is_superuser ? 'La base de données est vide ou la recherche n\'a rien donné.' : 'Tous les citoyens inscrits ont été vérifiés.'}</p>
 
         </div>
 
@@ -5297,6 +5307,12 @@ export default function AgentDashboardPage() {
 
                     }
 
+                    {c.is_verified ? (
+                      <span className="badge ms-1" style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '10px' }}><i className="fas fa-check-double me-1"></i>Vérifié</span>
+                    ) : (
+                      <span className="badge ms-1" style={{ background: '#f5f5f5', color: '#9e9e9e', fontSize: '10px' }}><i className="fas fa-clock me-1"></i>Non vérifié</span>
+                    )}
+
                     {(c.cin_front || c.cin_back) && (
 
                       <span className="badge ms-1" style={{ background: '#fff3e0', color: '#e65100', fontSize: '10px' }}><i className="fas fa-id-card me-1"></i>CIN disponible</span>
@@ -5309,19 +5325,21 @@ export default function AgentDashboardPage() {
 
                     <div className="d-flex gap-2">
 
-                      <button
+                      {!c.is_verified && (
+                        <button
 
-                        className="btn btn-sm btn-success"
+                          className="btn btn-sm btn-success"
 
-                        title="Vérifier ce compte"
+                          title="Vérifier ce compte"
 
-                        onClick={e => { e.stopPropagation(); if (window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
+                          onClick={e => { e.stopPropagation(); if (window.confirm(`Vérifier le compte de "${c.full_name}" ?`)) handleAgentCitizenAction(c.id, 'verify') }}
 
-                      >
+                        >
 
-                        <i className="fas fa-check me-1"></i> Vérifier
+                          <i className="fas fa-check me-1"></i> Vérifier
 
-                      </button>
+                        </button>
+                      )}
 
                       <button
 
