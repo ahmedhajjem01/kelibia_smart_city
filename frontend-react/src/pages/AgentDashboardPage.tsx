@@ -1829,24 +1829,46 @@ export default function AgentDashboardPage() {
       { position: 'topright', collapsed: true }
     ).addTo(m)
 
-    // Click-to-open / click-outside-to-close behaviour for the layers control
+    // Click-to-open / click-outside-to-close for the layers control
+    // Strategy: replace container node with a clone to strip Leaflet's internal
+    // mouseenter/mouseleave expand handlers, then attach our own click logic.
     setTimeout(() => {
       const ctrlEl = layersCtrl.getContainer()
-      if (!ctrlEl) return
-      const toggle = ctrlEl.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
-      const form   = ctrlEl.querySelector('.leaflet-control-layers-list') as HTMLElement | null
+      if (!ctrlEl || !ctrlEl.parentNode) return
+
+      // Clone strips all JS event listeners attached via addEventListener
+      const clone = ctrlEl.cloneNode(true) as HTMLElement
+      ctrlEl.parentNode.replaceChild(clone, ctrlEl)
+
+      const toggle = clone.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
+      const form   = clone.querySelector('.leaflet-control-layers-list') as HTMLElement | null
       if (!toggle || !form) return
 
-      let open = false
-      const open_ = () => { form.style.display = 'block'; toggle.style.display = 'none'; open = true }
-      const close_ = () => { form.style.display = 'none'; toggle.style.display = 'block'; open = false }
+      // Ensure it starts collapsed
+      form.style.display = 'none'
+      toggle.style.display = 'block'
+      clone.classList.remove('leaflet-control-layers-expanded')
 
-      // Toggle on button click
-      L.DomEvent.on(toggle, 'click', (e) => { L.DomEvent.stopPropagation(e); open_ () })
-      // Prevent clicks inside the form from bubbling to the document
-      L.DomEvent.on(form,   'click', (e) => { L.DomEvent.stopPropagation(e) })
-      // Close when clicking anywhere outside
-      document.addEventListener('click', () => { if (open) close_() })
+      let open = false
+
+      const openPanel = () => {
+        form.style.display = 'block'
+        toggle.style.display = 'none'
+        clone.classList.add('leaflet-control-layers-expanded')
+        open = true
+      }
+      const closePanel = () => {
+        form.style.display = 'none'
+        toggle.style.display = 'block'
+        clone.classList.remove('leaflet-control-layers-expanded')
+        open = false
+      }
+
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); openPanel() })
+      // Clicks inside the panel stay inside — do not close
+      clone.addEventListener('click', (e) => { e.stopPropagation() })
+      // Click anywhere outside closes the panel
+      document.addEventListener('click', () => { if (open) closePanel() })
     }, 0)
 
     // Legend is rendered as a React overlay (see JSX below), not as a Leaflet control
