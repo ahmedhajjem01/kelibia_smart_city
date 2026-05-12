@@ -2249,10 +2249,12 @@ export default function AgentDashboardPage() {
               {managedUsers.filter(u => !u.is_verified).length > 0 && !(user?.user_type === 'supervisor' || user?.is_superuser) && <span className="ag-badge">{managedUsers.filter(u => !u.is_verified).length}</span>}
             </a>
 
-            <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens(); }}>
-              <i className="fas fa-user-friends"></i>
-              <span>{lang === 'ar' ? 'قائمة المواطنين' : 'Liste des Citoyens'}</span>
-            </a>
+            {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+              <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens(); }}>
+                <i className="fas fa-user-friends"></i>
+                <span>{lang === 'ar' ? 'قائمة المواطنين' : 'Liste des Citoyens'}</span>
+              </a>
+            )}
 
             {(user?.user_type === 'supervisor' || user?.is_superuser) && (
               <a className={`ag-nav-item${activeTab === 'config' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('config'); }}>
@@ -2756,7 +2758,9 @@ export default function AgentDashboardPage() {
                       <button onClick={() => { setUsersMode('unverified'); fetchManagedUsers('unverified') }} className={`btn btn-sm ${usersMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('pending_verification')}</button>
                     )}
 
-                    <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? (user?.user_type === 'supervisor' || user?.is_superuser ? 'btn-light' : 'btn-warning') : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+                    {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+                      <button onClick={() => { setUsersMode('agents'); fetchManagedUsers('agents') }} className={`btn btn-sm ${usersMode === 'agents' ? (user?.user_type === 'supervisor' || user?.is_superuser ? 'btn-light' : 'btn-warning') : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}><i className="fas fa-user-tie me-1"></i>{t('role_agent')}</button>
+                    )}
 
                     {!(user?.user_type === 'supervisor' || user?.is_superuser) && (
                       <button onClick={() => { setUsersMode('all'); fetchManagedUsers('all') }} className={`btn btn-sm ${usersMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} style={{ fontSize: '11px', fontWeight: 600 }}>{t('all_label')}</button>
