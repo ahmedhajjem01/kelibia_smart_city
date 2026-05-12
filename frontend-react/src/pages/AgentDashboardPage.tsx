@@ -1823,11 +1823,31 @@ export default function AgentDashboardPage() {
       }
     )
 
-    L.control.layers(
+    const layersCtrl = L.control.layers(
       { '🗺️ OpenStreetMap': osm, '🛰️ Satellite (Esri)': sat, '🏔️ Topographique': topo },
       { '📍 Signalements': markersLayer.current, ...sigOverlays },
       { position: 'topright', collapsed: true }
     ).addTo(m)
+
+    // Click-to-open / click-outside-to-close behaviour for the layers control
+    setTimeout(() => {
+      const ctrlEl = layersCtrl.getContainer()
+      if (!ctrlEl) return
+      const toggle = ctrlEl.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
+      const form   = ctrlEl.querySelector('.leaflet-control-layers-list') as HTMLElement | null
+      if (!toggle || !form) return
+
+      let open = false
+      const open_ = () => { form.style.display = 'block'; toggle.style.display = 'none'; open = true }
+      const close_ = () => { form.style.display = 'none'; toggle.style.display = 'block'; open = false }
+
+      // Toggle on button click
+      L.DomEvent.on(toggle, 'click', (e) => { L.DomEvent.stopPropagation(e); open_ () })
+      // Prevent clicks inside the form from bubbling to the document
+      L.DomEvent.on(form,   'click', (e) => { L.DomEvent.stopPropagation(e) })
+      // Close when clicking anywhere outside
+      document.addEventListener('click', () => { if (open) close_() })
+    }, 0)
 
     // Legend is rendered as a React overlay (see JSX below), not as a Leaflet control
 
