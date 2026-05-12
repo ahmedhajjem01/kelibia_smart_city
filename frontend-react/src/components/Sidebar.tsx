@@ -93,14 +93,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, user, isOpen, onClose }) =>
               <i className="fas fa-tasks" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('my_requests')}</span>
             </NavLink>
-            <NavLink to="/mes-impots" className={({ isActive }) => navItem(isActive)}>
-              <i className="fas fa-file-invoice-dollar" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
-              <span>{lang === 'ar' ? 'أدائي و جباياتي' : 'Mes Impôts & Taxes'}</span>
-            </NavLink>
-            <NavLink to="/mes-commerce" className={({ isActive }) => navItem(isActive)}>
-              <i className="fas fa-store" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
-              <span>{lang === 'ar' ? 'مساحاتي التجارية' : 'Boutiques & Commerces'}</span>
-            </NavLink>
             <NavLink to="/mes-extraits" className={({ isActive }) => navItem(isActive)}>
               <i className="fas fa-file-contract" style={{ width: 16, textAlign: 'center', flexShrink: 0 }}></i>
               <span>{t('extraits_hub_title')}</span>
