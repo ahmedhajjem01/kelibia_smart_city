@@ -88,36 +88,42 @@ class RegisterView(APIView):
             
             user.save()
             
-            # Send Verification Email
+            # Send Verification Email (Synchrone avec Rollback en cas d'échec)
             from django.core.mail import send_mail
             from django.conf import settings
-            import threading
             
             if getattr(settings, 'EMAIL_HOST_USER', None):
-                def send_async_verification():
-                    try:
-                        uid = urlsafe_base64_encode(force_bytes(user.pk))
-                        token = default_token_generator.make_token(user)
-                        protocol = "https" if not settings.DEBUG else "http"
-                        domain = settings.DOMAIN
-                        activation_link = f"{protocol}://{domain}/activate?uid={uid}&token={token}"
+                try:
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = default_token_generator.make_token(user)
+                    protocol = "https" if not settings.DEBUG else "http"
+                    domain = settings.DOMAIN
+                    activation_link = f"{protocol}://{domain}/activate?uid={uid}&token={token}"
 
-                        subject = "Confirmez votre compte Kélibia Smart City"
-                        email_body = f"Bonjour {user.first_name},\n\n" \
-                                     f"Merci de vous être inscrit sur Kélibia Smart City.\n" \
-                                     f"Veuillez cliquer sur le lien suivant pour activer votre compte et accéder à votre profil :\n" \
-                                     f"{activation_link}\n\n" \
-                                     f"Cordialement,\nL'équipe Kélibia Smart City"
-                        send_mail(
-                            subject,
-                            email_body,
-                            settings.EMAIL_HOST_USER,
-                            [user.email],
-                            fail_silently=True,
-                        )
-                    except Exception as e:
-                        logger.error(f"Mail verification failed: {e}")
-                threading.Thread(target=send_async_verification).start()
+                    subject = "Confirmez votre compte Kélibia Smart City"
+                    email_body = f"Bonjour {user.first_name},\n\n" \
+                                 f"Merci de vous être inscrit sur Kélibia Smart City.\n" \
+                                 f"Veuillez cliquer sur le lien suivant pour activer votre compte et accéder à votre profil :\n" \
+                                 f"{activation_link}\n\n" \
+                                 f"Cordialement,\nL'équipe Kélibia Smart City"
+                    
+                    # Envoi synchrone pour capturer l'erreur SMTP immédiatement
+                    send_mail(
+                        subject,
+                        email_body,
+                        settings.EMAIL_HOST_USER,
+                        [user.email],
+                        fail_silently=False, # Doit être False pour lever une exception
+                    )
+                except Exception as e:
+                    logger.error(f"Mail verification failed: {e}")
+                    
+                    # ROLLBACK : On supprime l'utilisateur car son e-mail est injoignable
+                    user.delete()
+                    
+                    return Response({
+                        "error": "L'adresse e-mail est invalide ou introuvable. Veuillez corriger et réessayer."
+                    }, status=status.HTTP_400_BAD_REQUEST)
             
             return Response({
                 "message": "Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
@@ -372,54 +378,6 @@ class UserVerificationView(APIView):
                 target_user.set_password(new_password)
                 target_user.save()
                 return Response({"message": "Mot de passe réinitialisé.", "new_password": new_password})
-            elif action == 'activate_asd':
-                from django.utils import timezone
-                from notifications.models import Notification
-                from notifications.helpers import get_notif
-                from django.core.mail import send_mail
-                from django.conf import settings
-
-                target_user.is_verified = True
-                target_user.asd_active = True
-                duration_months = int(request.data.get('duration_months', 12))
-                target_user.asd_expiration = timezone.now() + timezone.timedelta(days=30 * duration_months)
-                target_user.save()
-
-                title, message = get_notif(target_user, 'asd_activated', months=duration_months)
-                Notification.objects.create(
-                    recipient=target_user,
-                    title=title,
-                    message=message,
-                    notification_type='success',
-                    link='/dashboard'
-                )
-
-                if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-                    import threading
-                    def send_async_asd_email():
-                        try:
-                            subject = "Activation de votre abonnement ASD - Kélibia Smart City"
-                            email_body = (
-                                f"Bonjour {target_user.first_name},\n\n"
-                                f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n"
-                                f"Durée : {duration_months} mois\n"
-                                f"Expiration : {target_user.asd_expiration.strftime('%d/%m/%Y')}\n\n"
-                                f"Cordialement,\nL'administration de Kélibia Smart City"
-                            )
-                            send_mail(
-                                subject, email_body,
-                                settings.EMAIL_HOST_USER, [target_user.email],
-                                fail_silently=True,
-                            )
-                        except Exception as e:
-                            print(f"Failed to send ASD activation email: {e}")
-                    threading.Thread(target=send_async_asd_email).start()
-
-                return Response({
-                    'message': f'Abonnement ASD activé pour {duration_months} mois (et compte vérifié).',
-                    'asd_expiration': target_user.asd_expiration,
-                    'is_verified': True
-                })
             else:
                 return Response({"error": "Action non reconnue."}, status=400)
         except User.DoesNotExist:
@@ -545,8 +503,8 @@ class AgentCitizenVerificationView(APIView):
         user_id = request.data.get('user_id')
         action  = request.data.get('action')
 
-        # Agents can only verify or reject (toggle_active) citizens
-        allowed_actions = ('verify', 'toggle_active')
+        # Agents can only verify, block, or activate ASD for citizens
+        allowed_actions = ('verify', 'toggle_active', 'activate_asd')
         if action not in allowed_actions:
             return Response({"error": f"Action non autorisée pour les agents. Actions permises: {allowed_actions}"}, status=403)
 
@@ -611,6 +569,54 @@ class AgentCitizenVerificationView(APIView):
             return Response({
                 "message": f"Compte {'activé' if target.is_active else 'bloqué'}.",
                 "is_active": target.is_active,
+            })
+        elif action == 'activate_asd':
+            from django.utils import timezone
+            from notifications.models import Notification
+            from notifications.helpers import get_notif
+            from django.core.mail import send_mail
+            from django.conf import settings
+
+            target.is_verified = True
+            target.asd_active = True
+            duration_months = int(request.data.get('duration_months', 12))
+            target.asd_expiration = timezone.now() + timezone.timedelta(days=30 * duration_months)
+            target.save()
+
+            title, message = get_notif(target, 'asd_activated', months=duration_months)
+            Notification.objects.create(
+                recipient=target,
+                title=title,
+                message=message,
+                notification_type='success',
+                link='/dashboard'
+            )
+
+            if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+                import threading
+                def send_async_asd_email():
+                    try:
+                        subject = "Activation de votre abonnement ASD - Kélibia Smart City"
+                        email_body = (
+                            f"Bonjour {target.first_name},\n\n"
+                            f"Votre abonnement aux Services Digitaux (ASD) a été activé avec succès.\n"
+                            f"Durée : {duration_months} mois\n"
+                            f"Expiration : {target.asd_expiration.strftime('%d/%m/%Y')}\n\n"
+                            f"Cordialement,\nL'administration de Kélibia Smart City"
+                        )
+                        send_mail(
+                            subject, email_body,
+                            settings.EMAIL_HOST_USER, [target.email],
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        print(f"Failed to send ASD activation email: {e}")
+                threading.Thread(target=send_async_asd_email).start()
+
+            return Response({
+                'message': f'Abonnement ASD activé pour {duration_months} mois (et compte vérifié).',
+                'asd_expiration': target.asd_expiration,
+                'is_verified': True
             })
 
 

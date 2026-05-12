@@ -371,7 +371,7 @@ export default function DashboardPage() {
           if (data.user_type === 'agent' || data.is_staff || data.is_superuser) { navigate('/agent-dashboard'); return }
 
         }
-        const [rRes, mRes, bRes, resRes, cRes, lRes, nRes, newsRes, gnRes] = await Promise.all([
+        const [rRes, mRes, bRes, resRes, cRes, lRes, nRes, newsRes, gnRes, iRes, comRes] = await Promise.all([
           fetch(resolveBackendUrl('/api/reclamations/'), { headers: { Authorization: `Bearer ${access}` } }),
           fetch(resolveBackendUrl('/extrait-mariage/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
           fetch(resolveBackendUrl('/extrait-naissance/api/declaration/'), { headers: { Authorization: `Bearer ${access}` } }),
@@ -380,7 +380,9 @@ export default function DashboardPage() {
           fetch(resolveBackendUrl('/livret-famille/demandes/'), { headers: { Authorization: `Bearer ${access}` } }),
           fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } }),
           fetch(resolveBackendUrl('/api/news/')),
-          fetch(resolveBackendUrl('/api/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
+          fetch(resolveBackendUrl('/api/notifications/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/impots/demande/'), { headers: { Authorization: `Bearer ${access}` } }),
+          fetch(resolveBackendUrl('/api/commerce/demande/'), { headers: { Authorization: `Bearer ${access}` } })
         ])
 
         let totalDossiers = 0
@@ -390,6 +392,8 @@ export default function DashboardPage() {
         if (resRes.ok) { const d = await resRes.json(); totalDossiers += d.length }
         if (cRes.ok) { const d = await cRes.json(); totalDossiers += d.length }
         if (lRes.ok) { const d = await lRes.json(); setLivretNotifications(d.filter((x: any) => x.status === 'ready')); totalDossiers += d.length }
+        if (iRes && iRes.ok) { const d = await iRes.json(); totalDossiers += d.length }
+        if (comRes && comRes.ok) { const d = await comRes.json(); totalDossiers += d.length }
         setDossiersCount(totalDossiers)
 
         if (nRes.ok) { const d = (await nRes.json()) as ForumNotif[]; setForumUnread(d.filter(n => !n.is_read).length) }

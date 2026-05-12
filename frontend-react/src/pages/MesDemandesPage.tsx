@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout'
 
 interface UnifiedRequest {
   id: number
-  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation' | 'evenement' | 'raccordement'
+  type: 'birth' | 'marriage' | 'death' | 'residence' | 'inhumation' | 'livret' | 'construction' | 'goudronnage' | 'vocation' | 'evenement' | 'raccordement' | 'impot' | 'commerce' | 'transfert' | 'legalisation'
   title: string
   status: string
   date: string
@@ -56,7 +56,7 @@ export default function MesDemandesPage() {
           }
         }
 
-        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement, resTransfert, resLegalisation] = await Promise.all([
+        const [resBirth, resMarriage, resDeath, resResidence, resInhumation, resExtraits, resExtraitsMariage, resLivret, resConstruction, resGoudronnage, resVocation, resRaccordement, resEvenement, resTransfert, resLegalisation, resImpots, resCommerce] = await Promise.all([
           safeFetch('/extrait-naissance/api/declaration/'),
           safeFetch('/extrait-mariage/demandes/'),
           safeFetch('/extrait-deces/api/declaration/'),
@@ -72,6 +72,8 @@ export default function MesDemandesPage() {
           safeFetch('/api/evenements/demande/'),
           safeFetch('/extrait-deces/api/transfert-corps/'),
           safeFetch('/extrait-naissance/api/legalisation/'),
+          safeFetch('/api/impots/demande/'),
+          safeFetch('/api/commerce/demande/'),
         ])
 
 
@@ -316,6 +318,38 @@ export default function MesDemandesPage() {
             })
           })
         }
+        
+        // 14. Impôts
+        if (resImpots && resImpots.ok) {
+          const impots = await resImpots.json()
+          impots.forEach((i: any) => {
+            unified.push({
+              id: i.id,
+              type: 'impot',
+              title: lang === 'ar' ? 'طلب تسوية ضريبية' : 'Demande d\'impôts et taxes',
+              status: i.status,
+              date: i.created_at,
+              details: `${i.type_taxe} — ${i.annee_fiscale || ''}`,
+              isPaid: i.is_paid
+            })
+          })
+        }
+
+        // 15. Commerce
+        if (resCommerce && resCommerce.ok) {
+          const commerces = await resCommerce.json()
+          commerces.forEach((c: any) => {
+            unified.push({
+              id: c.id,
+              type: 'commerce',
+              title: lang === 'ar' ? 'طلب رخصة تجارية' : 'Demande de commerce / boutique',
+              status: c.status,
+              date: c.created_at,
+              details: `${c.nom_boutique} — ${c.type_activite}`,
+              isPaid: c.is_paid
+            })
+          })
+        }
 
         // Sort by date descending
         unified.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -384,6 +418,10 @@ export default function MesDemandesPage() {
         return '5.000';
       case 'construction':
         return '20.000';
+      case 'impot':
+        return '10.000';
+      case 'commerce':
+        return '15.000';
       default:
         return '2.000';
     }
@@ -404,6 +442,8 @@ export default function MesDemandesPage() {
       case 'transfert': return <i className="fas fa-ambulance text-danger"></i>
       case 'legalisation': return <i className="fas fa-signature text-primary"></i>
       case 'raccordement': return <i className="fas fa-plug text-warning"></i>
+      case 'impot': return <i className="fas fa-file-invoice-dollar text-success"></i>
+      case 'commerce': return <i className="fas fa-store text-primary"></i>
       default: return <i className="fas fa-file-alt"></i>
     }
   }
