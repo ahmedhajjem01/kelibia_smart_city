@@ -625,8 +625,8 @@ export default function AgentDashboardPage() {
   }, [])
 
   useEffect(() => {
-    if (activeTab === 'citizens') fetchAgentCitizens()
-  }, [activeTab])
+    if (activeTab === 'citizens' && user) fetchAgentCitizens()
+  }, [activeTab, user])
 
   function insideKelibia(lat: number, lng: number): boolean {
     const ring = kelibiaRingRef.current
@@ -1506,15 +1506,26 @@ export default function AgentDashboardPage() {
     try {
 
       const isSup = user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff;
-      const url = isSup 
+      const url = isSup
         ? resolveBackendUrl('/api/accounts/verify-citizens/?mode=citizens')
         : resolveBackendUrl('/api/accounts/agent-citizens/');
 
+      console.log('[fetchAgentCitizens] user:', user?.user_type, '| isSup:', isSup, '| url:', url)
+
       const res = await fetch(url, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
-      if (res.ok) setAgentCitizens(await res.json())
+      console.log('[fetchAgentCitizens] status:', res.status)
 
-    } catch (e) { console.error(e) }
+      if (res.ok) {
+        const data = await res.json()
+        console.log('[fetchAgentCitizens] data count:', data.length, data)
+        setAgentCitizens(data)
+      } else {
+        const err = await res.text()
+        console.error('[fetchAgentCitizens] error response:', err)
+      }
+
+    } catch (e) { console.error('[fetchAgentCitizens] exception:', e) }
 
     finally { setLoadingCitizens(false) }
 
