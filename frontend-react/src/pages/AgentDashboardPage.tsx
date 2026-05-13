@@ -624,6 +624,10 @@ export default function AgentDashboardPage() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (activeTab === 'citizens') fetchAgentCitizens()
+  }, [activeTab])
+
   function insideKelibia(lat: number, lng: number): boolean {
     const ring = kelibiaRingRef.current
     if (!ring) return true // allow if ring not loaded yet
