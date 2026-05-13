@@ -2233,6 +2233,14 @@ export default function AgentDashboardPage() {
             </>
           )}
 
+          {user?.user_type === 'agent' && (
+            <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
+              <i className="fas fa-users"></i>
+              <span>{lang === 'ar' ? 'إدارة المواطنين' : 'Gestion Citoyens'}</span>
+              {agentCitizens.filter(c => !c.is_verified).length > 0 && <span className="ag-badge">{agentCitizens.filter(c => !c.is_verified).length}</span>}
+            </a>
+          )}
+
           {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
             <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { 
               e.preventDefault(); 
@@ -2313,6 +2321,14 @@ export default function AgentDashboardPage() {
                 {badge ? <span className="ag-badge">{badge}</span> : null}
               </a>
             ))}
+            {user?.user_type === 'agent' && (
+              <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#"
+                onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens(); setMobileSidebarOpen(false) }}>
+                <i className="fas fa-users"></i>
+                <span>{lang === 'ar' ? 'إدارة المواطنين' : 'Gestion Citoyens'}</span>
+                {agentCitizens.filter(c => !c.is_verified).length > 0 && <span className="ag-badge">{agentCitizens.filter(c => !c.is_verified).length}</span>}
+              </a>
+            )}
             {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (
               <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#"
                 onClick={e => { e.preventDefault(); setActiveTab('users'); fetchManagedUsers(usersMode); setMobileSidebarOpen(false) }}>
