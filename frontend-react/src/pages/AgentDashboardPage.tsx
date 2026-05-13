@@ -5463,105 +5463,92 @@ export default function AgentDashboardPage() {
 
             <div className="modal-body p-4">
 
+              {/* Status banner */}
+              <div className={`alert py-2 px-3 mb-3 d-flex align-items-center gap-2`} style={{ fontSize: '.82rem', borderRadius: 8, background: selectedCitizen.is_verified ? '#e8f5e9' : '#fff8e1', border: `1px solid ${selectedCitizen.is_verified ? '#a5d6a7' : '#ffe082'}`, color: selectedCitizen.is_verified ? '#2e7d32' : '#f57f17' }}>
+                <i className={`fas ${selectedCitizen.is_verified ? 'fa-check-circle' : 'fa-clock'}`}></i>
+                <span><strong>{selectedCitizen.is_verified ? 'Compte vérifié' : 'En attente de vérification'}</strong> — Vérifiez les informations ci-dessous et les photos du CIN avant de valider.</span>
+              </div>
+
+              {/* Identity info */}
+              <div className="fw-bold mb-2" style={{ color: '#1b5e20', fontSize: '.85rem' }}><i className="fas fa-user me-2"></i>Informations d'identité</div>
               <div className="row g-3 mb-4">
 
                 <div className="col-md-6">
-
                   <div className="p-3 border rounded bg-light">
-
-                    <div className="det-label">Nom complet</div>
-
+                    <div className="det-label">Nom complet (FR)</div>
                     <div className="det-value">{selectedCitizen.full_name}</div>
-
                   </div>
-
                 </div>
 
+                {(selectedCitizen.first_name_ar || selectedCitizen.last_name_ar) && (
+                  <div className="col-md-6">
+                    <div className="p-3 border rounded bg-light">
+                      <div className="det-label">الاسم الكامل (AR)</div>
+                      <div className="det-value" style={{ fontFamily: 'Arial', direction: 'rtl' }}>{selectedCitizen.first_name_ar} {selectedCitizen.last_name_ar}</div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="col-md-6">
-
                   <div className="p-3 border rounded bg-light">
-
                     <div className="det-label">Email</div>
-
                     <div className="det-value">{selectedCitizen.email}</div>
-
                   </div>
-
                 </div>
 
-                <div className="col-md-4">
-
-                  <div className="p-3 border rounded bg-light">
-
-                    <div className="det-label">CIN</div>
-
-                    <div className="det-value fw-bold">{selectedCitizen.cin}</div>
-
+                <div className="col-md-3">
+                  <div className="p-3 border rounded" style={{ background: '#e3f2fd', borderColor: '#90caf9 !important' }}>
+                    <div className="det-label" style={{ color: '#1565c0' }}>Numéro CIN</div>
+                    <div className="det-value fw-bold" style={{ fontSize: '1rem', letterSpacing: 1 }}>{selectedCitizen.cin}</div>
                   </div>
-
                 </div>
 
-                <div className="col-md-4">
-
+                <div className="col-md-3">
                   <div className="p-3 border rounded bg-light">
-
                     <div className="det-label">Téléphone</div>
-
-                    <div className="det-value">{selectedCitizen.phone}</div>
-
+                    <div className="det-value">{selectedCitizen.phone || '—'}</div>
                   </div>
-
                 </div>
 
                 <div className="col-md-4">
-
                   <div className="p-3 border rounded bg-light">
-
                     <div className="det-label">Date de naissance</div>
-
                     <div className="det-value">{selectedCitizen.date_of_birth ? formatDate(selectedCitizen.date_of_birth) : '—'}</div>
-
                   </div>
-
                 </div>
 
-                <div className="col-md-6">
-
+                <div className="col-md-4">
                   <div className="p-3 border rounded bg-light">
-
-                    <div className="det-label">Ville / Gouvernorat</div>
-
-                    <div className="det-value">{selectedCitizen.city}, {selectedCitizen.governorate}</div>
-
-                  </div>
-
-                </div>
-
-                <div className="col-md-6">
-
-                  <div className="p-3 border rounded bg-light">
-
                     <div className="det-label">Lieu de naissance</div>
-
                     <div className="det-value">{selectedCitizen.place_of_birth || '—'}</div>
-
                   </div>
-
                 </div>
+
+                <div className="col-md-4">
+                  <div className="p-3 border rounded bg-light">
+                    <div className="det-label">Ville / Gouvernorat</div>
+                    <div className="det-value">{selectedCitizen.city}{selectedCitizen.governorate ? `, ${selectedCitizen.governorate}` : ''}</div>
+                  </div>
+                </div>
+
+                {selectedCitizen.address && (
+                  <div className="col-12">
+                    <div className="p-3 border rounded bg-light">
+                      <div className="det-label">Adresse</div>
+                      <div className="det-value">{selectedCitizen.address}</div>
+                    </div>
+                  </div>
+                )}
 
               </div>
 
-
-
               {/* CIN Images */}
+              <hr />
+              <div className="fw-bold mb-3" style={{ color: '#1565c0', fontSize: '.85rem' }}><i className="fas fa-id-card me-2"></i>Photos du CIN — à vérifier</div>
 
               {(selectedCitizen.cin_front || selectedCitizen.cin_back) && (
 
                 <>
-
-                  <hr />
-
-                  <div className="fw-bold mb-3" style={{ color: '#1b5e20' }}><i className="fas fa-id-card me-2"></i>Photos du CIN</div>
 
                   <div className="row g-3">
 
