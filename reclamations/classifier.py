@@ -138,11 +138,11 @@ def _build_pipeline() -> object:
     TF-IDF (word unigrams + bigrams, sublinear TF) fed into a calibrated LinearSVC.
     CalibratedClassifierCV adds probability output to LinearSVC via isotonic regression.
 
-    Anti-overfitting measures (v3):
-      - min_df=2   : ignore tokens seen only once (hapax eliminata)
+    Anti-overfitting measures (v4):
+      - min_df=1   : keep all tokens (corpus v4 is large enough, hapax carry signal)
       - max_features=4000 : cap vocabulary size to avoid memorising rare phrases
       - max_df=0.90 : tighter cutoff for overly common terms
-      - C=0.3      : stronger L2 regularisation on LinearSVC (was 1.0)
+      - C=0.7      : balanced regularisation — better margin separation on v4 corpus
       - strip_accents=None : we handle accent removal ourselves to preserve Arabic
     """
     from sklearn.pipeline import Pipeline
@@ -153,14 +153,14 @@ def _build_pipeline() -> object:
     tfidf = TfidfVectorizer(
         analyzer="word",
         ngram_range=(1, 2),
-        min_df=2,           # drop hapax legomena
+        min_df=1,           # keep all tokens — v4 corpus is large enough
         max_df=0.90,
         max_features=4000,  # cap vocabulary — prevents memorising rare bigrams
         sublinear_tf=True,
         strip_accents=None, # we handle normalisation in _normalize() to preserve Arabic
     )
     svc = CalibratedClassifierCV(
-        LinearSVC(C=0.3, max_iter=3000, class_weight="balanced"),
+        LinearSVC(C=0.7, max_iter=3000, class_weight="balanced"),
         cv=3,
     )
     return Pipeline([("tfidf", tfidf), ("clf", svc)])

@@ -590,4 +590,188 @@ TRAINING_DATA = [
     ("Mineur : ampoule un peu moins lumineuse, pas urgent", "lighting", "faible"),
     ("Bruit très léger et occasionnel, pas vraiment dérangeant", "noise", "faible"),
     ("Idée d'amélioration à long terme pour le quartier", "other", "faible"),
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # EXPANSION v4 — 140 additional samples for better generalisation
+    # ══════════════════════════════════════════════════════════════════════════
+
+    # ─── LIGHTING / normale (10) ──────────────────────────────────────────────
+    ("Le couloir de l'immeuble municipal est plongé dans le noir", "lighting", "normale"),
+    ("L'éclairage du tunnel piétonnier est en panne depuis lundi", "lighting", "normale"),
+    ("Trois lampadaires consécutifs éteints sur la rue du port", "lighting", "normale"),
+    ("La place du marché n'est plus éclairée le soir", "lighting", "normale"),
+    ("Réverbère tombé dans la haie, non dangereux mais à relever", "lighting", "normale"),
+    ("L'allée menant au cimetière est sans éclairage la nuit", "lighting", "normale"),
+    ("Lampe de rue hors service depuis quinze jours sans intervention", "lighting", "normale"),
+    ("L'entrée du lycée est dans le noir le soir, élèves gênés", "lighting", "normale"),
+    ("Éclairage du parking de la mairie défaillant", "lighting", "normale"),
+    ("Le pont est mal éclairé la nuit, circulation difficile", "lighting", "normale"),
+
+    # ─── LIGHTING / urgente (10) ──────────────────────────────────────────────
+    ("Câble électrique nu tombé sur le capot d'une voiture garée", "lighting", "urgente"),
+    ("Poteau d'éclairage renversé par le vent bloque la sortie d'école", "lighting", "urgente"),
+    ("Fils sous tension traînent dans une flaque après la pluie, danger immédiat", "lighting", "urgente"),
+    ("Boîtier électrique ouvert et fumant dans la rue commerçante", "lighting", "urgente"),
+    ("Lampadaire arraché pend sur la route, voitures le contournent difficilement", "lighting", "urgente"),
+    ("Étincelles visibles sur le transformateur de la rue chaque nuit", "lighting", "urgente"),
+    ("Câble haute tension effondré sur le toit d'une voiture, conducteur bloqué", "lighting", "urgente"),
+    ("Armoire de commande électrique vandalisée, câbles exposés à la pluie", "lighting", "urgente"),
+    ("Poteau électrique brisé à mi-hauteur, penche sur la chaussée", "lighting", "urgente"),
+    ("Enfant a reçu une décharge en touchant un lampadaire, hospitalisation", "lighting", "urgente"),
+
+    # ─── LIGHTING / faible (8) ────────────────────────────────────────────────
+    ("Les lampadaires de la promenade sont un peu vieillots", "lighting", "faible"),
+    ("Il serait bien d'installer des détecteurs de présence dans les ruelles", "lighting", "faible"),
+    ("La teinte des néons du marché est peu flatteuse pour les étals", "lighting", "faible"),
+    ("Proposition de mise en lumière du minaret pour la saison touristique", "lighting", "faible"),
+    ("Éclairage légèrement insuffisant dans le parking mais on s'y voit quand même", "lighting", "faible"),
+    ("Un lampadaire de moins sur l'avenue ne gêne pas vraiment", "lighting", "faible"),
+    ("Suggestion de lampadaires solaires pour la piste cyclable", "lighting", "faible"),
+    ("La couleur jaune des vieux lampadaires manque de modernité", "lighting", "faible"),
+
+    # ─── TRASH / normale (10) ─────────────────────────────────────────────────
+    ("Les poubelles de la plage débordent chaque week-end", "trash", "normale"),
+    ("Dépôt sauvage de pneus usagés derrière le stade", "trash", "normale"),
+    ("Les ordures du marché du vendredi ne sont pas ramassées le soir même", "trash", "normale"),
+    ("Gravats de construction laissés sur le trottoir depuis deux semaines", "trash", "normale"),
+    ("Les rats ont éventré les sacs poubelles dans la ruelle", "trash", "normale"),
+    ("Collecte des encombrants non effectuée malgré la demande faite il y a dix jours", "trash", "normale"),
+    ("Bac à ordures renversé par le vent et non redressé depuis trois jours", "trash", "normale"),
+    ("Déchets de chantier illégalement déversés dans le terrain communal", "trash", "normale"),
+    ("Odeur nauséabonde des poubelles non collectées dans la cité", "trash", "normale"),
+    ("Les poubelles publiques de la corniche sont saturées tous les matins", "trash", "normale"),
+
+    # ─── TRASH / urgente (10) ─────────────────────────────────────────────────
+    ("Incendie dans une benne à ordures, flammes proches d'un bâtiment résidentiel", "trash", "urgente"),
+    ("Déversement de produits chimiques industriels dans la rue, vapeurs toxiques", "trash", "urgente"),
+    ("Seringues et déchets médicaux abandonnés près de l'école primaire", "trash", "urgente"),
+    ("Fût de produit corrosif non identifié renversé sur le trottoir", "trash", "urgente"),
+    ("Égout débordant d'eaux fécales envahit le rez-de-chaussée des habitations", "trash", "urgente"),
+    ("Déchets en feu bloquent l'accès aux urgences de la polyclinique", "trash", "urgente"),
+    ("Produits pétroliers déversés dans la rue après accident de camion-citerne", "trash", "urgente"),
+    ("Conteneur de déchets hospitaliers renversé sur la voie publique", "trash", "urgente"),
+    ("Rats en grand nombre envahissent les cuisines depuis les ordures en décomposition", "trash", "urgente"),
+    ("Fuite d'égout massive, eaux noires inondent plusieurs rues du quartier", "trash", "urgente"),
+
+    # ─── TRASH / faible (8) ───────────────────────────────────────────────────
+    ("Quelques capsules de bouteilles sur le sol de la place", "trash", "faible"),
+    ("Un carton abandonné devant la boulangerie, pas urgent", "trash", "faible"),
+    ("Légère saleté sur les bords du trottoir de la rue piétonne", "trash", "faible"),
+    ("Il manque une corbeille à l'entrée du parc", "trash", "faible"),
+    ("Proposition d'installer un composteur collectif dans le quartier", "trash", "faible"),
+    ("Poubelle de la rue légèrement pleine mais pas encore débordante", "trash", "faible"),
+    ("Feuilles mortes non balayées devant la médiathèque", "trash", "faible"),
+    ("Quelques papiers gras laissés par des touristes sur la plage ce matin", "trash", "faible"),
+
+    # ─── ROADS / normale (10) ─────────────────────────────────────────────────
+    ("Nid de poule profond à l'entrée du rond-point, crève les pneus", "roads", "normale"),
+    ("Le trottoir de la rue du marché est entièrement défoncé", "roads", "normale"),
+    ("Marquage piéton effacé au carrefour de la poste", "roads", "normale"),
+    ("Regard d'égout sans couvercle au milieu du trottoir depuis une semaine", "roads", "normale"),
+    ("Route communale envahie par la végétation, visibilité réduite", "roads", "normale"),
+    ("Glissière de sécurité manquante sur la route de la corniche", "roads", "normale"),
+    ("Chaussée défoncée après les travaux de gaz, non réasphaltée", "roads", "normale"),
+    ("Trottoir surélevé dangereux pour les personnes en fauteuil roulant", "roads", "normale"),
+    ("Caniveau obstrué, eaux stagnantes après la pluie d'hier soir", "roads", "normale"),
+    ("Panneau stop couché par le vent à l'intersection principale", "roads", "normale"),
+
+    # ─── ROADS / urgente (8) ──────────────────────────────────────────────────
+    ("Effondrement de chaussée suite aux pluies, voiture piégée dans le trou", "roads", "urgente"),
+    ("Pont communal présentant des fissures profondes, à fermer d'urgence", "roads", "urgente"),
+    ("Glissement de boue sur la route nationale, circulation impossible", "roads", "urgente"),
+    ("Accident grave causé par regard ouvert, motard hospitalisé", "roads", "urgente"),
+    ("Route inondée, courant fort emporte les voitures, personnes en danger", "roads", "urgente"),
+    ("Chaussée effondrée sous un camion de livraison, chauffeur coincé", "roads", "urgente"),
+    ("Rochers tombés sur la route littorale, accès au village coupé", "roads", "urgente"),
+    ("Mur de soutènement s'effondre progressivement sur la route, fermer", "roads", "urgente"),
+
+    # ─── ROADS / faible (9) ───────────────────────────────────────────────────
+    ("Marquage au sol du parking légèrement effacé", "roads", "faible"),
+    ("Il manque un miroir de sécurité au virage de la ruelle", "roads", "faible"),
+    ("Suggestion d'installer un ralentisseur devant la mosquée", "roads", "faible"),
+    ("La bordure du trottoir est un peu ébréchée mais praticable", "roads", "faible"),
+    ("Proposition d'une piste cyclable entre le centre et la plage", "roads", "faible"),
+    ("Revêtement de la place centrale un peu vieilli, à refaire à terme", "roads", "faible"),
+    ("Fissures superficielles sur le trottoir, aucun risque pour l'instant", "roads", "faible"),
+    ("Panneau de nom de rue illisible à cause de la rouille", "roads", "faible"),
+    ("Les lignes de stationnement sont presque invisibles dans la zone bleue", "roads", "faible"),
+
+    # ─── NOISE / normale (10) ─────────────────────────────────────────────────
+    ("Le bar du port diffuse de la musique forte jusqu'à 3h du matin", "noise", "normale"),
+    ("Chantier de rénovation du marché bruyant dès 6h du matin", "noise", "normale"),
+    ("Les camions de livraison klaxonnent excessivement la nuit devant le supermarché", "noise", "normale"),
+    ("Atelier de menuiserie voisin génère un bruit de scie incessant la journée", "noise", "normale"),
+    ("Fête de mariage bruyante en semaine jusqu'à l'aube, enfants ne dorment pas", "noise", "normale"),
+    ("Les motos circulent à plein régime dans la rue piétonne en soirée", "noise", "normale"),
+    ("Voisin du dessus fait des travaux de carrelage le soir après 20h", "noise", "normale"),
+    ("Terrasse de café très bruyante jusqu'à minuit devant des habitations", "noise", "normale"),
+    ("Aboiements persistants d'une meute de chiens errants la nuit", "noise", "normale"),
+    ("Klaxonnage continu près du lycée aux heures de sortie", "noise", "normale"),
+
+    # ─── NOISE / urgente (8) ──────────────────────────────────────────────────
+    ("Détonation entendue dans la rue, possible coup de feu, panique", "noise", "urgente"),
+    ("Alarme incendie de l'école sonne sans interruption depuis une heure", "noise", "urgente"),
+    ("Cris de détresse et bruit de violence dans l'appartement du dessus", "noise", "urgente"),
+    ("Explosion sourde dans la rue industrielle, fumée noire visible", "noise", "urgente"),
+    ("Bruits de craquements dans les murs de l'immeuble, risque effondrement", "noise", "urgente"),
+    ("Bruit d'une collision grave sur le carrefour, plusieurs blessés", "noise", "urgente"),
+    ("Alarme de fuite gaz déclenchée dans l'immeuble, évacuation nécessaire", "noise", "urgente"),
+    ("Tirs entendus dans le quartier, habitants terrifiés, intervention urgente", "noise", "urgente"),
+
+    # ─── NOISE / faible (8) ───────────────────────────────────────────────────
+    ("Le ventilateur du commerce voisin fait un léger bourdonnement", "noise", "faible"),
+    ("Bruit de fontaine dans le jardin du voisin, peu gênant", "noise", "faible"),
+    ("Le camion poubelle passe tôt le matin, bruit acceptable", "noise", "faible"),
+    ("Suggestion d'installer des panneaux acoustiques dans la salle des fêtes", "noise", "faible"),
+    ("Enfants qui jouent dans la cour, bruit normal et ponctuel", "noise", "faible"),
+    ("Légère nuisance du générateur d'une boutique en journée", "noise", "faible"),
+    ("Le carillon de l'église sonne le matin, peu dérangeant", "noise", "faible"),
+    ("Bruit de circulation acceptable mais qu'on pourrait réduire avec un terre-plein", "noise", "faible"),
+
+    # ─── OTHER / normale (10) ─────────────────────────────────────────────────
+    ("Fuite sur le réseau d'eau potable, flaque permanente dans la rue", "other", "normale"),
+    ("Banc public cassé dans la zone piétonne depuis trois semaines", "other", "normale"),
+    ("Les feux tricolores du carrefour central sont en panne", "other", "normale"),
+    ("Arbre menaçant de tomber sur le trottoir fréquenté", "other", "normale"),
+    ("Aire de jeux dégradée, balançoires rouillées et bords tranchants", "other", "normale"),
+    ("Le local poubelle du cimetière déborde et n'est pas entretenu", "other", "normale"),
+    ("Graffitis couvrent le mur de la bibliothèque municipale", "other", "normale"),
+    ("La fontaine d'eau potable du parc est hors service", "other", "normale"),
+    ("Tuyau apparent et rouillé sur la façade de la mairie", "other", "normale"),
+    ("Portail du jardin public cassé, impossible à fermer la nuit", "other", "normale"),
+
+    # ─── OTHER / urgente (10) ─────────────────────────────────────────────────
+    ("Fuite de gaz très forte dans la cave d'un immeuble, odeur envahit le hall", "other", "urgente"),
+    ("Incendie déclaré dans une maison du quartier, flammes visibles", "other", "urgente"),
+    ("Enfant coincé dans l'ascenseur scolaire depuis 30 minutes, pleure", "other", "urgente"),
+    ("Mur de clôture effondré sur un passant, personne blessée au sol", "other", "urgente"),
+    ("Inondation rapide du sous-sol, eau monte, personnes piégées", "other", "urgente"),
+    ("Personne inconsciente sur le trottoir depuis plusieurs minutes, secours absents", "other", "urgente"),
+    ("Rupture d'une canalisation principale, geyser d'eau bouillante dans la rue", "other", "urgente"),
+    ("Arbre arraché par la tempête écrase une voiture, conducteur blessé", "other", "urgente"),
+    ("Noyade sur la plage municipale, baigneur en détresse visible", "other", "urgente"),
+    ("Rixe grave avec blessés devant l'école, enfants témoins, police nécessaire", "other", "urgente"),
+
+    # ─── OTHER / faible (9) ───────────────────────────────────────────────────
+    ("Le banc du parc mériterait une couche de peinture", "other", "faible"),
+    ("Suggestion de planter des palmiers sur l'avenue touristique", "other", "faible"),
+    ("Il serait agréable d'avoir des toilettes publiques près de la plage", "other", "faible"),
+    ("La signalétique touristique du centre-ville est vieillotte", "other", "faible"),
+    ("Proposition d'un espace de co-working dans la médiathèque", "other", "faible"),
+    ("Le terrain de pétanque du parc est en mauvais état, à rénover", "other", "faible"),
+    ("Il manque un distributeur de sacs pour les déjections canines", "other", "faible"),
+    ("La façade de la mairie mériterait un ravalement esthétique", "other", "faible"),
+    ("Suggestion d'organiser un marché artisanal hebdomadaire en été", "other", "faible"),
+
+    # ─── ARABIC EXPANSION (10 mixed) ──────────────────────────────────────────
+    ("عمود الإنارة مكسور في الشارع منذ أسبوعين ما جاش أحد يصلحه", "lighting", "normale"),
+    ("أسلاك كهرباء متدلية بعد العاصفة خطر على المارة", "lighting", "urgente"),
+    ("الزبالة ما تجمعتش من خمسة أيام والروايح انتشرت في الحي", "trash", "normale"),
+    ("حريق في حاوية القمامة بجانب البناية السكنية خطر عاجل", "trash", "urgente"),
+    ("الطريق فيها حفر كثيرة تضر بالسيارات وتسبب الحوادث", "roads", "normale"),
+    ("انهيار جزء من الطريق بعد الأمطار وسيارة وقعت في الحفرة", "roads", "urgente"),
+    ("الجيران يصنعوا ضجة كل ليلة ويمنعوا النوم", "noise", "normale"),
+    ("سمعنا صوت انفجار في الحارة وما نعرفوش الأصل خطر", "noise", "urgente"),
+    ("تسرب ماء في الشارع الرئيسي منذ أيام ضياع في الماء", "other", "normale"),
+    ("ريحة غاز قوية تنبعث من الطابق السفلي للعمارة خطر انفجار", "other", "urgente"),
 ]

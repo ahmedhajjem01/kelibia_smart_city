@@ -12,7 +12,7 @@ Citizens can:
 - Use the community forum
 - View municipal news/announcements
 
-Two user roles: `citizen` and `agent` (municipal agent).
+Three user roles: `citizen`, `agent` (municipal agent), and `supervisor` (administrator).
 
 ---
 
@@ -69,16 +69,23 @@ bash build.sh   # pip install + collectstatic + migrate
 
 | App | Purpose |
 |---|---|
-| `accounts` | Custom user model (`CustomUser`), JWT auth, CIN image upload, agent verification |
-| `reclamations` | Citizen complaints with ML/NLP auto-classification (category + priority) |
+| `accounts` | Custom user model (`CustomUser`), JWT auth, CIN image upload, agent verification, supervisor management |
+| `reclamations` | Citizen complaints with ML/NLP auto-classification (10 categories + priority + duplicate detection) |
 | `forum` | Community forum — topics, replies, votes, notifications |
 | `services` | Bilingual service catalog (FR/AR categories, descriptions, requirements) |
-| `extrait_naissance` | Birth certificate records + citizen declaration requests |
+| `extrait_naissance` | Birth certificate records + citizen declaration requests + legalization requests |
 | `extrait_mariage` | Marriage certificate records + marriage requests |
-| `extrait_deces` | Death certificate records + declaration requests |
+| `extrait_deces` | Death certificate records + declaration requests + inhumation + body transfer |
 | `attestation_residence` | Residence attestation requests |
+| `livret_famille` | Family booklet requests |
 | `news` | Municipal announcements/articles |
-| `signalement` | Geo-tagged reports/alerts (alt complaint system, simpler schema) |
+| `social_evenements` | Event authorization requests (public/private) with conflict detection |
+| `maison_construction` | Building permits, road surfacing requests, property vocation certificates, network connections |
+| `eau_lumiere_egouts` | Water, electricity, sewage connection requests and anomaly reports |
+| `argent_impots` | Property registration, ownership changes, tax certificates |
+| `boutiques_commerces` | Commercial signage license requests |
+| `notifications` | System-wide notification model |
+| `signalement` | Geo-tagged reports/alerts (legacy simpler schema) |
 
 ### URL Structure (`core/urls.py`)
 
@@ -87,7 +94,16 @@ bash build.sh   # pip install + collectstatic + migrate
 - `/api/token/` — JWT login (`MyTokenObtainPairView`)
 - `/api/accounts/` — register, activate, profile (`me/`)
 - `/api/services/`, `/api/reclamations/`, `/api/news/`, `/api/forum/`, `/api/residence/`, `/api/signalement/`
+- `/api/evenements/` — event authorizations
+- `/api/construction/` — building permits, road surfacing, property vocation, network connections
+- `/api/eau/` — water/electricity/sewage requests
+- `/api/impots/` — tax and property services
+- `/api/commerce/` — commercial services
+- `/api/notifications/` — notification management
+- `/api/supervisor/services-summary/` — supervisor aggregate dashboard
+- `/api/supervisor/manage-orders/` — centralized order management for supervisors
 - `/extrait-naissance/`, `/extrait-mariage/`, `/extrait-deces/` — certificate endpoints (NOT under `/api/`)
+- `/livret-famille/` — family booklet endpoints
 - `/signalement/`, `/dashboard/` — also map to signalement app
 
 ### Authentication
@@ -96,7 +112,11 @@ bash build.sh   # pip install + collectstatic + migrate
 - Login field: **email** (not username)
 - JWT via `djangorestframework_simplejwt` + djoser; access token: 60 min, refresh: 1 day
 - `is_verified` flag — agents verify citizen accounts
-- CIN front/back images uploaded to `media/cin_images/`
+- `user_type`: `citizen` | `agent` | `supervisor`
+- `assigned_service` for agents: 14 service types (lighting, trash, roads, noise, water, construction, social, commerce, taxes, civil_registry, residence, forum_moderator, news_editor, general)
+- Arabic name fields: `first_name_ar`, `last_name_ar`
+- Additional fields: `date_of_birth`, `place_of_birth`, `is_married`, `spouse_*`, `preferred_language`, `asd_active` (subscription)
+- CIN front/back images stored as Base64 in `cin_front_image`/`cin_back_image` (and `cin_front_utf`/`cin_back_utf`)
 - Password: min 10 chars + complexity checks
 
 ### Dual Frontend
@@ -124,14 +144,18 @@ PostgreSQL — `kelibia_db`, user `postgres`, password `admin`. Override via `DA
 ## App Details
 
 ### `accounts`
-- `CustomUser`: `email`, `cin`, `phone`, `address`, `governorate`, `city`, `user_type` (citizen|agent), `is_verified`, `cin_front_image`, `cin_back_image`
+- `CustomUser`: `email`, `cin`, `phone`, `address`, `governorate`, `city`, `user_type` (citizen|agent|supervisor), `is_verified`, `cin_front_image`, `cin_back_image`, `first_name_ar`, `last_name_ar`, `date_of_birth`, `place_of_birth`, `is_married`, `spouse_cin/first_name/last_name`, `preferred_language`, `assigned_service`, `asd_active`, `asd_expiration`
+- `SavedCard`: payment card storage (card_holder, last_4, expiry, brand)
+- `SiteConfiguration`: global site settings
 - Views: `RegisterView`, `CustomActivationView`, `UserProfileView`, `MyTokenObtainPairView`
 
 ### `reclamations`
-- `Reclamation`: `citizen`, `agent`, `title`, `description`, `category` (lighting|trash|roads|noise|other), `status` (pending|in_progress|resolved|rejected), `priority` (faible|normale|urgente), `service_responsable`, `image`, `latitude`, `longitude`
+- `Reclamation`: `citizen`, `agent`, `title`, `description`, `category` (lighting|trash|roads|noise|water|construction|social|commerce|taxes|other), `status` (pending|in_progress|resolved|rejected), `priority` (faible|normale|urgente), `service_responsable`, `image`, `latitude`, `longitude`, `is_duplicate`, `duplicate_of`, `similarity_score`
 - **ML Classifier** (`reclamations/classifier.py`):
-  - **ML pipeline** (when scikit-learn available): TF-IDF + LinearSVC, dual models for category + priority, 200+ training examples
-  - **Rule-based fallback** (always available, used on Vercel): keyword matching for category + priority
+  - **ML pipeline**: TF-IDF (unigrams+bigrams) + LinearSVC (via CalibratedClassifierCV), dual models for category (10 classes) + priority (3 classes), 601 training examples
+  - **Duplicate detection**: cosine similarity (TF-IDF, 60%) + Haversine distance (40%), threshold 0.65
+  - **XAI explanations**: LIME + SHAP for word-level feature importance
+  - **Rule-based fallback** (always available, used when scikit-learn unavailable): keyword matching
   - Auto-classifies on `perform_create()`; agents can override via `reclassify` action
 - Custom ViewSet actions: `classify_preview`, `reclassify`, `update_status`, `ml_stats`
 
@@ -158,12 +182,40 @@ PostgreSQL — `kelibia_db`, user `postgres`, password `admin`. Override via `DA
 
 ### `extrait_deces`
 - `ExtraitDeces`: death record with `defunt` (FK Citoyen), QR code
+- `DeclarationDeces`: new death declaration; signal auto-creates `ExtraitDeces` on validation
+- `DemandeInhumation`: burial request linked to `DeclarationDeces`
+- `DemandeTransfertCorps`: body transfer request with medical cert + CIN
+
+### `livret_famille`
+- `DemandeLivretFamille`: family booklet request; supports first issuance, renewal, duplicate; requires marriage/birth extracts
 
 ### `news`
 - `Article`: `author`, `title`, `slug`, `content`, `image`, `is_published`
+- `ArticleImage`: additional images for an article
+
+### `social_evenements`
+- `DemandeEvenement`: public/private event authorization request with conflict detection (`detect_conflict()`); fields for organizer, dates, location, required documents, `autorisation_signee`
+
+### `maison_construction`
+- `DemandeConstruction`: building permit with risk scoring (`compute_risk()` flags demolitions and 3+ story buildings); `permis_signe`
+- `DemandeGoudronnage`: road surfacing request
+- `DemandeCertificatVocation`: property use certificate; `certificat_signe`
+- `DemandeRaccordement`: utility connection (eau|electricite|assainissement); `devis_pdf`, `date_visite`
+
+### `eau_lumiere_egouts`
+- `DemandeEau`: unified water/electricity/sewage request and anomaly report; `issued_document`
+
+### `argent_impots`
+- `DemandeImpot`: property registration, ownership/use changes, tax certificates; `issued_document`
+
+### `boutiques_commerces`
+- `DemandeCommerce`: commercial signage license; `issued_document`
+
+### `notifications`
+- `Notification`: system-wide notifications (info|success|warning|error) with `link` and `is_read`
 
 ### `signalement`
-- `Complaint`: simpler geo-tagged complaint schema; defaults to Kelibia center (36.8481, 11.0939)
+- `Complaint`: legacy simpler geo-tagged complaint schema; defaults to Kelibia center (36.8481, 11.0939)
 
 ---
 
@@ -174,9 +226,9 @@ PostgreSQL — `kelibia_db`, user `postgres`, password `admin`. Override via `DA
 **Structure:**
 ```
 src/
-├── pages/          # 25+ pages (Login, Dashboard, AgentDashboard, Forum, forms, etc.)
+├── pages/          # 48 pages (Login, Dashboard, AgentDashboard, Forum, forms, etc.)
 ├── components/     # MainLayout, TopNav, Sidebar, HeroSection, ProfileCard
-├── i18n/           # LanguageProvider — bilingual FR/AR context
+├── i18n/           # LanguageProvider — bilingual FR/AR context (400+ translation keys)
 ├── lib/            # api.ts (HTTP client), authStorage.ts (JWT), backendUrl.ts
 ├── styles/         # CSS files
 └── types/          # TypeScript interfaces
@@ -187,15 +239,25 @@ src/
 | Route | Page |
 |---|---|
 | `/login`, `/signup`, `/activate` | Auth flow |
+| `/forgot-password`, `/reset-password-confirm` | Password reset |
 | `/dashboard` | Citizen home |
 | `/agent-dashboard` | Agent home |
-| `/services` | Bilingual service catalog |
+| `/profile` | User profile |
+| `/services`, `/news` | Service catalog + municipal news |
 | `/forum`, `/forum/:id` | Forum list + topic detail |
-| `/mes-extraits`, `/mes-demandes`, `/mes-deces`, `/mes-mariages`, `/mes-residences` | Citizen document views |
+| `/mes-extraits`, `/mes-naissances`, `/mes-demandes`, `/mes-deces`, `/mes-mariages`, `/mes-residences` | Citizen document views |
 | `/mes-reclamations` | Citizen complaint list |
 | `/declaration-naissance`, `/declaration-deces` | New declaration forms |
-| `/reclamation-form` | Submit complaint |
-| `/demande-residence`, `/mariage-contract` | Request forms |
+| `/nouvelle-reclamation` | Submit complaint |
+| `/demande-residence`, `/demande-mariage` | Request forms |
+| `/demande-evenement`, `/demande-evenement-public`, `/demande-evenement-prive`, `/mes-evenements`, `/evenements` | Events |
+| `/demande-construction`, `/demande-goudronnage`, `/demande-certificat-vocation`, `/demande-raccordement`, `/mes-constructions` | Construction services |
+| `/demande-inhumation`, `/demande-transfert-corps`, `/demande-legalisation` | Death-related services |
+| `/demande-livret-famille` | Family booklet |
+| `/demande-bien`, `/demande-propriete-changement`, `/demande-vocation-changement`, `/mes-impots` | Property/tax services |
+| `/demande-eau`, `/mes-eau` | Water/utility services |
+| `/demande-commerce`, `/mes-commerce` | Commercial services |
+| `/paiement` | Payment simulation |
 
 **Vite proxy rules** (dev only, `vite.config.ts`):
 - `/api/*` → `http://localhost:8000`
@@ -225,7 +287,7 @@ Also seeds 30 complaints with realistic Kelibia GPS coordinates and varied statu
 - Django served via `core/wsgi.py` (Python 3.12 serverless)
 - React SPA served from `frontend-react/dist/`
 - Database: **Neon PostgreSQL** (serverless Postgres, SSL required)
-- ML scikit-learn packages excluded (too large ~200MB) — classifier uses rule-based fallback
+- ML scikit-learn packages **included** in requirements.txt (~81MB total, within Vercel's 250MB limit) — full ML pipeline active in production; rule-based fallback used only if scikit-learn is exceptionally unavailable
 
 ### Required Vercel Environment Variables
 
@@ -259,24 +321,30 @@ python manage.py migrate
 
 ---
 
-## Pending Features (TODO)
+## Implemented Services (Phase 1 — Complete)
 
-Services to build next (React frontend + Django backend as needed).
-**État Civil** is handled by the partner. **Problèmes & Signalements** is already done.
+All major citizen services are implemented with React frontend + Django backend:
 
-| Service | Description | Priority |
+| Service | App | Status |
 |---|---|---|
-| **Social & Événements** | Event listings, social aid requests, community announcements | Medium |
-| **Maison & Construction** | Building permits, renovation declarations, property documents | Medium |
-| **Argent & Impôts** | Municipal tax consultation, payment receipts, fines | Medium |
-| **Boutiques & Commerces** | Business license requests, commercial registration, market stalls | Medium |
-| **Eau, Lumière et Égouts** | Water/electricity connection requests, utility complaints, meter readings | Medium |
+| **État Civil** (birth, marriage, death, residence, livret) | `extrait_naissance`, `extrait_mariage`, `extrait_deces`, `attestation_residence`, `livret_famille` | ✅ Done |
+| **Problèmes & Signalements** | `reclamations` | ✅ Done |
+| **Social & Événements** | `social_evenements` | ✅ Done |
+| **Maison & Construction** | `maison_construction` | ✅ Done |
+| **Argent & Impôts** | `argent_impots` | ✅ Done |
+| **Boutiques & Commerces** | `boutiques_commerces` | ✅ Done |
+| **Eau, Lumière et Égouts** | `eau_lumiere_egouts` | ✅ Done |
 
-Each service typically needs:
-1. A citizen-facing request form page (React)
-2. A Django model + serializer + viewset
-3. An agent-facing list/detail view to process requests
-4. Route registered in `App.tsx` and `core/urls.py`
+## Pending Features (Phase 2 — Future)
+
+| Feature | Description |
+|---|---|
+| DGI/SONEDE/STEG integration | Connect to real external government systems |
+| Electronic signature | Legal document signing |
+| Real payment gateway | Tunisian banking integration |
+| Push notifications + PWA | Real-time alerts + offline support |
+| Automated tests | Unit + end-to-end test suites |
+| Arabic NLP improvement | Better ML classification for Arabic text |
 
 ---
 
@@ -284,7 +352,9 @@ Each service typically needs:
 
 - Always activate `.venv` before running Django commands on Windows
 - Use `127.0.0.1` not `localhost` for the legacy frontend (SSO breaks)
-- ML packages (`scikit-learn`, `nltk`, `joblib`, `numpy`) are commented out in `requirements.txt` — uncomment for local ML training
+- ML packages (`scikit-learn`, `nltk`, `joblib`, `numpy`, `lime`) are **included** in `requirements.txt` and active in production
 - Certificate endpoints (`/extrait-naissance/`, etc.) are NOT under `/api/` — this is intentional
-- `signalement` app is an alternative/simpler complaint system alongside `reclamations`
+- `signalement` app is a legacy simpler complaint system; `reclamations` is the primary one
 - Bilingual models use `_fr` / `_ar` field suffixes for French and Arabic content
+- Agent `assigned_service` field controls RBAC — agents only see requests for their assigned service
+- `seed_news.py`, `update_social_services.py`, `test_services_api.py` contain hardcoded DB credentials — do not commit to public repos
