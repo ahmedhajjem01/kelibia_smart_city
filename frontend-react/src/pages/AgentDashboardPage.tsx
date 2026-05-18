@@ -7346,6 +7346,8 @@ export default function AgentDashboardPage() {
 
           <div className="mb-3"><label className="form-label small fw-bold">Mot de passe</label><input className="form-control" name="password" type="password" required placeholder="••••••••" /></div>
 
+          <div className="mb-3"><label className="form-label small fw-bold">Numéro CIN</label><input className="form-control" name="cin" maxLength={8} required placeholder="12345678" /></div>
+
           <div className="mb-3">
 
             <label className="form-label small fw-bold">Type de compte</label>
@@ -7355,6 +7357,42 @@ export default function AgentDashboardPage() {
               <option value="agent">Agent Municipal</option>
 
               <option value="supervisor">Superviseur (Superuser)</option>
+
+            </select>
+
+          </div>
+
+          <div className="mb-3">
+
+            <label className="form-label small fw-bold">Service assigné (Pour les agents)</label>
+
+            <select className="form-select" name="assigned_service" defaultValue="">
+
+              <option value="">-- Sélectionner un service --</option>
+
+              <option value="civil_registry">Agent État Civil</option>
+
+              <option value="construction">Agent Construction</option>
+
+              <option value="lighting">Agent Lumière (Éclairage)</option>
+
+              <option value="roads">Agent Route (Voirie)</option>
+
+              <option value="trash">Agent Déchets / Hygiène</option>
+
+              <option value="water">Agent Eau & Assainissement</option>
+
+              <option value="social">Agent Affaires Sociales</option>
+
+              <option value="commerce">Agent Commerce</option>
+
+              <option value="taxes">Agent Finances / Impôts</option>
+
+              <option value="forum_moderator">Modérateur Forum</option>
+
+              <option value="news_editor">Rédacteur Actualités</option>
+
+              <option value="general">Service Général</option>
 
             </select>
 
