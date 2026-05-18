@@ -490,6 +490,8 @@ export default function ForumPage() {
                     </div>
                   </div>
                 </Link>
+              )
+            })}
           </div>
         )}
 
