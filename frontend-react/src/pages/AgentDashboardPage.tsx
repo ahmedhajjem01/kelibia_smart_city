@@ -5867,16 +5867,11 @@ export default function AgentDashboardPage() {
     <div className="row g-3">
 
       {[
-
-        { lbl: t('profile_signalements_pending'), val: pending, icon: 'fa-clock', color: '#e65100', bg: '#fff3e0', action: 'dashboard' },
-
-        { lbl: t('profile_signalements_inprog'), val: inprog, icon: 'fa-tasks', color: '#1565c0', bg: '#e3f2fd', action: 'dashboard' },
-
-        { lbl: t('profile_demandes_admin'), val: allDemandes.length, icon: 'fa-users', color: '#2e7d32', bg: '#e8f5e9', action: 'demandes' },
-
-        { lbl: t('nav_forum_moderation'), val: allTopics.length, icon: 'fa-comments', color: '#6a1b9a', bg: '#f3e5f5', action: 'forum' },
-
-      ].map(c => (
+        { lbl: t('profile_signalements_pending'), val: pending, icon: 'fa-clock', color: '#e65100', bg: '#fff3e0', action: 'dashboard', show: !user?.assigned_service || ['lighting', 'trash', 'roads', 'noise', 'water', 'general'].includes(user?.assigned_service) },
+        { lbl: t('profile_signalements_inprog'), val: inprog, icon: 'fa-tasks', color: '#1565c0', bg: '#e3f2fd', action: 'dashboard', show: !user?.assigned_service || ['lighting', 'trash', 'roads', 'noise', 'water', 'general'].includes(user?.assigned_service) },
+        { lbl: t('profile_demandes_admin'), val: allDemandes.length, icon: 'fa-users', color: '#2e7d32', bg: '#e8f5e9', action: 'demandes', show: !user?.assigned_service || !['lighting', 'trash', 'roads', 'noise'].includes(user?.assigned_service) },
+        { lbl: t('nav_forum_moderation'), val: allTopics.length, icon: 'fa-comments', color: '#6a1b9a', bg: '#f3e5f5', action: 'forum', show: !user?.assigned_service || user?.assigned_service === 'forum_moderator' },
+      ].filter(c => c.show).map(c => (
 
         <div key={c.lbl} className="col-6 col-md-3">
 
