@@ -462,9 +462,11 @@ export default function MesDemandesPage() {
             </h1>
             <p className="text-muted mb-0">{t('my_requests_desc')}</p>
           </div>
-          <Link to="/services" className="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i className={`fas fa-plus ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i> {t('new_request')}
-          </Link>
+          {user?.is_verified && (
+            <Link to="/services" className="btn btn-primary rounded-pill px-4 shadow-sm">
+              <i className={`fas fa-plus ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i> {t('new_request')}
+            </Link>
+          )}
         </div>
 
         {user && !user.is_verified && (
@@ -497,16 +499,18 @@ export default function MesDemandesPage() {
             <i className="fas fa-exclamation-circle me-2"></i> {error}
           </div>
         ) : requests.length === 0 ? (
-          <div className="text-center py-5 card shadow-sm border-0 rounded-4">
-            <div className="mb-4 opacity-25">
-              <i className="fas fa-folder-open fa-4x text-muted"></i>
+          user?.is_verified ? (
+            <div className="text-center py-5 card shadow-sm border-0 rounded-4">
+              <div className="mb-4 opacity-25">
+                <i className="fas fa-folder-open fa-4x text-muted"></i>
+              </div>
+              <h4 className="fw-bold text-muted">{t('no_requests_found')}</h4>
+              <p className="text-muted mb-4">{t('no_requests_desc')}</p>
+              <Link to="/services" className="btn btn-outline-primary rounded-pill px-4">
+                {t('make_first_request')}
+              </Link>
             </div>
-            <h4 className="fw-bold text-muted">{t('no_requests_found')}</h4>
-            <p className="text-muted mb-4">{t('no_requests_desc')}</p>
-            <Link to="/services" className="btn btn-outline-primary rounded-pill px-4">
-              {t('make_first_request')}
-            </Link>
-          </div>
+          ) : null
         ) : (
           <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
             <div className="table-responsive">
