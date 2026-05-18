@@ -2432,11 +2432,11 @@ export default function AgentDashboardPage() {
                 {/* ── Stat Cards ── */}
                 <div className="ag-stats-grid">
                   {([
-                    { val: total,    chip: 'Total',    lbl: 'Rapports totaux',        icon: 'fa-list-alt',   iconBg: '#f3f3f3', iconColor: '#6b7280', chipColor: '#6b7280' },
-                    { val: pending,  chip: 'Attente',  lbl: "En attente d'examen",    icon: 'fa-clock',      iconBg: '#fff7ed', iconColor: '#ea580c', chipColor: '#ea580c' },
-                    { val: inprog,   chip: 'Cours',    lbl: 'Interventions actives',  icon: 'fa-tools',      iconBg: '#eff6ff', iconColor: '#2563eb', chipColor: '#2563eb' },
-                    { val: resolved, chip: 'Résolu',   lbl: 'Problèmes réglés',       icon: 'fa-check-circle', iconBg: '#f0fdf4', iconColor: '#16a34a', chipColor: '#16a34a', accent: true },
-                    { val: dupCount, chip: 'Doublons', lbl: 'Réclamations répétées',   icon: 'fa-copy',       iconBg: '#fef2f2', iconColor: '#dc2626', chipColor: '#dc2626', onClick: () => setShowDupPanel((p: boolean) => !p) },
+                    { val: total,    chip: lang === 'ar' ? 'المجموع' : 'Total',    lbl: lang === 'ar' ? 'إجمالي البلاغات' : 'Rapports totaux',        icon: 'fa-list-alt',   iconBg: '#f3f3f3', iconColor: '#6b7280', chipColor: '#6b7280' },
+                    { val: pending,  chip: lang === 'ar' ? 'في الانتظار' : 'Attente',  lbl: lang === 'ar' ? 'في انتظار المراجعة' : "En attente d'examen",    icon: 'fa-clock',      iconBg: '#fff7ed', iconColor: '#ea580c', chipColor: '#ea580c' },
+                    { val: inprog,   chip: lang === 'ar' ? 'قيد التنفيذ' : 'Cours',    lbl: lang === 'ar' ? 'التدخلات النشطة' : 'Interventions actives',  icon: 'fa-tools',      iconBg: '#eff6ff', iconColor: '#2563eb', chipColor: '#2563eb' },
+                    { val: resolved, chip: lang === 'ar' ? 'تم الحل' : 'Résolu',   lbl: lang === 'ar' ? 'المشاكل التي تم حلها' : 'Problèmes réglés',       icon: 'fa-check-circle', iconBg: '#f0fdf4', iconColor: '#16a34a', chipColor: '#16a34a', accent: true },
+                    { val: dupCount, chip: lang === 'ar' ? 'المكررة' : 'Doublons', lbl: lang === 'ar' ? 'الشكاوى المكررة' : 'Réclamations répétées',   icon: 'fa-copy',       iconBg: '#fef2f2', iconColor: '#dc2626', chipColor: '#dc2626', onClick: () => setShowDupPanel((p: boolean) => !p) },
                   ] as Array<{ val: number; chip: string; lbl: string; icon: string; iconBg: string; iconColor: string; chipColor: string; accent?: boolean; onClick?: () => void }>).map((s, i) => (
                     <div key={i} className="ag-stat" style={{ cursor: s.onClick ? 'pointer' : 'default', borderBottom: s.accent ? '2px solid #ae131a' : undefined }} onClick={s.onClick}>
                       <div className="stat-top">
@@ -2497,15 +2497,15 @@ export default function AgentDashboardPage() {
                         }}
                       >
                         <i className="fas fa-mask" style={{ fontSize: '.65rem' }}></i>
-                        {showMask ? 'Masque ON' : 'Masque OFF'}
+                        {showMask ? (lang === 'ar' ? 'القناع مفعل' : 'Masque ON') : (lang === 'ar' ? 'القناع غير مفعل' : 'Masque OFF')}
                       </button>
                       {/* Status filter toggles + export buttons — all on one row */}
                       <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
                         {([
-                          { key: 'pending',     label: 'En attente',  color: '#e65100', bg: '#fff7ed' },
-                          { key: 'in_progress', label: 'En cours',    color: '#1565c0', bg: '#eff6ff' },
-                          { key: 'resolved',    label: 'Résolu',      color: '#15803d', bg: '#f0fdf4' },
-                          { key: 'rejected',    label: 'Rejeté',      color: '#757575', bg: '#f5f5f5' },
+                          { key: 'pending',     label: lang === 'ar' ? 'في الانتظار' : 'En attente',  color: '#e65100', bg: '#fff7ed' },
+                          { key: 'in_progress', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours',    color: '#1565c0', bg: '#eff6ff' },
+                          { key: 'resolved',    label: lang === 'ar' ? 'تم الحل' : 'Résolu',      color: '#15803d', bg: '#f0fdf4' },
+                          { key: 'rejected',    label: lang === 'ar' ? 'مرفوض' : 'Rejeté',      color: '#757575', bg: '#f5f5f5' },
                         ] as { key: string; label: string; color: string; bg: string }[]).map(s => {
                           const active = mapStatusFilter.includes(s.key)
                           return (
@@ -2546,7 +2546,7 @@ export default function AgentDashboardPage() {
                         >
                           <i className="fas fa-map-legend me-1" style={{ fontSize: '0.68rem' }}></i>
                           <i className="fas fa-list me-1" style={{ fontSize: '0.68rem' }}></i>
-                          Légende
+                          {lang === 'ar' ? 'دليل الألوان' : 'Légende'}
                         </button>
                       </div>
                     </div>
@@ -2562,15 +2562,15 @@ export default function AgentDashboardPage() {
                           border: '1px solid #f0f0f0',
                         }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                            <span style={{ fontWeight: 700, color: '#ae131a', borderBottom: '1px solid #eee', paddingBottom: 4, flex: 1 }}>📋 Légende</span>
+                            <span style={{ fontWeight: 700, color: '#ae131a', borderBottom: '1px solid #eee', paddingBottom: 4, flex: 1 }}>📋 {lang === 'ar' ? 'دليل الألوان' : 'Légende'}</span>
                             <button onClick={() => setShowLegend(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 14, padding: '0 0 0 8px', lineHeight: 1 }}>✕</button>
                           </div>
-                          <div style={{ fontWeight: 600, fontSize: 11, color: '#555', marginBottom: 4 }}>Signalements</div>
+                          <div style={{ fontWeight: 600, fontSize: 11, color: '#555', marginBottom: 4 }}>{lang === 'ar' ? 'البلاغات' : 'Signalements'}</div>
                           {[
-                            { color: '#e65100', label: 'En attente' },
-                            { color: '#1565c0', label: 'En cours' },
-                            { color: '#1b5e20', label: 'Résolu' },
-                            { color: '#757575', label: 'Rejeté' },
+                            { color: '#e65100', label: lang === 'ar' ? 'في الانتظار' : 'En attente' },
+                            { color: '#1565c0', label: lang === 'ar' ? 'قيد التنفيذ' : 'En cours' },
+                            { color: '#1b5e20', label: lang === 'ar' ? 'تم الحل' : 'Résolu' },
+                            { color: '#757575', label: lang === 'ar' ? 'مرفوض' : 'Rejeté' },
                           ].map(({ color, label }) => (
                             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                               <span style={{ width: 12, height: 12, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }}></span>
@@ -2602,7 +2602,7 @@ export default function AgentDashboardPage() {
 
                     {/* Donut — Taux de résolution */}
                     <div className="ag-panel">
-                      <h4>Taux de Résolution</h4>
+                      <h4>{lang === 'ar' ? 'نسبة الحل' : 'Taux de Résolution'}</h4>
                       {(() => {
                         const rate = total > 0 ? resolved / total : 0;
                         const circ = 351.86;
@@ -2618,12 +2618,12 @@ export default function AgentDashboardPage() {
                               </svg>
                               <div className="ag-donut-center">
                                 <span className="pct">{pct}%</span>
-                                <span className="lbl">Mensuel</span>
+                                <span className="lbl">{lang === 'ar' ? 'شهري' : 'Mensuel'}</span>
                               </div>
                             </div>
                             <div style={{ marginTop: 20 }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af', marginBottom: 6 }}>
-                                <span>Moyenne mensuelle</span>
+                                <span>{lang === 'ar' ? 'المعدل الشهري' : 'Moyenne mensuelle'}</span>
                                 <span style={{ fontWeight: 700, color: '#1a1c1c' }}>{pct}%</span>
                               </div>
                               <div style={{ height: 4, background: '#f3f3f3', borderRadius: 2, overflow: 'hidden' }}>
