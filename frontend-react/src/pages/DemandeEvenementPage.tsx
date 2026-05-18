@@ -69,7 +69,7 @@ function LocationMarker({ position, onMapClick }: { position: [number, number] |
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function DemandeEvenementPage() {
-  useI18n()
+  const { lang } = useI18n()
   const navigate = useNavigate()
 
   type UserInfo = { first_name: string; last_name: string; email: string; is_verified: boolean }
@@ -257,8 +257,29 @@ export default function DemandeEvenementPage() {
               </div>
             </div>
 
-            <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-              <div className="card-body p-4 p-md-5 bg-white">
+            {user && !user.is_verified && (
+              <div 
+                className="p-4 mb-4 d-flex align-items-center shadow-sm"
+                style={{ 
+                  background: '#FFF4CD', 
+                  borderRadius: '20px', 
+                  border: 'none',
+                  gap: '20px'
+                }}
+              >
+                <div className="text-warning">
+                  <i className="fas fa-exclamation-triangle" style={{ fontSize: '2.5rem' }}></i>
+                </div>
+                <div>
+                  <h5 className="fw-bold mb-1" style={{ color: '#664d03' }}>{lang === 'ar' ? 'حساب في انتظار التحقق' : 'Compte en attente de vérification'}</h5>
+                  <p className="mb-0 fs-6" style={{ color: '#664d03', opacity: 0.9 }}>{lang === 'ar' ? 'يجب التحقق من حسابك من قبل الإدارة للوصول إلى cette service.' : "Votre compte doit être vérifié par l'administration pour accéder à ce service."}</p>
+                </div>
+              </div>
+            )}
+
+            {user?.is_verified && (
+              <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div className="card-body p-4 p-md-5 bg-white">
                 {success ? (
                   <div className="text-center py-5">
                     <div className="mb-4" style={{ color: '#c61f2c' }}><i className="fas fa-check-circle fa-5x"></i></div>
@@ -537,6 +558,7 @@ export default function DemandeEvenementPage() {
                 )}
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
