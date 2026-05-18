@@ -68,7 +68,7 @@ class RegisterView(APIView):
                 address=payload['address'],
                 governorate=payload['governorate'],
                 city=payload['city'],
-                is_active=True,
+                is_active=False,
                 is_verified=False,
                 date_of_birth=dob_obj,
                 place_of_birth=payload.get('place_of_birth', ''),
@@ -172,15 +172,14 @@ class CustomActivationView(APIView):
         except User.DoesNotExist:
             return Response({"error": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
-        if user.is_verified:
-            return Response({"error": "Ce compte est déjà vérifié."}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.activation_code:
+            return Response({"error": "Aucun code d'activation en attente ou compte déjà activé."}, status=status.HTTP_400_BAD_REQUEST)
 
         if user.activation_code != code:
             return Response({"error": "Le code de vérification est incorrect."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Activer le compte
         user.is_active = True
-        user.is_verified = True
         user.activation_code = None  # On efface le code après validation
         user.save()
 
