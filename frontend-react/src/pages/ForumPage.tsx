@@ -396,26 +396,33 @@ export default function ForumPage() {
                   className="block no-underline"
                 >
                   <div
-                    className="bg-white p-3 rounded-xl shadow-sm border border-transparent hover:border-blue-200 transition-all group"
-                    style={{ [lang === 'ar' ? 'borderRight' : 'borderLeft']: `4px solid ${catColor.text}` }}
+                    className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300 group relative overflow-hidden"
+                    style={{ 
+                      [lang === 'ar' ? 'borderRight' : 'borderLeft']: `5px solid ${catColor.text}`,
+                      backgroundColor: '#fff'
+                    }}
                   >
                     <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                      <div className="flex-1 space-y-2 w-full">
+                      <div className="flex-1 space-y-3 w-full">
                         {/* Badges row */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 items-center">
                           {topic.is_pinned && (
-                            <span className="px-2 py-1 rounded text-[10px] font-bold" style={{ backgroundColor: '#fff3e0', color: '#e65100' }}>📌 {t('pinned')}</span>
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: '#fff3e0', color: '#e65100' }}>
+                              <i className="fas fa-thumbtack text-[9px]"></i> {t('pinned')}
+                            </span>
                           )}
                           {topic.is_resolved && (
-                            <span className="px-2 py-1 rounded text-[10px] font-bold" style={{ backgroundColor: '#e8f5e9', color: '#1b5e20' }}>✅ {t('resolved')}</span>
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1" style={{ backgroundColor: '#e8f5e9', color: '#1b5e20' }}>
+                              <i className="fas fa-check text-[9px]"></i> {t('resolved')}
+                            </span>
                           )}
-                          <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider"
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider"
                             style={{ backgroundColor: catColor.bg, color: catColor.text }}>
                             {t(topic.category === 'questions' ? 'questions_agents' : topic.category === 'suggestions' ? 'suggestions_amelioration' : 'debates_citoyens') || topic.category}
                           </span>
-                          {/* Rank badge */}
+                          
                           {sortBy === 'votes' && idx < 3 && (
-                            <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                            <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
                               style={{ backgroundColor: ['#d97706', '#9ca3af', '#92400e'][idx] }}>
                               #{idx + 1}
                             </span>
@@ -423,29 +430,31 @@ export default function ForumPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
+                        <h3 className="text-base md:text-lg font-bold text-slate-800 group-hover:text-[#b87a50] transition-colors mb-1 leading-snug">
                           {topic.title}
                         </h3>
 
                         {/* Author + meta */}
-                        <div className="flex flex-wrap gap-4 text-xs text-slate-400">
-                          <span className="flex items-center gap-1">
-                            <i className="fas fa-user"></i>
-                            {topic.author.first_name} {topic.author.last_name}
+                        <div className="flex flex-wrap gap-4 text-xs text-slate-500 items-center">
+                          <span className="flex items-center gap-1.5">
+                            <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-[10px]">
+                              <i className="fas fa-user"></i>
+                            </div>
+                            <span className="font-medium text-slate-700">{topic.author.first_name} {topic.author.last_name}</span>
                             {topic.author.user_type === 'agent' && (
-                              <span className="ms-1 px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>{t('agent_badge')}</span>
+                              <span className="ms-1 px-1.5 py-0.5 rounded text-[9px] font-bold" style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>{t('agent_badge')}</span>
                             )}
                           </span>
-                          <span className="flex items-center gap-1"><i className="fas fa-calendar"></i>{formatDate(topic.created_at)}</span>
-                          <span className="flex items-center gap-1"><i className="fas fa-eye"></i>{topic.views}</span>
+                          <span className="flex items-center gap-1.5"><i className="far fa-calendar-alt text-slate-400"></i>{formatDate(topic.created_at)}</span>
+                          <span className="flex items-center gap-1.5"><i className="far fa-eye text-slate-400"></i>{topic.views}</span>
                         </div>
 
                         {/* Tags */}
                         {topic.tags.length > 0 && (
-                          <div className="flex gap-1 flex-wrap mt-2">
+                          <div className="flex gap-1.5 flex-wrap mt-2">
                             {topic.tags.map(tag => (
-                              <span key={tag.id} className="px-2 py-0.5 rounded text-[11px] font-bold"
-                                style={{ backgroundColor: '#dbeafe', color: '#1e40af' }}>
+                              <span key={tag.id} className="px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors hover:bg-opacity-80"
+                                style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
                                 #{tag.name}
                               </span>
                             ))}
@@ -454,23 +463,28 @@ export default function ForumPage() {
                       </div>
 
                       {/* Right: votes + replies + join button */}
-                      <div className={`flex flex-row md:flex-col items-center gap-3 md:min-w-[80px] ${lang === 'ar' ? 'mr-auto' : 'ml-auto'}`}>
-                        <button
-                          onClick={e => voteTopic(topic.id, e)}
-                          className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors border-0 cursor-pointer"
-                          style={topic.has_voted
-                            ? { backgroundColor: '#d4aa8d', color: 'white' }
-                            : { backgroundColor: 'rgba(212,170,141,.1)', color: '#d4aa8d' }
-                          }
-                        >
-                          <i className="fas fa-thumbs-up"></i>{topic.votes_count}
-                        </button>
-                        <div className="text-xs text-slate-400 flex items-center gap-1">
-                          <i className="fas fa-comment"></i>{topic.replies_count}
+                      <div className={`flex flex-row md:flex-col items-center gap-3 md:min-w-[100px] ${lang === 'ar' ? 'mr-auto' : 'ml-auto'} md:items-end`}>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={e => voteTopic(topic.id, e)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer hover:scale-105"
+                            style={topic.has_voted
+                              ? { backgroundColor: '#d4aa8d', color: 'white', boxShadow: '0 4px 10px rgba(212,170,141,0.3)' }
+                              : { backgroundColor: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }
+                            }
+                          >
+                            <i className={`${topic.has_voted ? 'fas' : 'far'} fa-thumbs-up`}></i>{topic.votes_count}
+                          </button>
+                          
+                          <div className="text-xs text-slate-500 flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                            <i className="far fa-comment-dots text-slate-400"></i>
+                            <span className="font-bold text-slate-700">{topic.replies_count}</span>
+                          </div>
                         </div>
-                        <span className="text-xs font-bold uppercase tracking-tighter hover:underline"
-                          style={{ color: '#d4aa8d', textDecoration: 'underline', textDecorationStyle: 'dotted' }}>
+
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#b87a50] group-hover:underline flex items-center gap-1 mt-1">
                           {t('join_discussion')}
+                          <i className={`fas fa-chevron-${lang === 'ar' ? 'left' : 'right'} text-[9px] transition-transform group-hover:translate-x-${lang === 'ar' ? '-2' : '2'}`}></i>
                         </span>
                       </div>
                     </div>
