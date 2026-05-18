@@ -1412,7 +1412,8 @@ export default function SignupPage() {
 
       setMessage(data?.message || t('signup_success_verified') || "Un code de vérification vous a été envoyé. Veuillez vérifier votre e-mail.");
 
-      setTimeout(() => navigate('/verify', { state: { email } }), 2000)
+      // Redirect immediately and pass email in query params for reliability
+      navigate(`/verify?email=${encodeURIComponent(email)}`)
 
     } catch (err) {
 
