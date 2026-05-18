@@ -2212,20 +2212,20 @@ export default function AgentDashboardPage() {
             </a>
           )}
 
-          {user?.user_type === 'agent' && (
-            <>
-              <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
-                <i className="fas fa-calendar-alt"></i>
-                <span>{t('nav_events_mgmt')}</span>
-                {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>}
-              </a>
+          {user?.user_type === 'agent' && (user?.assigned_service === 'social' || !user?.assigned_service) && (
+            <a className={`ag-nav-item${activeTab === 'evenements' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('evenements'); fetchEvenements() }}>
+              <i className="fas fa-calendar-alt"></i>
+              <span>{t('nav_events_mgmt')}</span>
+              {allEvenements.filter((ev: any) => ev.status === 'pending').length > 0 && <span className="ag-badge">{allEvenements.filter((ev: any) => ev.status === 'pending').length}</span>}
+            </a>
+          )}
 
-              <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
-                <i className="fas fa-hard-hat"></i>
-                <span>{t('permis_construire')}</span>
-                {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
-              </a>
-            </>
+          {user?.user_type === 'agent' && (user?.assigned_service === 'construction' || !user?.assigned_service) && (
+            <a className={`ag-nav-item${activeTab === 'construction' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('construction'); fetchConstructions() }}>
+              <i className="fas fa-hard-hat"></i>
+              <span>{t('permis_construire')}</span>
+              {allConstructions.filter((c: any) => c.status === 'pending').length > 0 && <span className="ag-badge">{allConstructions.filter((c: any) => c.status === 'pending').length}</span>}
+            </a>
           )}
 
           {(user?.user_type === 'supervisor' || user?.is_superuser) && (
