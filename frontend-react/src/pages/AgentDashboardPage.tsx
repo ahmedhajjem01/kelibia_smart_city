@@ -2226,7 +2226,7 @@ export default function AgentDashboardPage() {
           <div className="ag-divider"></div>
           <div className="ag-sec-title">{t('nav_admin_staff')}</div>
 
-          {user?.user_type === 'agent' && (
+          {user?.user_type === 'agent' && user?.assigned_service !== 'forum_moderator' && user?.assigned_service !== 'news_editor' && (
             <a className={`ag-nav-item${activeTab === 'demandes' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('demandes'); fetchDemandes() }}>
               <i className="fas fa-folder-open"></i>
               <span>{t('nav_demandes_citoyens')}</span>
@@ -2234,18 +2234,18 @@ export default function AgentDashboardPage() {
             </a>
           )}
 
-          {user?.user_type === 'agent' && (
-            <>
-              <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
-                <i className="fas fa-comments"></i>
-                <span>{t('nav_forum_moderation')}</span>
-              </a>
+          {user?.user_type === 'agent' && user?.assigned_service === 'forum_moderator' && (
+            <a className={`ag-nav-item${activeTab === 'forum' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('forum'); fetchTopics(); fetchMlStats(); }}>
+              <i className="fas fa-comments"></i>
+              <span>{t('nav_forum_moderation')}</span>
+            </a>
+          )}
 
-              <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
-                <i className="fas fa-newspaper"></i>
-                <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
-              </a>
-            </>
+          {user?.user_type === 'agent' && user?.assigned_service === 'news_editor' && (
+            <a className={`ag-nav-item${activeTab === 'actualites' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('actualites'); fetchArticles(); }}>
+              <i className="fas fa-newspaper"></i>
+              <span>{lang === 'ar' ? 'إدارة الأخبار' : 'Gérer Actualités'}</span>
+            </a>
           )}
 
           {user?.user_type === 'agent' && user?.assigned_service === 'civil_registry' && (
