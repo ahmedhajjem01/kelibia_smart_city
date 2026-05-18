@@ -628,6 +628,20 @@ export default function AgentDashboardPage() {
     if (activeTab === 'citizens' && user) fetchAgentCitizens()
   }, [activeTab, user])
 
+  useEffect(() => {
+    if (user?.user_type === 'agent' && activeTab === 'dashboard') {
+      const recServices = ['lighting', 'trash', 'roads', 'noise', 'water', 'general'];
+      if (user.assigned_service && !recServices.includes(user.assigned_service)) {
+        if (user.assigned_service === 'civil_registry') {
+          setActiveTab('citizens');
+        } else {
+          setActiveTab('demandes');
+          fetchDemandes();
+        }
+      }
+    }
+  }, [user, activeTab]);
+
   function insideKelibia(lat: number, lng: number): boolean {
     const ring = kelibiaRingRef.current
     if (!ring) return true // allow if ring not loaded yet
@@ -2190,11 +2204,13 @@ export default function AgentDashboardPage() {
         {/* Nav */}
         <nav className="ag-sidebar-nav">
 
-          <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
-            <i className="fas fa-chart-pie"></i>
-            <span>{t('dashboard')}</span>
-            {pending > 0 && <span className="ag-badge">{pending}</span>}
-          </a>
+          {(!user?.assigned_service || ['lighting', 'trash', 'roads', 'noise', 'water', 'general'].includes(user?.assigned_service)) && (
+            <a className={`ag-nav-item${activeTab === 'dashboard' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('dashboard') }}>
+              <i className="fas fa-chart-pie"></i>
+              <span>{t('dashboard')}</span>
+              {pending > 0 && <span className="ag-badge">{pending}</span>}
+            </a>
+          )}
 
           {user?.user_type === 'agent' && (
             <>
