@@ -430,7 +430,7 @@ export default function ForumPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base font-bold text-slate-800 group-hover:text-[#1a237e] transition-colors mb-1 leading-snug">
+                        <h3 className="text-sm font-semibold text-black mb-1 leading-snug">
                           {topic.title}
                         </h3>
 
