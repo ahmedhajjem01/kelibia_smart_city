@@ -1509,7 +1509,7 @@ export default function AgentDashboardPage() {
         ? resolveBackendUrl('/api/accounts/agent-citizens/')
         : resolveBackendUrl('/api/accounts/verify-citizens/?mode=citizens');
 
-      console.log('[fetchAgentCitizens] user:', user?.user_type, '| isSup:', isSup, '| url:', url)
+      console.log('[fetchAgentCitizens] user:', user?.user_type, '| url:', url)
 
       const res = await fetch(url, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
 
