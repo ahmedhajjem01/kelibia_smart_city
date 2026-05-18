@@ -396,14 +396,14 @@ export default function ForumPage() {
                   className="block no-underline"
                 >
                   <div
-                    className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300 group relative overflow-hidden"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300 group relative overflow-hidden"
                     style={{ 
-                      [lang === 'ar' ? 'borderRight' : 'borderLeft']: `5px solid ${catColor.text}`,
+                      [lang === 'ar' ? 'borderRight' : 'borderLeft']: `4px solid ${catColor.text}`,
                       backgroundColor: '#fff'
                     }}
                   >
                     <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                      <div className="flex-1 space-y-3 w-full">
+                      <div className="flex-1 space-y-2 w-full">
                         {/* Badges row */}
                         <div className="flex flex-wrap gap-2 items-center">
                           {topic.is_pinned && (
@@ -430,7 +430,7 @@ export default function ForumPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base md:text-lg font-bold text-slate-800 group-hover:text-[#b87a50] transition-colors mb-1 leading-snug">
+                        <h3 className="text-base font-bold text-slate-800 group-hover:text-[#1a237e] transition-colors mb-1 leading-snug">
                           {topic.title}
                         </h3>
 
@@ -469,7 +469,7 @@ export default function ForumPage() {
                             onClick={e => voteTopic(topic.id, e)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer hover:scale-105"
                             style={topic.has_voted
-                              ? { backgroundColor: '#d4aa8d', color: 'white', boxShadow: '0 4px 10px rgba(212,170,141,0.3)' }
+                              ? { backgroundColor: '#1a237e', color: 'white', boxShadow: '0 4px 10px rgba(26,35,126,0.3)' }
                               : { backgroundColor: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }
                             }
                           >
@@ -482,7 +482,7 @@ export default function ForumPage() {
                           </div>
                         </div>
 
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#b87a50] group-hover:underline flex items-center gap-1 mt-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#1a237e] group-hover:underline flex items-center gap-1 mt-1">
                           {t('join_discussion')}
                           <i className={`fas fa-chevron-${lang === 'ar' ? 'left' : 'right'} text-[9px] transition-transform group-hover:translate-x-${lang === 'ar' ? '-2' : '2'}`}></i>
                         </span>
@@ -490,8 +490,6 @@ export default function ForumPage() {
                     </div>
                   </div>
                 </Link>
-              )
-            })}
           </div>
         )}
 
