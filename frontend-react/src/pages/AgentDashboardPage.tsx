@@ -1505,10 +1505,9 @@ export default function AgentDashboardPage() {
 
     try {
 
-      const isSup = user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff;
-      const url = isSup
-        ? resolveBackendUrl('/api/accounts/verify-citizens/?mode=citizens')
-        : resolveBackendUrl('/api/accounts/agent-citizens/');
+      const url = user?.user_type === 'agent'
+        ? resolveBackendUrl('/api/accounts/agent-citizens/')
+        : resolveBackendUrl('/api/accounts/verify-citizens/?mode=citizens');
 
       console.log('[fetchAgentCitizens] user:', user?.user_type, '| isSup:', isSup, '| url:', url)
 
