@@ -269,295 +269,299 @@ export default function DemandeConstructionPage() {
         )}
 
         {/* Step wizard */}
-        <div className="cst-wizard">
-          {([1,2,3,4] as Step[]).map((s,i) => (
-            <React.Fragment key={s}>
-              {i > 0 && <div className={`cst-conn${step > s-1 ? ' on' : ''}`} />}
-              <div className="cst-step">
-                <div className={`cst-circ ${step > s ? 'done' : step === s ? 'act' : 'wait'}`}>
-                  {step > s ? <i className="fas fa-check" /> : s}
-                </div>
-                <div className={`cst-slbl${step === s ? ' act' : ''}`}>{STEP_TITLES[s]}</div>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-
-        {highRisk && (
-          <div className="rbanner d-flex align-items-center gap-2">
-            <i className={`fas fa-exclamation-triangle ${lang === 'ar' ? 'ms-2' : ''}`}></i>
-            <span>{lang === 'ar' ? `ملف ذو أولوية عالية — ${form.type_travaux === 'demolition' ? 'هدم' : `${form.nombre_etages} طوابق`} — يلزم إجراء معاينة فنية` : `Dossier haute priorité — ${form.type_travaux === 'demolition' ? 'Démolition' : `${form.nombre_etages} étages`} — inspection technique requise`}</span>
-          </div>
-        )}
-        {error && <div className="alert alert-danger rounded-3 mb-3 small"><i className={`fas fa-times-circle ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{error}</div>}
-
-        <div className="fc">
-
-          {/* ── STEP 1 ── Nature des travaux */}
-          {step === 1 && (
-            <div>
-              <p className="sh"><i className={`fas fa-tools ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'طبيعة الأشغال' : 'Nature des travaux / نوع الأشغال'}</p>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">{lang === 'ar' ? 'نوع الأشغال' : 'Type de travaux'} <span className="text-danger">*</span></label>
-                <div className="row g-2">
-                  {TYPE_TRAVAUX.map(t => (
-                    <div className="col-6 col-md-4" key={t.value}>
-                      <div className={`tcard${form.type_travaux === t.value ? ' sel' : ''}`} onClick={() => update('type_travaux', t.value)}>
-                        <div style={{ fontSize: '1.4rem' }}>{t.emoji}</div>
-                        <div className="fw-semibold" style={{ fontSize: '.82rem' }}>{t.label}</div>
-                        {t.risk && <span className="badge bg-danger mt-1" style={{ fontSize: '.63rem' }}>⚠️ {lang === 'ar' ? 'أولوية عالية' : 'Priorité haute'}</span>}
-                      </div>
+        {user?.is_verified && (
+          <>
+            <div className="cst-wizard">
+              {([1,2,3,4] as Step[]).map((s,i) => (
+                <React.Fragment key={s}>
+                  {i > 0 && <div className={`cst-conn${step > s-1 ? ' on' : ''}`} />}
+                  <div className="cst-step">
+                    <div className={`cst-circ ${step > s ? 'done' : step === s ? 'act' : 'wait'}`}>
+                      {step > s ? <i className="fas fa-check" /> : s}
                     </div>
-                  ))}
-                </div>
-                {form.type_travaux === 'autre' && (
-                  <input className="form-control mt-2 rounded-3" placeholder={lang === 'ar' ? 'يرجى تحديد نوع الأشغال...' : "Précisez le type de travaux..."}
-                    value={form.type_travaux_libre} onChange={e => update('type_travaux_libre', e.target.value)} />
-                )}
-              </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">{lang === 'ar' ? 'استعمال المبنى' : 'Usage du bâtiment'} <span className="text-danger">*</span></label>
-                <div className="d-flex flex-wrap gap-2">
-                  {USAGE_BATIMENT.map(u => (
-                    <button key={u.value} type="button" onClick={() => update('usage_batiment', u.value)}
-                      className={`btn btn-sm rounded-pill ${form.usage_batiment === u.value ? 'btn-primary' : 'btn-outline-secondary'}`}>
-                      {u.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">{lang === 'ar' ? 'وصف الأشغال' : 'Description des travaux'} <span className="text-danger">*</span></label>
-                <textarea className="form-control rounded-3" rows={4}
-                  placeholder={lang === 'ar' ? 'قم بوصف الأشغال المخطط لها بالتفصيل (الطبيعة، المواد، الطرق...)' : "Décrivez en détail les travaux prévus (nature, matériaux, méthodes...)"}
-                  value={form.description_travaux} onChange={e => update('description_travaux', e.target.value)} dir="auto" />
-                <small className="text-muted">{form.description_travaux.length}/10 {lang === 'ar' ? 'حروف كحد أدنى' : 'caractères minimum'}</small>
-              </div>
-              <button className="btn btn-primary rounded-pill px-5 w-100 fw-bold" disabled={!canStep1} onClick={() => setStep(2)}>
-                {lang === 'ar' ? 'متابعة' : 'Continuer'} <i className={`fas fa-arrow-${lang === 'ar' ? 'left' : 'right'} ms-2`}></i>
-              </button>
+                    <div className={`cst-slbl${step === s ? ' act' : ''}`}>{STEP_TITLES[s]}</div>
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
-          )}
 
-          {/* ── STEP 2 ── Terrain & Dimensions */}
-          {step === 2 && (
-            <div>
-              <p className="sh"><i className={`fas fa-map-marked-alt ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'قطعة الأرض والأبعاد' : 'Terrain & Dimensions'}</p>
-              <div className="row g-3 mb-3">
-                <div className="col-md-8">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'عنوان قطعة الأرض' : 'Adresse du terrain'} <span className="text-danger">*</span></label>
-                  <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'مثال: شارع الزيتون، قليبية' : "Ex: Rue des Oliviers, Kelibia"}
-                    value={form.adresse_terrain} onChange={e => update('adresse_terrain', e.target.value)} dir="auto" />
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'رقم القطعة' : 'N° de parcelle'}</label>
-                  <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'مثال: 12/ب' : "Ex: 12/B"}
-                    value={form.numero_parcelle} onChange={e => update('numero_parcelle', e.target.value)} dir="auto" />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'مساحة الأرض (م²)' : 'Surface terrain (m²)'} <span className="text-danger">*</span></label>
-                  <input type="number" className="form-control rounded-3" placeholder="Ex: 300" min="1"
-                    value={form.surface_terrain} onChange={e => update('surface_terrain', e.target.value)} dir="ltr" />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'المساحة المبنية (م²)' : 'Surface à construire (m²)'} <span className="text-danger">*</span></label>
-                  <input type="number" className="form-control rounded-3" placeholder="Ex: 150" min="1"
-                    value={form.surface_construite} onChange={e => update('surface_construite', e.target.value)} dir="ltr" />
-                  {form.surface_terrain && form.surface_construite && Number(form.surface_construite) > Number(form.surface_terrain) && (
-                    <small className="text-danger fw-semibold d-block mt-1">⚠️ {lang === 'ar' ? 'لا يمكن أن تتجاوز مساحة الأرض' : 'Ne peut pas dépasser la surface du terrain'}</small>
-                  )}
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'عدد الطوابق' : "Nbre d'étages"} <span className="text-danger">*</span></label>
-                  <input type="number" className="form-control rounded-3" min="0" max="20"
-                    value={form.nombre_etages} onChange={e => update('nombre_etages', e.target.value)} dir="ltr" />
-                  {parseInt(form.nombre_etages) > 3 && <small className="text-danger fw-semibold">⚠️ {lang === 'ar' ? '+3 طوابق = أولوية عالية' : '+3 étages = haute priorité'}</small>}
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'الارتفاع الأقصى (م)' : 'Hauteur max. (m)'}</label>
-                  <input type="number" className="form-control rounded-3" placeholder="Ex: 12" min="1"
-                    value={form.hauteur_max} onChange={e => update('hauteur_max', e.target.value)} dir="ltr" />
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'التكلفة التقديرية (د.ت)' : 'Coût estimatif (DT)'}</label>
-                  <input type="number" className="form-control rounded-3" placeholder="Ex: 85000" min="0"
-                    value={form.cout_estime} onChange={e => update('cout_estime', e.target.value)} dir="ltr" />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'تاريخ البدء المخطط' : 'Date début prévue'} <span className="text-danger">*</span></label>
-                  <input type="date" className="form-control rounded-3"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={form.date_debut_prevue} onChange={e => update('date_debut_prevue', e.target.value)} dir="ltr" />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-semibold small">{lang === 'ar' ? 'المدة التقديرية (أشهر)' : 'Durée estimée (mois)'} <span className="text-danger">*</span></label>
-                  <input type="number" className="form-control rounded-3" placeholder="Ex: 6" min="1" max="120"
-                    value={form.duree_travaux_mois} onChange={e => update('duree_travaux_mois', e.target.value)} dir="ltr" />
-                </div>
+            {highRisk && (
+              <div className="rbanner d-flex align-items-center gap-2">
+                <i className={`fas fa-exclamation-triangle ${lang === 'ar' ? 'ms-2' : ''}`}></i>
+                <span>{lang === 'ar' ? `ملف ذو أولوية عالية — ${form.type_travaux === 'demolition' ? 'هدم' : `${form.nombre_etages} طوابق`} — يلزم إجراء معاينة فنية` : `Dossier haute priorité — ${form.type_travaux === 'demolition' ? 'Démolition' : `${form.nombre_etages} étages`} — inspection technique requise`}</span>
               </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">
-                  <i className={`fas fa-map-pin ${lang === 'ar' ? 'ms-1' : 'me-1'} text-primary`}></i>{lang === 'ar' ? 'الموقع الجغرافي (اختياري) — انقر على الخريطة' : 'Localisation GPS (optionnel) — cliquez sur la carte'}
-                </label>
-                <div className="rounded-3 overflow-hidden border" style={{ height: 240 }} dir="ltr">
-                  <MapContainer center={KELIBIA_CENTER} zoom={13} style={{ height: '100%', width: '100%' }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
-                    {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
-                    <LocationMarker position={position} onMapClick={p => {
-                      if (!isInsideKelibia(p[0], p[1])) {
-                        setError(t('error_outside_kelibia'))
-                      } else {
-                        setError(null)
-                        setPosition(p)
-                      }
-                    }} />
-                  </MapContainer>
-                </div>
-                {position && (
-                  <div className="d-flex align-items-center gap-2 mt-2">
-                    <span className="badge bg-success rounded-pill px-3 py-2" dir="ltr">
-                      <i className="fas fa-map-marker-alt me-1"></i>{position[0].toFixed(5)}, {position[1].toFixed(5)}
-                    </span>
-                    <button type="button" className="btn btn-sm btn-outline-danger rounded-pill" onClick={() => setPosition(null)}>{lang === 'ar' ? 'مسح' : 'Effacer'}</button>
-                  </div>
-                )}
-              </div>
-              <div className="d-flex gap-2">
-                <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setStep(1)}>
-                  <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رجوع' : 'Retour'}
-                </button>
-                <button className="btn btn-primary rounded-pill px-5 flex-grow-1 fw-bold" disabled={!canStep2} onClick={() => setStep(3)}>
-                  {lang === 'ar' ? 'متابعة' : 'Continuer'} <i className={`fas fa-arrow-${lang === 'ar' ? 'left' : 'right'} ${lang === 'ar' ? 'me-2' : 'ms-2'}`}></i>
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+            {error && <div className="alert alert-danger rounded-3 mb-3 small"><i className={`fas fa-times-circle ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{error}</div>}
 
-          {/* ── STEP 3 ── Propriétaire & Entrepreneur */}
-          {step === 3 && (
-            <div>
-              <p className="sh"><i className={`fas fa-user-tie ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'المالك والمقاول' : 'Propriétaire & Entrepreneur / المالك والمقاول'}</p>
-              <div className="p-3 bg-light rounded-3 mb-3">
-                <p className="fw-bold mb-2 text-primary small"><i className={`fas fa-id-card ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'معلومات المالك' : 'Informations du propriétaire'}</p>
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'الاسم الكامل' : 'Nom complet'} <span className="text-danger">*</span></label>
-                    <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'الاسم واللقب' : "Nom et prénom"}
-                      value={form.nom_proprietaire} onChange={e => update('nom_proprietaire', e.target.value)} dir="auto" />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'بطاقة التعريف (8 أرقام)' : 'CIN (8 chiffres)'} <span className="text-danger">*</span></label>
-                    <input className="form-control rounded-3" placeholder="12345678" maxLength={8}
-                      value={form.cin_proprietaire}
-                      onChange={e => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        if (val.length <= 8) update('cin_proprietaire', val);
-                      }} dir="ltr" />
-                  </div>
-                  <div className="col-md-3">
-                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'رقم الهاتف' : 'Téléphone'} <span className="text-danger">*</span></label>
-                    <input className="form-control rounded-3" placeholder="Ex: 25123456" maxLength={8}
-                      value={form.telephone_proprietaire}
-                      onChange={e => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        if (val.length <= 8) update('telephone_proprietaire', val);
-                      }} dir="ltr" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-3 bg-light rounded-3 mb-3">
-                <p className="fw-bold mb-2 text-warning small"><i className={`fas fa-hard-hat ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'المقاول (اختياري)' : 'Entrepreneur (optionnel)'}</p>
-                <div className="row g-3">
-                  <div className="col-md-7">
-                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'اسم الشركة' : "Nom de l'entreprise"}</label>
-                    <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'مثال: شركة البناء بقليبية' : "Ex: SARL Bâtiment Kelibia"}
-                      value={form.nom_entrepreneur} onChange={e => update('nom_entrepreneur', e.target.value)} dir="auto" />
-                  </div>
-                  <div className="col-md-5">
-                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'هاتف المقاول' : 'Téléphone entrepreneur'}</label>
-                    <input className="form-control rounded-3" placeholder="Ex: 71234567"
-                      value={form.telephone_entrepreneur} onChange={e => update('telephone_entrepreneur', e.target.value)} dir="ltr" />
-                  </div>
-                </div>
-              </div>
-              <div className="d-flex gap-2">
-                <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setStep(2)}>
-                  <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رجوع' : 'Retour'}
-                </button>
-                <button className="btn btn-primary rounded-pill px-5 flex-grow-1 fw-bold" disabled={!canStep3} onClick={() => setStep(4)}>
-                  {lang === 'ar' ? 'متابعة' : 'Continuer'} <i className={`fas fa-arrow-${lang === 'ar' ? 'left' : 'right'} ${lang === 'ar' ? 'me-2' : 'ms-2'}`}></i>
-                </button>
-              </div>
-            </div>
-          )}
+            <div className="fc">
 
-          {/* ── STEP 4 ── Documents */}
-          {step === 4 && (
-            <div>
-              <p className="sh"><i className={`fas fa-file-upload ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'الوثائق المطلوبة' : 'Documents requis / الوثائق المطلوبة'}</p>
-              <div className="alert alert-info rounded-3 small mb-3">
-                <i className={`fas fa-info-circle ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'الوثائق التي تحمل علامة ' : 'Les documents marqués '}<strong>*</strong>{lang === 'ar' ? ' إلزامية.' : ' sont obligatoires.'}
-              </div>
-              {DOCS.map(doc => (
-                <div key={doc.key} className="mb-3 p-3 rounded-3 border" style={{ background: '#fafbff' }}>
-                  <label className="form-label fw-semibold small d-flex align-items-center gap-2">
-                    <i className={`fas ${doc.icon} text-primary`}></i>
-                    {doc.label} {doc.required && <span className="text-danger">*</span>}
-                  </label>
-                  {cameraActive === doc.key ? (
-                    <WebcamCapture onCapture={handleCameraCapture(doc.key)} onCancel={() => setCameraActive(null)} />
-                  ) : (
-                    <div className="d-flex gap-2 flex-wrap">
-                      <input type="file" accept={doc.accept} className="form-control rounded-3 flex-grow-1"
-                        onChange={e => setFile(doc.key, e.target.files?.[0] ?? null)} />
-                      {doc.camera && (
-                        <button type="button" className="btn btn-outline-secondary rounded-3" onClick={() => setCameraActive(doc.key)}>
-                          <i className={`fas fa-camera ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{lang === 'ar' ? 'صورة' : 'Photo'}
+              {/* ── STEP 1 ── Nature des travaux */}
+              {step === 1 && (
+                <div>
+                  <p className="sh"><i className={`fas fa-tools ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'طبيعة الأشغال' : 'Nature des travaux / نوع الأشغال'}</p>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'نوع الأشغال' : 'Type de travaux'} <span className="text-danger">*</span></label>
+                    <div className="row g-2">
+                      {TYPE_TRAVAUX.map(t => (
+                        <div className="col-6 col-md-4" key={t.value}>
+                          <div className={`tcard${form.type_travaux === t.value ? ' sel' : ''}`} onClick={() => update('type_travaux', t.value)}>
+                            <div style={{ fontSize: '1.4rem' }}>{t.emoji}</div>
+                            <div className="fw-semibold" style={{ fontSize: '.82rem' }}>{t.label}</div>
+                            {t.risk && <span className="badge bg-danger mt-1" style={{ fontSize: '.63rem' }}>⚠️ {lang === 'ar' ? 'أولوية عالية' : 'Priorité haute'}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {form.type_travaux === 'autre' && (
+                      <input className="form-control mt-2 rounded-3" placeholder={lang === 'ar' ? 'يرجى تحديد نوع الأشغال...' : "Précisez le type de travaux..."}
+                        value={form.type_travaux_libre} onChange={e => update('type_travaux_libre', e.target.value)} />
+                    )}
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'استعمال المبنى' : 'Usage du bâtiment'} <span className="text-danger">*</span></label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {USAGE_BATIMENT.map(u => (
+                        <button key={u.value} type="button" onClick={() => update('usage_batiment', u.value)}
+                          className={`btn btn-sm rounded-pill ${form.usage_batiment === u.value ? 'btn-primary' : 'btn-outline-secondary'}`}>
+                          {u.label}
                         </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold small">{lang === 'ar' ? 'وصف الأشغال' : 'Description des travaux'} <span className="text-danger">*</span></label>
+                    <textarea className="form-control rounded-3" rows={4}
+                      placeholder={lang === 'ar' ? 'قم بوصف الأشغال المخطط لها بالتفصيل (الطبيعة، المواد، الطرق...)' : "Décrivez en détail les travaux prévus (nature, matériaux, méthodes...)"}
+                      value={form.description_travaux} onChange={e => update('description_travaux', e.target.value)} dir="auto" />
+                    <small className="text-muted">{form.description_travaux.length}/10 {lang === 'ar' ? 'حروف كحد أدنى' : 'caractères minimum'}</small>
+                  </div>
+                  <button className="btn btn-primary rounded-pill px-5 w-100 fw-bold" disabled={!canStep1} onClick={() => setStep(2)}>
+                    {lang === 'ar' ? 'متابعة' : 'Continuer'} <i className={`fas fa-arrow-${lang === 'ar' ? 'left' : 'right'} ms-2`}></i>
+                  </button>
+                </div>
+              )}
+
+              {/* ── STEP 2 ── Terrain & Dimensions */}
+              {step === 2 && (
+                <div>
+                  <p className="sh"><i className={`fas fa-map-marked-alt ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'قطعة الأرض والأبعاد' : 'Terrain & Dimensions'}</p>
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-8">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'عنوان قطعة الأرض' : 'Adresse du terrain'} <span className="text-danger">*</span></label>
+                      <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'مثال: شارع الزيتون، قليبية' : "Ex: Rue des Oliviers, Kelibia"}
+                        value={form.adresse_terrain} onChange={e => update('adresse_terrain', e.target.value)} dir="auto" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'رقم القطعة' : 'N° de parcelle'}</label>
+                      <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'مثال: 12/ب' : "Ex: 12/B"}
+                        value={form.numero_parcelle} onChange={e => update('numero_parcelle', e.target.value)} dir="auto" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'مساحة الأرض (م²)' : 'Surface terrain (m²)'} <span className="text-danger">*</span></label>
+                      <input type="number" className="form-control rounded-3" placeholder="Ex: 300" min="1"
+                        value={form.surface_terrain} onChange={e => update('surface_terrain', e.target.value)} dir="ltr" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'المساحة المبنية (م²)' : 'Surface à construire (m²)'} <span className="text-danger">*</span></label>
+                      <input type="number" className="form-control rounded-3" placeholder="Ex: 150" min="1"
+                        value={form.surface_construite} onChange={e => update('surface_construite', e.target.value)} dir="ltr" />
+                      {form.surface_terrain && form.surface_construite && Number(form.surface_construite) > Number(form.surface_terrain) && (
+                        <small className="text-danger fw-semibold d-block mt-1">⚠️ {lang === 'ar' ? 'لا يمكن أن تتجاوز مساحة الأرض' : 'Ne peut pas dépasser la surface du terrain'}</small>
                       )}
                     </div>
-                  )}
-                  {files[doc.key] && (
-                    <div className="fok">
-                      <i className={`fas fa-check-circle text-success ${lang === 'ar' ? 'ms-2' : ''}`}></i>
-                      {files[doc.key]!.name} — {(files[doc.key]!.size / 1024).toFixed(0)} Ko
-                      <button type="button" className={`btn btn-sm text-danger ${lang === 'ar' ? 'me-auto' : 'ms-auto'} p-0 border-0 bg-transparent`}
-                        onClick={() => setFile(doc.key, null)}>
-                        <i className="fas fa-times"></i>
-                      </button>
+                    <div className="col-md-4">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'عدد الطوابق' : "Nbre d'étages"} <span className="text-danger">*</span></label>
+                      <input type="number" className="form-control rounded-3" min="0" max="20"
+                        value={form.nombre_etages} onChange={e => update('nombre_etages', e.target.value)} dir="ltr" />
+                      {parseInt(form.nombre_etages) > 3 && <small className="text-danger fw-semibold">⚠️ {lang === 'ar' ? '+3 طوابق = أولوية عالية' : '+3 étages = haute priorité'}</small>}
                     </div>
-                  )}
+                    <div className="col-md-4">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'الارتفاع الأقصى (م)' : 'Hauteur max. (m)'}</label>
+                      <input type="number" className="form-control rounded-3" placeholder="Ex: 12" min="1"
+                        value={form.hauteur_max} onChange={e => update('hauteur_max', e.target.value)} dir="ltr" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'التكلفة التقديرية (د.ت)' : 'Coût estimatif (DT)'}</label>
+                      <input type="number" className="form-control rounded-3" placeholder="Ex: 85000" min="0"
+                        value={form.cout_estime} onChange={e => update('cout_estime', e.target.value)} dir="ltr" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'تاريخ البدء المخطط' : 'Date début prévue'} <span className="text-danger">*</span></label>
+                      <input type="date" className="form-control rounded-3"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={form.date_debut_prevue} onChange={e => update('date_debut_prevue', e.target.value)} dir="ltr" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label fw-semibold small">{lang === 'ar' ? 'المدة التقديرية (أشهر)' : 'Durée estimée (mois)'} <span className="text-danger">*</span></label>
+                      <input type="number" className="form-control rounded-3" placeholder="Ex: 6" min="1" max="120"
+                        value={form.duree_travaux_mois} onChange={e => update('duree_travaux_mois', e.target.value)} dir="ltr" />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold small">
+                      <i className={`fas fa-map-pin ${lang === 'ar' ? 'ms-1' : 'me-1'} text-primary`}></i>{lang === 'ar' ? 'الموقع الجغرافي (اختياري) — انقر على الخريطة' : 'Localisation GPS (optionnel) — cliquez sur la carte'}
+                    </label>
+                    <div className="rounded-3 overflow-hidden border" style={{ height: 240 }} dir="ltr">
+                      <MapContainer center={KELIBIA_CENTER} zoom={13} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
+                        {limiteData && <GeoJSON data={limiteData} style={() => ({ color: '#1a237e', weight: 2.5, fill: false, dashArray: '8,4', opacity: 0.85 })} />}
+                        <LocationMarker position={position} onMapClick={p => {
+                          if (!isInsideKelibia(p[0], p[1])) {
+                            setError(t('error_outside_kelibia'))
+                          } else {
+                            setError(null)
+                            setPosition(p)
+                          }
+                        }} />
+                      </MapContainer>
+                    </div>
+                    {position && (
+                      <div className="d-flex align-items-center gap-2 mt-2">
+                        <span className="badge bg-success rounded-pill px-3 py-2" dir="ltr">
+                          <i className="fas fa-map-marker-alt me-1"></i>{position[0].toFixed(5)}, {position[1].toFixed(5)}
+                        </span>
+                        <button type="button" className="btn btn-sm btn-outline-danger rounded-pill" onClick={() => setPosition(null)}>{lang === 'ar' ? 'مسح' : 'Effacer'}</button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setStep(1)}>
+                      <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رجوع' : 'Retour'}
+                    </button>
+                    <button className="btn btn-primary rounded-pill px-5 flex-grow-1 fw-bold" disabled={!canStep2} onClick={() => setStep(3)}>
+                      {lang === 'ar' ? 'متابعة' : 'Continuer'} <i className={`fas fa-arrow-${lang === 'ar' ? 'left' : 'right'} ${lang === 'ar' ? 'me-2' : 'ms-2'}`}></i>
+                    </button>
+                  </div>
                 </div>
-              ))}
+              )}
 
-              {/* Recap */}
-              <div className="p-3 rounded-3 mb-3" style={{ background: '#f0f9f0', border: '1px solid #c3e6cb' }}>
-                <p className="fw-bold mb-2 small text-success"><i className={`fas fa-clipboard-check ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'ملخص' : 'Récapitulatif'}</p>
-                <div className="row g-1" style={{ fontSize: '.81rem' }}>
-                  <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'النوع :' : 'Type :'}</span> <strong>{TYPE_TRAVAUX.find(t => t.value === form.type_travaux)?.label}</strong></div>
-                  <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'المساحة :' : 'Surface :'}</span> <strong>{form.surface_construite} m²</strong></div>
-                  <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'الطوابق :' : 'Étages :'}</span> <strong>{form.nombre_etages}</strong></div>
-                  <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'المالك :' : 'Propriétaire :'}</span> <strong>{form.nom_proprietaire}</strong></div>
-                  <div className="col-12"><span className="text-muted">{lang === 'ar' ? 'العنوان :' : 'Adresse :'}</span> <strong>{form.adresse_terrain || '—'}</strong></div>
-                  {form.cout_estime && <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'التكلفة :' : 'Coût :'}</span> <strong>{form.cout_estime} DT</strong></div>}
-                  {highRisk && <div className="col-12 mt-1"><span className="badge bg-danger">⚠️ {lang === 'ar' ? 'ملف ذو أولوية عالية' : 'Dossier haute priorité'}</span></div>}
+              {/* ── STEP 3 ── Propriétaire & Entrepreneur */}
+              {step === 3 && (
+                <div>
+                  <p className="sh"><i className={`fas fa-user-tie ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'المالك والمقاول' : 'Propriétaire & Entrepreneur / المالك والمقاول'}</p>
+                  <div className="p-3 bg-light rounded-3 mb-3">
+                    <p className="fw-bold mb-2 text-primary small"><i className={`fas fa-id-card ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'معلومات المالك' : 'Informations du propriétaire'}</p>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <label className="form-label fw-semibold small">{lang === 'ar' ? 'الاسم الكامل' : 'Nom complet'} <span className="text-danger">*</span></label>
+                        <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'الاسم واللقب' : "Nom et prénom"}
+                          value={form.nom_proprietaire} onChange={e => update('nom_proprietaire', e.target.value)} dir="auto" />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold small">{lang === 'ar' ? 'بطاقة التعريف (8 أرقام)' : 'CIN (8 chiffres)'} <span className="text-danger">*</span></label>
+                        <input className="form-control rounded-3" placeholder="12345678" maxLength={8}
+                          value={form.cin_proprietaire}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 8) update('cin_proprietaire', val);
+                          }} dir="ltr" />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label fw-semibold small">{lang === 'ar' ? 'رقم الهاتف' : 'Téléphone'} <span className="text-danger">*</span></label>
+                        <input className="form-control rounded-3" placeholder="Ex: 25123456" maxLength={8}
+                          value={form.telephone_proprietaire}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 8) update('telephone_proprietaire', val);
+                          }} dir="ltr" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-light rounded-3 mb-3">
+                    <p className="fw-bold mb-2 text-warning small"><i className={`fas fa-hard-hat ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'المقاول (اختياري)' : 'Entrepreneur (optionnel)'}</p>
+                    <div className="row g-3">
+                      <div className="col-md-7">
+                        <label className="form-label fw-semibold small">{lang === 'ar' ? 'اسم الشركة' : "Nom de l'entreprise"}</label>
+                        <input className="form-control rounded-3" placeholder={lang === 'ar' ? 'مثال: شركة البناء بقليبية' : "Ex: SARL Bâtiment Kelibia"}
+                          value={form.nom_entrepreneur} onChange={e => update('nom_entrepreneur', e.target.value)} dir="auto" />
+                      </div>
+                      <div className="col-md-5">
+                        <label className="form-label fw-semibold small">{lang === 'ar' ? 'هاتف المقاول' : 'Téléphone entrepreneur'}</label>
+                        <input className="form-control rounded-3" placeholder="Ex: 71234567"
+                          value={form.telephone_entrepreneur} onChange={e => update('telephone_entrepreneur', e.target.value)} dir="ltr" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setStep(2)}>
+                      <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رجوع' : 'Retour'}
+                    </button>
+                    <button className="btn btn-primary rounded-pill px-5 flex-grow-1 fw-bold" disabled={!canStep3} onClick={() => setStep(4)}>
+                      {lang === 'ar' ? 'متابعة' : 'Continuer'} <i className={`fas fa-arrow-${lang === 'ar' ? 'left' : 'right'} ${lang === 'ar' ? 'me-2' : 'ms-2'}`}></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="d-flex gap-2">
-                <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setStep(3)} disabled={loading}>
-                  <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رجوع' : 'Retour'}
-                </button>
-                <button className="btn btn-success rounded-pill px-5 flex-grow-1 fw-bold" onClick={handleSubmit} disabled={loading}>
-                  {loading
-                    ? <><span className="spinner-border spinner-border-sm me-2"></span>{lang === 'ar' ? 'إرسال...' : 'Envoi...'}</>
-                    : <><i className={`fas fa-paper-plane ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'إرسال الطلب' : 'Soumettre la demande'}</>}
-                </button>
-              </div>
+              {/* ── STEP 4 ── Documents */}
+              {step === 4 && (
+                <div>
+                  <p className="sh"><i className={`fas fa-file-upload ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'الوثائق المطلوبة' : 'Documents requis / الوثائق المطلوبة'}</p>
+                  <div className="alert alert-info rounded-3 small mb-3">
+                    <i className={`fas fa-info-circle ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'الوثائق التي تحمل علامة ' : 'Les documents marqués '}<strong>*</strong>{lang === 'ar' ? ' إلزامية.' : ' sont obligatoires.'}
+                  </div>
+                  {DOCS.map(doc => (
+                    <div key={doc.key} className="mb-3 p-3 rounded-3 border" style={{ background: '#fafbff' }}>
+                      <label className="form-label fw-semibold small d-flex align-items-center gap-2">
+                        <i className={`fas ${doc.icon} text-primary`}></i>
+                        {doc.label} {doc.required && <span className="text-danger">*</span>}
+                      </label>
+                      {cameraActive === doc.key ? (
+                        <WebcamCapture onCapture={handleCameraCapture(doc.key)} onCancel={() => setCameraActive(null)} />
+                      ) : (
+                        <div className="d-flex gap-2 flex-wrap">
+                          <input type="file" accept={doc.accept} className="form-control rounded-3 flex-grow-1"
+                            onChange={e => setFile(doc.key, e.target.files?.[0] ?? null)} />
+                          {doc.camera && (
+                            <button type="button" className="btn btn-outline-secondary rounded-3" onClick={() => setCameraActive(doc.key)}>
+                              <i className={`fas fa-camera ${lang === 'ar' ? 'ms-1' : 'me-1'}`}></i>{lang === 'ar' ? 'صورة' : 'Photo'}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {files[doc.key] && (
+                        <div className="fok">
+                          <i className={`fas fa-check-circle text-success ${lang === 'ar' ? 'ms-2' : ''}`}></i>
+                          {files[doc.key]!.name} — {(files[doc.key]!.size / 1024).toFixed(0)} Ko
+                          <button type="button" className={`btn btn-sm text-danger ${lang === 'ar' ? 'me-auto' : 'ms-auto'} p-0 border-0 bg-transparent`}
+                            onClick={() => setFile(doc.key, null)}>
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Recap */}
+                  <div className="p-3 rounded-3 mb-3" style={{ background: '#f0f9f0', border: '1px solid #c3e6cb' }}>
+                    <p className="fw-bold mb-2 small text-success"><i className={`fas fa-clipboard-check ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'ملخص' : 'Récapitulatif'}</p>
+                    <div className="row g-1" style={{ fontSize: '.81rem' }}>
+                      <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'النوع :' : 'Type :'}</span> <strong>{TYPE_TRAVAUX.find(t => t.value === form.type_travaux)?.label}</strong></div>
+                      <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'المساحة :' : 'Surface :'}</span> <strong>{form.surface_construite} m²</strong></div>
+                      <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'الطوابق :' : 'Étages :'}</span> <strong>{form.nombre_etages}</strong></div>
+                      <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'المالك :' : 'Propriétaire :'}</span> <strong>{form.nom_proprietaire}</strong></div>
+                      <div className="col-12"><span className="text-muted">{lang === 'ar' ? 'العنوان :' : 'Adresse :'}</span> <strong>{form.adresse_terrain || '—'}</strong></div>
+                      {form.cout_estime && <div className="col-6"><span className="text-muted">{lang === 'ar' ? 'التكلفة :' : 'Coût :'}</span> <strong>{form.cout_estime} DT</strong></div>}
+                      {highRisk && <div className="col-12 mt-1"><span className="badge bg-danger">⚠️ {lang === 'ar' ? 'ملف ذو أولوية عالية' : 'Dossier haute priorité'}</span></div>}
+                    </div>
+                  </div>
+
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setStep(3)} disabled={loading}>
+                      <i className={`fas fa-arrow-${lang === 'ar' ? 'right' : 'left'} ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'رجوع' : 'Retour'}
+                    </button>
+                    <button className="btn btn-success rounded-pill px-5 flex-grow-1 fw-bold" onClick={handleSubmit} disabled={loading}>
+                      {loading
+                        ? <><span className="spinner-border spinner-border-sm me-2"></span>{lang === 'ar' ? 'إرسال...' : 'Envoi...'}</>
+                        : <><i className={`fas fa-paper-plane ${lang === 'ar' ? 'ms-2' : 'me-2'}`}></i>{lang === 'ar' ? 'إرسال الطلب' : 'Soumettre la demande'}</>}
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
-          )}
-
-        </div>
+          </>
+        )}
       </div>
     </MainLayout>
   )
