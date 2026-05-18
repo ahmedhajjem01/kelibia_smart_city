@@ -1331,16 +1331,16 @@ export default function SignupPage() {
 
 
     if (password !== rePassword) {
-
       setMessageType('danger')
-
       setMessage(t('password_mismatch'))
-
       return
-
     }
 
-
+    if (!cinFront || !cinBack) {
+      setMessageType('danger')
+      setMessage(lang === 'ar' ? 'يرجى تحميل صور بطاقة التعريف (الوجهان)' : 'Veuillez télécharger les photos de la CIN (Recto et Verso)')
+      return
+    }
 
     setLoading(true)
 
