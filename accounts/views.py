@@ -526,8 +526,10 @@ class AgentCitizenVerificationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def _is_agent_or_above(self, user):
+        if getattr(user, 'user_type', '') == 'agent':
+            return getattr(user, 'assigned_service', '') == 'civil_registry'
         return (
-            getattr(user, 'user_type', '') in ('agent', 'supervisor')
+            getattr(user, 'user_type', '') == 'supervisor'
             or user.is_staff
             or user.is_superuser
         )

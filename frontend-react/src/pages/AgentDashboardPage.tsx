@@ -2248,7 +2248,7 @@ export default function AgentDashboardPage() {
             </>
           )}
 
-          {user?.user_type === 'agent' && (
+          {user?.user_type === 'agent' && user?.assigned_service === 'civil_registry' && (
             <a className={`ag-nav-item${activeTab === 'citizens' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('citizens'); fetchAgentCitizens() }}>
               <i className="fas fa-users"></i>
               <span>{lang === 'ar' ? 'إدارة المواطنين' : 'Gestion Citoyens'}</span>
