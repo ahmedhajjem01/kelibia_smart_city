@@ -9,6 +9,7 @@ import { useI18n } from '../i18n/LanguageProvider'
 
 import logo from '../assets/logo.png'
 import smartCityLogo from '../assets/smart_city_logo.png'
+import TermsModal from '../components/TermsModal'
 
 
 
@@ -1199,6 +1200,7 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
 
 
@@ -1799,6 +1801,15 @@ export default function SignupPage() {
                     })}
 
                   </select>
+                  
+                  {city && city !== 'Kélibia' && (
+                    <div style={{ color: '#f43f5e', fontSize: '0.8rem', marginTop: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <i className="fas fa-exclamation-circle"></i>
+                      {lang === 'ar' 
+                        ? 'هذه البلدية غير متصلة بعد بمنصة المدينة الذكية.'
+                        : 'Cette municipalité n\'est pas encore connectée à la plateforme Smart City.'}
+                    </div>
+                  )}
 
                 </div>
 
@@ -1880,7 +1891,7 @@ export default function SignupPage() {
 
                 <div className="sg-submit-row">
 
-                  <button className="sg-btn" type="submit" disabled={loading}>
+                  <button className="sg-btn" type="submit" disabled={loading || (!!city && city !== 'Kélibia')}>
 
                     {loading && <span className="spinner-border spinner-border-sm" role="status" />}
 
@@ -1898,11 +1909,11 @@ export default function SignupPage() {
 
                 <div className="sg-terms-row">
 
-                  <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
+                  <input type="checkbox" required checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
 
                   <span className="sg-terms-text">
 
-                    {t('terms_accept')} <a href="#">{t('terms_link')}</a> {t('privacy_policy_text')}
+                    {t('terms_accept')} <span onClick={() => setShowTermsModal(true)} style={{ color: '#954a00', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>{t('terms_link') || "Conditions Générales d'Utilisation"}</span> {t('privacy_policy_text')}
 
                   </span>
 
@@ -2016,9 +2027,10 @@ export default function SignupPage() {
 
       )}
 
+      <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+
     </div>
 
   )
 
 }
-

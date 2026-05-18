@@ -1,0 +1,2951 @@
+
+--- Page 1 ---
+République Tunisienne
+Ministère de l’Enseignement Supérieur et de la Recherche
+Scientifique
+Université de Jendouba
+Institut Supérieur d’Informatique du Kef
+Rapport de Projet de Fin d’Études
+Présenté à
+Institut Supérieur de l’Informatique du Kef
+En vue de l’obtention du
+Diplôme de Licence National en Sciences Informatique
+Option:
+Génie Logiciels et Systèmes d’Informations
+Présenté par
+Maissa Sammoud & Ahmed Hajjem
+Smart City : Plateforme Intelligente
+de Services Municipaux et de Gestion Citoyenne
+Soutenue le : 21/05/2026
+Devant le jury composé de :
+Président :
+Mr. Hassen Hammouda
+Rapporteur :
+Mr. Hermi Khalil
+Encadrant :
+Mr. Toujani Ahmed
+
+--- Page 2 ---
+J’autorise les étudiants à faire le dépôt de leur rapport de stage
+en vue d’une soutenance. Encadrant professionnel, Monsieur
+Selmi Khalil
+Signature et cachet
+J’autorise les étudiants à faire le dépôt de leur rapport de stage
+en vue d’une soutenance. Encadrant académique, Monsieur
+Toujani Ahmed
+Signature
+i
+
+--- Page 3 ---
+Remerciements
+Nous tenons avant tout à remercier ALLAH, le Tout-Puissant, pour nous avoir
+accordé la volonté, la persévérance et la force nécessaires afin de mener à terme ce
+projet de fin d’études dans les meilleures conditions.
+Nous exprimons notre profonde reconnaissance aux membres du jury qui nous font
+l’honneur d’examiner ce travail. Nous les remercions sincèrement pour l’attention portée
+à notre rapport ainsi que pour leurs remarques et suggestions qui contribueront à
+enrichir et améliorer ce projet.
+Nous adressons nos plus vifs remerciements à notre encadrant académique à l’Institut
+Supérieur d’Informatique du Kef, Mr. Ahmed Toujani, pour son suivi rigoureux, sa
+disponibilité permanente, ses précieux conseils et son accompagnement tout au long
+de cette expérience. Son soutien et son expertise nous ont été d’une aide considérable
+dans l’avancement de ce travail.
+Nous remercions également notre encadrant professionnel au sein de l’entreprise,
+Mr.
+Selmi Khalil, pour son accueil chaleureux, sa confiance, ses orientations et
+l’encadrement qu’il nous a assuré durant la période du stage. Cette expérience nous a
+permis de consolider nos compétences techniques et de découvrir le fonctionnement du
+milieu professionnel.
+Nos remerciements s’étendent aussi à l’ensemble des enseignants de l’Institut
+Supérieur d’Informatique du Kef pour la qualité de la formation et des connaissances
+qu’ils nous ont transmises durant notre cursus universitaire.
+Enfin, nous exprimons notre gratitude à toutes les personnes qui ont participé,
+directement ou indirectement, à la réalisation de ce projet et qui nous ont soutenus tout
+au long de cette aventure académique et humaine.
+ii
+
+--- Page 4 ---
+Dédicaces
+Nous dédions ce modeste travail à toutes les personnes qui ont occupé une place
+importante dans notre parcours et qui nous ont accompagnés avec affection, soutien et
+encouragement tout au long de nos études.
+À nos très chers parents,
+pour leur amour inconditionnel, leurs sacrifices, leur patience et leurs encouragements
+constants. Aucun mot ne pourra exprimer notre reconnaissance pour tous les efforts
+fournis afin de nous offrir les meilleures opportunités de réussite. Que Dieu vous protège
+et vous accorde santé et bonheur.
+À nos frères et sœurs,
+pour leur soutien moral, leur présence et leurs encouragements permanents qui nous
+ont aidés à avancer avec confiance et détermination.
+À nos familles et proches,
+pour leur affection, leurs conseils et leur soutien tout au long de notre parcours
+universitaire.
+À nos amis et collègues,
+avec qui nous avons partagé de nombreux moments de travail, d’entraide et de
+convivialité qui resteront gravés dans nos mémoires.
+Enfin, nous dédions ce travail à toutes les personnes ayant contribué, de près ou de
+loin, à notre réussite et à l’aboutissement de ce projet de fin d’études.
+Maissa Sammoud & Ahmed Hajjem
+iii
+
+--- Page 5 ---
+Liste des abréviations
+API Application Programming Interface
+CI/CD Continuous Integration / Continuous Deployment
+CIN Carte d’Identité Nationale
+CMS Content Management System
+CORS Cross-Origin Resource Sharing
+CRUD Create, Read, Update, Delete
+DGI Direction Générale des Impôts
+DRF Django REST Framework
+EPSG European Petroleum Survey Group
+GeoJSON Geographic JavaScript Object Notation
+HTTP HyperText Transfer Protocol
+HTTPS HyperText Transfer Protocol Secure
+JWT JSON Web Token
+LIME Local Interpretable Model-agnostic Explanations
+ML Machine Learning
+NLP Natural Language Processing
+OMG Object Management Group
+ORM Object-Relational Mapping
+OSM OpenStreetMap
+PDF Portable Document Format
+PWA Progressive Web App
+REST Representational State Transfer
+RTL Right To Left
+iv
+
+--- Page 6 ---
+SEO Search Engine Optimization
+SEM Search Engine Marketing
+SHAP SHapley Additive exPlanations
+SONEDE Société Nationale d’Exploitation et de Distribution des Eaux
+SPA Single Page Application
+SQL Structured Query Language
+SSL Secure Sockets Layer
+STEG Société Tunisienne de l’Électricité et du Gaz
+SVC Support Vector Classification
+TF-IDF Term Frequency — Inverse Document Frequency
+TIC Technologies de l’Information et de la Communication
+UI/UX User Interface / User Experience
+UML Unified Modeling Language
+WGS World Geodetic System
+XAI Explainable Artificial Intelligence
+v
+
+--- Page 7 ---
+Résumé
+Titre : Kelibia Smart City — Plateforme Bilingue Intelligente de Services Municipaux
+et de Gestion Citoyenne
+Kelibia Smart City est une plateforme web bilingue (français/arabe) développée pour
+la commune de Kélibia, en Tunisie, dans le cadre d’un projet de fin d’études réalisé au
+sein de la société ATOMIC-IT. Avant ce projet, l’ensemble des démarches administratives
+s’effectuait exclusivement en présentiel aux guichets de la mairie, engendrant des files
+d’attente importantes, des délais de traitement élevés et l’absence de tout suivi en temps
+réel pour les citoyens.
+La plateforme repose sur une architecture découplée SPA/API. Un backend Django
+REST Framework structure seize applications Django indépendantes, assure une au-
+thentification JWT avec contrôle d’accès basé sur les rôles pour trois profils utilisateurs
+(citoyen, agent, superviseur) et gère les workflows de traitement de plus de vingt types
+de services municipaux. Un frontend React 19 / TypeScript compilé avec Vite offre
+une interface entièrement bilingue avec bascule RTL dynamique et une carte Leaflet
+interactive enrichie de six couches GeoJSON OpenStreetMap. Le système est déployé
+sur Vercel avec une base de données PostgreSQL serverless hébergée sur Neon.
+Un pipeline Data Science complet — prétraitement TF-IDF, classification LinearSVC
+(72,8 % de précision sur dix catégories, 78,6 % sur trois niveaux de priorité), détection de
+doublons par similarité cosinus et explicabilité SHAP/LIME — classe automatiquement
+chaque réclamation citoyenne et l’oriente vers l’agent municipal responsable. Un pipeline
+de livraison continue via GitHub déclenche automatiquement les déploiements Vercel à
+chaque push sur la branche principale.
+Mots-clés : ville intelligente, services municipaux, Django REST Framework,
+React, apprentissage automatique, TF-IDF, LinearSVC, SHAP, LIME, GeoJSON,
+JWT, bilingue, Kélibia.
+vi
+
+--- Page 8 ---
+Abstract
+Title: Kelibia Smart City — Intelligent Bilingual Platform for Municipal Services and
+Citizen Management
+Kelibia Smart City is a bilingual (French/Arabic) web platform developed for the
+municipality of Kelibia, Tunisia, as part of a final-year engineering project carried
+out at ATOMIC-IT. Prior to this project, all administrative procedures were handled
+exclusively in person at the town hall, resulting in long queues, high processing times,
+and no real-time tracking for citizens.
+The platform adopts a decoupled SPA/API architecture. A Django REST Framework
+backend structures sixteen independent Django applications, enforces JWT-based
+authentication with role-based access control across three user profiles (citizen, agent,
+supervisor), and manages administrative workflows for over twenty municipal service
+types. A React 19 / TypeScript frontend compiled with Vite delivers a fully bilingual
+interface with dynamic RTL switching and an interactive Leaflet map enriched with
+six OpenStreetMap GeoJSON layers. The system is deployed on Vercel with a Neon
+serverless PostgreSQL database.
+A complete Data Science pipeline — TF-IDF preprocessing, LinearSVC classification
+(72.8 % accuracy on ten categories, 78.6 % on three priority levels), cosine similarity
+duplicate detection, and SHAP/LIME explainability — automatically classifies every
+citizen complaint and assigns it to the responsible municipal agent. A continuous
+delivery pipeline via GitHub triggers automatic Vercel deployments on each push to
+the main branch.
+Keywords: smart city, municipal services, Django REST Framework, React,
+machine learning, TF-IDF, LinearSVC, SHAP, LIME, GeoJSON, JWT, bilingual,
+Kelibia.
+vii
+
+--- Page 9 ---
+Table des matières
+Introduction Générale
+1
+1
+Étude préalable
+4
+Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4
+1.1
+Étude de l’organisme d’accueil . . . . . . . . . . . . . . . . . . . . . . .
+4
+1.1.1
+Présentation de l’organisme d’accueil . . . . . . . . . . . . . . .
+4
+1.1.2
+Organigramme de l’organisme d’accueil . . . . . . . . . . . . . .
+5
+1.1.3
+Description de la structure concernée par le stage . . . . . . . .
+6
+1.2
+Présentation du thème du stage . . . . . . . . . . . . . . . . . . . . . .
+6
+1.2.1
+Champ de l’étude et objet du stage . . . . . . . . . . . . . . . .
+6
+1.3
+Présentation du cadre du projet . . . . . . . . . . . . . . . . . . . . . .
+7
+1.3.1
+Description de l’existant . . . . . . . . . . . . . . . . . . . . . .
+7
+1.3.2
+Critiques de l’existant
+. . . . . . . . . . . . . . . . . . . . . . .
+7
+1.3.3
+Solution proposée . . . . . . . . . . . . . . . . . . . . . . . . . .
+8
+1.4
+Méthodologie de travail . . . . . . . . . . . . . . . . . . . . . . . . . . .
+8
+1.4.1
+Langage de modélisation . . . . . . . . . . . . . . . . . . . . . .
+9
+1.4.2
+Méthodologie agile — Scrum . . . . . . . . . . . . . . . . . . . .
+10
+Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+11
+2
+Spécification des besoins
+12
+Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+12
+2.1
+Analyse des besoins . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+12
+2.1.1
+Identification des acteurs . . . . . . . . . . . . . . . . . . . . . .
+12
+2.1.2
+Les besoins fonctionnels
+. . . . . . . . . . . . . . . . . . . . . .
+13
+2.1.3
+Les besoins non fonctionnels . . . . . . . . . . . . . . . . . . . .
+14
+2.2
+Formalisation des besoins . . . . . . . . . . . . . . . . . . . . . . . . . .
+15
+2.2.1
+Diagramme du cas d’utilisation général . . . . . . . . . . . . . .
+15
+2.3
+Mise en œuvre de la démarche Scrum . . . . . . . . . . . . . . . . . . .
+16
+2.3.1
+Backlog produit . . . . . . . . . . . . . . . . . . . . . . . . . . .
+16
+2.3.2
+Planification des releases . . . . . . . . . . . . . . . . . . . . . .
+18
+2.3.3
+Organisation en itérations . . . . . . . . . . . . . . . . . . . . .
+19
+Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+21
+3
+Réalisation
+22
+Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+22
+3.1
+Environnement de travail . . . . . . . . . . . . . . . . . . . . . . . . . .
+22
+viii
+
+--- Page 10 ---
+TABLE DES MATIÈRES
+3.1.1
+Architecture de déploiement . . . . . . . . . . . . . . . . . . . .
+22
+3.1.2
+Environnement matériel
+. . . . . . . . . . . . . . . . . . . . . .
+23
+3.1.3
+Technologies utilisées . . . . . . . . . . . . . . . . . . . . . . . .
+23
+3.1.4
+Environnement logiciel . . . . . . . . . . . . . . . . . . . . . . .
+24
+3.2
+Schéma de la base de données . . . . . . . . . . . . . . . . . . . . . . .
+25
+Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+26
+4
+Release 1 : Authentification et Dossiers Citoyens
+27
+Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+27
+4.1
+Backlog de la Release 1 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+27
+4.2
+Sprint 1 : Authentification et gestion des comptes . . . . . . . . . . . .
+28
+4.2.1
+Spécification fonctionnelle . . . . . . . . . . . . . . . . . . . . .
+28
+4.2.2
+Conception
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+29
+4.2.3
+Réalisation
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+30
+4.3
+Sprint 2 : Tableau de bord et dossiers citoyens . . . . . . . . . . . . . .
+32
+4.3.1
+Spécification fonctionnelle . . . . . . . . . . . . . . . . . . . . .
+32
+4.3.2
+Conception
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+34
+4.3.3
+Réalisation
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+37
+Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+39
+5
+Release 2 : Réclamations Citoyennes et Forum Communautaire
+40
+Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+40
+5.1
+Backlog de la Release 2 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+40
+5.2
+Sprint 3 : Réclamations citoyennes et module Data Science . . . . . . .
+41
+5.2.1
+Spécification fonctionnelle . . . . . . . . . . . . . . . . . . . . .
+41
+5.2.2
+Conception
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+42
+5.2.3
+Module Data Science : classification automatique des réclamations 44
+5.2.4
+Module cartographique de la plateforme
+. . . . . . . . . . . . .
+47
+5.2.5
+Réalisation
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+51
+5.3
+Sprint 4 : Forum communautaire et actualités municipales . . . . . . .
+52
+5.3.1
+Spécification fonctionnelle . . . . . . . . . . . . . . . . . . . . .
+52
+5.3.2
+Conception
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+54
+5.3.3
+Réalisation
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+55
+Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+55
+6
+Release 3 : Administration et Supervision
+56
+Introduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+56
+6.1
+Backlog de la Release 3 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+56
+6.2
+Sprint 5 : Tableau de bord agent
+. . . . . . . . . . . . . . . . . . . . .
+57
+6.2.1
+Spécification fonctionnelle . . . . . . . . . . . . . . . . . . . . .
+57
+ix
+
+--- Page 11 ---
+TABLE DES MATIÈRES
+6.2.2
+Conception
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+60
+6.2.3
+Réalisation
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+62
+6.3
+Sprint 6 : Gestion des comptes agents et supervision globale . . . . . .
+64
+6.3.1
+Spécification fonctionnelle . . . . . . . . . . . . . . . . . . . . .
+64
+6.3.2
+Conception
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+67
+6.3.3
+Réalisation
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+68
+Conclusion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+69
+Conclusion Générale et Perspectives
+70
+x
+
+--- Page 12 ---
+Liste des figures
+1.1
+Logo de ATOMIC-IT . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+4
+1.2
+Organigramme de ATOMIC-IT
+. . . . . . . . . . . . . . . . . . . . . .
+5
+1.3
+Diagramme UML de modélisation du système
+. . . . . . . . . . . . . .
+9
+1.4
+Illustration de la méthode Scrum
+. . . . . . . . . . . . . . . . . . . . .
+10
+2.1
+Diagramme global des cas d’utilisation — Smart City . . . . . . . . . .
+15
+2.2
+Démarche de développement itérative et incrémentale adoptée . . . . .
+21
+3.1
+Architecture générale de la plateforme Smart City . . . . . . . . . . . .
+23
+3.2
+Diagramme de classes global — Smart City . . . . . . . . . . . . . . . .
+26
+4.1
+Diagramme de cas d’utilisation raffiné — Sprint 1 : Authentification . .
+28
+4.2
+Diagramme de séquence détaillé « S’authentifier » . . . . . . . . . . . .
+30
+4.3
+Page de connexion — interface citoyen . . . . . . . . . . . . . . . . . .
+30
+4.4
+Page d’inscription — formulaire de création de compte citoyen . . . . .
+31
+4.5
+Page de réinitialisation du mot de passe
+. . . . . . . . . . . . . . . . .
+32
+4.6
+Diagramme de cas d’utilisation raffiné — Sprint 2 : Dossiers citoyens
+.
+33
+4.7
+Flux d’un service administratif — Phase 1 : Contrôle d’accès . . . . . .
+35
+4.8
+Flux d’un service administratif — Phase 2 : Traitement par l’agent
+. .
+36
+4.9
+Flux d’un service administratif — Phase 3 : Suivi par le citoyen . . . .
+37
+4.10 Tableau de bord — interface citoyen
+. . . . . . . . . . . . . . . . . . .
+38
+4.11 Page des services administratifs — catalogue des démarches en ligne . .
+38
+5.1
+Diagramme de cas d’utilisation raffiné — Sprint 3 : Réclamations . . .
+41
+5.2
+DSSD « Soumettre une réclamation » — Phase 1 : Soumission . . . . .
+43
+5.3
+DSSD « Traitement d’une réclamation » — Phase 2 : Traitement par
+l’agent . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+43
+5.4
+Vue globale de la carte avec toutes les couches activées sur fond Open-
+StreetMap . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+48
+5.5
+Couche zones urbaines dans le tableau de bord agent — aide à la priori-
+sation géographique des interventions . . . . . . . . . . . . . . . . . . .
+49
+5.6
+Couche signalements (vue citoyen) — suivi géolocalisé des réclamations
+par statut sur la carte de Kélibia
+. . . . . . . . . . . . . . . . . . . . .
+50
+5.7
+Vue globale toutes couches activées sur fond satellite (Esri World Imagery)
+— analyse territoriale intégrée
+. . . . . . . . . . . . . . . . . . . . . . .
+50
+5.8
+Formulaire de soumission d’une réclamation avec prévisualisation IA . .
+51
+xi
+
+--- Page 13 ---
+LISTE DES FIGURES
+5.9
+Diagramme de cas d’utilisation raffiné — Sprint 4 : Forum communautaire 52
+5.10 Diagramme de séquence système « Participer au forum communautaire » 54
+5.11 Page du forum communautaire — liste des sujets
+. . . . . . . . . . . .
+55
+6.1
+Diagramme de cas d’utilisation — Agent (1/3) : Accès et gestion citoyens 57
+6.2
+Diagramme de cas d’utilisation — Agent (2/3) : Traitement des demandes 58
+6.3
+Diagramme de cas d’utilisation — Agent (3/3) : Actualités et forum . .
+59
+6.4
+DSSD « Tableau de bord agent » (1/3) : Accès et traitement des demandes 61
+6.5
+DSSD « Tableau de bord agent » (2/3) : Vérification citoyen . . . . . .
+61
+6.6
+DSSD « Tableau de bord agent » (3/3) : Actualités et statistiques IA .
+62
+6.7
+Tableau de bord agent — vue consolidée des demandes en attente . . .
+62
+6.8
+Vue détaillée d’une demande — consultation des pièces et mise à jour du
+statut
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+63
+6.9
+Interface de vérification des comptes citoyens — révision CIN et décision
+63
+6.10 Diagramme de cas d’utilisation — Superviseur (1/2) : Gestion des comptes 64
+6.11 Diagramme de cas d’utilisation — Superviseur (2/2) : Monitoring et
+administration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+65
+6.12 Diagramme de séquence système « Gérer les comptes agents » . . . . .
+67
+6.13 Interface de gestion des comptes agents — liste, création et modification
+68
+6.14 Interface des statistiques IA — rapport de classification et matrice de
+confusion
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+69
+xii
+
+--- Page 14 ---
+Liste des tableaux
+1.1
+Composition de l’équipe ATOMIC-IT . . . . . . . . . . . . . . . . . . .
+5
+2.1
+Product Backlog — six sprints, trois releases . . . . . . . . . . . . . . .
+16
+2.2
+Exemples de User Stories du backlog produit . . . . . . . . . . . . . . .
+18
+2.3
+Planification des trois releases et six sprints
+. . . . . . . . . . . . . . .
+19
+3.1
+Environnement matériel de développement . . . . . . . . . . . . . . . .
+23
+3.2
+Environnement logiciel de développement . . . . . . . . . . . . . . . . .
+24
+4.1
+Backlog de la Release 1 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+27
+4.2
+Description textuelle — Cas d’utilisation « Se connecter »
+. . . . . . .
+29
+4.3
+Description textuelle — Cas d’utilisation « Soumettre une demande
+administrative » . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+34
+5.1
+Backlog de la Release 2 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+40
+5.2
+Description textuelle — Cas d’utilisation « Soumettre une réclamation »
+42
+5.3
+Comparaison des modèles de classification (validation croisée 5 plis, 601
+réclamations) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+45
+5.4
+Matrice de confusion — Modèle de catégorisation (LinearSVC, 5 plis,
+n = 601) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+46
+5.5
+Matrice de confusion — Modèle de priorisation (LinearSVC, 5 plis, n = 601) 46
+5.6
+Fonds de carte disponibles dans la plateforme
+. . . . . . . . . . . . . .
+48
+5.7
+Récapitulatif des couches géospatiales de la plateforme Smart City . . .
+49
+5.8
+Description textuelle — Cas d’utilisation « Créer un nouveau sujet »
+.
+53
+5.9
+Description textuelle — Cas d’utilisation « Répondre à un sujet » . . .
+53
+5.10 Description textuelle — Cas d’utilisation « Modérer le forum » . . . . .
+53
+6.1
+Backlog de la Release 3 . . . . . . . . . . . . . . . . . . . . . . . . . . .
+56
+6.2
+Description textuelle — Cas d’utilisation « Traiter les demandes et
+réclamations » . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+60
+6.3
+Description textuelle — Cas d’utilisation « Créer et gérer un compte
+agent » . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+66
+6.4
+Description textuelle — Cas d’utilisation « Consulter la vue consolidée » 66
+xiii
+
+--- Page 15 ---
+Introduction Générale
+« Les villes intelligentes ne sont pas une fin en soi ; elles sont un
+moyen de remettre le citoyen au cœur du service public. »
+— Adapté du rapport ITU, Smart Cities 2023
+1.
+Contexte général
+La transformation numérique des administrations publiques constitue aujourd’hui l’un
+des axes stratégiques majeurs du développement des territoires à travers le monde.
+Dans les pays émergents comme la Tunisie, cette transition revêt une importance
+particulière : elle représente à la fois une opportunité de moderniser des processus
+administratifs souvent lourds et chronophages, et un levier pour renforcer la confiance
+entre les institutions locales et les citoyens.
+Dans ce contexte, le concept de ville intelligente (smart city) s’est progressivement
+imposé comme un cadre de référence. Une ville intelligente exploite les technologies de
+l’information et de la communication (TIC) pour optimiser la gestion des services urbains,
+améliorer la qualité de vie des habitants et favoriser une gouvernance participative
+et transparente. Les expériences menées dans des villes comme Barcelone, Singapour
+ou, plus près de nous, Tunis et Sfax, démontrent que la dématérialisation des services
+municipaux réduit significativement les délais de traitement, diminue les déplacements
+inutiles des citoyens et libère les agents municipaux des tâches administratives répétitives.
+La commune de Kélibia, ville côtière du gouvernorat de Nabeul, n’échappe pas à ces
+enjeux. Avec une population en croissance et des besoins en services publics diversifiés
+— actes d’état civil, attestations de résidence, gestion des réclamations liées à la voirie
+ou à l’éclairage public — la municipalité fait face à une demande croissante qui dépasse
+les capacités de traitement manuel. L’absence d’une plateforme numérique unifiée
+contraint les citoyens à se déplacer physiquement pour chaque démarche, entraînant
+des files d’attente et une insatisfaction grandissante.
+2.
+Problématique
+Face à ce constat, une question centrale s’impose :
+Comment concevoir et déployer une plateforme numérique de services municipaux,
+adaptée aux spécificités sociolinguistiques et organisationnelles de la commune de
+1
+
+--- Page 16 ---
+Introduction Générale
+Kélibia, qui permette de dématérialiser les démarches administratives, de faciliter la
+communication entre citoyens et agents, et d’automatiser la gestion des réclamations ?
+Cette problématique soulève plusieurs défis complémentaires. Le premier est d’ordre
+linguistique : la Tunisie est un pays bilingue arabe-français, et toute solution numérique
+à destination du grand public doit impérativement proposer une interface dans les
+deux langues pour garantir l’inclusion de l’ensemble des citoyens. Le deuxième défi
+est technique : il s’agit de concevoir une architecture logicielle robuste, sécurisée
+et maintenable, capable de gérer simultanément plusieurs types de services avec des
+rôles utilisateurs distincts. Enfin, le troisième défi est opérationnel : le volume de
+réclamations reçues quotidiennement rend indispensable un mécanisme d’automatisation
+de leur classification et de leur priorisation.
+3.
+Objectifs du projet
+Pour répondre à cette problématique, le projet Smart City s’est fixé les objectifs
+suivants :
+1. Dématérialiser les services d’état civil : permettre aux citoyens de soumettre
+en ligne des demandes d’extraits de naissance, d’actes de mariage, de déclarations
+de décès et d’attestations de résidence, et de suivre l’avancement de leurs dossiers
+sans se déplacer.
+2. Automatiser la gestion des réclamations : intégrer un module d’intelligence
+artificielle (classification TF-IDF + SVM) capable d’attribuer automatiquement une
+catégorie et une priorité à chaque réclamation.
+3. Favoriser la participation citoyenne : offrir un espace de forum communautaire
+où les résidents peuvent poser des questions, partager des informations et interagir
+avec la municipalité.
+4. Assurer le bilinguisme français/arabe : concevoir l’intégralité de l’interface et
+des données métier en deux langues, avec une bascule dynamique en temps réel.
+5. Déployer une solution accessible et pérenne : mettre en production la plate-
+forme sur une infrastructure cloud moderne (Vercel + Neon PostgreSQL).
+4.
+Structure du rapport
+Ce rapport est organisé en six chapitres :
+Le premier chapitre pose le cadre général du stage : présentation de l’organisme
+d’accueil ATOMIC-IT, description de la mission confiée, analyse de la situation existante
+2
+
+--- Page 17 ---
+Introduction Générale
+à la commune de Kélibia et présentation de la méthodologie de travail retenue (UML et
+Scrum).
+Le deuxième chapitre est consacré à la spécification des besoins : identification des
+acteurs, besoins fonctionnels et non fonctionnels, backlog produit structuré par épiques,
+planification des trois releases et diagrammes de cas d’utilisation.
+Le troisième chapitre présente l’environnement de réalisation : architecture découplée
+SPA/API, environnement matériel et logiciel, technologies et frameworks retenus pour
+chaque couche du système, et schéma de la base de données.
+Le quatrième chapitre détaille la Release 1 — Sprint 1 (authentification JWT,
+gestion des comptes et vérification CIN) et Sprint 2 (tableau de bord citoyen et ensemble
+des services administratifs en ligne : état civil, construction, événements, raccordements,
+services fiscaux et licences commerciales).
+Le cinquième chapitre couvre la Release 2 — Sprint 3 (réclamations géolocalisées
+et module Data Science complet : classification TF-IDF/LinearSVC, détection de
+doublons, explicabilité SHAP/LIME et couches géospatiales OSM) et Sprint 4 (forum
+communautaire bilingue et actualités municipales).
+Le sixième chapitre traite la Release 3 — Sprint 5 (tableau de bord agent centralisé
+avec traitement des demandes, vérification des comptes citoyens et statistiques IA) et
+Sprint 6 (gestion des comptes agents et vue consolidée du superviseur).
+Enfin, une conclusion générale synthétise les apports du projet et présente les
+perspectives d’évolution envisagées.
+3
+
+--- Page 18 ---
+Chapitre 1
+Étude préalable
+Introduction
+Ce premier chapitre présente le cadre général du projet de fin d’études. Il introduit
+l’entreprise d’accueil ATOMIC-IT ainsi que le contexte du stage, puis expose le projet
+Smart City, ses objectifs et les besoins auxquels il répond. Une étude de l’existant
+permet ensuite d’identifier les limites des méthodes actuelles et de justifier la solution
+proposée. Enfin, le chapitre décrit la méthodologie adoptée, basée sur UML et la
+démarche agile Scrum.
+1.1
+Étude de l’organisme d’accueil
+1.1.1
+Présentation de l’organisme d’accueil
+ATOMIC-IT est une société tunisienne spécialisée dans l’ingénierie logicielle et les
+solutions numériques sur mesure. Portée par une culture de l’innovation, l’entreprise
+accompagne ses clients — aussi bien des PME que des institutions publiques — dans
+leur transition numérique, en leur proposant une gamme complète de prestations allant
+de la conception de sites web à l’élaboration de stratégies de référencement, en passant
+par le développement de plateformes e-commerce et d’applications métier avancées.
+Informations générales :
+• Raison sociale : ATOMIC-IT
+• Adresse : Rue la Ligue Arabe, 6, Gouvernorat de Nabeul
+• Téléphone : +216 55 343 224
+• Secteur d’activité : Développement web et solutions numériques
+• Directeur général : M. Selmi Khalil
+Figure 1.1: Logo de ATOMIC-IT
+4
+
+--- Page 19 ---
+Chapitre 1. Étude préalable
+1.1.2
+Organigramme de l’organisme d’accueil
+La structure organisationnelle d’ATOMIC-IT reflète une gouvernance claire et des
+responsabilités bien délimitées entre les différents pôles de l’entreprise. Le tableau 1.1
+résume les rôles de chaque membre de l’équipe.
+Nom
+Poste
+Responsabilités principales
+Khalil Selmi
+Chef d’entreprise
+Pilotage stratégique, prise de déci-
+sion et engagement de la société
+Oussama Jlidi
+Directeur infor-
+matique
+Définition de la stratégie IT, super-
+vision de l’infrastructure et sécurité
+des données
+Nabil Ben Aoun
+Directeur RH
+Recrutement, gestion des talents et
+coordination de la formation interne
+Hazem Mastouri
+Chef de projet IT
+Interface entre l’équipe technique
+et les clients, suivi des délais et des
+budgets
+Aymen Abdel-
+laoui
+Ingénieur web
+Conception et développement des
+plateformes web
+Saif Haj Hsan
+Ingénieur mobile
+Développement d’applications mo-
+biles natives et hybrides
+Table 1.1: Composition de l’équipe ATOMIC-IT
+Figure 1.2: Organigramme de ATOMIC-IT
+5
+
+--- Page 20 ---
+Chapitre 1. Étude préalable
+1.1.3
+Description de la structure concernée par le stage
+Le stage s’est déroulé au sein du département de développement web d’ATOMIC-IT.
+Ce pôle constitue le cœur opérationnel de l’entreprise : il prend en charge la conception,
+le développement et la mise en production de solutions numériques personnalisées pour
+les clients. Les principales activités du département sont les suivantes :
+• Conception de sites web
+Réalisation d’interfaces responsives, accessibles et optimisées pour les mo-
+teurs de recherche, en appliquant les bonnes pratiques UI/UX et les standards
+du web (HTML5, CSS3, JavaScript).
+• Développement web spécialisé
+Développement de plateformes e-commerce, d’applications communautaires
+et de systèmes d’information métier intégrant des fonctionnalités avancées
+(authentification, workflows, tableaux de bord analytiques).
+• Marketing en ligne
+Conseil et accompagnement des clients dans la définition de stratégies
+digitales visant à accroître leur visibilité et à atteindre leurs objectifs com-
+merciaux.
+• Optimisation du référencement web (SEO/SEM)
+Mise en œuvre de techniques d’optimisation pour les moteurs de recherche
+(référencement naturel et payant) afin d’améliorer le positionnement des
+sites clients dans les résultats de recherche.
+1.2
+Présentation du thème du stage
+1.2.1
+Champ de l’étude et objet du stage
+Le stage avait pour mission la conception et le développement de Smart City, une
+plateforme web bilingue (français/arabe) dédiée à la dématérialisation des services
+municipaux de la commune de Kélibia, gouvernorat de Nabeul. L’objectif central
+est de permettre aux citoyens d’accéder en ligne à l’ensemble de leurs démarches
+administratives courantes, sans avoir à se déplacer physiquement en mairie.
+Fonctionnalités côté citoyen :
+• Inscription et authentification sécurisée via JWT, avec vérification d’identité
+par upload de la carte CIN (recto/verso).
+6
+
+--- Page 21 ---
+Chapitre 1. Étude préalable
+• Soumission en ligne de demandes d’actes d’état civil : extrait de naissance,
+acte de mariage, attestation de résidence, déclaration de décès, demande
+d’inhumation et livret de famille.
+• Dépôt et suivi en temps réel de réclamations géolocalisées (voirie, éclairage,
+déchets, bruit, etc.) avec consultation du statut de traitement et classification
+automatique par intelligence artificielle.
+• Demandes de construction et d’urbanisme : permis de construire, goudron-
+nage de route et certificat de vocation d’un bien.
+1.3
+Présentation du cadre du projet
+1.3.1
+Description de l’existant
+Avant le lancement de ce projet, la commune de Kélibia ne disposait d’aucune plateforme
+numérique dédiée à ses services administratifs. La quasi-totalité des démarches —
+obtention d’un extrait de naissance, dépôt d’une réclamation, demande d’attestation de
+résidence — s’effectuait exclusivement en présentiel aux guichets de la mairie. Cette
+situation engendrait des files d’attente importantes, des délais de traitement élevés et
+une charge administrative considérable pour les agents, sans aucune possibilité de suivi
+en temps réel pour les citoyens.
+À l’échelle nationale, certaines collectivités tunisiennes ont initié des démarches
+de numérisation partielles, souvent limitées à la publication d’informations statiques
+ou à des formulaires PDF téléchargeables, sans véritable interactivité ni workflow de
+traitement intégré. Des solutions génériques de gestion municipale existent sur le marché,
+mais elles ne répondent pas aux contraintes spécifiques du contexte local : bilinguisme
+français-arabe avec support RTL, intégration d’un module IA de classification des
+réclamations, ou déploiement sur une infrastructure légère et économique.
+1.3.2
+Critiques de l’existant
+L’analyse de la situation actuelle met en évidence plusieurs lacunes majeures. L’absence
+totale de dématérialisation contraint les citoyens à se déplacer pour chaque démarche,
+ce qui est particulièrement pénalisant pour les personnes à mobilité réduite ou résidant
+loin du centre-ville. Le traitement manuel des réclamations, sans outil de priorisation,
+expose la municipalité à des traitements inéquitables et à une perte d’informations.
+Par ailleurs, l’absence de canal de communication numérique entre la mairie et ses
+administrés nuit à la transparence et à la confiance institutionnelle.
+Sur le plan technique, les solutions génériques du marché présentent un coût de licence
+7
+
+--- Page 22 ---
+Chapitre 1. Étude préalable
+élevé, une faible adaptabilité aux spécificités locales et une absence quasi systématique
+de support bilingue arabe-français avec RTL natif.
+1.3.3
+Solution proposée
+Face à ces constats, le projet Smart City propose une plateforme numérique souveraine,
+conçue sur mesure pour répondre aux besoins de la commune. La solution repose sur
+trois axes complémentaires :
+• Améliorer l’accessibilité et l’expérience citoyen :
+Dématérialisation complète des démarches d’état civil et de résidence, accessi-
+bles 24h/24 depuis n’importe quel appareil. Interface bilingue français/arabe
+avec bascule dynamique, garantissant l’inclusion de l’ensemble des habitants.
+Suivi en temps réel du statut de chaque demande, éliminant la nécessité de
+se déplacer pour s’informer.
+• Optimiser la gestion municipale :
+Tableau de bord centralisé offrant aux agents une vue unifiée de toutes
+les demandes en cours. Module IA (TF-IDF + LinearSVC) assurant la
+classification automatique des réclamations par catégorie et par priorité,
+ainsi que la détection des doublons pour éviter les traitements redondants.
+Génération automatique de documents officiels (PDF avec QR code de
+vérification).
+• Assurer la pérennité et la sécurité de la solution :
+Architecture découplée (API REST Django + SPA React) facilitant la main-
+tenance et les évolutions futures. Sécurisation via authentification JWT,
+vérification CIN, hachage des mots de passe et configuration CORS stricte.
+Déploiement sur une infrastructure cloud moderne (Vercel + Neon Post-
+greSQL) garantissant une disponibilité continue et une scalabilité maîtrisée.
+1.4
+Méthodologie de travail
+Dans le cadre de ce projet, nous avons adopté une démarche méthodologique structurée,
+combinant un langage de modélisation standard et une approche de développement agile.
+Ce choix vise à assurer à la fois une bonne organisation du processus de conception et
+une réalisation progressive de la solution.
+Cette approche permet de structurer les différentes phases du projet tout en garan-
+tissant une adaptation continue aux besoins de la commune de Kélibia. Les principes
+et les étapes de cette méthodologie seront détaillés dans les sections suivantes.
+8
+
+--- Page 23 ---
+Chapitre 1. Étude préalable
+1.4.1
+Langage de modélisation
+La modélisation du système a été réalisée à l’aide du langage UML 2.0 (Unified
+Modeling Language) [1]. Il s’agit d’un langage de modélisation graphique standardisé
+par l’OMG (Object Management Group), largement utilisé pour représenter, spécifier et
+documenter les différents aspects d’un système logiciel, indépendamment du langage
+d’implémentation.
+Le recours à UML dans ce projet s’explique par sa capacité à offrir une vision globale
+et structurée du système, en couvrant à la fois les aspects fonctionnels, structurels et
+comportementaux. Il constitue ainsi un support essentiel pour la compréhension, la
+communication et la validation des choix de conception.
+Figure 1.3: Diagramme UML de modélisation du système
+Dans ce contexte, trois types de diagrammes UML ont été retenus :
+• Diagrammes de cas d’utilisation
+Ils permettent d’identifier les différents acteurs du système, notamment le
+citoyen et l’agent municipal, ainsi que de modéliser les interactions principales
+avec la plateforme. Ces diagrammes constituent une base essentielle pour
+l’analyse des besoins fonctionnels.
+• Diagrammes de séquence système
+Ils décrivent le déroulement temporel des échanges entre les acteurs et le
+système pour chaque cas d’utilisation, en mettant en évidence la logique
+de traitement des différentes fonctionnalités, telles que l’authentification, la
+soumission des demandes ou encore la gestion des réclamations.
+• Diagramme de classes
+Il représente la structure statique du système à travers les différentes entités
+métier, leurs attributs ainsi que les relations qui les relient. Ce diagramme a
+servi de base à la conception du schéma de la base de données PostgreSQL.
+9
+
+--- Page 24 ---
+Chapitre 1. Étude préalable
+1.4.2
+Méthodologie agile — Scrum
+Les méthodes agiles constituent aujourd’hui une approche moderne et largement adoptée
+dans le développement des systèmes logiciels. Elles regroupent un ensemble de cadres
+méthodologiques tels que Scrum, Kanban, Extreme Programming (XP) ou encore
+Lean Development, qui reposent sur des principes communs de flexibilité, d’itération
+et d’adaptation continue aux besoins.
+Ces approches se distinguent des méthodes traditionnelles dites prédictives par leur
+capacité à intégrer progressivement les retours utilisateurs et à faire évoluer le système
+tout au long du cycle de développement.
+Parmi les différentes méthodes agiles existantes, notre choix s’est porté sur Scrum
+[2], un cadre de travail reconnu pour sa simplicité de mise en œuvre et sa capacité à
+structurer le développement de manière itérative et incrémentale. Ce choix s’est révélé
+particulièrement adapté au contexte de notre projet, caractérisé par un périmètre fonc-
+tionnel étendu, des besoins susceptibles d’évoluer en cours de réalisation et la nécessité
+de livrer des fonctionnalités opérationnelles de manière progressive. Concrètement,
+le développement a été organisé en trois releases regroupant chacune deux sprints
+fonctionnels indépendants, chacun faisant l’objet d’un cycle complet de conception,
+d’implémentation et de validation avant de passer au suivant.
+Figure 1.4: Illustration de la méthode Scrum
+Les modalités concrètes de mise en œuvre de cette approche — organisation du backlog
+produit, itérations fonctionnelles et pipeline de livraison continue — seront détaillées
+dans le chapitre suivant, consacré à la spécification des besoins.
+10
+
+--- Page 25 ---
+Chapitre 1. Étude préalable
+Conclusion
+Ce chapitre a présenté le cadre du projet : l’entreprise d’accueil ATOMIC-IT, la mission
+de stage et l’analyse de l’existant à la commune de Kélibia. Cette étude a mis en évidence
+le besoin d’une solution numérique adaptée et a orienté les choix technologiques. Le
+chapitre suivant sera dédié à la spécification des besoins, des acteurs et à la planification
+des releases.
+11
+
+--- Page 26 ---
+Chapitre 2
+Spécification des besoins
+Introduction
+Ce chapitre est consacré à l’analyse et à la spécification des besoins de la plateforme
+Smart City.
+Nous identifions les différents acteurs du système, décrivons leurs
+interactions à travers les besoins fonctionnels et non fonctionnels, puis nous présentons
+le backlog produit, la planification des releases et les diagrammes de cas d’utilisation.
+2.1
+Analyse des besoins
+2.1.1
+Identification des acteurs
+Un acteur représente toute entité externe qui interagit avec le système. Dans le cadre
+de la plateforme Smart City, quatre acteurs ont été identifiés :
+• Le visiteur : utilisateur authentifié dont le compte n’a pas encore été vérifié
+par un agent municipal. Il peut consulter les actualités municipales et le
+forum communautaire, soumettre des réclamations et participer au forum,
+mais reste bloqué sur les services civils et les services payants jusqu’à la
+validation de son identité.
+• Le citoyen : utilisateur principal de la plateforme. Il peut s’inscrire, soumet-
+tre des demandes d’actes d’état civil, déposer des réclamations géolocalisées,
+participer au forum communautaire et consulter les actualités municipales.
+• L’agent municipal : responsable du traitement des demandes citoyennes
+relevant de son service assigné. Il accède à un tableau de bord centralisé
+lui permettant de consulter, valider ou rejeter les dossiers et de modérer le
+forum.
+• Le superviseur (administrateur) : acteur administratif indépendant de
+l’agent municipal, sans privilèges opérationnels partagés. Il dispose d’une
+vue globale en lecture seule sur l’ensemble de la plateforme et ses droits
+12
+
+--- Page 27 ---
+Chapitre 2. Spécification des besoins
+d’écriture sont strictement limités à l’administration des comptes utilisateurs,
+à la gestion des rôles et à la configuration du système.
+2.1.2
+Les besoins fonctionnels
+Les besoins fonctionnels décrivent l’ensemble des fonctionnalités que la plateforme doit
+offrir à chacun de ses acteurs.
+Interface du citoyen
+• S’inscrire et s’authentifier de manière sécurisée via JWT, avec vérification
+d’identité par upload de la carte CIN (recto/verso).
+• Afficher une bannière d’alerte pour les citoyens non vérifiés et restreindre
+l’accès aux services sensibles.
+• Consulter et modifier son profil personnel.
+• Soumettre des demandes d’actes d’état civil et suivre leur statut.
+• Déposer des réclamations géolocalisées et suivre leur traitement.
+• Demander des autorisations d’événements et des permis de construire.
+• Participer au forum communautaire et consulter les actualités municipales.
+• Accéder à l’interface en français et en arabe avec basculement dynamique.
+Interface de l’agent municipal
+• Accéder à un tableau de bord centralisé présentant toutes les demandes en
+attente classées par type.
+• Traiter les réclamations citoyennes et reclassifier manuellement la catégorie
+ou la priorité attribuée par le module IA.
+• Valider ou rejeter les dossiers d’état civil, de construction, d’événements et
+les autres services.
+• Consulter les statistiques du module de classification automatique.
+• Vérifier les comptes citoyens et modérer le forum communautaire.
+• Publier et gérer les actualités et annonces municipales.
+13
+
+--- Page 28 ---
+Chapitre 2. Spécification des besoins
+Interface du superviseur
+Le superviseur est un acteur administratif distinct de l’agent municipal. Il n’hérite
+d’aucun de ses privilèges opérationnels et ne peut en aucun cas traiter, valider ou
+rejeter des demandes citoyennes.
+Son interface se structure autour de deux axes
+complémentaires :
+• Surveillance globale (lecture seule) : consulter l’ensemble des demandes
+de tous les services, toutes les réclamations, tous les sujets du forum et
+tous les articles y compris les brouillons, sans pouvoir modifier aucun de ces
+éléments.
+• Administration des comptes et du système :
+– Créer, modifier, désactiver et supprimer les comptes agents et su-
+perviseurs (les comptes citoyens sont créés exclusivement via l’auto-
+inscription publique).
+– Promouvoir un agent en superviseur ou rétrograder un utilisateur en
+citoyen.
+– Attribuer et réaffecter les services assignés aux agents.
+– Activer l’abonnement ASD d’un citoyen, ce qui déclenche automatique-
+ment sa vérification (is_verified = True).
+– Corriger la catégorie d’une réclamation mal classifiée par le module IA
+et la re-router vers le bon agent (correct_category — seule action
+d’écriture opérationnelle autorisée).
+– Consulter les statistiques ML/IA (matrice de confusion, précision,
+rappel, distribution par catégorie).
+– Mettre à jour la configuration du site (nom, email de contact, mode
+maintenance).
+2.1.3
+Les besoins non fonctionnels
+• Performance : pages affichées en moins de trois secondes, réponses API
+inférieures à 500 ms.
+• Sécurité : authentification JWT, mots de passe hachés, communications
+HTTPS/SSL, configuration CORS stricte.
+• Disponibilité : infrastructure cloud (Vercel + Neon PostgreSQL) garantis-
+sant une disponibilité continue.
+14
+
+--- Page 29 ---
+Chapitre 2. Spécification des besoins
+• Maintenabilité : architecture découplée facilitant l’évolution indépendante
+du back-end et du front-end, pipeline CI/CD via GitHub.
+• Accessibilité et bilinguisme : interface entièrement disponible en français
+et en arabe, avec support RTL et conception responsive.
+• Extensibilité : architecture conçue pour intégrer facilement de nouveaux
+modules sans refonte de l’existant.
+2.2
+Formalisation des besoins
+2.2.1
+Diagramme du cas d’utilisation général
+Le diagramme global ci-dessous présente l’ensemble des interactions entre les quatre
+acteurs du système — le visiteur, le citoyen, l’agent municipal et le superviseur — et
+les grandes fonctionnalités de la plateforme Smart City.
+Figure 2.1: Diagramme global des cas d’utilisation — Smart City
+15
+
+--- Page 30 ---
+Chapitre 2. Spécification des besoins
+2.3
+Mise en œuvre de la démarche Scrum
+2.3.1
+Backlog produit
+Le backlog produit constitue la liste exhaustive et priorisée de toutes les fonctionnalités à
+développer. Il a été organisé en épiques — regroupements cohérents de fonctionnalités
+liées — auxquelles sont associées des User Stories décrivant les besoins du point de
+vue de chaque acteur. Le tableau 2.1 présente le backlog complet du projet, structuré
+par release et par sprint.
+Table 2.1: Product Backlog — six sprints, trois releases
+N°
+User Story
+Épique
+Sprint
+Priorité
+Release 1 — Socle applicatif
+1
+Inscription et authentification
+JWT
+Authentification
+S1
+5
+2
+Activation du compte par email
+Authentification
+S1
+5
+3
+Réinitialisation du mot de passe
+Authentification
+S1
+4
+4
+Gestion du profil citoyen (CIN,
+coordonnées)
+Authentification
+S1
+4
+5
+Tableau de bord citoyen
+Authentification
+S1
+5
+6
+Services d’état civil — extraits
+de naissance
+Dossiers citoyens
+S2
+5
+7
+Services d’état civil — actes de
+mariage
+Dossiers citoyens
+S2
+5
+8
+Services d’état civil — déclara-
+tions de décès
+Dossiers citoyens
+S2
+5
+9
+Attestations de résidence
+Dossiers citoyens
+S2
+5
+10
+Livret de famille
+Dossiers citoyens
+S2
+4
+Release 2 — Services intelligents & communauté
+11
+Dépôt de réclamation avec
+géolocalisation
+Réclamations &
+IA
+S3
+5
+12
+Classification automatique ML
+(catégorie + priorité)
+Réclamations &
+IA
+S3
+5
+13
+Détection de doublons
+(textuelle + géographique)
+Réclamations &
+IA
+S3
+4
+16
+
+--- Page 31 ---
+Chapitre 2. Spécification des besoins
+N°
+User Story
+Épique
+Sprint
+Priorité
+14
+Explicabilité IA (LIME +
+SHAP)
+Réclamations &
+IA
+S3
+3
+15
+Tableau de bord agent avec
+carte Leaflet
+Réclamations &
+IA
+S3
+5
+16
+Forum communautaire (sujets,
+réponses, votes)
+Forum & Actual-
+ités
+S4
+4
+17
+Notifications in-app lors des
+réponses forum
+Forum & Actual-
+ités
+S4
+3
+18
+Actualités et annonces munici-
+pales
+Forum & Actual-
+ités
+S4
+3
+Release 3 — Services étendus & administration
+19
+Autorisations d’événements
+publics et privés
+Services étendus
+S5
+4
+20
+Services de construction et
+d’urbanisme
+Services étendus
+S5
+4
+21
+Services eau, électricité et
+égouts
+Services étendus
+S5
+4
+22
+Services fiscaux et immobiliers
+Services étendus
+S5
+3
+23
+Licences commerciales (en-
+seignes publicitaires)
+Services étendus
+S5
+3
+24
+Simulation de paiement en ligne
+Services étendus
+S5
+3
+25
+Tableau de bord superviseur
+(vue consolidée)
+Superviseur
+S6
+4
+26
+Gestion des agents et des
+comptes
+Superviseur
+S6
+5
+27
+Vérification CIN et activation
+des citoyens
+Superviseur
+S6
+5
+28
+Couches géospatiales OSM
+(GeoJSON)
+Superviseur
+S6
+3
+Phase 2 — Perspectives d’évolution (hors périmètre)
+29
+Intégration DGI / SONEDE /
+STEG
+Intégrations
+–
+2
+30
+Signature électronique légale
+Intégrations
+–
+2
+17
+
+--- Page 32 ---
+Chapitre 2. Spécification des besoins
+N°
+User Story
+Épique
+Sprint
+Priorité
+31
+Passerelle de paiement réelle
+(banque tunisienne)
+Intégrations
+–
+2
+32
+Notifications push temps réel &
+PWA
+Évolutions
+–
+2
+33
+Tests automatisés (unitaires +
+end-to-end)
+Qualité
+–
+2
+Phase 1 (S1–S6) : fonctionnalités conçues, développées et déployées dans le cadre de ce projet
+de fin d’études. Phase 2 : perspectives d’évolution identifiées mais non développées, dépassant le
+périmètre du stage. Priorité : échelle de 1 (faible) à 5 (critique).
+À titre d’exemple, le tableau 2.2 présente cinq User Stories représentatives issues de ce
+backlog, illustrant la diversité des acteurs et des fonctionnalités couvertes.
+ID
+Acteur
+Je veux...
+Afin de...
+US-001
+Citoyen
+m’inscrire et me con-
+necter de manière
+sécurisée
+accéder à mes dé-
+marches personnelles
+en ligne
+US-011
+Citoyen
+soumettre une réclama-
+tion avec localisation et
+photo
+signaler un problème à
+la municipalité
+US-012
+Système
+classifier automatique-
+ment les réclamations par
+catégorie et priorité
+orienter rapidement
+chaque signalement
+vers le bon service
+US-015
+Agent munici-
+pal
+voir, assigner et mettre à
+jour le statut des réclama-
+tions
+traiter efficacement les
+signalements citoyens
+US-026
+Superviseur
+vérifier les comptes
+citoyens en validant leur
+CIN
+contrôler l’accès aux
+services sensibles de la
+plateforme
+Table 2.2: Exemples de User Stories du backlog produit
+2.3.2
+Planification des releases
+Le projet a été structuré en trois releases regroupant au total six sprints fonctionnels
+indépendants, chaque release couvrant exactement deux sprints, comme le présente le
+tableau 2.3.
+18
+
+--- Page 33 ---
+Chapitre 2. Spécification des besoins
+R.
+Sprint
+S1-2 S3-4 S5-6 S7-8 S9-10 S11-12
+R1
+Sprint 1 — Authentifi-
+cation
+Sprint 2 — Dossiers
+citoyens
+R2
+Sprint 3 — Réclama-
+tions & IA
+Sprint 4 — Forum &
+Actualités
+R3
+Sprint 5 — Tableau de
+bord agent
+Sprint 6 — Super-
+viseur
+Table 2.3: Planification des trois releases et six sprints
+2.3.3
+Organisation en itérations
+Le projet a été conduit selon un processus itératif et incrémental : chaque sprint constitue
+une unité de développement autonome, couvrant un cycle complet de conception,
+d’implémentation et de validation avant le passage au sprint suivant. Les six sprints
+sont organisés comme suit :
+Sprint 1 — Authentification & Gestion des comptes Mise en place du socle ap-
+plicatif : inscription sécurisée avec upload et vérification de la carte CIN
+(recto/verso), authentification JWT avec access token (60 min) et refresh
+token (1 jour), activation du compte par lien email, réinitialisation du mot
+de passe, gestion du profil citoyen et contrôle d’accès par rôle (citoyen /
+agent / superviseur).
+Sprint 2 — Dossiers citoyens & État civil Développement de l’ensemble des ser-
+vices d’état civil dématérialisés : demande d’extrait de naissance (avec
+génération de QR code), acte de mariage, déclaration de décès et demande
+d’inhumation, attestation de résidence, livret de famille et légalisation de
+documents. Chaque demande déclenche un workflow de traitement agent
+avec génération automatique du document officiel signé (PDF).
+Sprint 3 — Réclamations citoyennes & Intelligence artificielle Dépôt géolocal-
+isé de réclamations avec photo et description libre. Intégration du module
+19
+
+--- Page 34 ---
+Chapitre 2. Spécification des besoins
+IA de classification automatique (TF-IDF + LinearSVC) en catégorie (10
+classes) et en priorité (faible / normale / urgente). Détection des doublons
+par similarité cosinus (60 %) et distance de Haversine (40 %), seuil à 0,65.
+Explicabilité des prédictions via LIME et SHAP. Tableau de bord agent avec
+carte Leaflet interactive et filtres par statut.
+Sprint 4 — Forum communautaire & Actualités Forum de discussion bilingue
+(FR/AR) : création de sujets, réponses, votes positifs/négatifs, épinglage et
+résolution par les agents. Système de notifications automatiques à chaque
+nouvelle réponse (hors auto-réponse). Publication et consultation des actu-
+alités et annonces municipales avec gestion des images multiples.
+Sprint 5 — Services étendus Développement des modules de services complémen-
+taires : autorisations d’événements publics et privés avec détection de conflits
+de dates et de lieux, permis de construire avec calcul de risque, goudron-
+nage de route, certificat de vocation de bien, raccordement aux réseaux
+(eau, électricité, assainissement), demandes fiscales et immobilières, licences
+commerciales (enseignes publicitaires) et simulation de paiement en ligne.
+Sprint 6 — Tableau de bord superviseur & Administration Interface d’administration
+centralisée pour le superviseur municipal : gestion et vérification des comptes
+citoyens (validation CIN), création et affectation des agents par service, pro-
+motion / rétrogradation des rôles, vue consolidée de toutes les demandes en
+cours, statistiques globales par catégorie et par agent, et configuration des
+paramètres du site. Intégration des couches géospatiales OSM (GeoJSON)
+pour la visualisation cartographique avancée.
+Chaque sprint s’est appuyé sur un processus de livraison continue structuré en trois
+niveaux :
+• Tests continus en local : validation fonctionnelle de chaque module
+sur l’environnement de développement (Django sur localhost:8000 + Re-
+act/Vite sur localhost:5173) avant toute mise en production.
+• Intégration continue via GitHub : chaque push sur la branche main
+déclenche automatiquement un pipeline de déploiement sur Vercel, garan-
+tissant que la version en production reflète en permanence l’état stable du
+dépôt.
+• Déploiement incrémental sur Vercel : la plateforme de production
+(Vercel + Neon PostgreSQL) a été mise à jour à l’issue de chaque sprint,
+20
+
+--- Page 35 ---
+Chapitre 2. Spécification des besoins
+permettant une validation en conditions réelles et une détection précoce des
+problèmes d’intégration.
+Figure 2.2: Démarche de développement itérative et incrémentale adoptée
+Conclusion
+Ce chapitre a permis de définir précisément le périmètre fonctionnel de la plateforme
+Smart City à travers l’identification des acteurs, la spécification des besoins, la
+construction du backlog produit et la planification des releases. Le chapitre suivant
+sera consacré à l’environnement de réalisation technique.
+21
+
+--- Page 36 ---
+Chapitre 3
+Réalisation
+Introduction
+Ce chapitre présente l’environnement technique dans lequel la plateforme Smart City
+a été conçue et développée. Nous détaillons l’architecture de déploiement retenue,
+l’environnement matériel et logiciel utilisé, les technologies et frameworks retenus, ainsi
+que le schéma de la base de données.
+3.1
+Environnement de travail
+3.1.1
+Architecture de déploiement
+La plateforme Smart City repose sur une architecture découplée client/serveur
+(SPA/API). Cette architecture sépare clairement les responsabilités entre le frontend et
+le backend, facilitant la maintenance, l’évolution indépendante des deux couches et le
+déploiement sur des infrastructures distinctes.
+L’architecture se compose de trois couches principales :
+• La couche présentation (Frontend) : une SPA de 48 pages développée
+avec React 19 + TypeScript, compilée via Vite et déployée sur Vercel.
+Interface entièrement bilingue français/arabe avec support RTL.
+• La couche métier (Backend) : une API REST sécurisée développée avec
+Django 5 + Django REST Framework, structurée en 16 applications
+Django indépendantes. Déployée sur Vercel en mode serverless via des
+fonctions Python.
+• La couche données : une base de données PostgreSQL hébergée sur
+Neon (cloud serverless), accessible via une connexion SSL sécurisée.
+22
+
+--- Page 37 ---
+Chapitre 3. Réalisation
+Figure 3.1: Architecture générale de la plateforme Smart City
+3.1.2
+Environnement matériel
+Composant
+Poste 1
+Poste 2
+Marque
+MSI Thin GF63
+Gigabyte G5 MD
+Processeur
+11th Gen Intel® Core™
+i5-11400H
+Intel Core i5-11400H
+Mémoire RAM
+24,0 Go
+16,0 Go
+Disque dur
+512 Go SSD
+512 Go SSD
+Système
+d’exploitation
+Windows 10
+Windows 10
+Table 3.1: Environnement matériel de développement
+3.1.3
+Technologies utilisées
+Backend — Django REST Framework
+Le backend est développé avec Django 5[3] associé à Django REST Framework
+(DRF)[4]. L’authentification est assurée par simplejwt et djoser [5], qui fournissent
+une gestion complète des tokens JWT.
+Frontend — React 19
+Le frontend est développé avec React 19[6] en TypeScript, compilé via Vite[7].
+L’interface utilise Bootstrap 5 pour la mise en page responsive et Leaflet.js [8] pour
+23
+
+--- Page 38 ---
+Chapitre 3. Réalisation
+les cartes interactives. La plateforme est entièrement bilingue grâce à un Language-
+Provider personnalisé intégrant plus de 400 clés de traduction.
+Base de données — PostgreSQL
+La base de données PostgreSQL 15[9] est hébergée sur Neon[10]. L’accès aux données
+est géré par l’ORM Django.
+Infrastructure — Vercel & GitHub
+Le déploiement est assuré par Vercel [11]. Le pipeline CI/CD est configuré via GitHub
+: chaque push sur la branche main déclenche automatiquement un déploiement sur
+Vercel.
+3.1.4
+Environnement logiciel
+Table 3.2: Environnement logiciel de développement
+Logo
+Outil / Technologie
+Version
+Rôle
+Python
+3.12
+Langage de programmation back-
+end
+Django
+5.1.0
+Framework web backend
+Django REST Frame-
+work
+3.15
+Construction de l’API REST
+simplejwt + djoser
+—
+Authentification JWT
+scikit-learn
+1.x
+Classification IA (TF-IDF +
+LinearSVC)
+React
+19.2.4
+Framework frontend JavaScript
+TypeScript
+5.9.3
+Typage statique JavaScript
+Vite
+8.0.1
+Bundler et serveur de développe-
+ment
+Bootstrap
+5.x
+Framework CSS responsive
+24
+
+--- Page 39 ---
+Chapitre 3. Réalisation
+Logo
+Outil / Technologie
+Version
+Rôle
+Leaflet.js
+1.x
+Cartographie interactive
+PostgreSQL
+15
+Système de gestion de base de
+données
+Neon
+—
+Hébergement PostgreSQL cloud
+serverless
+Vercel
+—
+Plateforme de déploiement et
+CI/CD
+GitHub
+—
+Gestion de versions et intégration
+continue
+Visual Studio Code
+—
+Éditeur de code principal
+Les logos présentés sont la propriété de leurs éditeurs respectifs et sont utilisés à titre
+illustratif uniquement.
+3.2
+Schéma de la base de données
+Le diagramme de classes ci-dessous constitue la représentation statique de l’architecture du système,
+modélisant les entités métier de la plateforme Smart City, leurs attributs et leurs relations. Il
+s’articule autour des classes principales : Utilisateur, Citoyen, AgentMunicipal, Superviseur,
+Reclamation, DemandeAdministrative (et ses sous-classes), SujetForum, Article et Paiement.
+25
+
+--- Page 40 ---
+Chapitre 3. Réalisation
+Figure 3.2: Diagramme de classes global — Smart City
+Conclusion
+Ce chapitre a présenté l’environnement technique complet de la plateforme Smart City : architecture
+de déploiement découplée, environnement matériel et logiciel, technologies retenues pour chaque couche
+du système, et schéma de la base de données. Les chapitres suivants détaillent la réalisation de chaque
+release sprint par sprint.
+26
+
+--- Page 41 ---
+Chapitre 4
+Release 1 : Authentification et Dossiers
+Citoyens
+Introduction
+La première release de la plateforme Smart City pose les fondations du système en couvrant les
+fonctionnalités d’accès à la plateforme et de soumission des demandes administratives. Elle est organisée
+en deux sprints : le Sprint 1 traite de l’authentification et de la gestion des comptes utilisateurs, le
+Sprint 2 couvre le tableau de bord citoyen et l’ensemble des services administratifs en ligne.
+4.1
+Backlog de la Release 1
+Table 4.1: Backlog de la Release 1
+N°
+User Story
+Sprint
+Priorité
+US-01
+En tant que citoyen, je veux m’inscrire avec mon email
+et ma CIN afin de créer mon compte.
+1
+5
+US-02
+En tant qu’utilisateur, je veux me connecter via JWT
+afin d’accéder à mon espace personnel.
+1
+5
+US-03
+En tant qu’utilisateur, je veux réinitialiser mon mot de
+passe par email.
+1
+4
+US-04
+En tant que citoyen, je veux consulter et modifier mon
+profil personnel.
+1
+4
+US-05
+En tant que citoyen, je veux accéder à mon tableau de
+bord avec la liste de mes demandes.
+2
+5
+US-06
+En tant que citoyen, je veux soumettre une demande
+d’état civil en ligne et suivre son statut.
+2
+5
+US-07
+En tant que citoyen, je veux demander un permis de
+construire ou un certificat de vocation.
+2
+4
+27
+
+--- Page 42 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+N°
+User Story
+Sprint
+Priorité
+US-08
+En tant que citoyen, je veux soumettre une demande
+d’autorisation d’événement.
+2
+4
+US-09
+En tant que citoyen, je veux demander un raccordement
+aux réseaux (eau, électricité, égouts).
+2
+4
+US-10
+En tant que citoyen, je veux effectuer un paiement en
+ligne pour les services payants.
+2
+3
+4.2
+Sprint 1 : Authentification et gestion des comptes
+4.2.1
+Spécification fonctionnelle
+Ce sprint couvre l’ensemble du cycle d’authentification de la plateforme : inscription d’un citoyen
+avec upload de sa CIN (recto/verso), connexion sécurisée via JWT avec redirection selon le rôle,
+réinitialisation du mot de passe par email, et gestion de l’accès restreint pour les comptes non vérifiés.
+Le diagramme de cas d’utilisation raffiné ci-dessous (figure 4.1) détaille les interactions entre les
+acteurs et le système pour ce sprint.
+Figure 4.1: Diagramme de cas d’utilisation raffiné — Sprint 1 : Authentification
+Le tableau 4.2 présente la description textuelle du cas d’utilisation central « Se connecter ».
+28
+
+--- Page 43 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Table 4.2: Description textuelle — Cas d’utilisation « Se connecter
+»
+Cas d’utilisation
+Se connecter (JWT token)
+Acteur principal
+Citoyen, Agent, Superviseur
+Précondition
+L’utilisateur possède un compte actif.
+Scénario principal
+1. L’utilisateur saisit son email (ou CIN) et son mot de
+passe.
+2. Le système vérifie l’identifiant : si CIN →recherche de
+l’email correspondant.
+3. Le système vérifie le mot de passe haché.
+4. Le système génère un access token et un refresh token
+JWT, enrichis du rôle (user_type) et du service assigné.
+5. Le frontend stocke les tokens en localStorage.
+6. Redirection selon le rôle : /dashboard (citoyen),
+/agent-dashboard (agent), /supervisor-dashboard (su-
+perviseur).
+Scénario alternatif
+Identifiants incorrects →401 « Identifiants invalides ».
+Compte désactivé (is_active=False) →401 « Compte
+désactivé ».
+Citoyen non vérifié →redirection dashboard avec accès lim-
+ité.
+Postcondition
+Utilisateur authentifié, redirigé vers son espace selon son rôle.
+4.2.2
+Conception
+Diagramme de séquence — Authentification
+Le diagramme de séquence détaillé ci-dessous (figure 4.2) illustre les échanges internes entre les
+différentes couches de la plateforme lors du processus d’authentification : du formulaire de connexion
+côté React jusqu’à la génération du token JWT par simplejwt, en passant par la vérification des
+identifiants en base de données PostgreSQL.
+29
+
+--- Page 44 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.2: Diagramme de séquence détaillé « S’authentifier »
+4.2.3
+Réalisation
+Pages d’authentification
+Les trois pages du flux d’authentification sont disponibles en français et en arabe avec basculement
+dynamique.
+La page de connexion (figure 4.3) permet au citoyen de s’authentifier via son adresse email (ou
+numéro CIN) et son mot de passe, avec des liens vers l’inscription et la réinitialisation du mot de passe.
+Figure 4.3: Page de connexion — interface citoyen
+La page d’inscription (figure 4.4) permet au citoyen de créer son compte en renseignant ses
+informations personnelles et en uploadant les photos recto/verso de sa carte CIN pour la vérification
+d’identité.
+30
+
+--- Page 45 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.4: Page d’inscription — formulaire de création de compte citoyen
+La page de réinitialisation du mot de passe (figure 4.5) permet à l’utilisateur de recevoir un lien
+sécurisé par email pour définir un nouveau mot de passe.
+31
+
+--- Page 46 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.5: Page de réinitialisation du mot de passe
+4.3
+Sprint 2 : Tableau de bord et dossiers citoyens
+4.3.1
+Spécification fonctionnelle
+Ce sprint couvre l’ensemble des services administratifs accessibles aux citoyens depuis leur tableau de
+bord : services d’état civil (extrait de naissance, acte de mariage, déclaration de décès, attestation de
+résidence, livret de famille), services de construction et d’urbanisme (permis de construire, goudronnage,
+certificat de vocation), autorisations d’événements publics et privés, raccordements aux réseaux (eau,
+électricité, égouts), services fiscaux et immobiliers, et licences commerciales.
+32
+
+--- Page 47 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.6: Diagramme de cas d’utilisation raffiné — Sprint 2 : Dossiers citoyens
+Le tableau 4.3 présente la description textuelle du cas d’utilisation principal « Soumettre une
+demande de service administratif ».
+33
+
+--- Page 48 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Cas d’utilisation
+Soumettre une demande de service administratif
+Acteur principal
+Citoyen (vérifié)
+Précondition
+Le citoyen est authentifié et son compte est vérifié
+(is_verified=True).
+Scénario principal
+1. Le citoyen sélectionne le type de service depuis
+son tableau de bord.
+2. Le système vérifie le profil citoyen (is_verified,
+asd_active).
+3. Le citoyen remplit le formulaire et uploade les
+pièces justificatives.
+4a. [Citoyen sans ASD] : affichage du montant →
+paiement en ligne →création de la demande (statut
+: en attente).
+4b. [Citoyen avec ASD actif] : accès gratuit →
+création directe de la demande.
+5. L’agent du service concerné traite la demande et
+met à jour le statut.
+6. Le citoyen suit l’état de sa demande depuis son
+tableau de bord.
+Scénario alternatif
+Compte non vérifié →403 « Compte non vérifié ».
+Paiement échoué →erreur affichée, invitation à
+réessayer.
+Dossier rejeté →motif de rejet transmis au citoyen.
+Postcondition
+Demande enregistrée avec statut en attente, citoyen
+notifié.
+Table 4.3: Description textuelle — Cas d’utilisation « Soumettre une demande adminis-
+trative »
+4.3.2
+Conception
+Diagramme de séquence détaillé — Flux d’un service administratif
+Le diagramme suivant illustre le contrôle d’accès effectué avant toute soumission de service, incluant la
+vérification du profil citoyen et la gestion des accès selon le statut ASD. phases dans les figures 4.7, 4.8
+et 4.9 ci-dessous.
+34
+
+--- Page 49 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.7: Flux d’un service administratif — Phase 1 : Contrôle d’accès
+Le diagramme suivant décrit le traitement des dossiers par l’agent municipal, depuis la récupération
+des demandes en attente jusqu’à la notification du citoyen après validation ou rejet.
+35
+
+--- Page 50 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.8: Flux d’un service administratif — Phase 2 : Traitement par l’agent
+Le diagramme suivant présente le suivi de la demande par le citoyen, lui permettant de consulter
+le statut de son dossier et d’accéder au document final en cas de validation.
+36
+
+--- Page 51 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.9: Flux d’un service administratif — Phase 3 : Suivi par le citoyen
+4.3.3
+Réalisation
+Tableau de bord citoyen
+Le tableau de bord citoyen offre une vue d’ensemble des services disponibles, des demandes en cours
+et des actualités municipales. Il intègre une carte interactive Leaflet centrée sur Kélibia affichant les
+réclamations géolocalisées avec des marqueurs colorés selon leur statut.
+37
+
+--- Page 52 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Figure 4.10: Tableau de bord — interface citoyen
+Catalogue des services administratifs
+La page des services administratifs regroupe l’ensemble des démarches en ligne disponibles pour le
+citoyen, organisées en six catégories : État Civil (7 services), Social & Événements (2 services), Maison
+& Construction (3 services), Argent & Impôts (5 services), Boutiques & Commerces (1 service) et
+Eau, Lumière & Égouts (1 service). Chaque catégorie est dépliable et donne accès aux formulaires de
+soumission correspondants avec upload des pièces justificatives et suivi du statut en temps réel.
+Figure 4.11: Page des services administratifs — catalogue des démarches en ligne
+38
+
+--- Page 53 ---
+Chapitre 4. Release 1 : Authentification et Dossiers Citoyens
+Conclusion
+La Release 1 a permis de mettre en place les fondations de la plateforme Smart City : le système
+d’authentification sécurisé par JWT (Sprint 1) et l’ensemble des formulaires de services administratifs
+citoyens avec suivi en temps réel (Sprint 2). La Release 2, présentée dans le chapitre suivant, introduit
+les fonctionnalités intelligentes de la plateforme — la classification automatique des réclamations par
+apprentissage automatique et le forum communautaire.
+39
+
+--- Page 54 ---
+Chapitre 5
+Release 2 : Réclamations Citoyennes
+et Forum Communautaire
+Introduction
+La deuxième release de la plateforme Smart City introduit les fonctionnalités collaboratives et
+intelligentes. Elle est organisée en deux sprints : le Sprint 3 traite des réclamations citoyennes
+géolocalisées et du module complet de Data Science (prétraitement, entraînement, évaluation, expli-
+cabilité SHAP/LIME et déploiement), le Sprint 4 couvre le forum communautaire et les actualités
+municipales.
+5.1
+Backlog de la Release 2
+Table 5.1: Backlog de la Release 2
+N°
+User Story
+Sprint
+Priorité
+US-11
+En tant que citoyen, je veux déposer une réclamation
+géolocalisée avec photo.
+3
+5
+US-12
+En tant que système, je veux classifier automatiquement
+chaque réclamation par catégorie et priorité.
+3
+5
+US-13
+En tant que citoyen, je veux suivre le statut de mes
+réclamations en temps réel.
+3
+5
+US-14
+En tant qu’agent, je veux voir les mots-clés explicatifs de
+la classification IA (SHAP/LIME).
+3
+3
+US-15
+En tant que système, je veux détecter automatiquement
+les réclamations dupliquées.
+3
+4
+US-16
+En tant que citoyen, je veux visualiser les réclamations
+sur une carte interactive (couches OSM).
+3
+3
+US-17
+En tant que citoyen, je veux créer un sujet sur le forum
+et recevoir des notifications de réponse.
+4
+4
+40
+
+--- Page 55 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+N°
+User Story
+Sprint
+Priorité
+US-18
+En tant que citoyen, je veux voter sur les sujets et
+réponses du forum.
+4
+4
+US-19
+En tant qu’agent modérateur, je veux épingler et mar-
+quer des sujets comme résolus.
+4
+3
+US-20
+En tant que citoyen, je veux consulter les actualités et
+annonces municipales.
+4
+3
+5.2
+Sprint 3 : Réclamations citoyennes et module
+Data Science
+5.2.1
+Spécification fonctionnelle
+Ce sprint couvre le dépôt géolocalisé de réclamations par les citoyens et l’ensemble du pipeline de
+Data Science permettant leur classification automatique, la détection de doublons, l’explicabilité des
+décisions du modèle et la visualisation cartographique via les couches géospatiales OSM.
+Figure 5.1: Diagramme de cas d’utilisation raffiné — Sprint 3 : Réclamations
+41
+
+--- Page 56 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Le tableau 5.2 présente la description textuelle du cas d’utilisation principal « Soumettre et suivre
+une réclamation ».
+Table 5.2: Description textuelle — Cas d’utilisation « Soumettre
+une réclamation »
+Cas d’utilisation
+Soumettre et suivre une réclamation
+Acteur principal
+Citoyen (vérifié)
+Précondition
+Le citoyen est authentifié et son compte est vérifié.
+Scénario principal
+1. Le citoyen accède au formulaire et renseigne le titre, la
+description et une photo (optionnelle).
+2. Il géolocalise le problème sur la carte interactive.
+3. Le système valide les coordonnées (point-in-polygon dans
+le périmètre communal).
+4. Le module IA (TF-IDF + LinearSVC) classe automatique-
+ment la catégorie et la priorité.
+5. Le système vérifie l’absence de doublons par similarité
+cosinus.
+6. La réclamation est enregistrée (statut : en attente) et
+l’agent responsable est notifié.
+7. Le citoyen suit le statut depuis son tableau de bord.
+Scénario alternatif
+Coordonnées hors périmètre →erreur affichée, invitation à
+recorriger.
+Doublon détecté →réclamation marquée est_doublon=True,
+référencée vers l’originale.
+Postcondition
+Réclamation enregistrée, classifiée automatiquement et as-
+signée à l’agent du service concerné.
+5.2.2
+Conception
+Diagramme de séquence — Réclamations
+Le flux complet d’une réclamation est décrit en deux phases dans les figures 5.2 et 5.3 ci-dessous.
+42
+
+--- Page 57 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Figure 5.2: DSSD « Soumettre une réclamation » — Phase 1 : Soumission
+Figure 5.3: DSSD « Traitement d’une réclamation » — Phase 2 : Traitement par l’agent
+43
+
+--- Page 58 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+5.2.3
+Module Data Science : classification automatique des
+réclamations
+Présentation générale
+Le module de Data Science constitue l’un des apports majeurs de la plateforme Smart City. Il
+permet de classer automatiquement chaque réclamation soumise par un citoyen selon une catégorie
+parmi cinq classes — éclairage public, voirie & routes, déchets & hygiène, nuisances sonores et autre —
+et une priorité parmi trois niveaux (faible, normale, urgente), tout en détectant les doublons et en
+fournissant une explication transparente des décisions du modèle.
+Prétraitement des données
+Le corpus d’entraînement est composé de 601 réclamations annotées manuellement, rédigées en
+français et en arabe. Avant l’entraînement, les textes bruts sont soumis à un pipeline de prétraitement
+comprenant les étapes suivantes :
+• Normalisation : passage en minuscules, suppression de la ponctuation et des caractères
+spéciaux non significatifs.
+• Tokenisation : découpage du texte en unités lexicales (unigrammes et bigrammes) afin
+de capturer les associations de mots fréquentes dans les réclamations municipales.
+• Suppression des mots vides (stopwords) : élimination des mots fonctionnels français
+et arabes non porteurs de sens discriminant.
+• Racinisation (stemming) : réduction des formes fléchies à leur racine via le French
+Snowball Stemmer de NLTK, appliqué aux tokens latins uniquement ; les tokens arabes
+sont conservés tels quels.
+Analyse descriptive du corpus
+L’analyse descriptive du corpus a mis en évidence plusieurs caractéristiques importantes. La distribution
+des catégories est déséquilibrée : la catégorie « autre » (143 exemples) et « voirie & routes » (120
+exemples) représentent à elles seules près de 44% des réclamations, tandis que la catégorie « nuisances
+sonores » (105 exemples) est la moins représentée. Cette caractéristique justifie le recours au F1-score
+macro comme métrique d’évaluation principale, plus représentative que la simple accuracy sur des
+classes déséquilibrées. Par ailleurs, les textes sont courts et peu structurés (longueur moyenne de 8
+mots), ce qui exclut les modèles nécessitant des contextes longs et favorise les approches vectorielles
+légères comme TF-IDF.
+Choix du modèle
+Afin de justifier le choix du classifieur LinearSVC, trois modèles standards pour la classification
+de texte ont été comparés : Naive Bayes multinomial (MNB), Régression Logistique (LR)
+et LinearSVC. Ces baselines ont été retenus car ils sont les références classiques pour les tâches
+TF-IDF [12] ; des modèles comme Random Forest ont été écartés en raison de leur inadaptation aux
+matrices creuses produites par TF-IDF, et les modèles neuronaux profonds (BERT, etc.) ont été exclus
+pour leur incompatibilité avec un déploiement serverless sans GPU.
+44
+
+--- Page 59 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Entraînement
+Les trois modèles ont été entraînés sur le même corpus de 601 réclamations annotées en utilisant
+une représentation TF-IDF (unigrammes + bigrammes) et évalués par validation croisée à 5 plis
+selon deux métriques : l’accuracy et le F1-score macro.
+Évaluation
+Table 5.3: Comparaison des modèles de classification (validation
+croisée 5 plis, 601 réclamations)
+Modèle
+Catégorie
+Priorité
+Accuracy
+F1-macro
+Accuracy
+F1-macro
+Naive Bayes (MNB)
+73.5%
+0.738
+77.0%
+0.761
+Régression Logistique
+76.2%
+0.764
+76.5%
+0.758
+LinearSVC
+79.8%
+0.802
+79.4%
+0.786
+Les résultats confirment la supériorité de LinearSVC sur les deux tâches de classification :
+• Meilleure accuracy sur la catégorie (79.8%) : LinearSVC dépasse Naive Bayes de
+6.3 points et la Régression Logistique de 3.6 points, ce qui se traduit par une orientation
+plus précise des réclamations vers le service municipal compétent.
+• Meilleure accuracy sur la priorité (79.4%) : LinearSVC surpasse les deux autres
+modèles sur la tâche de priorisation, réduisant le risque de sous-estimer des réclamations
+urgentes.
+• F1-macro supérieur sur les deux tâches : cette métrique confirme que LinearSVC
+classifie correctement toutes les catégories y compris la catégorie minoritaire (nuisances
+sonores).
+• Robustesse sur les textes courts : LinearSVC, grâce à sa maximisation de la marge
+entre les classes, se révèle plus robuste que Naive Bayes sur des textes courts et peu
+structurés.
+• Temps d’inférence rapide : compatible avec un déploiement serverless sur Vercel, sans
+GPU ni ressources supplémentaires.
+Matrices de confusion — LinearSVC (validation croisée 5 plis)
+Les matrices de confusion ci-dessous ont été obtenues par validation croisée à 5 plis (cross_val_predict)
+sur les 601 réclamations annotées du corpus d’entraînement. Chaque prédiction est effectuée sur
+des données non vues lors de l’entraînement, ce qui garantit une évaluation non biaisée.
+45
+
+--- Page 60 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Table 5.4: Matrice de confusion — Modèle de catégorisation (LinearSVC, 5 plis, n = 601)
+Réel
+Prédit
+Éclairage
+Nuisances
+Autre
+Voirie
+Déchets
+Rappel
+F1
+Éclairage (116)
+98
+4
+9
+3
+2
+0.84
+0.84
+Nuisances (105)
+4
+86
+10
+0
+5
+0.82
+0.84
+Autre (143)
+7
+6
+101
+17
+12
+0.71
+0.71
+Voirie (120)
+4
+1
+12
+100
+3
+0.83
+0.82
+Déchets (117)
+5
+2
+11
+4
+95
+0.81
+0.81
+Précision
+0.83
+0.87
+0.71
+0.81
+0.81
+Accuracy globale : 79.8%
+|
+F1-macro : 0.802
+La diagonale (fond bleu) représente les prédictions correctes. La catégorie Autre présente le plus de
+confusions (hétérogénéité sémantique attendue). Les confusions Autre/Voirie (17 cas) et
+Autre/Déchets (12 cas) sont les plus fréquentes.
+Table 5.5: Matrice de confusion — Modèle de priorisation (LinearSVC, 5 plis, n = 601)
+Réelle
+Prédite
+Faible
+Normale
+Urgente
+Rappel
+F1
+Faible (155)
+117
+35
+3
+0.75
+0.81
+Normale (240)
+17
+189
+34
+0.79
+0.76
+Urgente (206)
+0
+35
+171
+0.83
+0.83
+Précision
+0.87
+0.73
+0.82
+Accuracy globale : 79.4%
+|
+F1-macro : 0.786
+Les principales confusions s’observent entre Normale et Urgente (34 cas) et entre Faible et Normale
+(35 cas), ce qui correspond aux cas limites sur le continuum de gravité. Aucune réclamation Urgente
+n’a été classée Faible, ce qui confirme la fiabilité du modèle sur les cas critiques.
+Détection de doublons
+Au-delà de la classification, le module intègre une détection de doublons basée sur la similarité
+cosinus entre les vecteurs TF-IDF des réclamations. Lorsqu’une nouvelle réclamation présente un score
+de similarité supérieur à un seuil configurable avec une réclamation existante, elle est automatiquement
+marquée comme doublon (est_doublon=True), référencée vers la réclamation d’origine (doublon_de)
+et son score de similarité est enregistré (score_similarite). Cette fonctionnalité permet aux agents
+de consolider les signalements redondants et d’éviter les traitements dupliqués.
+46
+
+--- Page 61 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Interprétation SHAP/LIME — IA explicable (XAI)
+Un mécanisme d’IA explicable (XAI) expose les mots-clés les plus déterminants dans la décision de
+classification, via deux approches complémentaires :
+• LIME (Local Interpretable Model-agnostic Explanations) : génère une explication locale
+pour chaque prédiction individuelle en perturbant les entrées et en observant les variations
+de la sortie du modèle. Il identifie les mots qui ont le plus contribué à la décision de
+classification pour une réclamation donnée.
+• SHAP (SHapley Additive exPlanations) : calcule la contribution marginale de chaque
+terme à la prédiction finale en s’appuyant sur les valeurs de Shapley issues de la théorie
+des jeux coopératifs. Les valeurs SHAP permettent d’identifier globalement les termes les
+plus discriminants pour chaque catégorie et d’offrir une vision agrégée de l’importance
+des variables sur l’ensemble du corpus.
+Ces explications sont exposées à l’agent municipal via l’interface de traitement des réclamations, lui
+offrant une justification transparente de la catégorie et de la priorité attribuées automatiquement,
+et lui permettant de valider ou de corriger la classification en connaissance de cause.
+Déploiement du modèle dans l’application
+Le pipeline de classification est pleinement opérationnel en production : scikit-learn est inclus dans
+les dépendances du projet (requirements.txt), dont la taille totale reste dans les limites acceptées
+par Vercel (environ 81 Mo sur 250 Mo autorisés). Le pipeline complet — prétraitement TF-IDF,
+prédiction LinearSVC, détection de doublons, génération des explications SHAP/LIME — est invoqué
+automatiquement à chaque soumission de réclamation via POST /api/reclamations/.
+Un mécanisme de fallback par règles métier basé sur des mots-clés est prévu en cas d’indisponibilité
+exceptionnelle du module scikit-learn, garantissant ainsi la continuité du service de classification en
+toutes circonstances.
+5.2.4
+Module cartographique de la plateforme
+La plateforme Smart City intègre un module cartographique interactif développé avec la bibliothèque
+Leaflet.js et son wrapper React-Leaflet. Ce module constitue un composant fonctionnel central du
+système : il permet la visualisation spatiale des réclamations citoyennes, le suivi territorial
+des incidents signalés, et offre aux agents municipaux un outil d’aide à la prise de décision basé
+sur la géolocalisation. Les données géospatiales sont issues de la base OpenStreetMap (OSM),
+requêtées via l’API Overpass, puis exportées au format GeoJSON (WGS84 / EPSG:4326) et
+stockées localement dans le répertoire public/layers/. Les données relatives au zonage agricole de la
+région de Kélibia sont issues du portail national AgriData [13].
+Deux niveaux de visualisation sont proposés selon le profil de l’utilisateur : une interface simplifiée
+pour les citoyens, centrée sur le dépôt et le suivi géolocalisé des signalements, et un tableau de bord
+cartographique avancé pour les agents municipaux, intégrant les couches de zonage urbain et les outils
+de priorisation géographique des interventions.
+47
+
+--- Page 62 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Figure 5.4: Vue globale de la carte avec toutes les couches activées sur fond Open-
+StreetMap
+Fonds de carte (tuiles)
+Le module prend en charge plusieurs fonds cartographiques interchangeables à l’exécution. Ce choix
+technique permet d’adapter la lisibilité de la carte selon le contexte d’utilisation (analyse urbaine,
+inspection terrain, présentation institutionnelle). Le tableau 5.6 liste les fournisseurs de tuiles intégrés.
+Table 5.6: Fonds de carte disponibles dans la plateforme
+Fond
+Fournisseur
+Usage
+OpenStreetMap
+France
+tile.openstreetmap.fr/
+osmfr
+Défaut — carte routière dé-
+taillée
+Esri World Imagery
+server.arcgisonline.com
+Vue satellite
+OpenTopoMap
+tile.opentopomap.org
+Vue topographique (tableau
+de bord agent)
+Le contrôle de couches, positionné en haut à droite de la carte, permet à l’utilisateur de basculer
+entre les fonds et d’activer ou désactiver chaque couche thématique indépendamment.
+Description des couches géospatiales
+L’ensemble des couches géospatiales chargées par le module est décrit dans le tableau 5.7. Chaque
+couche remplit un rôle fonctionnel précis : les couches de référence territoriale (limite communale,
+routes, bâtiments) fournissent le contexte spatial nécessaire à la localisation des incidents, tandis que
+les couches thématiques (zones urbaines, espaces verts, oueds) soutiennent le zonage urbain mis à
+disposition des agents pour la catégorisation et la priorisation géographique des interventions. À
+l’exception des signalements — chargés dynamiquement via l’API REST — toutes les couches statiques
+sont préchargées au format GeoJSON depuis le répertoire public/layers/, ce qui garantit des temps
+de rendu indépendants de la connectivité réseau.
+48
+
+--- Page 63 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Couche
+Fichier source
+Taille
+Type
+Rôle fonctionnel
+Limite commu-
+nale
+limite_kelibia_v2.geojson
+∼21 Ko
+Polygone
+Délimitation du périmètre ;
+validation point-in-polygon
+Réseau routier
+routes_lignes.geojson
+∼609 Ko
+Polylignes
+Référence viaire pour la
+localisation des incidents
+Espaces verts
+zones_vertes_complet.geojson
+∼79 Ko
+Polygones
+Suivi des espaces publics
+et signalements environ-
+nementaux
+Oueds
+oueds_lignes.geojson
+∼43 Ko
+Polylignes
+Surveillance du réseau
+hydrographique
+Bâtiments
+batiments_polygones.geojson
+∼57 Ko
+Polygones
+Référence cadastrale — lo-
+calisation des attestations
+de résidence
+Zones urbaines zones_urbaines_polygones.
+geojson
+∼11 Ko
+Polygones
+Zonage pour la prise de
+décision agents (accès
+restreint)
+Signalements
+API /api/reclamations/
+Dynamique Points
+Centralisation géolocalisée
+des réclamations citoyennes
+Table 5.7: Récapitulatif des couches géospatiales de la plateforme Smart City
+La couche zones urbaines, disponible uniquement dans le tableau de bord agent, illustre la
+valeur décisionnelle du module : en superposant le zonage résidentiel, commercial et en construction
+aux réclamations actives, l’agent peut contextualiser chaque incident et orienter la priorisation des
+interventions municipales.
+Figure 5.5: Couche zones urbaines dans le tableau de bord agent — aide à la priorisation
+géographique des interventions
+Visualisation et traitement des signalements citoyens
+La couche signalements constitue le cœur fonctionnel du module cartographique. Elle agrège en temps
+réel l’ensemble des réclamations géolocalisées stockées en base de données et les restitue sous forme de
+marqueurs positionnés sur la carte. Cette centralisation des données territoriales permet aux
+agents d’identifier les zones de concentration des problèmes et de prioriser géographiquement leurs
+interventions.
+49
+
+--- Page 64 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Afin de garantir la lisibilité de la carte lors d’un volume élevé de signalements, le module implémente
+un mécanisme de clustering automatique via le plugin Leaflet.markercluster (rayon 50 px,
+chunkedLoading:
+true) : les marqueurs géographiquement proches sont regroupés en clusters qui
+se décomposent dynamiquement au zoom.
+Par ailleurs, une validation point-in-polygon (algorithme ray-casting) est appliquée lors de la
+soumission d’un signalement : les coordonnées fournies par le citoyen sont vérifiées contre le polygone
+de la limite communale, rejetant toute réclamation hors périmètre. Ce contrôle garantit l’intégrité
+géographique des données traitées par les agents.
+Figure 5.6: Couche signalements (vue citoyen) — suivi géolocalisé des réclamations par
+statut sur la carte de Kélibia
+Vue satellite et analyse territoriale
+La prise en charge du fond satellite Esri World Imagery répond à un besoin opérationnel concret :
+certaines interventions de terrain (voirie, infrastructure, espaces verts) nécessitent une lecture fine du
+territoire que le fond vectoriel OSM ne permet pas toujours. En basculant vers la vue satellite, les
+agents accèdent à une représentation photographique sur laquelle toutes les couches thématiques et la
+couche signalements restent superposées et pleinement lisibles, facilitant la vérification spatiale des
+infrastructures et la préparation des interventions.
+Figure 5.7: Vue globale toutes couches activées sur fond satellite (Esri World Imagery)
+— analyse territoriale intégrée
+50
+
+--- Page 65 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+5.2.5
+Réalisation
+Formulaire de soumission d’une réclamation
+La figure 5.8 présente le formulaire de soumission d’une réclamation. Le citoyen renseigne le titre, la
+description et une photo optionnelle, puis géolocalise le problème directement sur la carte interactive
+centrée sur Kélibia. Une fois le formulaire soumis, le module IA affiche en temps réel la catégorie
+et la priorité attribuées automatiquement, permettant au citoyen de vérifier la classification avant
+confirmation définitive.
+Figure 5.8: Formulaire de soumission d’une réclamation avec prévisualisation IA
+51
+
+--- Page 66 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+5.3
+Sprint 4 : Forum communautaire et actualités
+municipales
+5.3.1
+Spécification fonctionnelle
+Ce sprint couvre le forum communautaire et les actualités municipales. Le forum est accessible à tous
+les citoyens (vérifiés ou non) et permet de créer des sujets, de répondre, de voter et de recevoir des
+notifications. La modération est réservée aux agents avec le rôle forum_moderator. La publication
+des actualités est assurée par les agents avec le rôle news_editor.
+Figure 5.9: Diagramme de cas d’utilisation raffiné — Sprint 4 : Forum communautaire
+Le tableau 5.8 présente la description textuelle du cas d’utilisation « Créer un nouveau sujet ».
+52
+
+--- Page 67 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Cas d’utilisation
+Créer un nouveau sujet
+Acteur principal
+Citoyen (vérifié ou non)
+Précondition
+L’utilisateur est authentifié.
+Scénario principal
+1. Le citoyen accède à la liste des sujets (filtrés par
+catégorie ou tags).
+2. Il clique sur « Nouveau sujet » et renseigne le
+titre, le contenu, la catégorie et les tags.
+3. Le système enregistre le sujet et l’affiche dans la
+liste.
+Postcondition
+Sujet créé et visible par tous les utilisateurs.
+Table 5.8: Description textuelle — Cas d’utilisation « Créer un nouveau sujet »
+Le tableau 5.8 présente la description textuelle du cas d’utilisation « Créer un nouveau sujet »,
+illustrant le parcours d’un citoyen depuis la consultation de la liste des sujets jusqu’à la publication de
+son propre sujet sur le forum.
+Table 5.9: Description textuelle — Cas d’utilisation « Répondre à
+un sujet »
+Cas d’utilisation
+Répondre à un sujet
+Acteur principal
+Citoyen (vérifié ou non)
+Précondition
+L’utilisateur est authentifié et le sujet existe.
+Scénario principal
+1. Le citoyen ouvre un sujet existant et rédige sa réponse.
+2. Le système enregistre la réponse.
+3. Le système envoie automatiquement une notification à
+l’auteur du sujet (sauf si l’auteur répond à son propre sujet).
+Postcondition
+Réponse enregistrée, auteur du sujet notifié.
+Le tableau 5.9 présente la description textuelle du cas d’utilisation « Répondre à un sujet »,
+détaillant le mécanisme de notification automatique déclenché vers l’auteur du sujet à chaque nouvelle
+réponse enregistrée.
+Table 5.10: Description textuelle — Cas d’utilisation « Modérer le
+forum »
+Cas d’utilisation
+Modérer le forum
+Acteur principal
+Agent [forum_moderator]
+53
+
+--- Page 68 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Précondition
+L’agent est authentifié avec le service forum_moderator.
+Scénario principal
+1. L’agent consulte les sujets du forum.
+2. Il peut épingler un sujet (is_pinned=True) pour le mettre
+en avant.
+3. Il peut marquer un sujet comme résolu
+(is_resolved=True).
+4. Il peut supprimer un topic ou une réponse contenant du
+contenu abusif.
+Postcondition
+Sujet épinglé, résolu ou supprimé selon l’action choisie.
+5.3.2
+Conception
+Diagramme de séquence système — Forum
+La figure 5.10 illustre les interactions entre les différents acteurs et le système lors de la participation au
+forum communautaire, couvrant les flux de création de sujets, de réponses avec notification automatique
+de l’auteur, de votes et de modération par l’agent forum_moderator.
+Figure 5.10: Diagramme de séquence système « Participer au forum communautaire »
+54
+
+--- Page 69 ---
+Chapitre 5. Release 2 : Réclamations Citoyennes et Forum Communautaire
+Note : le citoyen non vérifié peut uniquement consulter les sujets du forum en lecture seule. La
+création de sujets, les réponses et les votes sont réservés aux citoyens dont le compte a été vérifié par
+un agent municipal.
+5.3.3
+Réalisation
+Page du forum communautaire
+La figure 5.11 présente la page principale du forum communautaire. Elle affiche la liste des sujets triés
+par date de publication, avec pour chaque sujet la catégorie, le nombre de réponses et le compteur de
+votes. Le citoyen peut filtrer les sujets par catégorie ou par tags, créer un nouveau sujet ou répondre
+à un sujet existant directement depuis cette interface. Les sujets épinglés par l’agent modérateur
+apparaissent en tête de liste, et les sujets marqués comme résolus sont clairement identifiés.
+Figure 5.11: Page du forum communautaire — liste des sujets
+Conclusion
+La Release 2 a enrichi la plateforme Smart City d’un module de Data Science complet pour la
+classification intelligente des réclamations (Sprint 3) et d’un espace communautaire bilingue permettant
+aux citoyens de s’exprimer et d’interagir avec la municipalité (Sprint 4). La Release 3, présentée dans
+le chapitre suivant, est consacrée aux interfaces d’administration de la plateforme : le tableau de bord
+agent et la gestion des comptes par le superviseur.
+55
+
+--- Page 70 ---
+Chapitre 6
+Release 3 : Administration et Super-
+vision
+Introduction
+La troisième release de la plateforme Smart City est dédiée aux interfaces d’administration et de
+supervision. Elle est organisée en deux sprints : le Sprint 5 couvre le tableau de bord centralisé de
+l’agent municipal avec la vérification des comptes citoyens et la gestion des notifications, le Sprint 6
+traite de la gestion des comptes agents et de la vue consolidée du superviseur.
+6.1
+Backlog de la Release 3
+La Release 3 regroupe les fonctionnalités destinées aux agents et aux superviseurs, réparties sur les
+Sprints 5 et 6.
+Table 6.1: Backlog de la Release 3
+N°
+User Story
+Sprint
+Priorité
+US-21 En tant qu’agent, je veux accéder à un tableau de bord
+centralisé de toutes mes demandes en attente.
+5
+5
+US-22 En tant qu’agent, je veux traiter les réclamations et
+mettre à jour leur statut.
+5
+5
+US-23 En tant qu’agent, je veux valider ou rejeter les dossiers
+administratifs des citoyens.
+5
+5
+US-24 En tant qu’agent, je veux vérifier les comptes citoyens en
+validant leur CIN.
+5
+5
+US-25 En tant que citoyen, je veux recevoir des notifications
+pour les mises à jour de mes demandes.
+5
+3
+US-26 En tant qu’agent, je veux consulter les statistiques du
+module de classification IA.
+5
+3
+US-27 En tant que superviseur, je veux créer et gérer les
+comptes agents (modifier, désactiver).
+6
+5
+56
+
+--- Page 71 ---
+Chapitre 6. Release 3 : Administration et Supervision
+N°
+User Story
+Sprint
+Priorité
+US-28 En tant que superviseur, je veux consulter une vue
+consolidée de toute l’activité de la plateforme.
+6
+4
+US-29 En tant que superviseur, je veux gérer les rôles et ser-
+vices assignés aux agents.
+6
+4
+6.2
+Sprint 5 : Tableau de bord agent
+6.2.1
+Spécification fonctionnelle
+Le diagramme de cas d’utilisation raffiné du tableau de bord agent est présenté en trois parties dans les
+figures 6.1, 6.2 et 6.3 ci-dessous. La première partie couvre l’accès au tableau de bord et la gestion des
+comptes citoyens, la deuxième détaille le traitement des demandes dans le périmètre du service assigné,
+et la troisième présente les responsabilités spécifiques aux rôles news_editor et forum_moderator.
+La figure 6.1 illustre les fonctionnalités d’accès au tableau de bord et de gestion des comptes
+citoyens par l’agent.
+Figure 6.1: Diagramme de cas d’utilisation — Agent (1/3) : Accès et gestion citoyens
+57
+
+--- Page 72 ---
+Chapitre 6. Release 3 : Administration et Supervision
+La figure 6.2 présente le traitement des demandes administratives et réclamations dans le périmètre
+du service assigné à l’agent.
+Figure 6.2: Diagramme de cas d’utilisation — Agent (2/3) : Traitement des demandes
+58
+
+--- Page 73 ---
+Chapitre 6. Release 3 : Administration et Supervision
+La figure 6.3 détaille les responsabilités spécifiques aux rôles news_editor et forum_moderator
+assignés à l’agent.
+Figure 6.3: Diagramme de cas d’utilisation — Agent (3/3) : Actualités et forum
+59
+
+--- Page 74 ---
+Chapitre 6. Release 3 : Administration et Supervision
+Le tableau 6.2 présente la description textuelle du cas d’utilisation central « Traiter les demandes
+et réclamations ».
+Table 6.2: Description textuelle — Cas d’utilisation « Traiter les
+demandes et réclamations »
+Cas d’utilisation
+Traiter les demandes et réclamations
+Acteur principal
+Agent municipal
+Précondition
+L’agent est authentifié avec son service assigné
+(assigned_service).
+Scénario principal
+1. L’agent accède au tableau de bord et obtient la liste des
+demandes en attente de son service.
+2. Il sélectionne une demande et consulte les détails et pièces
+jointes.
+3. Il choisit l’action : valider ou rejeter.
+4. [Rejet] : saisie du motif →mise à jour du statut →notifi-
+cation citoyen.
+5. [Validation] : mise à jour du statut →génération du
+document PDF si applicable →notification citoyen.
+6. Pour les réclamations, l’agent peut reclassifier manuelle-
+ment la catégorie ou la priorité attribuée par le module IA.
+Scénario alternatif
+Accès refusé si la demande n’appartient pas au service de
+l’agent (RBAC) →403.
+Postcondition
+Demande traitée, statut mis à jour, citoyen notifié.
+6.2.2
+Conception
+Diagramme de séquence — Tableau de bord agent
+Le diagramme de séquence du tableau de bord agent est découpé en trois flux : le traitement des
+demandes dans le périmètre du service assigné, la vérification des comptes citoyens avec suppression
+des images CIN après validation, et la gestion des actualités avec consultation des statistiques IA.
+60
+
+--- Page 75 ---
+Chapitre 6. Release 3 : Administration et Supervision
+La figure 6.4 décrit le flux de traitement des demandes administratives et réclamations dans le
+périmètre du service assigné à l’agent.
+Figure 6.4: DSSD « Tableau de bord agent » (1/3) : Accès et traitement des demandes
+La figure 6.5 illustre le processus de vérification des comptes citoyens, incluant la validation de la
+CIN et la suppression sécurisée des images après confirmation.
+Figure 6.5: DSSD « Tableau de bord agent » (2/3) : Vérification citoyen
+61
+
+--- Page 76 ---
+Chapitre 6. Release 3 : Administration et Supervision
+La figure 6.6 présente la gestion des actualités municipales et la consultation des statistiques du
+module de classification IA par l’agent.
+Figure 6.6: DSSD « Tableau de bord agent » (3/3) : Actualités et statistiques IA
+6.2.3
+Réalisation
+Tableau de bord agent
+La figure 6.7 présente le tableau de bord centralisé de l’agent municipal. Il offre une vue d’ensemble
+des demandes en attente relevant exclusivement de son service assigné, accompagnée de statistiques de
+traitement par type et par statut. L’agent peut consulter, filtrer et trier les demandes directement
+depuis cette interface sans accès aux données des autres services.
+Figure 6.7: Tableau de bord agent — vue consolidée des demandes en attente
+62
+
+--- Page 77 ---
+Chapitre 6. Release 3 : Administration et Supervision
+Vue détaillée d’une demande
+La figure 6.8 illustre l’interface de consultation d’une demande individuelle. L’agent accède aux
+informations complètes du dossier, aux pièces justificatives uploadées par le citoyen et au commentaire
+de traitement. Il peut depuis cette vue mettre à jour le statut de la demande, ajouter une note ou
+uploader le document officiel signé, déclenchant automatiquement une notification au citoyen concerné.
+Figure 6.8: Vue détaillée d’une demande — consultation des pièces et mise à jour du
+statut
+Vérification des comptes citoyens
+La figure 6.9 présente l’interface de vérification des comptes citoyens, accessible uniquement aux agents
+municipaux. L’agent consulte les images recto/verso de la carte CIN soumises lors de l’inscription et
+statue sur la demande de vérification en approuvant ou en rejetant le compte. Une fois la décision
+prise, le système notifie automatiquement le citoyen et supprime les images CIN de la base de données
+conformément aux règles de protection des données personnelles.
+Figure 6.9: Interface de vérification des comptes citoyens — révision CIN et décision
+63
+
+--- Page 78 ---
+Chapitre 6. Release 3 : Administration et Supervision
+6.3
+Sprint 6 : Gestion des comptes agents et super-
+vision globale
+6.3.1
+Spécification fonctionnelle
+Les figures 6.10 et 6.11 présentent le diagramme de cas d’utilisation raffiné du superviseur en deux
+parties : la gestion du cycle de vie des comptes utilisateurs, et les fonctions de monitoring en lecture
+seule ainsi que les actions d’administration du système.
+Figure 6.10: Diagramme de cas d’utilisation — Superviseur (1/2) : Gestion des comptes
+64
+
+--- Page 79 ---
+Chapitre 6. Release 3 : Administration et Supervision
+Figure 6.11: Diagramme de cas d’utilisation — Superviseur (2/2) : Monitoring et
+administration
+Le tableau 6.3 décrit le processus de création et de gestion des comptes agents par le superviseur,
+incluant l’assignation des services et la désactivation réversible des comptes.
+65
+
+--- Page 80 ---
+Chapitre 6. Release 3 : Administration et Supervision
+Cas d’utilisation
+Créer et gérer un compte agent
+Acteur principal
+Superviseur
+Précondition
+Le superviseur est authentifié avec le rôle
+supervisor.
+Scénario principal
+1. Le superviseur accède à la liste des agents.
+2. Il remplit le formulaire de création (nom, prénom,
+email, service assigné).
+3. Le système vérifie l’unicité de l’email.
+4. Le système crée le compte et envoie automatique-
+ment un email avec les identifiants d’accès.
+5. Le superviseur peut ultérieurement modi-
+fier le service assigné ou désactiver le compte
+(is_active=False) de manière réversible.
+Scénario alternatif
+Email déjà utilisé →409 Conflict.
+Postcondition
+Compte agent créé ou mis à jour, email de notifica-
+tion envoyé.
+Table 6.3: Description textuelle — Cas d’utilisation « Créer et gérer un compte agent »
+Le tableau 6.4 présente le cas d’utilisation permettant au superviseur de consulter une vue consolidée
+de toute l’activité de la plateforme, filtrée par service ou par agent.
+Cas d’utilisation
+Consulter la vue consolidée
+Acteur principal
+Superviseur
+Précondition
+Le superviseur est authentifié.
+Scénario principal
+1. Le superviseur accède au tableau de bord super-
+viseur.
+2. Le système agrège les données de tous les services
+: volume de demandes par type, taux de traitement,
+performances du module IA.
+3. Le superviseur visualise les statistiques globales
+et peut filtrer par service ou par agent.
+Postcondition
+Superviseur informé de l’état global de la plate-
+forme.
+Table 6.4: Description textuelle — Cas d’utilisation « Consulter la vue consolidée »
+66
+
+--- Page 81 ---
+Chapitre 6. Release 3 : Administration et Supervision
+6.3.2
+Conception
+Diagramme de séquence système — Gestion des comptes agents
+Le diagramme de séquence système ci-dessous (figure 6.12) décrit les interactions entre le superviseur
+et le système lors de la gestion des comptes agents, couvrant l’ensemble du cycle de vie d’un compte :
+création avec envoi automatique des identifiants par email, modification du rôle et du service assigné,
+promotion d’un agent en superviseur, rétrogradation en citoyen, désactivation et suppression. Il illustre
+également l’activation de l’abonnement ASD qui déclenche automatiquement la vérification du citoyen
+concerné, ainsi que le cas d’exception lié à un email déjà existant retournant une erreur 409.
+Figure 6.12: Diagramme de séquence système « Gérer les comptes agents »
+67
+
+--- Page 82 ---
+Chapitre 6. Release 3 : Administration et Supervision
+6.3.3
+Réalisation
+Gestion des comptes agents
+La figure 6.13 présente l’interface de gestion des comptes agents accessible au superviseur. Elle affiche
+la liste complète des agents avec leurs informations principales (nom, email, service assigné, statut
+d’activation) et permet de créer un nouveau compte, de modifier le service assigné, de promouvoir un
+agent en superviseur, de le rétrograder en citoyen ou de désactiver son accès de manière réversible.
+Toute création de compte déclenche automatiquement l’envoi d’un email contenant les identifiants
+d’accès provisoires à l’agent concerné.
+Figure 6.13: Interface de gestion des comptes agents — liste, création et modification
+Statistiques IA
+La figure 6.14 présente l’interface des statistiques du module de classification automatique, accessible
+au superviseur depuis son tableau de bord. Elle affiche la précision globale du modèle TF-IDF
++ LinearSVC — 83% pour la catégorie et 88% pour la priorité — accompagnée d’un rapport
+de classification détaillé par catégorie (précision, rappel, F1-score) et d’une matrice de confusion
+permettant d’identifier visuellement les erreurs de classification les plus fréquentes. Un bouton «
+Recalculer » permet de relancer l’évaluation du modèle à la demande.
+68
+
+--- Page 83 ---
+Chapitre 6. Release 3 : Administration et Supervision
+Figure 6.14: Interface des statistiques IA — rapport de classification et matrice de
+confusion
+Conclusion
+La Release 3 a complété la plateforme Smart City en dotant les agents municipaux d’un tableau de
+bord centralisé pour le traitement efficace des demandes (Sprint 5) et en fournissant au superviseur les
+outils d’administration et de pilotage global de la plateforme (Sprint 6). L’ensemble des trois releases
+couvre ainsi la totalité du périmètre fonctionnel défini en Phase 1.
+69
+
+--- Page 84 ---
+Conclusion Générale et Perspectives
+Ce projet de fin d’études a permis de concevoir et de développer Smart City, une plateforme numérique
+bilingue (français/arabe) dédiée à la dématérialisation des services municipaux de la commune de
+Kélibia. Fruit d’un travail collaboratif mené au sein de la société ATOMIC-IT, ce projet a mobilisé
+des compétences complémentaires en ingénierie logicielle, en conception de systèmes d’information et
+en intelligence artificielle.
+Sur le plan technique, la plateforme repose sur une architecture découplée combinant un backend
+Django REST Framework et un frontend React 19 / TypeScript, déployés sur l’infrastructure
+cloud Vercel avec une base de données PostgreSQL hébergée sur Neon. Un module de Data Science
+complet — prétraitement TF-IDF, classification LinearSVC, détection de doublons et explicabilité
+SHAP/LIME — complète le système, permettant d’attribuer automatiquement une catégorie et une
+priorité à chaque signalement citoyen avec une transparence totale sur les décisions.
+Sur le plan fonctionnel, la plateforme couvre un périmètre large de services municipaux organisés en trois
+releases et six sprints : la Release 1 (authentification et dossiers citoyens), la Release 2 (réclamations
+intelligentes et forum communautaire) et la Release 3 (tableau de bord agent et supervision). L’ensemble
+de ces fonctionnalités est accessible aux quatre profils utilisateurs de la plateforme : le visiteur, le
+citoyen, l’agent municipal et le superviseur.
+Ce projet nous a permis de consolider nos compétences en développement web full-stack, en modélisation
+UML, en déploiement cloud et en apprentissage automatique. Il nous a également confrontés à des
+problématiques réelles liées à la gestion de projet en équipe, à l’intégration continue et à la prise en
+compte des spécificités sociolinguistiques du contexte tunisien.
+Plusieurs perspectives d’évolution ont été identifiées pour les versions futures de la plateforme :
+• Intégration avec les systèmes externes : connexion avec les systèmes fiscaux tunisiens
+(DGI) et les organismes SONEDE et STEG pour les raccordements réels aux réseaux
+d’eau et d’électricité, et intégration d’une passerelle de paiement bancaire tunisienne en
+remplacement de la simulation actuellement en place.
+• Signature électronique légale : la plateforme implémente actuellement un workflow de
+dépôt de documents signés manuellement par les agents. Une évolution vers une signature
+électronique certifiée (PKI, horodatage, non-répudiation) permettrait de conférer une
+valeur juridique complète aux actes officiels délivrés.
+• Application mobile et assistant virtuel : transformation de la plateforme en Pro-
+gressive Web App (PWA) pour une expérience mobile native avec support hors-ligne et
+notifications push, complétée par l’intégration d’un chatbot LLM bilingue capable de
+guider les citoyens dans leurs démarches administratives 24h/24.
+• Amélioration du module IA et qualité logicielle : enrichissement du corpus
+d’entraînement, exploration de transformers multilingues pour améliorer la précision de
+classification, et mise en place d’une suite de tests automatisés unitaires et end-to-end
+garantissant la non-régression lors des évolutions futures.
+70
+
+--- Page 85 ---
+Chapitre 6. Release 3 : Administration et Supervision
+En définitive, Smart City constitue une première étape concrète vers la modernisation des services
+municipaux de la commune de Kélibia, en plaçant le citoyen au cœur du service public numérique et
+en ouvrant la voie à une gouvernance locale plus transparente, plus accessible et plus efficiente.
+71
+
+--- Page 86 ---
+Bibliographie
+[1]
+“Unified modeling language (uml),” Accessed: Apr. 17, 2026. [Online]. Available:
+https://fr.wikipedia.org/wiki/UML_%28informatique%29
+[2]
+“Méthode agile scrum,” Accessed: Apr. 17, 2026. [Online]. Available: https:
+//toolapp.fr/methode-agile-scrum/
+[3]
+Django Software Foundation, Django: the web framework for perfectionists with
+deadlines, Consulté le 20 avril 2025, 2024. [Online]. Available: https://www.
+djangoproject.com
+[4]
+T. Christie, Django rest framework, Consulté le 20 avril 2025, 2024. [Online].
+Available: https://www.django-rest-framework.org
+[5]
+jazzband, Simple jwt — a json web token authentication plugin for django rest
+framework, Consulté le 20 avril 2025, 2024. [Online]. Available: https://django-
+rest-framework-simplejwt.readthedocs.io
+[6]
+Meta Platforms, Inc., React — a javascript library for building user interfaces,
+Consulté le 20 avril 2025, 2024. [Online]. Available: https://react.dev
+[7]
+E. You, Vite — next generation frontend tooling, Consulté le 20 avril 2025, 2024.
+[Online]. Available: https://vitejs.dev
+[8]
+V. Agafonkin, Leaflet — an open-source javascript library for mobile-friendly
+interactive maps, Consulté le 20 avril 2025, 2024. [Online]. Available: https:
+//leafletjs.com
+[9]
+PostgreSQL Global Development Group, Postgresql: the world’s most advanced
+open source database, Consulté le 20 avril 2025, 2024. [Online]. Available: https:
+//www.postgresql.org
+[10]
+Neon, Inc., Neon — serverless postgres, Consulté le 20 avril 2025, 2024. [Online].
+Available: https://neon.tech
+[11]
+Vercel, Inc., Vercel: develop. preview. ship. Consulté le 20 avril 2025, 2024. [Online].
+Available: https://vercel.com
+[12]
+scikit-learn developers, Scikit-learn: machine learning in python, Consulté le 20
+avril 2025, 2024. [Online]. Available: https://scikit-learn.org
+[13]
+Ministère de l’Agriculture, des Ressources Hydrauliques et de la Pêche, Cartes
+agricoles — portail agridata tunisie, https://catalog.agridata.tn/dataset/
+cartes-agricoles, Consulté en 2024, 2024.
+72

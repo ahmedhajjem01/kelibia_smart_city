@@ -13,6 +13,7 @@ import { useI18n } from '../i18n/LanguageProvider'
 import { resolveBackendUrl } from '../lib/backendUrl'
 
 import MainLayout from '../components/MainLayout'
+import TermsModal from '../components/TermsModal'
 
 
 
@@ -196,6 +197,8 @@ export default function ReclamationFormPage() {
   const [position, setPosition] = useState<[number, number] | null>(null)
 
   const [gpsStatus, setGpsStatus] = useState<'none' | 'manual' | 'gps' | 'loading'>('none')
+  const [cguAccepted, setCguAccepted] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   const [limiteData, setLimiteData] = useState<any>(null)
 
@@ -289,6 +292,19 @@ export default function ReclamationFormPage() {
   async function handleSubmit(e: React.FormEvent) {
 
     e.preventDefault()
+
+    if (!cguAccepted) {
+      setError(t('cgu_required_error') || 'Vous devez accepter les conditions générales d\'utilisation.');
+      return;
+    }
+
+    const BAD_WORDS = ['merde', 'putain', 'connard', 'salope', 'abruti', 'idiot', 'bâtard', 'chienne', 'foutre', 'gueule', 'conne', 'salaud', 'enculé'];
+    const hasBadWords = (text: string) => BAD_WORDS.some(w => new RegExp(`\\b${w}\\b`, 'i').test(text));
+
+    if (hasBadWords(title) || hasBadWords(description)) {
+       setError(t('profanity_error') || 'Votre texte contient des mots inappropriés. Veuillez rester courtois.');
+       return;
+    }
 
     setLoading(true); setError(null)
 
@@ -599,9 +615,19 @@ export default function ReclamationFormPage() {
 
 
 
+                {/* CGU Checkbox */}
+                <div style={{ marginBottom: 24, marginTop: 18, padding: '14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '.8rem', color: '#4b5563', margin: 0 }}>
+                    <input type="checkbox" required checked={cguAccepted} onChange={e => setCguAccepted(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#d4aa8d', marginTop: '2px', cursor: 'pointer' }} />
+                    <span style={{ lineHeight: '1.4' }}>
+                      J'accepte les <strong onClick={() => setShowTermsModal(true)} style={{ color: '#b87a50', cursor: 'pointer', textDecoration: 'underline' }}>Conditions Générales d'Utilisation</strong> et la politique de protection des données personnelles de la Commune de Kélibia.
+                    </span>
+                  </label>
+                </div>
+
                 {/* Submit */}
 
-                <button type="submit" className="rf-submit-btn" disabled={loading}>
+                <button type="submit" className="rf-submit-btn" disabled={loading || !cguAccepted}>
 
                   {loading ? <span className="spinner-border spinner-border-sm"></span> : <i className="fas fa-paper-plane"></i>}
 
@@ -618,6 +644,8 @@ export default function ReclamationFormPage() {
         </div>
 
       </div>
+
+      <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
 
     </MainLayout>
 

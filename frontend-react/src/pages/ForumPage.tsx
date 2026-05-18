@@ -2,8 +2,8 @@ import { resolveBackendUrl } from '../lib/backendUrl'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAccessToken, clearTokens } from '../lib/authStorage'
-import { useI18n } from '../i18n/LanguageProvider'
 import MainLayout from '../components/MainLayout'
+import TermsModal from '../components/TermsModal'
 import fortImg from '../assets/fort.webp'
 
 interface Tag { id: number; name: string }
@@ -64,6 +64,8 @@ export default function ForumPage() {
   const [showModal, setShowModal]     = useState(false)
   const [creating, setCreating]       = useState(false)
   const [createError, setCreateError] = useState('')
+  const [cguAccepted, setCguAccepted] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   const access = getAccessToken()
 
@@ -118,6 +120,16 @@ export default function ForumPage() {
 
   async function createTopic() {
     if (!newTitle.trim() || !newContent.trim()) { setCreateError('Titre et contenu requis.'); return }
+    if (!cguAccepted) { setCreateError('Vous devez accepter les conditions générales d\'utilisation.'); return }
+    
+    const BAD_WORDS = ['merde', 'putain', 'connard', 'salope', 'abruti', 'idiot', 'bâtard', 'chienne', 'foutre', 'gueule', 'conne', 'salaud', 'enculé'];
+    const hasBadWords = (text: string) => BAD_WORDS.some(w => new RegExp(`\\b${w}\\b`, 'i').test(text));
+
+    if (hasBadWords(newTitle) || hasBadWords(newContent)) {
+       setCreateError('Votre texte contient des mots inappropriés. Veuillez rester courtois.');
+       return;
+    }
+
     setCreating(true); setCreateError('')
     const tagNames = newTags.split(',').map((tt: string) => tt.trim()).filter(Boolean)
     const res = await fetch(resolveBackendUrl('/api/forum/topics/'), {
@@ -541,6 +553,14 @@ export default function ForumPage() {
                       placeholder={t('tags_placeholder')}
                     />
                   </div>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '.8rem', color: '#4b5563', marginTop: '10px', padding: '10px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                      <input type="checkbox" required checked={cguAccepted} onChange={e => setCguAccepted(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#d4aa8d', cursor: 'pointer' }} />
+                      <span>
+                        J'accepte les <strong onClick={() => setShowTermsModal(true)} style={{ color: '#b87a50', cursor: 'pointer', textDecoration: 'underline' }}>Conditions Générales d'Utilisation</strong> et la politique de protection des données personnelles de la Commune de Kélibia.
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -554,9 +574,9 @@ export default function ForumPage() {
                 </button>
                 <button
                   className="px-6 py-2 rounded-xl text-sm font-bold text-white border-0 cursor-pointer flex items-center gap-2 transition-opacity"
-                  style={{ backgroundColor: '#d4aa8d', opacity: creating ? 0.7 : 1 }}
+                  style={{ backgroundColor: '#d4aa8d', opacity: (creating || !cguAccepted) ? 0.7 : 1 }}
                   onClick={createTopic}
-                  disabled={creating}
+                  disabled={creating || !cguAccepted}
                 >
                   {creating ? (
                     <><span className="spinner-border spinner-border-sm me-1"></span>{t('sending')}</>
@@ -568,6 +588,8 @@ export default function ForumPage() {
             </div>
           </div>
         )}
+        {/* ── TERMS MODAL ── */}
+        <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
       </div>
     </MainLayout>
   )
