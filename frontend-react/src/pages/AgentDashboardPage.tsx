@@ -2256,7 +2256,7 @@ export default function AgentDashboardPage() {
             </a>
           )}
 
-          {(user?.user_type === 'supervisor' || user?.is_superuser || user?.is_staff) && (<>
+          {(user?.user_type === 'supervisor' || user?.is_superuser) && (<>
             <a className={`ag-nav-item${activeTab === 'users' ? ' active' : ''}`} href="#" onClick={e => { 
               e.preventDefault(); 
               setActiveTab('users'); 
