@@ -8,58 +8,41 @@ django.setup()
 
 from accounts.models import CustomUser
 
-agents = [
-    {
-        'username': 'agent_forum',
-        'email': 'agent_forum@kelibia.tn',
-        'password': 'Password123!',
-        'assigned_service': 'forum_moderator',
-        'cin': '11111111',
-        'phone': '22222221'
-    },
-    {
-        'username': 'agent_civil',
-        'email': 'agent_civil@kelibia.tn',
-        'password': 'Password123!',
-        'assigned_service': 'civil_registry',
-        'cin': '22222222',
-        'phone': '22222222'
-    },
-    {
-        'username': 'agent_construction',
-        'email': 'agent_construction@kelibia.tn',
-        'password': 'Password123!',
-        'assigned_service': 'construction',
-        'cin': '33333333',
-        'phone': '22222223'
-    },
-    {
-        'username': 'agent_lumiere',
-        'email': 'agent_lumiere@kelibia.tn',
-        'password': 'Password123!',
-        'assigned_service': 'lighting',
-        'cin': '44444444',
-        'phone': '22222224'
-    }
+services = [
+    ('trash',            'agent_dechet'),
+    ('roads',            'agent_route'),
+    ('noise',            'agent_bruit'),
+    ('water',            'agent_eau'),
+    ('social',           'agent_social'),
+    ('commerce',         'agent_commerce'),
+    ('taxes',            'agent_impots'),
+    ('residence',        'agent_residence'),
+    ('news_editor',      'agent_actualites'),
+    ('general',          'agent_general'),
 ]
 
-for a in agents:
+for service_key, username in services:
+    email = f"{username}@kelibia.tn"
+    password = "Password123!"
+    cin = f"5{services.index((service_key, username)):07d}" # Generate unique CIN
+    phone = f"555500{services.index((service_key, username)):02d}" # Generate unique phone
+    
     try:
-        if not CustomUser.objects.filter(username=a['username']).exists():
+        if not CustomUser.objects.filter(username=username).exists():
             user = CustomUser.objects.create_user(
-                username=a['username'],
-                email=a['email'],
-                password=a['password'],
-                assigned_service=a['assigned_service'],
+                username=username,
+                email=email,
+                password=password,
+                assigned_service=service_key,
                 user_type='agent',
-                cin=a['cin'],
-                phone=a['phone'],
+                cin=cin,
+                phone=phone,
                 is_staff=True,
                 is_verified=True,
                 is_active=True
             )
-            print(f"Created {a['username']}")
+            print(f"Created {username}")
         else:
-            print(f"{a['username']} already exists")
+            print(f"{username} already exists")
     except Exception as e:
-        print(f"Failed to create {a['username']}: {e}")
+        print(f"Failed to create {username}: {e}")
