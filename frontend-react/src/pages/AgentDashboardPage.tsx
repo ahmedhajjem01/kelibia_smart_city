@@ -2228,10 +2228,12 @@ export default function AgentDashboardPage() {
             </>
           )}
 
-          <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
-            <i className="fas fa-robot"></i>
-            <span>{t('nav_stats_ia')}</span>
-          </a>
+          {(user?.user_type === 'supervisor' || user?.is_superuser) && (
+            <a className={`ag-nav-item${activeTab === 'stats' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('stats'); if (!mlStats && !mlLoading) fetchMlStats() }}>
+              <i className="fas fa-robot"></i>
+              <span>{t('nav_stats_ia')}</span>
+            </a>
+          )}
 
           <a className={`ag-nav-item${activeTab === 'profile' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setActiveTab('profile'); fetchDemandes(); fetchTopics(); }}>
             <i className="fas fa-user-circle"></i>
