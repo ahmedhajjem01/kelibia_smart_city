@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 import LanguageProvider from './i18n/LanguageProvider'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import VerificationPage from './pages/VerificationPage'
 import ActivatePage from './pages/ActivatePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordConfirmPage from './pages/ResetPasswordConfirmPage'
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify" element={<VerificationPage />} />
           <Route path="/activate" element={<ActivatePage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route

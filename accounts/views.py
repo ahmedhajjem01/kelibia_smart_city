@@ -86,6 +86,10 @@ class RegisterView(APIView):
                 f = files['cin_back_image']
                 user.cin_back_utf = f"data:{f.content_type};base64,{base64.b64encode(f.read()).decode('utf-8')}"
             
+            # Generate 6-digit activation code
+            import random
+            activation_code = f"{random.randint(100000, 999999)}"
+            user.activation_code = activation_code
             user.save()
             
             # Send Verification Email (Synchrone avec Rollback en cas d'échec)
@@ -94,17 +98,12 @@ class RegisterView(APIView):
             
             if getattr(settings, 'EMAIL_HOST_USER', None):
                 try:
-                    uid = urlsafe_base64_encode(force_bytes(user.pk))
-                    token = default_token_generator.make_token(user)
-                    protocol = "https" if not settings.DEBUG else "http"
-                    domain = settings.DOMAIN
-                    activation_link = f"{protocol}://{domain}/activate?uid={uid}&token={token}"
-
                     subject = "Confirmez votre compte Kélibia Smart City"
                     email_body = f"Bonjour {user.first_name},\n\n" \
                                  f"Merci de vous être inscrit sur Kélibia Smart City.\n" \
-                                 f"Veuillez cliquer sur le lien suivant pour activer votre compte et accéder à votre profil :\n" \
-                                 f"{activation_link}\n\n" \
+                                 f"Votre code de vérification est : {activation_code}\n\n" \
+                                 f"Veuillez saisir ce code sur la page de vérification.\n" \
+                                 f"Ce code est personnel, ne le partagez pas.\n\n" \
                                  f"Cordialement,\nL'équipe Kélibia Smart City"
                     
                     # Envoi synchrone pour capturer l'erreur SMTP immédiatement
@@ -126,8 +125,9 @@ class RegisterView(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST)
             
             return Response({
-                "message": "Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
-                "username": user.username
+                "message": "Un code de vérification à 6 chiffres a été envoyé à votre email.",
+                "username": user.username,
+                "email": user.email
             }, status=status.HTTP_201_CREATED)
 
         except IntegrityError as e:
@@ -156,18 +156,32 @@ class RegisterView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class CustomActivationView(APIView):
     """
-    Custom Activation View that activates the user AND returns JWT tokens
-    to allow auto-login on the frontend.
+    Custom Activation View that verifies a 6-digit code and returns JWT tokens.
     """
     permission_classes = [permissions.AllowAny]
-    token_generator = default_token_generator
 
     def post(self, request, *args, **kwargs):
-        serializer = ActivationSerializer(data=request.data, context={'view': self})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.user
+        email = request.data.get('email')
+        code = request.data.get('code')
+
+        if not email or not code:
+            return Response({"error": "L'email et le code sont requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+
+        if user.is_verified:
+            return Response({"error": "Ce compte est déjà vérifié."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user.activation_code != code:
+            return Response({"error": "Le code de vérification est incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Activer le compte
         user.is_active = True
         user.is_verified = True
+        user.activation_code = None  # On efface le code après validation
         user.save()
 
         # Generate tokens for the user
@@ -177,8 +191,59 @@ class CustomActivationView(APIView):
             "message": "Compte activé avec succès !",
             "access": str(refresh.access_token),
             "refresh": str(refresh),
-            "username": user.username
+            "username": user.username,
+            "email": user.email
         }, status=status.HTTP_200_OK)
+
+class ResendActivationCodeView(APIView):
+    """
+    Resends a new 6-digit code to the user.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "L'email est requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+
+        if user.is_verified:
+            return Response({"error": "Ce compte est déjà vérifié."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Re-generate 6-digit activation code
+        import random
+        activation_code = f"{random.randint(100000, 999999)}"
+        user.activation_code = activation_code
+        user.save()
+
+        # Send Verification Email
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        if getattr(settings, 'EMAIL_HOST_USER', None):
+            try:
+                subject = "Nouveau code de confirmation Kélibia Smart City"
+                email_body = f"Bonjour {user.first_name},\n\n" \
+                             f"Voici votre nouveau code de vérification : {activation_code}\n\n" \
+                             f"Veuillez saisir ce code sur la page de vérification.\n" \
+                             f"Cordialement,\nL'équipe Kélibia Smart City"
+                
+                send_mail(
+                    subject,
+                    email_body,
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                logger.error(f"Resend mail failed: {e}")
+                return Response({"error": "Erreur lors de l'envoi de l'email. Réessayez plus tard."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"message": "Un nouveau code a été envoyé à votre adresse email."})
 
 class UserProfileView(APIView):
     """

@@ -1410,9 +1410,9 @@ export default function SignupPage() {
 
       }
 
-      setMessage(data?.message || t('signup_success_verified') || "Un e-mail de confirmation vous a été envoyé. Veuillez vérifier votre e-mail.");
+      setMessage(data?.message || t('signup_success_verified') || "Un code de vérification vous a été envoyé. Veuillez vérifier votre e-mail.");
 
-      setTimeout(() => navigate('/login'), 5000)
+      setTimeout(() => navigate('/verify', { state: { email } }), 2000)
 
     } catch (err) {
 

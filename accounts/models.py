@@ -64,6 +64,7 @@ class CustomUser(AbstractUser):
     last_name_ar = models.CharField(max_length=255, blank=True, verbose_name="Nom (Arabe)")
     user_type = models.CharField(max_length=50, choices=USER_TYPE_CHOICES, default='citizen', verbose_name="Type d'utilisateur")
     is_verified = models.BooleanField(default=False, verbose_name="Est vérifié")
+    activation_code = models.CharField(max_length=6, blank=True, null=True, verbose_name="Code d'activation")
     cin_front_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Avant (Base64 Old)")
     cin_back_image = models.TextField(null=True, blank=True, verbose_name="CIN Face Arrière (Base64 Old)")
     
