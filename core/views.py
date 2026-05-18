@@ -195,7 +195,27 @@ def manage_supervisor_orders(request, order_type=None, order_id=None):
 
     if request.method == 'GET':
         resp = []
-        for key, model in models_map.items():
+        
+        service_demands = {
+            'civil_registry': ['naissance', 'mariage_extrait', 'deces_extrait', 'mariage', 'deces', 'livret', 'legalisation', 'transfert'],
+            'residence': ['residence'],
+            'construction': ['construction', 'goudronnage', 'vocation', 'raccordement'],
+            'social': ['evenement'],
+            'commerce': ['commerce'],
+            'taxes': ['impots'],
+            'water': ['eau'],
+        }
+        
+        assigned_service = getattr(request.user, 'assigned_service', None)
+        user_type = getattr(request.user, 'user_type', '')
+        
+        if user_type == 'agent' and assigned_service:
+            allowed = service_demands.get(assigned_service, [])
+            filtered_models = {k: v for k, v in models_map.items() if k in allowed}
+        else:
+            filtered_models = models_map
+
+        for key, model in filtered_models.items():
             try:
                 if hasattr(model, 'citizen'):
                     objs = model.objects.all().select_related('citizen')
