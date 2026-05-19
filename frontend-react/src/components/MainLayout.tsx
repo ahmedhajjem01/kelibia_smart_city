@@ -30,6 +30,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
+  const [showAllNotifs, setShowAllNotifs] = useState(false);
 
   const fetchNotifications = async () => {
     const access = getAccessToken();
@@ -225,7 +226,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           {/* Notifications Dropdown */}
           <div style={{ position: 'relative', marginLeft: 16 }}>
             <button 
-              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              onClick={() => { setIsNotifOpen(v => !v); setShowAllNotifs(false); }}
               style={{ 
                 background: 'none', border: 'none', padding: 0,
                 color: unreadCount > 0 ? '#1a73e8' : '#6b7280', 
@@ -249,9 +250,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
             {isNotifOpen && (
               <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsNotifOpen(false)}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => { setIsNotifOpen(false); setShowAllNotifs(false); }}
                 />
                 <div 
                   className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl z-50 border border-slate-100 overflow-hidden"
@@ -265,14 +266,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                       </span>
                     )}
                   </div>
-                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  <div style={{ maxHeight: showAllNotifs ? '520px' : '300px', overflowY: 'auto', transition: 'max-height 0.3s ease' }}>
                     {notifications.length === 0 ? (
                       <div className="px-4 py-6 text-center text-slate-400 text-xs">
                         <i className="fas fa-bell-slash mb-2 block text-lg"></i>
                         {t('no_notifications') || 'Aucune notification'}
                       </div>
                     ) : (
-                      notifications.slice(0, 10).map((n: any) => (
+                      (showAllNotifs ? notifications : notifications.slice(0, 5)).map((n: any) => (
                         <div 
                           key={n.id} 
                           className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.is_read ? 'bg-blue-50/30' : ''}`}
@@ -312,14 +313,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                       ))
                     )}
                   </div>
-                  {notifications.length > 0 && (
-                    <Link 
-                      to="/dashboard" 
-                      onClick={() => setIsNotifOpen(false)}
-                      className="block py-2 text-center text-[10px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 border-t border-slate-100"
+                  {notifications.length > 5 && (
+                    <button
+                      onClick={() => setShowAllNotifs(v => !v)}
+                      className="block w-full py-2 text-center text-[10px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 border-t border-slate-100 border-0 cursor-pointer"
                     >
-                      {t('see_all') || 'Tout voir'}
-                    </Link>
+                      {showAllNotifs
+                        ? `▲ Réduire`
+                        : `▼ Voir tout (${notifications.length - 5} de plus)`}
+                    </button>
                   )}
                 </div>
               </>
