@@ -57,11 +57,11 @@ export default function NotificationsPage() {
       const forumList = Array.isArray(forumData) ? forumData : (forumData.results || [])
       const forumNormalized: Notif[] = forumList.map((n: any) => ({
         id: `forum-${n.id}`,
-        title: n.topic?.title || 'Forum',
+        title: n.topic_title || 'Forum',
         message: 'Nouvelle réponse à votre sujet',
         is_read: n.is_read,
         notification_type: 'info',
-        link: n.topic ? `/forum/${n.topic.id}` : '/forum',
+        link: n.topic ? `/forum/${n.topic}` : '/forum',
         created_at: n.created_at,
         _forum: true,
       }))
