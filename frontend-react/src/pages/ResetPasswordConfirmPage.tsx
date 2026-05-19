@@ -98,7 +98,7 @@ export default function ResetPasswordConfirmPage() {
         const data = await res.json().catch(() => ({})) as Record<string, unknown>
         let errMsg = t('reset_failed') || 'Échec de la réinitialisation.'
         if (data['new_password'] && Array.isArray(data['new_password'])) {
-          errMsg = (data['new_password'] as string[])[0] || errMsg
+          errMsg = 'Mot de passe trop faible'
         } else if (data['non_field_errors'] && Array.isArray(data['non_field_errors'])) {
           errMsg = (data['non_field_errors'] as string[])[0] || errMsg
         } else if (data['token']) {

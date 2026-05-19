@@ -357,6 +357,8 @@ export default function AgentDashboardPage() {
 
   const [agentCitizens, setAgentCitizens] = useState<any[]>([])
 
+  const [citizenMode, setCitizenMode] = useState<'unverified' | 'all'>('unverified')
+
   const [loadingCitizens, setLoadingCitizens] = useState(false)
 
   const [citizenSearch, setCitizenSearch] = useState('')
@@ -1513,14 +1515,16 @@ export default function AgentDashboardPage() {
 
 
 
-  async function fetchAgentCitizens() {
+  async function fetchAgentCitizens(mode?: 'unverified' | 'all') {
+
+    const activeMode = mode || citizenMode;
 
     setLoadingCitizens(true)
 
     try {
 
       const url = user?.user_type === 'agent'
-        ? resolveBackendUrl('/api/accounts/agent-citizens/')
+        ? resolveBackendUrl(`/api/accounts/agent-citizens/?mode=${activeMode}`)
         : resolveBackendUrl('/api/accounts/verify-citizens/?mode=citizens');
 
       console.log('[fetchAgentCitizens] user:', user?.user_type, '| url:', url)
@@ -1546,7 +1550,7 @@ export default function AgentDashboardPage() {
 
 
 
-  async function handleAgentCitizenAction(citizenId: number, action: 'verify' | 'toggle_active') {
+  async function handleAgentCitizenAction(citizenId: number, action: 'verify' | 'toggle_active' | 'activate_asd') {
 
     try {
 
@@ -1571,6 +1575,22 @@ export default function AgentDashboardPage() {
           setAgentCitizens(prev => prev.filter(c => c.id !== citizenId))
 
           if (selectedCitizen?.id === citizenId) setSelectedCitizen(null)
+
+        } else if (action === 'activate_asd') {
+
+          if (citizenMode === 'unverified') {
+
+            setAgentCitizens(prev => prev.filter(c => c.id !== citizenId))
+
+            if (selectedCitizen?.id === citizenId) setSelectedCitizen(null)
+
+          } else {
+
+            setAgentCitizens(prev => prev.map(c => c.id === citizenId ? { ...c, is_verified: true, has_active_asd: true, asd_expiration: data.asd_expiration } : c))
+
+            if (selectedCitizen?.id === citizenId) setSelectedCitizen((p: any) => p ? { ...p, is_verified: true, has_active_asd: true, asd_expiration: data.asd_expiration } : null)
+
+          }
 
         } else {
 
@@ -5231,11 +5251,30 @@ export default function AgentDashboardPage() {
 
       <span className="fw-bold"><i className={`fas ${user?.user_type === 'supervisor' || user?.is_superuser ? 'fa-user-friends' : 'fa-user-check'} me-2`}></i>{user?.user_type === 'supervisor' || user?.is_superuser ? (lang === 'ar' ? 'قاعدة بيانات المواطنين' : 'Base de données des Citoyens') : 'Vérification des Comptes Citoyens'}</span>
 
+      {!(user?.user_type === 'supervisor' || user?.is_superuser) && (
+        <div className="btn-group btn-group-sm bg-white bg-opacity-10 p-1 rounded">
+          <button 
+            onClick={() => { setCitizenMode('unverified'); fetchAgentCitizens('unverified') }} 
+            className={`btn btn-sm ${citizenMode === 'unverified' ? 'btn-light' : 'btn-outline-light border-0'}`} 
+            style={{ fontSize: '11px', fontWeight: 600 }}
+          >
+            {lang === 'ar' ? 'في انتظار التفعيل' : 'En attente'}
+          </button>
+          <button 
+            onClick={() => { setCitizenMode('all'); fetchAgentCitizens('all') }} 
+            className={`btn btn-sm ${citizenMode === 'all' ? 'btn-light' : 'btn-outline-light border-0'}`} 
+            style={{ fontSize: '11px', fontWeight: 600 }}
+          >
+            {lang === 'ar' ? 'الكل' : 'Tous'}
+          </button>
+        </div>
+      )}
+
       <div className="d-flex align-items-center gap-2">
 
-        <span className="badge bg-white bg-opacity-25" style={{ fontSize: '11px' }}>{agentCitizens.length} {user?.user_type === 'supervisor' || user?.is_superuser ? 'Citoyens' : 'en attente'}</span>
+        <span className="badge bg-white bg-opacity-25" style={{ fontSize: '11px' }}>{agentCitizens.length} {user?.user_type === 'supervisor' || user?.is_superuser ? 'Citoyens' : (citizenMode === 'all' ? 'Citoyens' : 'en attente')}</span>
 
-        <button className="btn btn-sm btn-light" onClick={fetchAgentCitizens}><i className="fas fa-sync-alt"></i></button>
+        <button className="btn btn-sm btn-light" onClick={() => fetchAgentCitizens()}><i className="fas fa-sync-alt"></i></button>
 
       </div>
 
@@ -5397,6 +5436,12 @@ export default function AgentDashboardPage() {
 
                     )}
 
+                    {c.has_active_asd ? (
+                      <span className="badge ms-1" style={{ background: '#e0f2fe', color: '#0369a1', fontSize: '10px' }}><i className="fas fa-id-card me-1"></i>ASD Actif</span>
+                    ) : (
+                      <span className="badge ms-1" style={{ background: '#f3f4f6', color: '#4b5563', fontSize: '10px' }}><i className="fas fa-id-card me-1"></i>ASD Inactif</span>
+                    )}
+
                   </td>
 
                   <td>
@@ -5418,6 +5463,16 @@ export default function AgentDashboardPage() {
 
                               <i className="fas fa-check me-1"></i> Vérifier
 
+                            </button>
+                          )}
+
+                          {!c.has_active_asd && (
+                            <button
+                              className="btn btn-sm btn-primary"
+                              title={t('activate_asd_btn') || "Activer l'abonnement ASD"}
+                              onClick={e => { e.stopPropagation(); if (window.confirm(`${t('activate_asd_btn') || "Activer l'abonnement ASD"} ?`)) handleAgentCitizenAction(c.id, 'activate_asd') }}
+                            >
+                              <i className="fas fa-id-card"></i>
                             </button>
                           )}
 
@@ -5661,6 +5716,19 @@ export default function AgentDashboardPage() {
 
                   <i className="fas fa-check-circle me-2"></i>Confirmer la vérification
 
+                </button>
+              )}
+
+              {!(user?.user_type === 'supervisor' || user?.is_superuser) && !selectedCitizen.has_active_asd && (
+                <button 
+                  className="btn btn-primary px-4 ms-2" 
+                  onClick={() => { 
+                    if (window.confirm(`${t('activate_asd_btn') || "Activer l'abonnement ASD"} pour "${selectedCitizen.full_name}" ?`)) { 
+                      handleAgentCitizenAction(selectedCitizen.id, 'activate_asd'); 
+                    } 
+                  }}
+                >
+                  <i className="fas fa-id-card me-2"></i>{t('activate_asd_btn') || "Activer ASD"}
                 </button>
               )}
 

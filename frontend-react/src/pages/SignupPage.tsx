@@ -1402,12 +1402,28 @@ export default function SignupPage() {
 
       const res = await fetch(resolveBackendUrl('/api/accounts/register/'), { method: 'POST', body: formData })
 
-      const data = (await res.json().catch(() => null)) as { error?: string } | null
+      const data = (await res.json().catch(() => null)) as any
 
       if (!res.ok) {
-
-        throw new Error(data?.error || `${t('error_msg')} (Code: ${res.status}). ${t('server_error_check_files')}`)
-
+        let errMsg = '';
+        if (data) {
+          if (data.error) {
+            errMsg = data.error;
+          } else if (typeof data === 'object') {
+            const values = Object.values(data);
+            if (values.length > 0) {
+              const firstVal = values[0];
+              errMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+            }
+          }
+        }
+        if (!errMsg) {
+          errMsg = `${t('error_msg')} (Code: ${res.status}). ${t('server_error_check_files')}`;
+        }
+        if (errMsg.toLowerCase().includes('faible') || errMsg.toLowerCase().includes('password') || errMsg.toLowerCase().includes('passe') || errMsg.toLowerCase().includes('weak')) {
+          errMsg = "Mot de passe trop faible";
+        }
+        throw new Error(errMsg)
       }
 
       setMessage(data?.message || t('signup_success_verified') || "Un code de vérification vous a été envoyé. Veuillez vérifier votre e-mail.");
