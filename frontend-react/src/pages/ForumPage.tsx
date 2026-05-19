@@ -393,7 +393,7 @@ export default function ForumPage() {
                 <Link
                   key={topic.id}
                   to={`/forum/${topic.id}`}
-                  className="block no-underline"
+                  className="block no-underline" style={{ textDecoration: 'none' }}
                 >
                   <div
                     className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300 group relative overflow-hidden"
@@ -430,7 +430,7 @@ export default function ForumPage() {
                         </div>
 
                         {/* Title */}
-                        <p className="text-xs font-semibold text-black mb-1 leading-snug" style={{ fontSize: '0.8rem' }}>
+                        <p className="font-semibold text-black mb-1 leading-snug" style={{ fontSize: '0.875rem' }}>
                           {topic.title}
                         </p>
 
@@ -482,7 +482,7 @@ export default function ForumPage() {
                           </div>
                         </div>
 
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#1a237e] group-hover:underline flex items-center gap-1 mt-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#1a237e] flex items-center gap-1 mt-1">
                           {t('join_discussion')}
                           <i className={`fas fa-chevron-${lang === 'ar' ? 'left' : 'right'} text-[9px] transition-transform group-hover:translate-x-${lang === 'ar' ? '-2' : '2'}`}></i>
                         </span>
