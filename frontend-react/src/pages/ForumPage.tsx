@@ -55,7 +55,6 @@ export default function ForumPage() {
   const [category, setCategory]   = useState('')
   const [search, setSearch]       = useState('')
   const [activeTag, setActiveTag] = useState('')
-  const [notifCount, setNotifCount] = useState(0)
   const [sortBy, setSortBy]       = useState<SortKey>('recent')
 
   const [newTitle, setNewTitle]       = useState('')
@@ -75,7 +74,7 @@ export default function ForumPage() {
     fetch(resolveBackendUrl('/api/accounts/me/'), { headers: { Authorization: `Bearer ${access}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setUser(data) })
-    Promise.all([fetchTopics(), fetchStats(), fetchTags(), fetchNotifCount()])
+    Promise.all([fetchTopics(), fetchStats(), fetchTags()])
       .finally(() => setLoading(false))
   }, [])
 
@@ -108,15 +107,6 @@ export default function ForumPage() {
   async function fetchTags() {
     const res = await fetch(resolveBackendUrl('/api/forum/tags/'), { headers: { Authorization: `Bearer ${access}` } })
     if (res.ok) setTags(await res.json())
-  }
-
-  async function fetchNotifCount() {
-    const res = await fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } })
-    if (res.ok) {
-      const data = await res.json()
-      const list = Array.isArray(data) ? data : (data.results || [])
-      setNotifCount(list.filter((n: any) => !n.is_read).length)
-    }
   }
 
   async function createTopic() {
@@ -244,13 +234,6 @@ export default function ForumPage() {
         </div>
       )}
 
-      {/* Notification badge */}
-      {notifCount > 0 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3">
-          <i className="fas fa-bell" style={{ color: '#d4aa8d' }}></i>
-          <span className="text-sm font-bold" style={{ color: '#b87a50' }}>{notifCount} {t('notifications')}</span>
-        </div>
-      )}
     </div>
   )
 
@@ -393,7 +376,7 @@ export default function ForumPage() {
                 <Link
                   key={topic.id}
                   to={`/forum/${topic.id}`}
-                  className="block no-underline"
+                  className="block no-underline" style={{ textDecoration: 'none' }}
                 >
                   <div
                     className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300 group relative overflow-hidden"
@@ -430,9 +413,9 @@ export default function ForumPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base font-bold text-slate-800 group-hover:text-[#1a237e] transition-colors mb-1 leading-snug">
+                        <p className="font-semibold text-black mb-1 leading-snug" style={{ fontSize: '0.875rem' }}>
                           {topic.title}
-                        </h3>
+                        </p>
 
                         {/* Author + meta */}
                         <div className="flex flex-wrap gap-4 text-xs text-slate-500 items-center">
@@ -482,7 +465,7 @@ export default function ForumPage() {
                           </div>
                         </div>
 
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#1a237e] group-hover:underline flex items-center gap-1 mt-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#1a237e] flex items-center gap-1 mt-1">
                           {t('join_discussion')}
                           <i className={`fas fa-chevron-${lang === 'ar' ? 'left' : 'right'} text-[9px] transition-transform group-hover:translate-x-${lang === 'ar' ? '-2' : '2'}`}></i>
                         </span>
