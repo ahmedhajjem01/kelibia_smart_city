@@ -430,9 +430,9 @@ export default function ForumPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-sm font-semibold text-black mb-1 leading-snug">
+                        <p className="text-xs font-semibold text-black mb-1 leading-snug" style={{ fontSize: '0.8rem' }}>
                           {topic.title}
-                        </h3>
+                        </p>
 
                         {/* Author + meta */}
                         <div className="flex flex-wrap gap-4 text-xs text-slate-500 items-center">
