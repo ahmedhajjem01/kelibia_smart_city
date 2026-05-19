@@ -35,14 +35,34 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     const access = getAccessToken();
     if (!access) return;
     try {
-      const res = await fetch(resolveBackendUrl('/api/notifications/'), {
-        headers: { Authorization: `Bearer ${access}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
-        setUnreadCount(data.filter((n: any) => !n.is_read).length);
-      }
+      const [sysRes, forumRes] = await Promise.all([
+        fetch(resolveBackendUrl('/api/notifications/'), { headers: { Authorization: `Bearer ${access}` } }),
+        fetch(resolveBackendUrl('/api/forum/notifications/'), { headers: { Authorization: `Bearer ${access}` } }),
+      ]);
+
+      const sysData = sysRes.ok ? await sysRes.json() : [];
+      const forumData = forumRes.ok ? await forumRes.json() : [];
+
+      // Normalise forum notifications to the same shape as system notifications
+      const forumList = Array.isArray(forumData) ? forumData : (forumData.results || []);
+      const forumNormalized = forumList.map((n: any) => ({
+        id: `forum-${n.id}`,
+        title: n.topic?.title || 'Forum',
+        message: 'Nouvelle réponse à votre sujet',
+        is_read: n.is_read,
+        notification_type: 'info',
+        link: n.topic ? `/forum/${n.topic.id}` : '/forum',
+        created_at: n.created_at,
+        _forum: true,
+        _forum_id: n.id,
+      }));
+
+      const combined = [...sysData, ...forumNormalized].sort(
+        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setNotifications(combined);
+      setUnreadCount(combined.filter((n: any) => !n.is_read).length);
     } catch (e) {
       console.error("Failed to fetch notifications", e);
     }
@@ -88,13 +108,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const markAsRead = async (id: number) => {
+  const markAsRead = async (id: number | string) => {
     const access = getAccessToken();
     try {
-      await fetch(resolveBackendUrl(`/api/notifications/${id}/mark_as_read/`), {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${access}` }
-      });
+      if (typeof id === 'string' && id.startsWith('forum-')) {
+        // Forum notification: mark all forum notifications as read via bulk endpoint
+        await fetch(resolveBackendUrl('/api/forum/notifications/read/'), {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${access}` }
+        });
+      } else {
+        await fetch(resolveBackendUrl(`/api/notifications/${id}/mark_as_read/`), {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${access}` }
+        });
+      }
       fetchNotifications();
     } catch (e) {
       console.error("Failed to mark as read", e);
@@ -250,8 +278,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                           className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.is_read ? 'bg-blue-50/30' : ''}`}
                         >
                           <div className="flex gap-3">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${n.notification_type === 'success' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
-                              <i className={`fas ${n.notification_type === 'success' ? 'fa-check' : 'fa-info'} text-[10px]`}></i>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${n._forum ? 'bg-purple-100 text-purple-600' : n.notification_type === 'success' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                              <i className={`fas ${n._forum ? 'fa-comments' : n.notification_type === 'success' ? 'fa-check' : 'fa-info'} text-[10px]`}></i>
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[11px] font-bold text-slate-800 mb-0.5 truncate">{n.title}</p>
